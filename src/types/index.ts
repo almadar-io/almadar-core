@@ -18,6 +18,9 @@ export {
   type OrbitalUnit, // Backward compatibility
   type EventListener,
   type OrbitalInput,
+  // Use Declaration (Import System)
+  type UseDeclaration,
+  UseDeclarationSchema,
   // Entity/Page reference types
   type EntityRef,
   type PageRef,
