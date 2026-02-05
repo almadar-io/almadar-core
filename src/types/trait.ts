@@ -360,6 +360,11 @@ export interface Trait {
     description?: string;
     description_visual_prompt?: string;
     category?: TraitCategory;
+    /**
+     * The entity this trait is linked to.
+     * Required for inline trait definitions within an orbital.
+     */
+    linkedEntity?: string;
     requiredFields?: RequiredField[];
     dataEntities?: TraitDataEntity[];
     stateMachine?: StateMachine;
@@ -384,6 +389,7 @@ export const TraitSchema = z.object({
     description: z.string().optional(),
     description_visual_prompt: z.string().optional(),
     category: TraitCategorySchema.optional(),
+    linkedEntity: z.string().optional(),
     requiredFields: z.array(RequiredFieldSchema).optional(),
     dataEntities: z.array(TraitDataEntitySchema).optional(),
     stateMachine: StateMachineSchema.optional(),
