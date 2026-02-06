@@ -93,24 +93,132 @@ export interface CallServiceConfig {
 }
 
 // ============================================================================
-// Effect Type (S-Expression Only)
+// Typed Effect Tuples
 // ============================================================================
 
 /**
- * Effect type - S-expression format (array form).
+ * Render UI effect - displays a pattern in a UI slot.
+ * @example ['render-ui', 'main', { patternType: 'entity-table', columns: ['name'] }]
+ */
+export type RenderUIEffect =
+    | ['render-ui', UISlot, AnyPatternConfig]
+    | ['render-ui', UISlot, AnyPatternConfig, Record<string, unknown>];
+
+/**
+ * Navigate effect - navigates to a path.
+ * @example ['navigate', '/tasks'] or ['navigate', '/tasks/:id', { id: '123' }]
+ */
+export type NavigateEffect = ['navigate', string] | ['navigate', string, Record<string, string>];
+
+/**
+ * Emit effect - emits an event, optionally with payload.
+ * @example ['emit', 'SAVE'] or ['emit', 'PLAYER_DIED', { playerId: '@entity.id' }]
+ */
+export type EmitEffect = ['emit', string] | ['emit', string, Record<string, unknown>];
+
+/**
+ * Set effect - sets a binding to a value.
+ * @example ['set', '@entity.health', 100]
+ */
+export type SetEffect = ['set', string, unknown];
+
+/**
+ * Persist effect - creates, updates, deletes, or clears entities.
+ * @example ['persist', 'create', 'Task', { title: '@payload.title' }]
+ */
+export type PersistEffect =
+    | ['persist', 'create', string, Record<string, unknown>]
+    | ['persist', 'update', string, Record<string, unknown>]
+    | ['persist', 'delete', string]
+    | ['persist', 'delete', string, Record<string, unknown>]
+    | ['persist', 'clear', string]
+    | ['persist', 'clear', string, Record<string, unknown>];
+
+/**
+ * Call service effect - invokes an external service.
+ * @example ['call-service', 'WeatherAPI', { service: 'weather', action: 'get', onSuccess: 'OK' }]
+ */
+export type CallServiceEffect = ['call-service', string, CallServiceConfig];
+
+/**
+ * Spawn effect - creates a new entity instance (games).
+ * @example ['spawn', 'Bullet', { x: '@entity.x', y: '@entity.y' }]
+ */
+export type SpawnEffect = ['spawn', string] | ['spawn', string, Record<string, unknown>];
+
+/**
+ * Despawn effect - removes an entity instance (games).
+ * @example ['despawn', '@entity.id']
+ */
+export type DespawnEffect = ['despawn', string];
+
+/**
+ * Do effect - executes multiple effects in sequence.
+ * @example ['do', ['set', '@entity.x', 0], ['set', '@entity.y', 0]]
+ */
+export type DoEffect = ['do', ...Effect[]];
+
+/**
+ * Notify effect - sends a notification.
+ * @example ['notify', 'in_app', 'Task created successfully']
+ */
+export type NotifyEffect =
+    | ['notify', string, string]
+    | ['notify', string, string, string];
+
+/**
+ * Fetch effect - retrieves entity data (server-side).
+ * @example ['fetch', 'User'] or ['fetch', 'User', { id: '@payload.userId' }]
+ */
+export type FetchEffect = ['fetch', string] | ['fetch', string, Record<string, unknown>];
+
+/**
+ * Union of all typed effects.
+ * Provides compile-time validation for common effect types.
+ */
+export type TypedEffect =
+    | RenderUIEffect
+    | NavigateEffect
+    | EmitEffect
+    | SetEffect
+    | PersistEffect
+    | CallServiceEffect
+    | SpawnEffect
+    | DespawnEffect
+    | DoEffect
+    | NotifyEffect
+    | FetchEffect;
+
+// ============================================================================
+// Effect Type (Strictly Typed)
+// ============================================================================
+
+/**
+ * Effect type - typed S-expression format.
  *
- * Effects are arrays where the first element is the operator name (string)
- * and subsequent elements are the arguments.
+ * Effects are strongly typed tuples that enforce:
+ * - Valid effect operators (render-ui, emit, set, persist, navigate, call-service)
+ * - Valid UISlots for render-ui
+ * - Valid PatternTypes and props for render-ui
+ * - Correct argument types for each effect
+ *
+ * Available typed effects:
+ * - RenderUIEffect: ['render-ui', UISlot, PatternConfig]
+ * - NavigateEffect: ['navigate', path] or ['navigate', path, params]
+ * - EmitEffect: ['emit', eventName] or ['emit', eventName, payload]
+ * - SetEffect: ['set', binding, value]
+ * - PersistEffect: ['persist', operation, entity, data?]
+ * - CallServiceEffect: ['call-service', serviceName, config]
  *
  * @example
  * ["set", "@entity.health", 100]
  * ["emit", "PLAYER_DIED", { "playerId": "@entity.id" }]
- * ["render-ui", "main", { "type": "entity-table", "entity": "Task" }]
- * ["call-service", "WeatherAPI", { "action": "getWeather", "onSuccess": "OK", "onError": "ERR" }]
+ * ["render-ui", "main", { "patternType": "entity-table", "columns": ["name"] }]
+ * ["call-service", "WeatherAPI", { "action": "getWeather", "onSuccess": "OK" }]
  * ["navigate", "/tasks"]
  * ["persist", "create", "Task", { "title": "@payload.title" }]
  */
-export type Effect = SExpr[];
+export type Effect = TypedEffect;
 
 /**
  * Schema for Effect - validates S-expression format
@@ -158,23 +266,33 @@ export function emit(event: string, payload?: Record<string, unknown>): Effect {
  * Create a navigate effect
  * @example ["navigate", "/tasks"]
  */
-export function navigate(path: string, params?: Record<string, string>): Effect {
+export function navigate(path: string): NavigateEffect;
+export function navigate(path: string, params: Record<string, string>): NavigateEffect;
+export function navigate(path: string, params?: Record<string, string>): NavigateEffect {
     return params ? ['navigate', path, params] : ['navigate', path];
 }
 
 /**
  * Create a render-ui effect
- * @example ["render-ui", "main", { "type": "entity-table", "entity": "Task" }]
+ * @example ["render-ui", "main", { "patternType": "entity-table", "columns": ["name"] }]
  */
 export function renderUI(
     target: UISlot,
-    pattern: PatternConfig | null,
+    pattern: AnyPatternConfig
+): RenderUIEffect;
+export function renderUI(
+    target: UISlot,
+    pattern: AnyPatternConfig,
+    props: Record<string, unknown>
+): RenderUIEffect;
+export function renderUI(
+    target: UISlot,
+    pattern: AnyPatternConfig,
     props?: Record<string, unknown>
-): Effect {
-    const patternObj = pattern ? { ...pattern } : null;
+): RenderUIEffect {
     return props
-        ? ['render-ui', target, patternObj as SExpr, props]
-        : ['render-ui', target, patternObj as SExpr];
+        ? ['render-ui', target, pattern, props]
+        : ['render-ui', target, pattern];
 }
 
 /**
@@ -182,32 +300,46 @@ export function renderUI(
  * @example ["persist", "create", "Task", { "title": "@payload.title" }]
  */
 export function persist(
+    action: 'create' | 'update',
+    entity: string,
+    data: Record<string, unknown>
+): PersistEffect;
+export function persist(
+    action: 'delete' | 'clear',
+    entity: string,
+    data?: Record<string, unknown>
+): PersistEffect;
+export function persist(
     action: 'create' | 'update' | 'delete' | 'clear',
     entity: string,
     data?: Record<string, unknown>
-): Effect {
-    return data ? ['persist', action, entity, data] : ['persist', action, entity];
+): PersistEffect {
+    if (action === 'create' || action === 'update') {
+        return ['persist', action, entity, data!] as PersistEffect;
+    }
+    return data
+        ? ['persist', action, entity, data] as PersistEffect
+        : ['persist', action, entity] as PersistEffect;
 }
 
 /**
  * Create a call-service effect
- * @example ["call-service", "stripe", { "action": "charge", "onSuccess": "OK", "onError": "ERR" }]
+ * @example ["call-service", "stripe", { "service": "stripe", "action": "charge", "onSuccess": "OK", "onError": "ERR" }]
  */
 export function callService(
-    service: string,
-    config: { action: string; onSuccess: string; onError: string; params?: Record<string, unknown> }
-): Effect {
-    return ['call-service', service, config];
+    serviceName: string,
+    config: CallServiceConfig
+): CallServiceEffect {
+    return ['call-service', serviceName, config];
 }
 
 /**
  * Create a spawn effect (games)
  * @example ["spawn", "Bullet", { "x": "@entity.x", "y": "@entity.y" }]
  */
-export function spawn(
-    entity: string,
-    initialState?: Record<string, unknown>
-): Effect {
+export function spawn(entity: string): SpawnEffect;
+export function spawn(entity: string, initialState: Record<string, unknown>): SpawnEffect;
+export function spawn(entity: string, initialState?: Record<string, unknown>): SpawnEffect {
     return initialState ? ['spawn', entity, initialState] : ['spawn', entity];
 }
 
@@ -215,7 +347,7 @@ export function spawn(
  * Create a despawn effect (games)
  * @example ["despawn", "@entity.id"]
  */
-export function despawn(entityId: string): Effect {
+export function despawn(entityId: string): DespawnEffect {
     return ['despawn', entityId];
 }
 
@@ -223,7 +355,7 @@ export function despawn(entityId: string): Effect {
  * Create a do effect (multiple effects)
  * @example ["do", ["set", "@entity.x", 0], ["set", "@entity.y", 0]]
  */
-export function doEffects(...effects: Effect[]): Effect {
+export function doEffects(...effects: Effect[]): DoEffect {
     return ['do', ...effects];
 }
 
@@ -233,9 +365,18 @@ export function doEffects(...effects: Effect[]): Effect {
  */
 export function notify(
     channel: 'email' | 'push' | 'sms' | 'in_app',
+    message: string
+): NotifyEffect;
+export function notify(
+    channel: 'email' | 'push' | 'sms' | 'in_app',
+    message: string,
+    recipient: string
+): NotifyEffect;
+export function notify(
+    channel: 'email' | 'push' | 'sms' | 'in_app',
     message: string,
     recipient?: string
-): Effect {
+): NotifyEffect {
     return recipient
         ? ['notify', channel, message, recipient]
         : ['notify', channel, message];
@@ -263,9 +404,9 @@ export interface FetchOptions {
  * @example ["fetch", "User", { "id": "@payload.userId" }] - fetch by ID
  * @example ["fetch", "User", { "filter": ["=", "@entity.status", "active"], "limit": 10 }]
  */
-export function fetch(
-    entity: string,
-    options?: FetchOptions
-): Effect {
-    return options ? ['fetch', entity, options as SExpr] : ['fetch', entity];
+export function fetch(entity: string): FetchEffect;
+export function fetch(entity: string, options: FetchOptions): FetchEffect;
+export function fetch(entity: string, options?: FetchOptions): FetchEffect {
+    return options ? ['fetch', entity, options as Record<string, unknown>] : ['fetch', entity];
 }
+
