@@ -39,29 +39,32 @@ export const UISlotSchema = z.enum(UI_SLOTS);
 // Pattern Config (for render-ui effects)
 // ============================================================================
 
-// Import PatternType for compile-time validation of pattern types
-import type { PatternType } from '@almadar/patterns';
-
 /**
- * Pattern configuration for render-ui effect.
+ * Type-safe pattern configuration for render-ui effects.
  *
- * The `type` field is validated at compile-time against the PatternType union,
- * which is auto-generated from almadar-patterns/patterns-registry.json.
+ * Re-exported from @almadar/patterns. Generated from patterns-registry.json.
  *
  * @example
- * // Valid - 'entity-table' exists in registry
- * const config: PatternConfig = { type: 'entity-table', entity: 'Task' };
+ * // Type-safe with specific pattern type
+ * const config: PatternConfig<'entity-table'> = {
+ *   type: 'entity-table',
+ *   columns: ['name', 'email'],  // ✅ Required prop
+ *   entity: 'User',
+ * };
  *
- * // Invalid - TypeScript error: '"fake-pattern"' is not assignable to 'PatternType'
- * const bad: PatternConfig = { type: 'fake-pattern' };
+ * // Error: Property 'columns' is missing (required prop)
+ * const bad: PatternConfig<'entity-table'> = { type: 'entity-table' };
+ *
+ * // Error: 'fake-pattern' is not assignable to PatternType
+ * const invalid: PatternConfig = { type: 'fake-pattern' };
  */
-export interface PatternConfig {
-    type: PatternType;
-    [key: string]: unknown;
-}
-
-// Re-export PatternType for convenience
-export type { PatternType } from '@almadar/patterns';
+export type {
+    PatternType,
+    PatternConfig,
+    PatternProps,
+    PatternPropsMap,
+    AnyPatternConfig,
+} from '@almadar/patterns';
 
 // ============================================================================
 // Service Config (for call-service effects)
