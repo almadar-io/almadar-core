@@ -159,19 +159,27 @@ export {
 export {
   // Types
   type OperatorCategory,
+  type TargetPlatform,
+  type CategoryMeta,
   type OperatorMeta,
+  type OperatorsSchema,
+  type OperatorStats,
   type OperatorName,
-  // Registry
+  // Data
+  OPERATORS_SCHEMA,
   OPERATORS,
-  OPERATOR_CATEGORIES,
-  // Helpers
+  CATEGORIES,
+  OPERATOR_NAMES,
+  // Functions
   getOperatorMeta,
   isKnownOperator,
   isEffectOperator,
   isGuardOperator,
   getOperatorsByCategory,
-  getAllOperators,
+  getOperatorsForTarget,
   validateOperatorArity,
+  getOperatorStats,
+  getAllOperators,
 } from "./operators.js";
 
 // ============================================================================
