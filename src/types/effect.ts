@@ -39,13 +39,29 @@ export const UISlotSchema = z.enum(UI_SLOTS);
 // Pattern Config (for render-ui effects)
 // ============================================================================
 
+// Import PatternType for compile-time validation of pattern types
+import type { PatternType } from '@almadar/patterns';
+
 /**
- * Pattern configuration for render-ui effect
+ * Pattern configuration for render-ui effect.
+ *
+ * The `type` field is validated at compile-time against the PatternType union,
+ * which is auto-generated from almadar-patterns/patterns-registry.json.
+ *
+ * @example
+ * // Valid - 'entity-table' exists in registry
+ * const config: PatternConfig = { type: 'entity-table', entity: 'Task' };
+ *
+ * // Invalid - TypeScript error: '"fake-pattern"' is not assignable to 'PatternType'
+ * const bad: PatternConfig = { type: 'fake-pattern' };
  */
 export interface PatternConfig {
-    type: string;
+    type: PatternType;
     [key: string]: unknown;
 }
+
+// Re-export PatternType for convenience
+export type { PatternType } from '@almadar/patterns';
 
 // ============================================================================
 // Service Config (for call-service effects)
