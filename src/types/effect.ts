@@ -168,17 +168,19 @@ export type DespawnEffect = ['despawn', string];
 
 /**
  * Do effect - executes multiple effects in sequence.
+ * Uses SExpr to allow deeply nested conditionals.
  * @example ['do', ['set', '@entity.x', 0], ['set', '@entity.y', 0]]
  */
-export type DoEffect = ['do', ...Effect[]];
+export type DoEffect = ['do', ...SExpr[]];
 
 /**
  * Notify effect - sends a notification.
  * @example ['notify', 'in_app', 'Task created successfully']
+ * @example ['notify', 'in_app', ['str/concat', 'Item: ', '@entity.name']]
  */
 export type NotifyEffect =
-    | ['notify', string, string]
-    | ['notify', string, string, string];
+    | ['notify', string, string | SExpr]
+    | ['notify', string, string | SExpr, string];
 
 /**
  * Fetch effect - retrieves entity data (server-side).
@@ -188,21 +190,24 @@ export type FetchEffect = ['fetch', string] | ['fetch', string, Record<string, u
 
 /**
  * If effect - conditional effect execution.
+ * Uses SExpr to allow deeply nested conditionals.
  * @example ['if', ['>', '@entity.health', 0], ['emit', 'ALIVE'], ['emit', 'DEAD']]
  */
-export type IfEffect = ['if', Expression, Effect] | ['if', Expression, Effect, Effect];
+export type IfEffect = ['if', Expression, SExpr] | ['if', Expression, SExpr, SExpr];
 
 /**
  * When effect - conditional effect similar to if but without else.
+ * Uses SExpr to allow deeply nested conditionals.
  * @example ['when', ['>', '@entity.health', 0], ['emit', 'ALIVE']]
  */
-export type WhenEffect = ['when', Expression, Effect];
+export type WhenEffect = ['when', Expression, SExpr];
 
 /**
  * Let effect - creates local bindings for effects.
+ * Uses SExpr to allow deeply nested conditionals.
  * @example ['let', ['temp', ['get', '@payload.value']], ['set', '@entity.value', 'temp']]
  */
-export type LetEffect = ['let', [string, unknown][], ...Effect[]];
+export type LetEffect = ['let', [string, unknown][], ...SExpr[]];
 
 /**
  * Log effect - logs a message for debugging.
@@ -215,6 +220,55 @@ export type LogEffect = ['log', ...unknown[]];
  * @example ['wait', 1000] - wait 1 second
  */
 export type WaitEffect = ['wait', number];
+
+// ============================================================================
+// Async Effects (from almadar-std/modules/async)
+// ============================================================================
+
+/**
+ * Async delay effect - wait then execute effects.
+ * @example ['async/delay', 2000, ['emit', 'TIMEOUT']]
+ */
+export type AsyncDelayEffect = ['async/delay', number | string, ...Effect[]];
+
+/**
+ * Async debounce effect - debounce then execute effect.
+ * @example ['async/debounce', 300, ['emit', 'SEARCH_COMPLETE']]
+ * @example ['async/debounce', '@entity.debounceMs', ['emit', 'SEARCH_COMPLETE']]
+ */
+export type AsyncDebounceEffect = ['async/debounce', number | string, SExpr];
+
+/**
+ * Async throttle effect - throttle then execute effect.
+ * @example ['async/throttle', 100, ['emit', 'SCROLL_HANDLED']]
+ * @example ['async/throttle', '@entity.throttleMs', ['emit', 'SCROLL_HANDLED']]
+ */
+export type AsyncThrottleEffect = ['async/throttle', number | string, SExpr];
+
+/**
+ * Async interval effect - execute effect at intervals.
+ * @example ['async/interval', 1000, ['emit', 'TICK']]
+ * @example ['async/interval', '@entity.intervalMs', ['emit', 'POLL_TICK']]
+ */
+export type AsyncIntervalEffect = ['async/interval', number | string, SExpr];
+
+/**
+ * Async race effect - first effect to complete wins.
+ * @example ['async/race', ['call', 'api1'], ['call', 'api2']]
+ */
+export type AsyncRaceEffect = ['async/race', ...Effect[]];
+
+/**
+ * Async all effect - wait for all effects to complete.
+ * @example ['async/all', ['call', 'api1'], ['call', 'api2']]
+ */
+export type AsyncAllEffect = ['async/all', ...Effect[]];
+
+/**
+ * Async sequence effect - execute effects in sequence.
+ * @example ['async/sequence', ['call', 'validate'], ['call', 'save']]
+ */
+export type AsyncSequenceEffect = ['async/sequence', ...Effect[]];
 
 /**
  * Union of all typed effects.
@@ -236,7 +290,14 @@ export type TypedEffect =
     | WhenEffect
     | LetEffect
     | LogEffect
-    | WaitEffect;
+    | WaitEffect
+    | AsyncDelayEffect
+    | AsyncDebounceEffect
+    | AsyncThrottleEffect
+    | AsyncIntervalEffect
+    | AsyncRaceEffect
+    | AsyncAllEffect
+    | AsyncSequenceEffect;
 
 // ============================================================================
 // Effect Type (Strictly Typed)
@@ -404,7 +465,7 @@ export function despawn(entityId: string): DespawnEffect {
  * Create a do effect (multiple effects)
  * @example ["do", ["set", "@entity.x", 0], ["set", "@entity.y", 0]]
  */
-export function doEffects(...effects: Effect[]): DoEffect {
+export function doEffects(...effects: SExpr[]): DoEffect {
     return ['do', ...effects];
 }
 
