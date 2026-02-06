@@ -127,8 +127,9 @@ export type NavigateEffect = ['navigate', string] | ['navigate', string, Record<
 /**
  * Emit effect - emits an event, optionally with payload.
  * @example ['emit', 'SAVE'] or ['emit', 'PLAYER_DIED', { playerId: '@entity.id' }]
+ * @example ['emit', 'FILTER_CHANGED', '@entity.filters']
  */
-export type EmitEffect = ['emit', string] | ['emit', string, Record<string, unknown>];
+export type EmitEffect = ['emit', string] | ['emit', string, Record<string, unknown> | string];
 
 /**
  * Set effect - sets a binding to a value.
@@ -139,14 +140,15 @@ export type SetEffect = ['set', string, unknown];
 /**
  * Persist effect - creates, updates, deletes, or clears entities.
  * @example ['persist', 'create', 'Task', { title: '@payload.title' }]
+ * @example ['persist', 'update', '@entity.entityType', '@payload.data']
  */
 export type PersistEffect =
-    | ['persist', 'create', string, Record<string, unknown>]
-    | ['persist', 'update', string, Record<string, unknown>]
+    | ['persist', 'create', string, Record<string, unknown> | string]
+    | ['persist', 'update', string, Record<string, unknown> | string]
     | ['persist', 'delete', string]
-    | ['persist', 'delete', string, Record<string, unknown>]
+    | ['persist', 'delete', string, Record<string, unknown> | string]
     | ['persist', 'clear', string]
-    | ['persist', 'clear', string, Record<string, unknown>];
+    | ['persist', 'clear', string, Record<string, unknown> | string];
 
 /**
  * Call service effect - invokes an external service.
