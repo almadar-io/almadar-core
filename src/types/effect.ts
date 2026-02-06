@@ -8,7 +8,7 @@
  */
 
 import { z } from 'zod';
-import { type SExpr } from './expression.js';
+import { type SExpr, type Expression } from './expression.js';
 
 // ============================================================================
 // UI Slots
@@ -173,6 +173,36 @@ export type NotifyEffect =
 export type FetchEffect = ['fetch', string] | ['fetch', string, Record<string, unknown>];
 
 /**
+ * If effect - conditional effect execution.
+ * @example ['if', ['>', '@entity.health', 0], ['emit', 'ALIVE'], ['emit', 'DEAD']]
+ */
+export type IfEffect = ['if', Expression, Effect] | ['if', Expression, Effect, Effect];
+
+/**
+ * When effect - conditional effect similar to if but without else.
+ * @example ['when', ['>', '@entity.health', 0], ['emit', 'ALIVE']]
+ */
+export type WhenEffect = ['when', Expression, Effect];
+
+/**
+ * Let effect - creates local bindings for effects.
+ * @example ['let', ['temp', ['get', '@payload.value']], ['set', '@entity.value', 'temp']]
+ */
+export type LetEffect = ['let', [string, unknown][], ...Effect[]];
+
+/**
+ * Log effect - logs a message for debugging.
+ * @example ['log', 'User created:', '@entity.name']
+ */
+export type LogEffect = ['log', ...unknown[]];
+
+/**
+ * Wait effect - delays execution.
+ * @example ['wait', 1000] - wait 1 second
+ */
+export type WaitEffect = ['wait', number];
+
+/**
  * Union of all typed effects.
  * Provides compile-time validation for common effect types.
  */
@@ -187,7 +217,12 @@ export type TypedEffect =
     | DespawnEffect
     | DoEffect
     | NotifyEffect
-    | FetchEffect;
+    | FetchEffect
+    | IfEffect
+    | WhenEffect
+    | LetEffect
+    | LogEffect
+    | WaitEffect;
 
 // ============================================================================
 // Effect Type (Strictly Typed)
