@@ -18,6 +18,7 @@ import { type SExpr, type Expression } from './expression.js';
  * Known UI slots where content can be rendered
  */
 export const UI_SLOTS = [
+    // App slots
     'main',
     'sidebar',
     'modal',
@@ -25,10 +26,23 @@ export const UI_SLOTS = [
     'overlay',
     'center',
     'toast',
-    'hud-top',
-    'hud-bottom',
     'floating',
     'system', // For invisible system components (InputListener, CollisionDetector)
+    'content',
+    'screen',
+    // Game HUD slots
+    'hud',
+    'hud-top',
+    'hud-bottom',
+    'hud.health',
+    'hud.score',
+    'hud.inventory',
+    'hud.stamina',
+    // Game overlay slots
+    'overlay.inventory',
+    'overlay.dialogue',
+    'overlay.menu',
+    'overlay.pause',
 ] as const;
 
 export type UISlot = (typeof UI_SLOTS)[number];
