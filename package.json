@@ -29,6 +29,7 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
+    "@kflow/almadar-operators": "workspace:*",
     "zod": "^3.22.0"
   },
   "devDependencies": {
