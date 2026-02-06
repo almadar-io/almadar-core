@@ -39,6 +39,15 @@ export const UISlotSchema = z.enum(UI_SLOTS);
 // Pattern Config (for render-ui effects)
 // ============================================================================
 
+// Import pattern types for local use and re-export for consumers
+import type {
+    PatternType,
+    PatternConfig,
+    PatternProps,
+    PatternPropsMap,
+    AnyPatternConfig,
+} from '@almadar/patterns';
+
 /**
  * Type-safe pattern configuration for render-ui effects.
  *
@@ -47,16 +56,16 @@ export const UISlotSchema = z.enum(UI_SLOTS);
  * @example
  * // Type-safe with specific pattern type
  * const config: PatternConfig<'entity-table'> = {
- *   type: 'entity-table',
+ *   patternType: 'entity-table',
  *   columns: ['name', 'email'],  // ✅ Required prop
  *   entity: 'User',
  * };
  *
  * // Error: Property 'columns' is missing (required prop)
- * const bad: PatternConfig<'entity-table'> = { type: 'entity-table' };
+ * const bad: PatternConfig<'entity-table'> = { patternType: 'entity-table' };
  *
  * // Error: 'fake-pattern' is not assignable to PatternType
- * const invalid: PatternConfig = { type: 'fake-pattern' };
+ * const invalid: PatternConfig = { patternType: 'fake-pattern' };
  */
 export type {
     PatternType,
@@ -64,7 +73,7 @@ export type {
     PatternProps,
     PatternPropsMap,
     AnyPatternConfig,
-} from '@almadar/patterns';
+};
 
 // ============================================================================
 // Service Config (for call-service effects)
