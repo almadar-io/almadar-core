@@ -1,8 +1,8 @@
 /**
  * Pattern Type for Orbital Units
  *
- * Defines pattern type validation.
- * The actual pattern definitions come from @almadar/patterns.
+ * Re-exports pattern type definitions from @almadar/patterns,
+ * which is the single source of truth for all pattern types.
  *
  * @packageDocumentation
  */
@@ -10,41 +10,18 @@
 import { z } from 'zod';
 
 // ============================================================================
-// Pattern Type
+// Pattern Type - Re-exported from @almadar/patterns
 // ============================================================================
 
 /**
- * Common pattern types.
- * The full list is defined in @almadar/patterns registry.
+ * All valid pattern type names, imported from the almadar-patterns registry.
+ * The authoritative list is auto-generated from patterns-registry.json.
  */
-export const PATTERN_TYPES = [
-  // Display patterns
-  'entity-table',
-  'entity-list',
-  'entity-cards',
-  'entity-grid',
-  // Form patterns
-  'form',
-  'form-section',
-  // Header patterns
-  'page-header',
-  // Stats patterns
-  'stats',
-  'stat-card',
-  // Layout patterns
-  'master-detail',
-  'dashboard-grid',
-  // Game patterns
-  'game-canvas',
-  'game-hud',
-  'game-controls',
-] as const;
-
-/**
- * Pattern type union.
- * This is a string type to allow for custom/extended patterns.
- */
-export type PatternType = string;
+export {
+  PATTERN_TYPES,
+  PatternType,
+  isValidPatternType,
+} from '@almadar/patterns';
 
 /**
  * Zod schema for pattern types.
@@ -52,22 +29,13 @@ export type PatternType = string;
  */
 export const PatternTypeSchema = z.string();
 
-// ============================================================================
-// Pattern Type Functions
-// ============================================================================
+// Re-export for backward compatibility
+import { PATTERN_TYPES as _PATTERN_TYPES } from '@almadar/patterns';
 
 /**
- * Get the common pattern types.
- * For the full registry, import from @almadar/patterns.
+ * Get all valid pattern types from the registry.
+ * Delegates to @almadar/patterns which is the SSOT.
  */
 export function getAllPatternTypes(): string[] {
-  return [...PATTERN_TYPES];
-}
-
-/**
- * Check if a pattern type is in the common list.
- * For comprehensive validation, use @almadar/patterns registry.
- */
-export function isValidPatternType(patternType: string): patternType is PatternType {
-  return (PATTERN_TYPES as readonly string[]).includes(patternType);
+  return [..._PATTERN_TYPES];
 }

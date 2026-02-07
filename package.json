@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@almadar/operators": "workspace:*",
+    "@almadar/patterns": "workspace:*",
     "zod": "^3.22.0"
   },
   "devDependencies": {
