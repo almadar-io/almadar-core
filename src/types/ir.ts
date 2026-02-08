@@ -65,6 +65,9 @@ export interface ResolvedEntity {
   /** Whether this entity has pre-authored instances in the schema */
   hasInstances?: boolean;
 
+  /** Pre-authored instances from the schema (seed data or static reference data) */
+  instances?: Record<string, unknown>[];
+
   /** Default field values from schema (for spawning singletons) */
   defaults?: Record<string, unknown>;
 
