@@ -54,6 +54,9 @@ export interface OrbitalEntity {
     /** Entity fields */
     fields: EntityField[];
 
+    /** Pre-authored instances (seed data or static reference data) */
+    instances?: Record<string, unknown>[];
+
     /** Auto-add createdAt/updatedAt timestamps */
     timestamps?: boolean;
 
@@ -75,6 +78,7 @@ export const OrbitalEntitySchema = z.object({
     persistence: EntityPersistenceSchema.default('persistent'),
     collection: z.string().optional(),
     fields: z.array(EntityFieldSchema).min(1, 'At least one field is required'),
+    instances: z.array(z.record(z.unknown())).optional(),
     timestamps: z.boolean().optional(),
     softDelete: z.boolean().optional(),
     description: z.string().optional(),
