@@ -12,8 +12,8 @@
       "types": "./dist/index.d.ts"
     },
     "./types": {
-      "import": "./dist/src/types/index.js",
-      "types": "./dist/src/types/index.d.ts"
+      "import": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
     }
   },
   "files": [

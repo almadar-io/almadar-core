@@ -8,7 +8,7 @@
  */
 
 // Export all types
-export * from './src/types/index.js';
+export * from './src/types/index';
 
 // Export schema resolution functions
 export {
@@ -19,4 +19,4 @@ export {
   getPages,
   getEntity,
   getTrait,
-} from './src/resolver.js';
+} from './src/resolver';
