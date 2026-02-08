@@ -221,6 +221,8 @@ export {
   TransitionSchema,
   StateMachineSchema,
   PayloadFieldSchema,
+  // Event utilities
+  isCircuitEvent,
 } from "./state-machine.js";
 
 // ============================================================================
@@ -233,6 +235,7 @@ export {
   type EffectInput,
   type UISlot,
   type PatternConfig,
+  type RenderUIConfig,
   type CallServiceConfig,
   // Schemas
   UI_SLOTS,

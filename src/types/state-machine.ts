@@ -199,3 +199,25 @@ export type EventInput = z.input<typeof EventSchema>;
 export type GuardInput = z.input<typeof GuardSchema>;
 export type TransitionInput = z.input<typeof TransitionSchema>;
 export type StateMachineInput = z.input<typeof StateMachineSchema>;
+
+// ============================================================================
+// Event Utilities
+// ============================================================================
+
+/**
+ * Check if an event is a circuit event (not internal/system event).
+ * Circuit events are user-defined events that participate in the closed circuit pattern.
+ * Internal/system events start with underscore (e.g., _INIT, _TICK, _TIMER).
+ *
+ * @param event - Event name to check
+ * @returns true if event is a circuit event (doesn't start with underscore)
+ *
+ * @example
+ * isCircuitEvent('CREATE') // true
+ * isCircuitEvent('SAVE') // true
+ * isCircuitEvent('_INIT') // false (internal)
+ * isCircuitEvent('_TICK') // false (internal)
+ */
+export function isCircuitEvent(event: string): boolean {
+  return !event.startsWith('_');
+}

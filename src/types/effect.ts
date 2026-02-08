@@ -89,6 +89,23 @@ export type {
     AnyPatternConfig,
 };
 
+/**
+ * Configuration for render-ui effect.
+ * Used in runtime to specify which slot and pattern to render.
+ */
+export interface RenderUIConfig {
+    /** Target UI slot */
+    slot: UISlot;
+    /** Pattern configuration (null clears the slot) */
+    pattern: AnyPatternConfig | null;
+    /** Target element (trait name or entity ID) */
+    target?: string;
+    /** Additional props for the pattern */
+    props?: Record<string, unknown>;
+    /** Optional priority for slot ordering */
+    priority?: number;
+}
+
 // ============================================================================
 // Service Config (for call-service effects)
 // ============================================================================

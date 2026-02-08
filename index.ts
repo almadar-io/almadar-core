@@ -7,4 +7,16 @@
  * @packageDocumentation
  */
 
+// Export all types
 export * from './src/types/index.js';
+
+// Export schema resolution functions
+export {
+  schemaToIR,
+  clearSchemaCache,
+  getSchemaCacheStats,
+  getPage,
+  getPages,
+  getEntity,
+  getTrait,
+} from './src/resolver.js';
