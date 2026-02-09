@@ -1,6 +1,6 @@
 {
   "name": "@almadar/core",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Core schema types and definitions for Almadar",
   "type": "module",
   "main": "./dist/index.js",
@@ -30,8 +30,8 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@almadar/operators": "^1.0.11",
-    "@almadar/patterns": "^1.0.11",
+    "@almadar/operators": "workspace:*",
+    "@almadar/patterns": "workspace:*",
     "zod": "^3.22.0"
   },
   "devDependencies": {
