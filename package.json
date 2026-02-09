@@ -30,8 +30,8 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@almadar/operators": "workspace:*",
-    "@almadar/patterns": "workspace:*",
+    "@almadar/operators": "^1.0.11",
+    "@almadar/patterns": "^1.0.11",
     "zod": "^3.22.0"
   },
   "devDependencies": {
