@@ -20,3 +20,14 @@ export {
   getEntity,
   getTrait,
 } from './src/resolver';
+
+// Export schema diffing & protection functions
+export {
+  diffSchemas,
+  isDestructiveChange,
+  getRemovals,
+  categorizeRemovals,
+  requiresConfirmation,
+  detectPageContentReduction,
+  hasSignificantPageReduction,
+} from './src/diff';
