@@ -164,7 +164,8 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
           ref: typeof traitRef === 'string' ? traitRef : traitRef.ref,
           trait: resolveTraitRef(traitRef, ir.traits, orbital.traits as Trait[] || []),
           linkedEntity: typeof traitRef === 'object' && 'linkedEntity' in traitRef ?
-            (traitRef as any).linkedEntity : undefined,
+            (traitRef as any).linkedEntity :
+            (orbital.entity ? (typeof orbital.entity === 'string' ? (orbital.entity as string).replace('.entity', '') : (orbital.entity as Entity).name) : undefined),
           config: typeof traitRef === 'object' && 'config' in traitRef ?
             (traitRef as any).config : undefined,
         })),
