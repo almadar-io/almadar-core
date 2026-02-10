@@ -31,3 +31,6 @@ export {
   detectPageContentReduction,
   hasSignificantPageReduction,
 } from './src/diff';
+
+// Export domain language engine (lexer, parsers, formatters, sync)
+export * from './src/domain-language/index';

@@ -3,7 +3,8 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   entry: {
     'index': 'index.ts',
-    'types/index': 'src/types/index.ts'
+    'types/index': 'src/types/index.ts',
+    'domain-language/index': 'src/domain-language/index.ts'
   },
   format: ['esm'],
   dts: true,
