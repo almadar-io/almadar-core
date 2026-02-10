@@ -7,8 +7,8 @@
  * @packageDocumentation
  */
 
-import type { SExpr } from '@almadar/core/types';
-import { isSExpr, getOperator, getArgs } from '@almadar/core/types';
+import type { SExpr } from '../../types/index.js';
+import { isSExpr, getOperator, getArgs } from '../../types/index.js';
 
 /**
  * Convert an S-expression to human-readable domain text.

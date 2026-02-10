@@ -18,7 +18,7 @@ import {
 } from './registry.js';
 
 // Import OrbitalSchema type definitions
-import { FieldTypeSchema, UI_SLOTS as ORBITAL_UI_SLOTS } from '@almadar/core/types';
+import { FieldTypeSchema, UI_SLOTS as ORBITAL_UI_SLOTS } from '../types/index.js';
 import { UI_SLOTS as DOMAIN_UI_SLOTS } from './types.js';
 
 // ============================================================================

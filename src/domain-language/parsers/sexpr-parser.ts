@@ -11,7 +11,7 @@
  * @packageDocumentation
  */
 
-import type { SExpr } from '@almadar/core/types';
+import type { SExpr } from '../../types/index.js';
 import { getPatternDefinition } from '@almadar/patterns';
 
 // Helper functions for pattern validation

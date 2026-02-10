@@ -22,14 +22,14 @@ import type {
   TraitRef,
   EntityRef,
   PageRef,
-} from '@almadar/core/types';
+} from '../../types/index.js';
 import {
   isOrbitalDefinition,
   getTraitName,
   isEntityReference,
   isPageReferenceString,
   isPageReferenceObject,
-} from '@almadar/core/types';
+} from '../../types/index.js';
 
 /**
  * Get entity name safely from EntityRef (string or inline Entity)
