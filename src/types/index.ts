@@ -466,6 +466,36 @@ export {
 } from "./asset.js";
 
 // ============================================================================
+// Changeset & Snapshot Types
+// ============================================================================
+
+export {
+  type SchemaChange,
+  type ChangeAuthor,
+  type ChangeSummary,
+  type ChangeSetDocument,
+  type SnapshotDocument,
+  type CategorizedRemovals,
+  type PageContentReduction,
+  type HistoryMeta,
+  type ValidationMeta,
+} from "./changeset.js";
+
+// ============================================================================
+// App Types
+// ============================================================================
+
+export {
+  type StatsView,
+  type AppSummary,
+  type SaveOptions,
+  type SaveResult,
+  type ValidationIssue,
+  type ValidationResults,
+  type ValidationDocument,
+} from "./app.js";
+
+// ============================================================================
 // IR Types (Intermediate Representation)
 // ============================================================================
 
