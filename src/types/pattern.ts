@@ -19,9 +19,9 @@ import { z } from 'zod';
  */
 export {
   PATTERN_TYPES,
-  PatternType,
   isValidPatternType,
 } from '@almadar/patterns';
+export type { PatternType } from '@almadar/patterns';
 
 /**
  * Zod schema for pattern types.
