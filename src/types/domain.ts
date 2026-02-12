@@ -52,6 +52,29 @@ export const DomainCategorySchema = z.enum([
 ]);
 
 // ============================================================================
+// Agent Domain Categories (simplified for LLM-based tools)
+// ============================================================================
+
+/**
+ * Simplified domain categories used by the agent tools for application classification.
+ * All agent tools and skill generators should derive from this constant.
+ */
+export const AGENT_DOMAIN_CATEGORIES = [
+  "game",
+  "business",
+  "dashboard",
+  "form",
+  "content",
+  "social",
+  "ecommerce",
+  "workflow",
+] as const;
+
+export type AgentDomainCategory = (typeof AGENT_DOMAIN_CATEGORIES)[number];
+
+export const AgentDomainCategorySchema = z.enum([...AGENT_DOMAIN_CATEGORIES]);
+
+// ============================================================================
 // Game Sub-Categories
 // ============================================================================
 
@@ -246,7 +269,7 @@ export interface DomainContext {
    */
   requestFragment?: string;
   /** Domain category */
-  category: "game" | "business" | "dashboard" | "form" | "content" | "social";
+  category: AgentDomainCategory;
   /** Sub-domain for more specific classification */
   subDomain?: string;
   /** User personas */
@@ -258,14 +281,7 @@ export interface DomainContext {
 export const DomainContextSchema = z.object({
   request: z.string().min(1, "Original request is required"),
   requestFragment: z.string().optional(),
-  category: z.enum([
-    "game",
-    "business",
-    "dashboard",
-    "form",
-    "content",
-    "social",
-  ]),
+  category: AgentDomainCategorySchema,
   subDomain: z.string().optional(),
   personas: z.array(UserPersonaSchema).optional(),
   vocabulary: DomainVocabularySchema.optional(),
