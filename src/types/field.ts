@@ -50,24 +50,75 @@ export const FieldTypeSchema = z.enum([
 // ============================================================================
 
 /**
+ * Cardinality for relation fields.
+ * Matches Rust compiler's Cardinality enum.
+ */
+export type RelationCardinality = 
+    | 'one' 
+    | 'many' 
+    | 'one-to-many' 
+    | 'many-to-one' 
+    | 'many-to-many';
+
+export const RelationCardinalitySchema = z.enum([
+    'one',
+    'many',
+    'one-to-many',
+    'many-to-one',
+    'many-to-many',
+]);
+
+/**
  * Configuration for relation fields (foreign keys).
+ * Matches Rust compiler's RelationDefinition format.
  */
 export interface RelationConfig {
-    /** Target entity name (e.g., 'User', 'Task') */
+    /** Target entity name (e.g., 'User', 'Task') - matches Rust's `entity` field */
     entity: string;
     /** Field on target entity (defaults to 'id') */
     field?: string;
-    /** Cardinality: one-to-one or one-to-many */
-    cardinality?: 'one' | 'many';
+    /** 
+     * Cardinality: one, many, one-to-many, many-to-one, many-to-many
+     * Matches Rust compiler's cardinality format
+     */
+    cardinality?: RelationCardinality;
     /** Delete behavior */
     onDelete?: 'cascade' | 'nullify' | 'restrict';
+    /** 
+     * Foreign key field name (for legacy compatibility).
+     * @deprecated Use field instead
+     */
+    foreignKey?: string;
+    /**
+     * Target entity name (for legacy compatibility).
+     * @deprecated Use entity instead
+     */
+    target?: string;
+    /**
+     * Cardinality type alias (for legacy compatibility).
+     * @deprecated Use cardinality instead
+     */
+    type?: RelationCardinality;
 }
 
 export const RelationConfigSchema = z.object({
     entity: z.string().min(1, 'Target entity is required'),
     field: z.string().optional(),
-    cardinality: z.enum(['one', 'many']).optional(),
+    cardinality: RelationCardinalitySchema.optional(),
     onDelete: z.enum(['cascade', 'nullify', 'restrict']).optional(),
+    // Legacy compatibility fields
+    foreignKey: z.string().optional(),
+    target: z.string().optional(),
+    type: RelationCardinalitySchema.optional(),
+}).transform((data) => {
+    // Normalize legacy format to standard format
+    const normalized: RelationConfig = {
+        entity: data.entity || data.target || '',
+        cardinality: data.cardinality || data.type,
+        field: data.field,
+        onDelete: data.onDelete,
+    };
+    return normalized;
 });
 
 export type RelationConfigInput = z.input<typeof RelationConfigSchema>;
