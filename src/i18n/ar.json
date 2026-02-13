@@ -1,0 +1,48 @@
+{
+    "meta": {
+        "code": "ar",
+        "name": "Arabic",
+        "rtl": true
+    },
+    "keywords": {
+        "orbital": "مدار",
+        "orbitals": "مدارات",
+        "entity": "كيان",
+        "trait": "سمة",
+        "traits": "سمات",
+        "field": "حقل",
+        "state": "حالة",
+        "transition": "انتقال",
+        "event": "حدث",
+        "effect": "تأثير",
+        "guard": "حارس",
+        "on": "عند",
+        "uses": "يستخدم",
+        "from": "من",
+        "as": "كـ",
+        "pages": "صفحات",
+        "path": "مسار",
+        "ref": "مرجع",
+        "collection": "مجموعة",
+        "fields": "حقول",
+        "name": "اسم",
+        "type": "نوع",
+        "required": "مطلوب",
+        "primaryKey": "مفتاح_رئيسي",
+        "linkedEntity": "كيان_مرتبط",
+        "stateMachine": "آلة_حالة",
+        "states": "حالات",
+        "isInitial": "أولي",
+        "transitions": "انتقالات",
+        "to": "إلى",
+        "effects": "تأثيرات",
+        "events": "أحداث"
+    },
+    "types": {
+        "string": "نص",
+        "number": "رقم",
+        "boolean": "منطقي",
+        "array": "مصفوفة",
+        "enum": "تعداد"
+    }
+}

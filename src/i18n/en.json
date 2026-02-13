@@ -1,0 +1,48 @@
+{
+  "meta": {
+    "code": "en",
+    "name": "English",
+    "rtl": false
+  },
+  "keywords": {
+    "orbital": "orbital",
+    "orbitals": "orbitals",
+    "entity": "entity",
+    "trait": "trait",
+    "traits": "traits",
+    "field": "field",
+    "state": "state",
+    "transition": "transition",
+    "event": "event",
+    "effect": "effect",
+    "guard": "guard",
+    "on": "on",
+    "uses": "uses",
+    "from": "from",
+    "as": "as",
+    "pages": "pages",
+    "path": "path",
+    "ref": "ref",
+    "collection": "collection",
+    "fields": "fields",
+    "name": "name",
+    "type": "type",
+    "required": "required",
+    "primaryKey": "primaryKey",
+    "linkedEntity": "linkedEntity",
+    "stateMachine": "stateMachine",
+    "states": "states",
+    "isInitial": "isInitial",
+    "transitions": "transitions",
+    "to": "to",
+    "effects": "effects",
+    "events": "events"
+  },
+  "types": {
+    "string": "string",
+    "number": "number",
+    "boolean": "boolean",
+    "array": "array",
+    "enum": "enum"
+  }
+}

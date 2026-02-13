@@ -1,0 +1,49 @@
+{
+    "meta": {
+        "code": "sl",
+        "name": "Slovenian",
+        "rtl": false
+    },
+    "keywords": {
+        "orbital": "orbitala",
+        "orbitals": "orbitale",
+        "entity": "entiteta",
+        "trait": "znacilnost",
+        "traits": "znacilnosti",
+        "field": "polje",
+        "state": "stanje",
+        "transition": "prehod",
+        "event": "dogodek",
+        "effect": "ucinek",
+        "guard": "strazar",
+        "on": "ob",
+        "uses": "uporablja",
+        "from": "iz",
+        "as": "kot",
+        "pages": "strani",
+        "path": "pot",
+        "ref": "sklic",
+        "collection": "zbirka",
+        "fields": "polja",
+        "name": "ime",
+        "type": "tip",
+        "required": "obvezno",
+        "primarniKljuc": "primarniKljuc",
+        "primaryKey": "primarniKljuc",
+        "linkedEntity": "povezanaEntiteta",
+        "stateMachine": "strojStanj",
+        "states": "stanja",
+        "isInitial": "zacetno",
+        "transitions": "prehodi",
+        "to": "do",
+        "effects": "ucinki",
+        "events": "dogodki"
+    },
+    "types": {
+        "string": "niz",
+        "number": "stevilo",
+        "boolean": "logicno",
+        "array": "seznam",
+        "enum": "nastevanje"
+    }
+}
