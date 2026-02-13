@@ -41,8 +41,9 @@ export const BindingSchema = z.string().refine(
     if (!val.startsWith('@')) return false;
     const parts = val.slice(1).split('.');
     if (parts.length === 0 || parts[0] === '') return false;
-    // All parts must be valid identifiers (alphanumeric + underscore)
-    return parts.every((part) => /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(part));
+    // All parts must be valid identifiers (letters, numbers, underscore)
+    // supporting unicode characters for i18n
+    return parts.every((part) => /^[\p{L}_][\p{L}0-9_]*$/u.test(part));
   },
   { message: 'Invalid binding format. Must be @name or @name.path.to.field' }
 );

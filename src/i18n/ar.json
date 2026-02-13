@@ -36,7 +36,13 @@
         "transitions": "انتقالات",
         "to": "إلى",
         "effects": "تأثيرات",
-        "events": "أحداث"
+        "events": "أحداث",
+        "default": "افتراضي",
+        "entityBinding": "كيان",
+        "payloadBinding": "حمولة",
+        "stateBinding": "حالة",
+        "nowBinding": "الآن",
+        "traitBinding": "سمة"
     },
     "types": {
         "string": "نص",

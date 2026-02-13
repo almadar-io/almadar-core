@@ -37,7 +37,13 @@
         "transitions": "prehodi",
         "to": "do",
         "effects": "ucinki",
-        "events": "dogodki"
+        "events": "dogodki",
+        "default": "privzeto",
+        "entityBinding": "entiteta",
+        "payloadBinding": "podatki",
+        "stateBinding": "stanje",
+        "nowBinding": "zdaj",
+        "traitBinding": "znacilnost"
     },
     "types": {
         "string": "niz",
