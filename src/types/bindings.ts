@@ -54,6 +54,8 @@ export const BindingSchema = z.string().refine(
 
 /**
  * Binding documentation for LLM prompts and validation messages.
+ * 
+ * IMPORTANT: Keep synchronized with CORE_BINDINGS in expression.ts
  */
 export const BINDING_DOCS = {
   entity: {
@@ -75,6 +77,21 @@ export const BINDING_DOCS = {
     description: 'Current timestamp in milliseconds',
     examples: ['@now'],
     requiresPath: false,
+  },
+  config: {
+    description: 'Trait configuration values',
+    examples: ['@config.apiEndpoint', '@config.theme'],
+    requiresPath: true,
+  },
+  computed: {
+    description: 'Computed/calculated values',
+    examples: ['@computed.total', '@computed.isValid'],
+    requiresPath: true,
+  },
+  trait: {
+    description: 'Trait context data',
+    examples: ['@trait.name', '@trait.category'],
+    requiresPath: true,
   },
 } as const;
 
