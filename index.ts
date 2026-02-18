@@ -32,5 +32,12 @@ export {
   hasSignificantPageReduction,
 } from './src/diff';
 
+// Export schema summarization functions
+export {
+  summarizeSchema,
+  summarizeOrbital,
+  classifyWorkflow,
+} from './src/summarize';
+
 // Export domain language engine (lexer, parsers, formatters, sync)
 export * from './src/domain-language/index';
