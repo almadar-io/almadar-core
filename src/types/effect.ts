@@ -133,7 +133,8 @@ export interface CallServiceConfig {
  */
 export type RenderUIEffect =
     | ['render-ui', UISlot, AnyPatternConfig]
-    | ['render-ui', UISlot, AnyPatternConfig, Record<string, unknown>];
+    | ['render-ui', UISlot, AnyPatternConfig, Record<string, unknown>]
+    | ['render-ui', UISlot, null];
 
 /**
  * Navigate effect - navigates to a path.
