@@ -33,6 +33,7 @@
         "stateMachine": "آلة_حالة",
         "states": "حالات",
         "isInitial": "أولي",
+        "isTerminal": "نهائي",
         "transitions": "انتقالات",
         "to": "إلى",
         "effects": "تأثيرات",
