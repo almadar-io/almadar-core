@@ -218,7 +218,5 @@ export {
   type GuardMapping,
 } from './registry.js';
 
-// Node.js-only utilities (validate-coverage, generate-docs) are not exported here.
-// Import them directly from their files if needed in Node.js environments:
-//   import { validateDomainLanguageCoverage } from '@kflow-builder/shared/domain-language/validate-coverage'
-//   import { generateDomainLanguageReference } from '@kflow-builder/shared/domain-language/generate-docs'
+// Documentation generation (pure function — no fs/path deps)
+export { generateDomainLanguageReference } from './domain-language-reference.js';
