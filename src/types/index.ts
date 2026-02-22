@@ -489,6 +489,7 @@ export {
 // ============================================================================
 
 export {
+  type GitHubLink,
   type StatsView,
   type AppSummary,
   type SaveOptions,

@@ -7,6 +7,22 @@
 import type { CategorizedRemovals } from './changeset.js';
 
 // ============================================================================
+// GitHub Integration
+// ============================================================================
+
+/**
+ * GitHub repository link metadata stored in Firestore.
+ * Enables GitHub as the source of truth for schema files.
+ */
+export interface GitHubLink {
+  repoUrl: string;
+  owner: string;
+  repo: string;
+  defaultBranch: string;
+  connectedAt: number;
+}
+
+// ============================================================================
 // Stats & Summary
 // ============================================================================
 
@@ -34,6 +50,7 @@ export interface AppSummary {
   domain?: { category: string; subDomain?: string };
   domainContext?: unknown;
   hasValidationErrors: boolean;
+  github?: GitHubLink;
 }
 
 // ============================================================================
