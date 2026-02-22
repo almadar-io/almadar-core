@@ -20,6 +20,7 @@ export interface GitHubLink {
   repo: string;
   defaultBranch: string;
   connectedAt: number;
+  schemaFile?: string;  // e.g. "trait-wars.orb" — defaults to "schema.orb"
 }
 
 // ============================================================================
