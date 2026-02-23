@@ -1,6 +1,6 @@
 {
   "name": "@almadar/core",
-  "version": "1.0.18",
+  "version": "2.0.0",
   "description": "Core schema types and definitions for Almadar",
   "type": "module",
   "main": "./dist/index.js",
@@ -34,8 +34,8 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@almadar/operators": "workspace:*",
-    "@almadar/patterns": "workspace:*",
+    "@almadar/operators": ">=2.0.0",
+    "@almadar/patterns": ">=2.0.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {
@@ -45,8 +45,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/almadar-io/almadar.git",
-    "directory": "packages/almadar-core"
+    "url": "https://github.com/almadar-io/almadar-core.git"
   },
   "license": "MIT",
   "keywords": [
