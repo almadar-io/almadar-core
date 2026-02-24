@@ -500,6 +500,27 @@ export {
 } from "./app.js";
 
 // ============================================================================
+// Service Contract Types (Call-Service + Event Surface)
+// ============================================================================
+
+export {
+  // Call-Service Contract
+  type ServiceAction,
+  type ServiceContract,
+  // Event Contract
+  type ServiceEvents,
+  // Store Contract
+  type StoreFilterOp,
+  type StoreFilter,
+  type StoreContract,
+  // Typed EventBus wrapper
+  createTypedEventBus,
+  // Lazy Service (Singleton Pattern)
+  type LazyService,
+  createLazyService,
+} from "../service-types.js";
+
+// ============================================================================
 // IR Types (Intermediate Representation)
 // ============================================================================
 
