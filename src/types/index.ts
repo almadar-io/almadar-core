@@ -504,6 +504,9 @@ export {
 // ============================================================================
 
 export {
+  // Service Action Names
+  type PersistActionName,
+  type ServiceActionName,
   // Call-Service Contract
   type ServiceAction,
   type ServiceContract,

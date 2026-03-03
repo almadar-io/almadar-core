@@ -13,6 +13,125 @@
  */
 
 // ============================================================================
+// Service Action Names (generated from services-registry.json)
+// ============================================================================
+
+/**
+ * All known service action names across all contracts.
+ * Kept in sync with `tools/almadar-service-sync/services-registry.json`.
+ *
+ * Persist operations are listed separately because they also appear
+ * as `EffectResult.action` for persist effects.
+ */
+export type PersistActionName =
+  | "create"
+  | "update"
+  | "delete"
+  | "list"
+  | "query";
+
+/**
+ * Union of all service action names across all 22 service contracts.
+ */
+export type ServiceActionName =
+  | PersistActionName
+  // Data service
+  | "get"
+  | "getById"
+  | "set"
+  | "remove"
+  | "size"
+  // LLM
+  | "generate"
+  | "classify"
+  | "extract"
+  | "summarize"
+  // Messaging
+  | "send"
+  | "sendMessage"
+  | "sendSMS"
+  | "sendWhatsApp"
+  // Auth / Identity
+  | "authorize"
+  | "revoke"
+  | "token"
+  | "refresh"
+  | "userinfo"
+  | "register"
+  // Git / VCS
+  | "cloneRepo"
+  | "commit"
+  | "createBranch"
+  | "createPR"
+  | "getPRComments"
+  | "pull"
+  | "push"
+  // CI / Build
+  | "build"
+  | "compile"
+  | "compileSchema"
+  | "run"
+  | "validate"
+  | "validateSchema"
+  | "publish"
+  // Queue / Jobs
+  | "enqueue"
+  | "dequeue"
+  | "cancel"
+  // Storage / Assets
+  | "upload"
+  | "download"
+  | "getSignedUrl"
+  // Search / Issues
+  | "search"
+  | "getIssue"
+  | "listIssues"
+  // Agent / Generation
+  | "generateAll"
+  | "generateDomainLanguage"
+  | "generateFix"
+  | "generateOrbitals"
+  | "cancelGeneration"
+  | "getGenerationHistory"
+  | "recordGeneration"
+  // Telemetry / Metrics
+  | "startSpan"
+  | "endSpan"
+  | "getSpan"
+  | "recordMetric"
+  | "getMetrics"
+  | "increment"
+  | "logs"
+  // Events / Channels
+  | "addEvent"
+  | "emit"
+  | "findEmitters"
+  | "findListeners"
+  | "getListenerCounts"
+  | "getChannel"
+  | "subscribe"
+  // User / Preferences
+  | "getUserPreferences"
+  | "updateUserPreferences"
+  | "getThreadHistory"
+  // Media
+  | "getVideo"
+  // Payments
+  | "createPaymentIntent"
+  | "confirmPayment"
+  | "refund"
+  // Lifecycle
+  | "complete"
+  | "fail"
+  | "expire"
+  | "resume"
+  | "status"
+  | "stop"
+  | "lock"
+  | "unlock"
+  | "clear";
+
+// ============================================================================
 // Call-Service Contract
 // ============================================================================
 
