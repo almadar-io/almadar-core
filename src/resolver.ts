@@ -10,6 +10,9 @@
 import type { OrbitalSchema } from './types/schema.js';
 import type { Orbital, Trait, Page, PageTraitRef, Entity } from './types/index.js';
 import type { ResolvedIR, ResolvedPage, ResolvedEntity, ResolvedTrait } from './types/ir.js';
+import type { EntityField } from './types/field.js';
+import type { State, Event, Transition } from './types/state-machine.js';
+import type { TraitEventListener } from './types/trait.js';
 
 // ============================================================================
 // Cache
@@ -90,9 +93,9 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
       const entity: ResolvedEntity = {
         name: entityDef.name,
         description: entityDef.description,
-        icon: (entityDef as any).icon,  // Optional icon (may not exist on type)
+        icon: (entityDef as Record<string, unknown>).icon as string | undefined,  // Optional icon (may not exist on type)
         collection: entityDef.collection || entityDef.name.toLowerCase() + 's',
-        fields: (entityDef.fields || []).map((field: any) => ({
+        fields: (entityDef.fields || []).map((field: EntityField) => ({
           name: field.name,
           type: field.type,
           tsType: inferTsType(field.type),
@@ -107,7 +110,7 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
         singleton: entityDef.persistence === 'singleton',
         hasInstances: (entityDef.instances?.length ?? 0) > 0,
         instances: entityDef.instances,
-        defaults: (entityDef as any).defaults,  // Optional defaults (may not exist on type)
+        defaults: (entityDef as Record<string, unknown>).defaults as Record<string, unknown> | undefined,  // Optional defaults (may not exist on type)
         usedByTraits: [],
         usedByPages: [],
       };
@@ -121,18 +124,17 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
         description: trait.description,
         source: 'schema',
         category: trait.category,
-        states: (trait.stateMachine?.states || []).map((s: any) => ({
+        states: (trait.stateMachine?.states || []).map((s: State) => ({
           name: s.name,
           isInitial: s.isInitial ?? false,
           isFinal: s.isFinal ?? s.isTerminal ?? false,
         })),
-        events: (trait.stateMachine?.events || []).map((e: any) => ({
-          key: typeof e === 'string' ? e : e.key || e.name,
-          name: typeof e === 'string' ? e : e.name,
-          payload: typeof e === 'object' && 'payloadSchema' in e ?
-            (e.payloadSchema as any) : undefined,
+        events: (trait.stateMachine?.events || []).map((e: Event) => ({
+          key: e.key,
+          name: e.name,
+          payload: e.payloadSchema,
         })),
-        transitions: (trait.stateMachine?.transitions || []).map((t: any) => ({
+        transitions: (trait.stateMachine?.transitions || []).map((t: Transition) => ({
           from: t.from,
           to: t.to,
           event: t.event,
@@ -141,7 +143,7 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
         })),
         guards: [],
         ticks: [],
-        listens: ((trait as any).listens || []).map((l: any) => ({
+        listens: (trait.listens || []).map((l: TraitEventListener) => ({
           event: l.event,
           triggers: l.triggers,
           guard: l.guard,
@@ -161,13 +163,11 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
           page.viewType as ('list' | 'detail' | 'create' | 'edit' | 'dashboard') : undefined,
         sections: [],
         traits: (page.traits || []).map((traitRef: PageTraitRef) => ({
-          ref: typeof traitRef === 'string' ? traitRef : traitRef.ref,
+          ref: traitRef.ref,
           trait: resolveTraitRef(traitRef, ir.traits, orbital.traits as Trait[] || []),
-          linkedEntity: typeof traitRef === 'object' && 'linkedEntity' in traitRef ?
-            (traitRef as any).linkedEntity :
-            (orbital.entity ? (typeof orbital.entity === 'string' ? (orbital.entity as string).replace('.entity', '') : (orbital.entity as Entity).name) : undefined),
-          config: typeof traitRef === 'object' && 'config' in traitRef ?
-            (traitRef as any).config : undefined,
+          linkedEntity: traitRef.linkedEntity ??
+            (orbital.entity ? (typeof orbital.entity === 'string' ? orbital.entity.replace('.entity', '') : (orbital.entity as Entity).name) : undefined),
+          config: traitRef.config,
         })),
         entityBindings: [],
         navigation: [],

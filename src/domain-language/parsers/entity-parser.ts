@@ -606,7 +606,7 @@ export function formatEntityToDomain(entity: DomainEntity): string {
  * Format entity AST to KFlow schema
  */
 export function formatEntityToSchema(entity: DomainEntity): Record<string, unknown> {
-  const fields = entity.fields.map(field => ({
+  const fields: Record<string, unknown>[] = entity.fields.map(field => ({
     name: field.name,
     type: mapFieldTypeToSchema(field.fieldType),
     required: field.required || undefined,
@@ -634,7 +634,7 @@ export function formatEntityToSchema(entity: DomainEntity): Record<string, unkno
           entity: rel.targetEntity,
           type: 'many-to-one',
         },
-      } as any);
+      });
     }
   }
 

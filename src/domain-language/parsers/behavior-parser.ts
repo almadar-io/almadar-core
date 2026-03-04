@@ -627,7 +627,7 @@ export function parseBehavior(text: string, entityName: string): ParseResult<Dom
         const config = JSON.parse(jsonMatch[2]);
         return {
           type: 'effect',
-          effectType: jsonMatch[1] as any,
+          effectType: jsonMatch[1] as DomainEffect['effectType'],
           description: text,
           config,
         };
