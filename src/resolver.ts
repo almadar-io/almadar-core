@@ -9,7 +9,7 @@
 
 import type { OrbitalSchema } from './types/schema.js';
 import type { Orbital, Trait, Page, PageTraitRef, Entity } from './types/index.js';
-import type { ResolvedIR, ResolvedPage, ResolvedEntity, ResolvedTrait } from './types/ir.js';
+import type { ResolvedIR, ResolvedPage, ResolvedEntity, ResolvedTrait, ResolvedTraitEvent, ResolvedTraitTransition } from './types/ir.js';
 import type { EntityField } from './types/field.js';
 import type { State, Event, Transition } from './types/state-machine.js';
 import type { TraitEventListener } from './types/trait.js';
@@ -93,13 +93,13 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
       const entity: ResolvedEntity = {
         name: entityDef.name,
         description: entityDef.description,
-        icon: (entityDef as Record<string, unknown>).icon as string | undefined,  // Optional icon (may not exist on type)
+        icon: (entityDef as unknown as Record<string, unknown>).icon as string | undefined,  // Optional icon (may not exist on type)
         collection: entityDef.collection || entityDef.name.toLowerCase() + 's',
         fields: (entityDef.fields || []).map((field: EntityField) => ({
           name: field.name,
           type: field.type,
           tsType: inferTsType(field.type),
-          description: field.description,
+          description: (field as unknown as Record<string, unknown>).description as string | undefined,
           default: field.default,
           required: field.required ?? false,
           values: field.values,
@@ -110,7 +110,7 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
         singleton: entityDef.persistence === 'singleton',
         hasInstances: (entityDef.instances?.length ?? 0) > 0,
         instances: entityDef.instances,
-        defaults: (entityDef as Record<string, unknown>).defaults as Record<string, unknown> | undefined,  // Optional defaults (may not exist on type)
+        defaults: (entityDef as unknown as Record<string, unknown>).defaults as Record<string, unknown> | undefined,  // Optional defaults (may not exist on type)
         usedByTraits: [],
         usedByPages: [],
       };
@@ -133,14 +133,14 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
           key: e.key,
           name: e.name,
           payload: e.payloadSchema,
-        })),
+        })) as ResolvedTraitEvent[],
         transitions: (trait.stateMachine?.transitions || []).map((t: Transition) => ({
           from: t.from,
           to: t.to,
           event: t.event,
           guard: t.guard,
           effects: t.effects || [],
-        })),
+        })) as ResolvedTraitTransition[],
         guards: [],
         ticks: [],
         listens: (trait.listens || []).map((l: TraitEventListener) => ({
