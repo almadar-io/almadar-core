@@ -41,3 +41,22 @@ export {
 
 // Export domain language engine (lexer, parsers, formatters, sync)
 export * from './src/domain-language/index';
+
+// Export state machine graph algorithms (BFS, guard payloads, replay paths)
+// Note: PayloadFieldSchema is re-exported selectively to avoid collision with
+// the Zod PayloadFieldSchema from types/state-machine.ts
+export {
+  type StateEdge,
+  type BFSNode,
+  type BFSPathNode,
+  type ReplayStep,
+  type GuardPayload,
+  type GraphTransition,
+  buildStateGraph,
+  collectReachableStates,
+  walkStatePairs,
+  buildGuardPayloads,
+  extractPayloadFieldRef,
+  buildReplayPaths,
+  type ReplayTransition,
+} from './src/state-machine/index';
