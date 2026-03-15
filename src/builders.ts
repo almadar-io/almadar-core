@@ -106,6 +106,58 @@ export function makeOrbital(
 }
 
 // ============================================================================
+// Intra-Orbital Composition
+// ============================================================================
+
+/**
+ * Merge multiple OrbitalDefinitions into one.
+ * Collects all traits from all sources into a single orbital with a shared entity.
+ * Pure: clones all traits, no mutation.
+ */
+export function mergeOrbitals(
+  name: string,
+  entity: Entity,
+  sources: OrbitalDefinition[],
+  pages: Page[],
+): OrbitalDefinition {
+  const allTraits = sources.flatMap(s =>
+    (s.traits as Trait[]).map(t => structuredClone(t)),
+  );
+  return { name, entity, traits: allTraits, pages } as OrbitalDefinition;
+}
+
+/**
+ * Wire an intra-orbital event between two traits.
+ * Adds emits to the source trait, listens to the target trait.
+ * Pure: returns cloned traits, no mutation.
+ */
+export function wire(
+  source: Trait,
+  target: Trait,
+  event: TraitEventContract,
+  triggers: string,
+): [Trait, Trait] {
+  const s = structuredClone(source);
+  const t = structuredClone(target);
+
+  s.emits = [...(s.emits ?? []), { ...event, scope: event.scope ?? ('internal' as const) }];
+  t.listens = [...(t.listens ?? []), {
+    event: event.event,
+    triggers,
+    scope: 'internal' as const,
+  }];
+
+  return [s, t];
+}
+
+/**
+ * Extract the first trait from an OrbitalDefinition.
+ */
+export function extractTrait(orbital: OrbitalDefinition): Trait {
+  return structuredClone((orbital.traits as Trait[])[0]);
+}
+
+// ============================================================================
 // Composition: connect
 // ============================================================================
 
