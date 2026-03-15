@@ -5,7 +5,8 @@ export default defineConfig({
     'index': 'index.ts',
     'types/index': 'src/types/index.ts',
     'domain-language/index': 'src/domain-language/index.ts',
-    'state-machine/index': 'src/state-machine/index.ts'
+    'state-machine/index': 'src/state-machine/index.ts',
+    'builders': 'src/builders.ts'
   },
   format: ['esm'],
   dts: true,

@@ -1,6 +1,6 @@
 {
   "name": "@almadar/core",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "description": "Core schema types and definitions for Almadar",
   "type": "module",
   "main": "./dist/index.js",
@@ -26,6 +26,11 @@
       "types": "./dist/state-machine/index.d.ts",
       "import": "./dist/state-machine/index.js",
       "require": "./dist/state-machine/index.js"
+    },
+    "./builders": {
+      "types": "./dist/builders.d.ts",
+      "import": "./dist/builders.js",
+      "require": "./dist/builders.js"
     }
   },
   "files": [
