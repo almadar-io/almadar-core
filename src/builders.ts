@@ -48,6 +48,8 @@ export interface MakeEntityOpts {
   fields: EntityField[];
   persistence?: EntityPersistence;
   collection?: string;
+  /** Pre-authored seed data instances */
+  instances?: Record<string, unknown>[];
 }
 
 /**
@@ -63,6 +65,7 @@ export function makeEntity(opts: MakeEntityOpts): Entity {
       ? { collection: opts.collection ?? plural(opts.name).toLowerCase() }
       : {}),
     fields,
+    ...(opts.instances && opts.instances.length > 0 ? { instances: opts.instances } : {}),
   };
 }
 
