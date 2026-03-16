@@ -362,6 +362,19 @@ export type EffectInput = z.input<typeof EffectSchema>;
 
 /**
  * Type guard to check if a value is a valid Effect (S-expression).
+ * 
+ * Validates that a value conforms to the Effect structure. Effects are
+ * represented as arrays where the first element is a string (effect type)
+ * and subsequent elements are parameters. Used for runtime validation
+ * of effect structures.
+ * 
+ * @param {unknown} value - Value to check
+ * @returns {boolean} True if value is a valid Effect, false otherwise
+ * 
+ * @example
+ * isEffect(['set', '@entity.health', 100]); // returns true
+ * isEffect('not-an-effect'); // returns false
+ * isEffect([]); // returns false
  */
 export function isEffect(value: unknown): value is Effect {
     return Array.isArray(value) && value.length > 0 && typeof value[0] === 'string';
@@ -377,24 +390,57 @@ export const isSExprEffect = isEffect;
 // ============================================================================
 
 /**
- * Create a set effect
- * @example ["set", "@entity.health", 100]
+ * Creates a set effect for state updates.
+ * 
+ * Generates an effect that sets a binding to a value. Used in state
+ * machine transitions to update entity fields, UI state, or other
+ * mutable data.
+ * 
+ * @param {string} binding - Target binding (e.g., '@entity.health')
+ * @param {SExpr} value - Value to set (can be literal or expression)
+ * @returns {Effect} Set effect array
+ * 
+ * @example
+ * set('@entity.health', 100); // returns ["set", "@entity.health", 100]
+ * set('@state.loading', false); // returns ["set", "@state.loading", false]
  */
 export function set(binding: string, value: SExpr): Effect {
     return ['set', binding, value];
 }
 
 /**
- * Create an emit effect
- * @example ["emit", "PLAYER_DIED", { "playerId": "@entity.id" }]
+ * Creates an emit effect for event dispatching.
+ * 
+ * Generates an effect that emits an event with optional payload.
+ * Used in state machine transitions to trigger events that can be
+ * handled by other traits, services, or external systems.
+ * 
+ * @param {string} event - Event name to emit
+ * @param {Record<string, unknown>} [payload] - Optional event payload
+ * @returns {Effect} Emit effect array
+ * 
+ * @example
+ * emit('PLAYER_DIED', { playerId: '@entity.id' }); // returns ["emit", "PLAYER_DIED", { playerId: "@entity.id" }]
+ * emit('GAME_STARTED'); // returns ["emit", "GAME_STARTED"]
  */
 export function emit(event: string, payload?: Record<string, unknown>): Effect {
     return payload ? ['emit', event, payload] : ['emit', event];
 }
 
 /**
- * Create a navigate effect
- * @example ["navigate", "/tasks"]
+ * Creates a navigation effect for page routing.
+ * 
+ * Generates an effect that navigates to a specified path with optional
+ * parameters. Used in state machine transitions to change pages or
+ * update URL parameters.
+ * 
+ * @param {string} path - Target path (e.g., '/tasks')
+ * @param {Record<string, string>} [params] - Optional URL parameters
+ * @returns {NavigateEffect} Navigation effect array
+ * 
+ * @example
+ * navigate('/tasks'); // returns ["navigate", "/tasks"]
+ * navigate('/user', { id: '123' }); // returns ["navigate", "/user", { id: "123" }]
  */
 export function navigate(path: string): NavigateEffect;
 export function navigate(path: string, params: Record<string, string>): NavigateEffect;

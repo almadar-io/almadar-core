@@ -259,7 +259,17 @@ export const ServiceDefinitionSchema = z.discriminatedUnion("type", [
 export type ServiceRef = ServiceDefinition | string;
 
 /**
- * Check if ServiceRef is a reference string.
+ * Checks if a service reference is a string.
+ * 
+ * Type guard to determine if a service reference is a string reference
+ * (format: "Alias.services.ServiceName") rather than an inline service definition.
+ * 
+ * @param {ServiceRef} service - Service reference to check
+ * @returns {boolean} True if service is a string reference, false otherwise
+ * 
+ * @example
+ * isServiceReference("Weather.services.openweather"); // returns true
+ * isServiceReference({ name: "weather", type: "rest" }); // returns false
  */
 export function isServiceReference(service: ServiceRef): service is string {
   return typeof service === "string";
@@ -281,8 +291,17 @@ export const ServiceRefSchema = z.union([
 ]);
 
 /**
- * Parse a service reference.
- * @returns { alias, serviceName } or null if not a valid reference
+ * Parses a service reference into its components.
+ * 
+ * Extracts the alias and service name from a service reference string
+ * in format "Alias.services.ServiceName". Returns null if not a valid reference.
+ * 
+ * @param {string} ref - Service reference string
+ * @returns {{ alias: string; serviceName: string } | null} Parsed components or null
+ * 
+ * @example
+ * parseServiceRef("Weather.services.openweather"); // returns { alias: "Weather", serviceName: "openweather" }
+ * parseServiceRef("invalid"); // returns null
  */
 export function parseServiceRef(
   ref: string,
@@ -299,7 +318,17 @@ export function parseServiceRef(
 // ============================================================================
 
 /**
- * Check if a service definition is a REST service.
+ * Checks if a service definition is a REST service.
+ * 
+ * Type guard to determine if a service definition represents a REST API service.
+ * Used for service type discrimination and validation.
+ * 
+ * @param {ServiceDefinition} service - Service definition to check
+ * @returns {boolean} True if service is a REST service, false otherwise
+ * 
+ * @example
+ * isRestService({ name: "weather", type: "rest", baseUrl: "..." }); // returns true
+ * isRestService({ name: "chat", type: "socket" }); // returns false
  */
 export function isRestService(
   service: ServiceDefinition,
@@ -308,7 +337,17 @@ export function isRestService(
 }
 
 /**
- * Check if a service definition is a Socket service.
+ * Checks if a service definition is a Socket service.
+ * 
+ * Type guard to determine if a service definition represents a WebSocket service.
+ * Used for service type discrimination and validation.
+ * 
+ * @param {ServiceDefinition} service - Service definition to check
+ * @returns {boolean} True if service is a Socket service, false otherwise
+ * 
+ * @example
+ * isSocketService({ name: "chat", type: "socket", url: "wss://..." }); // returns true
+ * isSocketService({ name: "weather", type: "rest" }); // returns false
  */
 export function isSocketService(
   service: ServiceDefinition,
@@ -317,7 +356,17 @@ export function isSocketService(
 }
 
 /**
- * Check if a service definition is an MCP service.
+ * Checks if a service definition is an MCP service.
+ * 
+ * Type guard to determine if a service definition represents an MCP
+ * (Multiplayer Control Protocol) service. Used for service type discrimination.
+ * 
+ * @param {ServiceDefinition} service - Service definition to check
+ * @returns {boolean} True if service is an MCP service, false otherwise
+ * 
+ * @example
+ * isMcpService({ name: "game", type: "mcp", serverUrl: "..." }); // returns true
+ * isMcpService({ name: "chat", type: "socket" }); // returns false
  */
 export function isMcpService(
   service: ServiceDefinition,

@@ -220,14 +220,36 @@ export type AnimationDefInput = z.input<typeof AnimationDefSchema>;
 // ============================================================================
 
 /**
- * Create a semantic asset key from role and category
+ * Creates a semantic asset key from role and category.
+ * 
+ * Generates a unique asset identifier by combining role and category
+ * with a colon separator. Used for asset management and lookup.
+ * 
+ * @param {EntityRole} role - Entity role (e.g., 'player', 'enemy')
+ * @param {string} category - Asset category (e.g., 'sprite', 'animation')
+ * @returns {string} Asset key in format 'role:category'
+ * 
+ * @example
+ * createAssetKey('player', 'sprite'); // returns 'player:sprite'
+ * createAssetKey('enemy', 'animation'); // returns 'enemy:animation'
  */
 export function createAssetKey(role: EntityRole, category: string): string {
     return `${role}:${category}`;
 }
 
 /**
- * Parse an asset key into role and category
+ * Parses an asset key into role and category components.
+ * 
+ * Deconstructs an asset key string (format 'role:category') into its
+ * constituent parts. Returns null if the key format is invalid.
+ * 
+ * @param {string} key - Asset key in format 'role:category'
+ * @returns {{ role: string; category: string } | null} Parsed components or null
+ * 
+ * @example
+ * parseAssetKey('player:sprite'); // returns { role: 'player', category: 'sprite' }
+ * parseAssetKey('enemy:animation'); // returns { role: 'enemy', category: 'animation' }
+ * parseAssetKey('invalid'); // returns null
  */
 export function parseAssetKey(key: string): { role: string; category: string } | null {
     const parts = key.split(':');
@@ -236,7 +258,17 @@ export function parseAssetKey(key: string): { role: string; category: string } |
 }
 
 /**
- * Get common animations for an entity role
+ * Gets common animations for an entity role.
+ * 
+ * Returns an array of default animation names appropriate for the
+ * specified entity role. Used for asset configuration and validation.
+ * 
+ * @param {EntityRole} role - Entity role
+ * @returns {string[]} Array of default animation names
+ * 
+ * @example
+ * getDefaultAnimationsForRole('player'); // returns ['idle', 'run', 'jump', 'fall', 'attack', 'hurt', 'die']
+ * getDefaultAnimationsForRole('enemy'); // returns ['idle', 'walk', 'attack', 'hurt', 'die']
  */
 export function getDefaultAnimationsForRole(role: EntityRole): string[] {
     switch (role) {
@@ -266,7 +298,18 @@ export function getDefaultAnimationsForRole(role: EntityRole): string[] {
 }
 
 /**
- * Validate that an asset ref has required animations
+ * Validates that an asset reference has required animations.
+ * 
+ * Checks if an asset reference contains all required animations.
+ * Returns an error message if validation fails, or null if valid.
+ * 
+ * @param {SemanticAssetRef} assetRef - Asset reference to validate
+ * @param {string[]} requiredAnimations - Required animation names
+ * @returns {string | null} Error message or null if valid
+ * 
+ * @example
+ * validateAssetAnimations(assetRef, ['idle', 'run']); // returns null if valid
+ * validateAssetAnimations(assetRef, ['missing-animation']); // returns error message
  */
 export function validateAssetAnimations(
     assetRef: SemanticAssetRef,

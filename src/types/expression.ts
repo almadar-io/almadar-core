@@ -103,7 +103,20 @@ export function isSExpr(value: unknown): value is SExpr[] {
 
 /**
  * Type guard for S-expression atoms (non-array values).
- * Includes objects (for payload data, props, etc.)
+ * 
+ * Validates that a value is an S-expression atom (literal value).
+ * Includes null, strings, numbers, booleans, and objects. Used to
+ * distinguish atomic values from S-expression calls (arrays).
+ * 
+ * @param {unknown} value - Value to check
+ * @returns {boolean} True if value is an S-expression atom, false otherwise
+ * 
+ * @example
+ * isSExprAtom('hello'); // returns true
+ * isSExprAtom(42); // returns true
+ * isSExprAtom(null); // returns true
+ * isSExprAtom({ key: 'value' }); // returns true
+ * isSExprAtom(['+', 1, 2]); // returns false
  */
 export function isSExprAtom(value: unknown): value is SExprAtom {
   if (value === null) return true;
@@ -113,16 +126,38 @@ export function isSExprAtom(value: unknown): value is SExprAtom {
 }
 
 /**
- * Check if a value is a binding reference.
- * Bindings start with @ (e.g., @entity.health, @payload.amount, @now)
+ * Checks if a value is a binding reference.
+ * 
+ * Validates that a string is a binding reference (starts with @).
+ * Bindings reference runtime values like @entity.health, @payload.amount, @now.
+ * Used for identifying bindings in S-expressions and validation.
+ * 
+ * @param {unknown} value - Value to check
+ * @returns {boolean} True if value is a binding reference, false otherwise
+ * 
+ * @example
+ * isBinding('@entity.health'); // returns true
+ * isBinding('@payload.amount'); // returns true
+ * isBinding('not-a-binding'); // returns false
+ * isBinding(123); // returns false
  */
 export function isBinding(value: unknown): value is string {
   return typeof value === 'string' && value.startsWith('@');
 }
 
 /**
- * Check if a value is a valid S-expression call (array with operator).
- * Use this to distinguish between S-expression calls and atom values.
+ * Checks if a value is a valid S-expression call (array with operator).
+ * 
+ * Alias for isSExpr() - validates S-expression call structure.
+ * Used to distinguish between S-expression calls and atom values.
+ * 
+ * @param {unknown} value - Value to check
+ * @returns {boolean} True if value is a valid S-expression call, false otherwise
+ * 
+ * @example
+ * isSExprCall(['+', 1, 2]); // returns true
+ * isSExprCall(['set', '@entity.health', 100]); // returns true
+ * isSExprCall('not-a-call'); // returns false
  */
 export function isSExprCall(value: unknown): value is SExpr[] {
   return isSExpr(value);
@@ -154,11 +189,19 @@ export const CORE_BINDINGS = ['entity', 'payload', 'state', 'now', 'config', 'co
 export type CoreBinding = (typeof CORE_BINDINGS)[number];
 
 /**
- * Parse a binding reference into its components.
- * Does NOT use regex - uses structured string operations.
- *
- * @param binding - Binding string starting with @
- * @returns Parsed binding object or null if invalid
+ * Parses a binding reference into its components.
+ * 
+ * Deconstructs a binding string (e.g., '@entity.health') into its constituent
+ * parts: type, root, path, and original string. Does NOT use regex - uses
+ * structured string operations for reliability and maintainability.
+ * 
+ * @param {string} binding - Binding string starting with @
+ * @returns {ParsedBinding | null} Parsed binding object or null if invalid
+ * 
+ * @example
+ * parseBinding('@entity.health'); // returns { type: 'core', root: 'entity', path: ['health'], original: '@entity.health' }
+ * parseBinding('@User.name'); // returns { type: 'entity', root: 'User', path: ['name'], original: '@User.name' }
+ * parseBinding('not-a-binding'); // returns null
  */
 export function parseBinding(binding: string): ParsedBinding | null {
   if (!binding.startsWith('@')) {

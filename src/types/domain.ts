@@ -477,7 +477,17 @@ export const ThemeDefinitionSchema = z.object({
 export type ThemeRef = ThemeDefinition | string;
 
 /**
- * Check if ThemeRef is a reference string.
+ * Checks if a theme reference is a string.
+ * 
+ * Type guard to determine if a theme reference is a string reference
+ * (format: "Alias.theme") rather than an inline theme definition.
+ * 
+ * @param {ThemeRef} theme - Theme reference to check
+ * @returns {boolean} True if theme is a string reference, false otherwise
+ * 
+ * @example
+ * isThemeReference("Ocean.theme"); // returns true
+ * isThemeReference({ name: "ocean", colors: {...} }); // returns false
  */
 export function isThemeReference(theme: ThemeRef): theme is string {
   return typeof theme === "string";
