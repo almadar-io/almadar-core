@@ -12,12 +12,20 @@ import { buildStateGraph } from './graph.js';
 import type { GraphTransition } from './types.js';
 
 /**
- * Collect all reachable states from an initial state via BFS.
- *
- * @param transitions - State machine transitions
- * @param initialState - Starting state
- * @param maxDepth - Maximum BFS depth (default: 5)
- * @returns Set of reachable state names
+ * Collects all reachable states from an initial state using breadth-first search.
+ * 
+ * Performs BFS traversal of the state machine to find all states reachable
+ * from the initial state, up to the specified maximum depth. Used for
+ * state machine analysis, verification, and test coverage assessment.
+ * 
+ * @param {GraphTransition[]} transitions - Array of state transitions
+ * @param {string} initialState - Starting state name
+ * @param {number} [maxDepth=5] - Maximum search depth
+ * @returns {Set<string>} Set of reachable state names
+ * 
+ * @example
+ * const reachable = collectReachableStates(transitions, 'initial', 10);
+ * console.log('Reachable states:', Array.from(reachable));
  */
 export function collectReachableStates(
   transitions: GraphTransition[],
@@ -45,14 +53,24 @@ export function collectReachableStates(
 }
 
 /**
- * Walk all (state, event) pairs reachable via BFS and invoke a callback for each.
- * Used by the server verification to POST each transition and check the response.
- *
- * @param transitions - State machine transitions
- * @param initialState - Starting state
- * @param maxDepth - Maximum BFS depth (default: 5)
- * @param visitor - Callback invoked for each (state, edge) pair.
- *   Return true to enqueue the target state for further exploration.
+ * Walks all reachable (state, event) pairs using BFS and invokes callback for each.
+ * 
+ * Traverses the state machine using breadth-first search and calls the visitor
+ * function for each (state, edge) pair encountered. Used by server verification
+ * to test transitions by POSTing to endpoints and checking responses.
+ * 
+ * @param {GraphTransition[]} transitions - Array of state transitions
+ * @param {string} initialState - Starting state name
+ * @param {number} maxDepth - Maximum BFS depth
+ * @param {(state: string, edge: StateEdge, depth: number) => Promise<boolean>} visitor - Callback for each pair
+ * @returns {Promise<{ visitedPairs: Set<string>; walkedEdges: number }>} Traversal statistics
+ * 
+ * @example
+ * const result = await walkStatePairs(transitions, 'initial', 5, async (state, edge) => {
+ *   console.log(`Transition: ${state} --${edge.event}--> ${edge.to}`);
+ *   return true; // Continue exploration
+ * });
+ * console.log(`Visited ${result.visitedPairs.size} state-event pairs`);
  */
 export async function walkStatePairs(
   transitions: GraphTransition[],

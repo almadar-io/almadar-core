@@ -13,7 +13,7 @@ importers:
         version: 2.0.5
       '@almadar/patterns':
         specifier: '>=2.0.0'
-        version: 2.7.0
+        version: 2.7.1
       zod:
         specifier: ^3.22.0
         version: 3.25.76
@@ -50,8 +50,8 @@ packages:
   '@almadar/operators@2.0.5':
     resolution: {integrity: sha512-bPobR/9IuMMG+Rnc60aVYB8T5+biLNRf2cYNJhDYLMvxUY7gvs9QZlCpUKAYmAZe2n2+/2cJwaOnZ78jDGug1w==}
 
-  '@almadar/patterns@2.7.0':
-    resolution: {integrity: sha512-p9+D23enAHZssAs5w+V2UOY1MQ1r4sA2GMhgg0BhGDVyiavTYcfX06AB5rLT/Jv3lBCUFyNyt8QINFMW6XbhPg==}
+  '@almadar/patterns@2.7.1':
+    resolution: {integrity: sha512-IoH09UcIBzgGubxf1YHCxdPhJHYnU4SwFLdpDKhh0qehrKMkeS7Lw76ufUjvnhS/d0zX+4rPtDmgMmGH4bpI2Q==}
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -1271,7 +1271,7 @@ snapshots:
 
   '@almadar/operators@2.0.5': {}
 
-  '@almadar/patterns@2.7.0': {}
+  '@almadar/patterns@2.7.1': {}
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
