@@ -7,106 +7,9 @@
  * @packageDocumentation
  */
 
-import type { SExpr // ============================================================================
-// Type Guards
-// ============================================================================
+import type { SExpr } from './expression.js';
 
-/**
- * Type guard to check if an object is a ResolvedIR.
- * 
- * Validates that an unknown value conforms to the ResolvedIR structure.
- * Checks for required properties and correct types. Used for runtime
- * type checking and validation.
- * 
- * @param {unknown} ir - Value to check
- * @returns {boolean} True if value is ResolvedIR, false otherwise
- * 
- * @example
- * if (isResolvedIR(schema)) {
- *   // Type-safe access to ResolvedIR properties
- *   console.log('Valid IR:', schema.appName);
- * }
- */
 // ============================================================================
-// Type Guards
-// ============================================================================
-
-/**
- * Type guard to check if an object is a ResolvedIR.
- * 
- * Validates that an unknown value conforms to the ResolvedIR structure.
- * Checks for required properties and correct types. Used for runtime
- * type checking and validation.
- * 
- * @param {unknown} ir - Value to check
- * @returns {boolean} True if value is ResolvedIR, false otherwise
- * 
- * @example
- * if (isResolvedIR(schema)) {
- *   // Type-safe access to ResolvedIR properties
- *   console.log('Valid IR:', schema.appName);
- * }
- */
-export function isResolvedIR(ir: unknown): ir is ResolvedIR {
-=======
-export function isResolvedIR(ir: unknown): ir is ResolvedIR {
-=======
-// ============================================================================
-// Type Guards
-// ============================================================================
-
-/**
- * Type guard to check if an object is a ResolvedIR.
- * 
- * Validates that an unknown value conforms to the ResolvedIR structure.
- * Checks for required properties and correct types. Used for runtime
- * type checking and validation.
- * 
- * @param {unknown} ir - Value to check
- * @returns {boolean} True if value is ResolvedIR, false otherwise
- * 
- * @example
- * if (isResolvedIR(schema)) {
- *   // Type-safe access to ResolvedIR properties
- *   console.log('Valid IR:', schema.appName);
- * }
- */
-export function isResolvedIR(ir: unknown): ir is ResolvedIR { from './expression.js';
-
-// Type Guards
-// ============================================================================
-
-export function isResolvedIR(ir: unknown): ir is ResolvedIR {
-  if (!ir || typeof ir !== 'object') return false;
-  const r = ir as ResolvedIR;
-  return typeof r.appName === 'string' && r.traits instanceof Map && r.pages instanceof Map;
-}
-=======
-// ============================================================================
-// Type Guards
-// ============================================================================
-
-/**
- * Type guard to check if an object is a ResolvedIR.
- * 
- * Validates that an unknown value conforms to the ResolvedIR structure.
- * Checks for required properties and correct types. Used for runtime
- * type checking and validation.
- * 
- * @param {unknown} ir - Value to check
- * @returns {boolean} True if value is ResolvedIR, false otherwise
- * 
- * @example
- * if (isResolvedIR(schema)) {
- *   // Type-safe access to ResolvedIR properties
- *   console.log('Valid IR:', schema.appName);
- * }
- */
-export function isResolvedIR(ir: unknown): ir is ResolvedIR {
-  if (!ir || typeof ir !== 'object') return false;
-  const r = ir as ResolvedIR;
-  return typeof r.appName === 'string' && r.traits instanceof Map && r.pages instanceof Map;
-}============================================================================
 // Transition Types
 // ============================================================================
 
@@ -443,18 +346,7 @@ export interface ResolvedIR {
 // ============================================================================
 
 /**
- * Creates an empty resolved trait with default structure.
- * 
- * Generates a skeleton ResolvedTrait object with empty arrays for all
- * collections. Used as a template or fallback when creating trait instances.
- * 
- * @param {string} name - Trait name
- * @param {'schema' | 'library' | 'inline'} source - Trait source type
- * @returns {ResolvedTrait} Empty trait structure
- * 
- * @example
- * const emptyTrait = createEmptyResolvedTrait('MyTrait', 'schema');
- * // Returns: { name: 'MyTrait', source: 'schema', states: [], ... }
+ * Create an empty resolved trait with defaults
  */
 export function createEmptyResolvedTrait(name: string, source: 'schema' | 'library' | 'inline'): ResolvedTrait {
   return {
@@ -471,18 +363,7 @@ export function createEmptyResolvedTrait(name: string, source: 'schema' | 'libra
 }
 
 /**
- * Creates an empty resolved page with default structure.
- * 
- * Generates a skeleton ResolvedPage object with default path and empty
- * arrays for all collections. Used as a template or fallback when creating
- * page instances.
- * 
- * @param {string} name - Page name
- * @returns {ResolvedPage} Empty page structure with default path
- * 
- * @example
- * const emptyPage = createEmptyResolvedPage('Dashboard');
- * // Returns: { name: 'Dashboard', path: '/dashboard', featureName: 'dashboard', ... }
+ * Create an empty resolved page with defaults
  */
 export function createEmptyResolvedPage(name: string): ResolvedPage {
   return {
@@ -523,30 +404,7 @@ export function inferTsType(schemaType: string): string {
 }
 
 /**
- * Creates a resolved field with TypeScript type inference.
- * 
- * Converts a field definition to a ResolvedField object with automatic
- * TypeScript type inference. Used during schema resolution to create
- * type-safe field definitions.
- * 
- * @param {Object} field - Field definition
- * @param {string} field.name - Field name
- * @param {string} field.type - Field type
- * @param {string} [field.description] - Optional description
- * @param {unknown} [field.default] - Optional default value
- * @param {boolean} [field.required] - Required flag
- * @param {unknown} [field.validation] - Validation rules
- * @param {string[]} [field.values] - Enum values
- * @returns {ResolvedField} Resolved field with TypeScript type
- * 
- * @example
- * const resolvedField = createResolvedField({
- *   name: 'status',
- *   type: 'string',
- *   description: 'Current status',
- *   required: true
- * });
- * // Returns: { name: 'status', type: 'string', tsType: 'string', ... }
+ * Create a resolved field with TypeScript type inference
  */
 export function createResolvedField(field: {
   name: string;
@@ -573,6 +431,22 @@ export function createResolvedField(field: {
 // Type Guards
 // ============================================================================
 
+/**
+ * Type guard to check if an object is a ResolvedIR.
+ * 
+ * Validates that an unknown value conforms to the ResolvedIR structure.
+ * Checks for required properties and correct types. Used for runtime
+ * type checking and validation.
+ * 
+ * @param {unknown} ir - Value to check
+ * @returns {boolean} True if value is ResolvedIR, false otherwise
+ * 
+ * @example
+ * if (isResolvedIR(schema)) {
+ *   // Type-safe access to ResolvedIR properties
+ *   console.log('Valid IR:', schema.appName);
+ * }
+ */
 export function isResolvedIR(ir: unknown): ir is ResolvedIR {
   if (!ir || typeof ir !== 'object') return false;
   const r = ir as ResolvedIR;

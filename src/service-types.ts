@@ -220,6 +220,27 @@ export interface ServiceEvents<
  * typedBus.on('LLM_ERROR', (payload) => { payload.error; }); // payload is typed
  * ```
  */
+/**
+ * Creates a typed event bus from an untyped bus implementation.
+ * 
+ * This wrapper adds TypeScript type safety to event emission and listening.
+ * The generic `EventMap` defines the shape of all events and their payloads.
+ * 
+ * @template EventMap - Type mapping event names to their payload types
+ * @param {Object} bus - Untyped event bus implementation
+ * @param {Function} bus.emit - Function to emit events
+ * @param {Function} bus.on - Function to listen to events
+ * @returns {ServiceEvents<EventMap>} Typed event bus interface
+ * 
+ * @example
+ * interface MyEvents {
+ *   'user.created': { id: string; name: string };
+ *   'user.deleted': { id: string };
+ * }
+ * 
+ * const typedBus = createTypedEventBus<MyEvents>(rawBus);
+ * typedBus.emit('user.created', { id: '123', name: 'Alice' });
+ */
 export function createTypedEventBus<
   EventMap extends Record<string, Record<string, unknown>>,
 >(bus: {
@@ -315,6 +336,17 @@ export interface LazyService<T> {
 
 /**
  * Create a lazy singleton from a factory function.
+ * 
+ * Creates a service that lazily initializes on first access and caches the instance.
+ * Useful for expensive resources like database connections or API clients.
+ * 
+ * @template T - The type of service to create
+ * @param {() => T} factory - Factory function that creates the service instance
+ * @returns {LazyService<T>} Lazy service with get() and reset() methods
+ * 
+ * @example
+ * const dbService = createLazyService(() => new DatabaseClient(config));
+ * const db = dbService.get(); // Initializes on first call
  */
 export function createLazyService<T>(factory: () => T): LazyService<T> {
   let instance: T | null = null;

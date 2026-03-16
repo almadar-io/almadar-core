@@ -7,6 +7,11 @@
  * Input: OrbitalSchema. Output: OrbitalSchema.
  * Same types — just stripped of implementation details.
  *
+ * This module provides functions to extract the essential business structure
+ * from a complete orbital schema, removing implementation details like
+ * effects, guards, and visual styling while preserving the core entity,
+ * trait, and page definitions.
+ *
  * @packageDocumentation
  */
 
@@ -24,7 +29,16 @@ import type { Transition, Event, State } from './types/state-machine.js';
 // Workflow Type Detection
 // ============================================================================
 
+/**
+ * Standard CRUD state names used for workflow classification.
+ * @internal
+ */
 const CRUD_STATES = new Set(['browsing', 'creating', 'editing', 'viewing', 'deleting']);
+
+/**
+ * Pattern for detecting wizard-style step states (step1, step2, etc).
+ * @internal
+ */
 const STEP_PATTERN = /^step\d+$/i;
 
 /**
@@ -58,10 +72,18 @@ export function classifyWorkflow(states: State[]): 'crud' | 'wizard' | 'custom' 
 // Entity Summarization
 // ============================================================================
 
+/**
+ * Check if a field is a primary key.
+ * @internal
+ */
 function isPrimaryKey(field: EntityField): boolean {
   return (field as EntityField & { primaryKey?: boolean }).primaryKey === true;
 }
 
+/**
+ * Check if a field is a business field (not primary key, has business meaning).
+ * @internal
+ */
 function isBusinessField(field: EntityField): boolean {
   if (isPrimaryKey(field)) return false;
   if (field.type === 'enum' || field.type === 'relation') return true;
@@ -69,6 +91,10 @@ function isBusinessField(field: EntityField): boolean {
   return false;
 }
 
+/**
+ * Summarize an entity to its business-relevant fields.
+ * @internal
+ */
 function summarizeEntity(entity: Entity): Entity {
   const fields: EntityField[] = entity.fields.filter(isBusinessField).map(f => {
     const summary: EntityField = { name: f.name, type: f.type };
@@ -93,6 +119,11 @@ function summarizeEntity(entity: Entity): Entity {
  * Deduplicate transitions that are identical in (from, to, event).
  * Strips effects and guards.
  */
+/**
+ * Deduplicate transitions that are identical in (from, to, event).
+ * Strips effects and guards.
+ * @internal
+ */
 function summarizeTransitions(transitions: Transition[]): Transition[] {
   const seen = new Set<string>();
   const result: Transition[] = [];
@@ -112,10 +143,18 @@ function summarizeTransitions(transitions: Transition[]): Transition[] {
 // Trait Summarization
 // ============================================================================
 
+/**
+ * Summarize events to just their keys.
+ * @internal
+ */
 function summarizeEvents(events: Event[]): Event[] {
   return events.map(e => ({ key: e.key, name: e.key }));
 }
 
+/**
+ * Summarize a trait to its essential structure.
+ * @internal
+ */
 function summarizeTrait(trait: Trait): Trait {
   const states = trait.stateMachine?.states ?? [];
   const events = trait.stateMachine?.events ?? [];
@@ -161,6 +200,10 @@ function summarizeTrait(trait: Trait): Trait {
 // Page Summarization
 // ============================================================================
 
+/**
+ * Summarize a page to its essential structure.
+ * @internal
+ */
 function summarizePage(page: Page): Page {
   const result: Page = { name: page.name, path: page.path };
   if (page.traits && page.traits.length > 0) {

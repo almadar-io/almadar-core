@@ -34,7 +34,16 @@ import { PATTERN_TYPES as _PATTERN_TYPES } from '@almadar/patterns';
 
 /**
  * Get all valid pattern types from the registry.
- * Delegates to @almadar/patterns which is the SSOT.
+ * 
+ * Returns a complete list of pattern type names from the canonical
+ * @almadar/patterns registry. Use this to iterate over or validate
+ * pattern types programmatically.
+ * 
+ * @returns {string[]} Array of pattern type names
+ * 
+ * @example
+ * const types = getAllPatternTypes();
+ * // Returns: ['data-table', 'detail-view', 'form-section', ...]
  */
 export function getAllPatternTypes(): string[] {
   return [..._PATTERN_TYPES];

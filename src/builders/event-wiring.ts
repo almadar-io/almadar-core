@@ -53,10 +53,18 @@ function findInlineTrait(
   return null;
 }
 
+/**
+ * Check if an emit already exists in the list.
+ * @internal
+ */
 function hasEmit(emits: TraitEventContract[], event: string): boolean {
   return emits.some((e) => e.event === event);
 }
 
+/**
+ * Check if a listen already exists in the list.
+ * @internal
+ */
 function hasListen(
   listens: TraitEventListener[],
   event: string,

@@ -100,22 +100,42 @@ const LOGICAL_OPERATORS = ['and', 'or', 'not', '&&', '||', '!'];
 const CONTROL_OPERATORS = ['if', 'cond', 'do', 'let', 'when', 'unless', 'case'];
 const EFFECT_OPERATORS = ['set', 'emit', 'navigate', 'notify', 'persist', 'spawn', 'despawn', 'call-service', 'render-ui'];
 
+/**
+ * Check if an operator is a comparison operator.
+ * @internal
+ */
 function isComparisonOperator(op: string): boolean {
   return COMPARISON_OPERATORS.includes(op);
 }
 
+/**
+ * Check if an operator is an arithmetic operator.
+ * @internal
+ */
 function isArithmeticOperator(op: string): boolean {
   return ARITHMETIC_OPERATORS.includes(op);
 }
 
+/**
+ * Check if an operator is a logical operator.
+ * @internal
+ */
 function isLogicalOperator(op: string): boolean {
   return LOGICAL_OPERATORS.includes(op);
 }
 
+/**
+ * Check if an operator is a control flow operator.
+ * @internal
+ */
 function isControlOperator(op: string): boolean {
   return CONTROL_OPERATORS.includes(op);
 }
 
+/**
+ * Check if an operator is an effect operator.
+ * @internal
+ */
 function isEffectOperator(op: string): boolean {
   return EFFECT_OPERATORS.includes(op);
 }
@@ -124,6 +144,14 @@ function isEffectOperator(op: string): boolean {
 // Primitive Formatting
 // ============================================================================
 
+/**
+ * Format a primitive value to domain text.
+ * 
+ * Handles null, strings (with binding detection), numbers, booleans,
+ * arrays, and objects.
+ * 
+ * @internal
+ */
 function formatPrimitive(value: unknown): string {
   if (value === null || value === undefined) {
     return 'nothing';
@@ -217,6 +245,13 @@ const COMPARISON_TEXT: Record<string, string> = {
   'lte': 'is at most',
 };
 
+/**
+ * Format a comparison expression to domain text.
+ * 
+ * Converts comparison operators (=, !=, >, <, etc.) to readable text.
+ * 
+ * @internal
+ */
 function formatComparison(op: string, args: SExpr[], ctx: FormatContext): string {
   const left = formatSExprToDomain(args[0], ctx);
   const right = formatSExprToDomain(args[1], ctx);
@@ -238,6 +273,13 @@ const ARITHMETIC_TEXT: Record<string, string> = {
   'mod': 'mod',
 };
 
+/**
+ * Format an arithmetic expression to domain text.
+ * 
+ * Converts arithmetic operators (+, -, *, /, etc.) to readable text.
+ * 
+ * @internal
+ */
 function formatArithmetic(op: string, args: SExpr[], ctx: FormatContext): string {
   if (args.length === 1 && op === '-') {
     // Unary negation
@@ -255,6 +297,13 @@ function formatArithmetic(op: string, args: SExpr[], ctx: FormatContext): string
 // Logical Formatting
 // ============================================================================
 
+/**
+ * Format a logical expression to domain text.
+ * 
+ * Converts logical operators (and, or, not) to readable text.
+ * 
+ * @internal
+ */
 function formatLogical(op: string, args: SExpr[], ctx: FormatContext): string {
   switch (op) {
     case 'and':
@@ -284,6 +333,14 @@ function formatLogical(op: string, args: SExpr[], ctx: FormatContext): string {
 // Control Flow Formatting
 // ============================================================================
 
+/**
+ * Format a control flow expression to domain text.
+ * 
+ * Converts control operators (if, cond, do, let, when, unless, case)
+ * to readable text.
+ * 
+ * @internal
+ */
 function formatControl(op: string, args: SExpr[], ctx: FormatContext): string {
   switch (op) {
     case 'if': {
@@ -524,6 +581,14 @@ function formatPatternProps(patternObj: Record<string, unknown>): string {
 // Effect Formatting
 // ============================================================================
 
+/**
+ * Format an effect expression to domain text.
+ * 
+ * Converts effect operators (set, emit, navigate, notify, persist,
+ * spawn, despawn, call-service, render-ui) to readable text.
+ * 
+ * @internal
+ */
 function formatEffect(op: string, args: SExpr[], ctx: FormatContext): string {
   switch (op) {
     case 'set': {
@@ -661,6 +726,13 @@ function formatEffect(op: string, args: SExpr[], ctx: FormatContext): string {
 // Std Library Formatting
 // ============================================================================
 
+/**
+ * Format a standard library function call to domain text.
+ * 
+ * Dispatches to module-specific formatters (math, str, array, object, etc.).
+ * 
+ * @internal
+ */
 function formatStdLibrary(op: string, args: SExpr[], ctx: FormatContext): string {
   const [module, fn] = op.split('/');
 
@@ -923,6 +995,13 @@ function formatFormatFunction(fn: string, args: SExpr[], ctx: FormatContext): st
 // Generic Operator Formatting
 // ============================================================================
 
+/**
+ * Format a generic operator call to domain text.
+ * 
+ * Fallback formatter for operators without specific formatting rules.
+ * 
+ * @internal
+ */
 function formatGenericOperator(op: string, args: SExpr[], ctx: FormatContext): string {
   if (args.length === 0) {
     return op;

@@ -227,7 +227,13 @@ export function schemaTraitToDomainBehavior(trait: Record<string, unknown>, enti
 }
 
 /**
- * Format DomainBehavior AST to domain language text
+ * Format DomainBehavior AST to domain language text.
+ * 
+ * Converts a structured DomainBehavior object into human-readable
+ * domain language text with proper formatting for states, transitions,
+ * guards, effects, and ticks.
+ * 
+ * @internal
  */
 function formatBehaviorText(behavior: DomainBehavior): string {
   const lines: string[] = [];
@@ -291,7 +297,11 @@ function formatBehaviorText(behavior: DomainBehavior): string {
 
 /**
  * Convert schema effects to domain effects.
- * Handles both legacy typed effects and S-expression format.
+ * 
+ * Handles both legacy typed effects and S-expression format,
+ * transforming them into standardized DomainEffect objects.
+ * 
+ * @internal
  */
 function convertEffects(effects: Array<Record<string, unknown> | unknown[]> | undefined): DomainEffect[] {
   if (!effects) return [];
@@ -323,7 +333,12 @@ function convertEffects(effects: Array<Record<string, unknown> | unknown[]> | un
 }
 
 /**
- * Generate a human-readable description for an effect
+ * Generate a human-readable description for an effect.
+ * 
+ * Converts effect type and configuration into a readable string
+ * that describes what the effect does.
+ * 
+ * @internal
  */
 function generateEffectDescription(type: EffectType, config: Record<string, unknown>): string {
   switch (type) {
@@ -368,7 +383,12 @@ function generateEffectDescription(type: EffectType, config: Record<string, unkn
 }
 
 /**
- * Format an interval in milliseconds to human readable text
+ * Format an interval in milliseconds to human readable text.
+ * 
+ * Converts millisecond values into readable time units
+ * (seconds, minutes, hours, days) as appropriate.
+ * 
+ * @internal
  */
 function formatIntervalMs(ms: number): string {
   const seconds = ms / 1000;
@@ -389,7 +409,12 @@ function formatIntervalMs(ms: number): string {
 }
 
 /**
- * Format behavior name from PascalCase to readable text
+ * Format behavior name from PascalCase to readable text.
+ * 
+ * Inserts spaces between words in PascalCase names to make
+ * them human-readable (e.g., "OrderLifecycle" -> "Order Lifecycle").
+ * 
+ * @internal
  */
 function formatBehaviorName(name: string): string {
   return name
@@ -398,7 +423,12 @@ function formatBehaviorName(name: string): string {
 }
 
 /**
- * Extract entity name from trait name
+ * Extract entity name from trait name.
+ * 
+ * Attempts to identify the entity by removing common suffixes
+ * like "Lifecycle", "Approval", "Workflow", etc. from trait names.
+ * 
+ * @internal
  */
 function extractEntityFromName(name: string): string {
   // Common patterns: "OrderLifecycle" -> "Order", "TaskApproval" -> "Task"
@@ -412,8 +442,12 @@ function extractEntityFromName(name: string): string {
 }
 
 /**
- * Parse a guard condition string into a simple AST
+ * Parse a guard condition string into a simple AST.
+ * 
  * This is a simplified version that creates a basic guard structure
+ * from a condition string and entity name.
+ * 
+ * @internal
  */
 function parseGuardCondition(condition: string, entityName: string): any {
   // Return a simple comparison condition
@@ -430,7 +464,12 @@ function parseGuardCondition(condition: string, entityName: string): any {
 }
 
 /**
- * Format a guard back to domain language
+ * Format a guard back to domain language.
+ * 
+ * Converts a DomainGuard object into its domain language
+ * representation, preferring the raw format if available.
+ * 
+ * @internal
  */
 function formatGuardForDomain(guard: DomainGuard): string {
   return guard.raw || 'if condition';

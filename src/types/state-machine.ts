@@ -209,8 +209,8 @@ export type StateMachineInput = z.input<typeof StateMachineSchema>;
  * Circuit events are user-defined events that participate in the closed circuit pattern.
  * Internal/system events start with underscore (e.g., _INIT, _TICK, _TIMER).
  *
- * @param event - Event name to check
- * @returns true if event is a circuit event (doesn't start with underscore)
+ * @param {string} event - Event name to check
+ * @returns {boolean} true if event is a circuit event (doesn't start with underscore)
  *
  * @example
  * isCircuitEvent('CREATE') // true

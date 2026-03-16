@@ -111,7 +111,12 @@ export function schemaEntityToDomainEntity(entity: Record<string, unknown>): Dom
 }
 
 /**
- * Format DomainEntity AST to domain language text
+ * Format DomainEntity AST to domain language text.
+ * 
+ * Converts a structured DomainEntity object into human-readable
+ * domain language text with proper article usage and formatting.
+ * 
+ * @internal
  */
 function formatEntityText(entity: DomainEntity): string {
   const lines: string[] = [];
@@ -155,8 +160,12 @@ function formatEntityText(entity: DomainEntity): string {
 }
 
 /**
- * Map KFlow schema field type to domain field type
- * Uses the centralized FIELD_TYPE_MAPPING from types.ts
+ * Map KFlow schema field type to domain field type.
+ * 
+ * Converts internal schema type names (string, number, boolean, etc.)
+ * to user-friendly domain field types (text, yes/no, date, etc.).
+ * 
+ * @internal
  */
 function mapSchemaTypeToDomain(schemaType: string): DomainFieldType {
   const mapping: Record<string, DomainFieldType> = {
@@ -175,7 +184,12 @@ function mapSchemaTypeToDomain(schemaType: string): DomainFieldType {
 }
 
 /**
- * Format a field's type and constraints for display
+ * Format a field's type and constraints for display.
+ * 
+ * Combines field type, enum values, and constraints (required,
+ * unique, auto, default) into a readable string.
+ * 
+ * @internal
  */
 function formatFieldType(field: DomainField): string {
   const parts: string[] = [];
@@ -200,15 +214,23 @@ function formatFieldType(field: DomainField): string {
 }
 
 /**
- * Convert camelCase to space-separated words
+ * Convert camelCase to space-separated words.
+ * 
+ * Inserts spaces before capital letters and lowercases the result.
+ * 
+ * @internal
  */
 function toSpaceSeparated(text: string): string {
   return text.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
 }
 
 /**
- * Check if a word starts with a vowel SOUND (not just vowel letter)
- * Used for determining "A" vs "An" article
+ * Check if a word starts with a vowel SOUND (not just vowel letter).
+ * 
+ * Used for determining "A" vs "An" article. Handles special cases
+ * like "user" (consonant sound) and "hour" (vowel sound).
+ * 
+ * @internal
  */
 function startsWithVowel(text: string): boolean {
   const lower = text.toLowerCase();

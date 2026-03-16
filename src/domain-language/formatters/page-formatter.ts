@@ -106,7 +106,12 @@ export function schemaPageToDomainPage(page: Record<string, unknown>): DomainPag
 }
 
 /**
- * Format trait name to human readable
+ * Format trait name to human readable.
+ * 
+ * Converts PascalCase trait names into space-separated readable text
+ * (e.g., "OrderLifecycle" -> "Order Lifecycle").
+ * 
+ * @internal
  */
 function formatTraitName(name: string): string {
   return name
@@ -115,7 +120,12 @@ function formatTraitName(name: string): string {
 }
 
 /**
- * Format DomainPage AST to domain language text
+ * Format DomainPage AST to domain language text.
+ * 
+ * Converts a structured DomainPage object into human-readable
+ * domain language text with proper formatting.
+ * 
+ * @internal
  */
 function formatPageText(page: DomainPage): string {
   const lines: string[] = [];
@@ -165,7 +175,12 @@ function formatPageText(page: DomainPage): string {
 }
 
 /**
- * Generate a description from a page name
+ * Generate a description from a page name.
+ * 
+ * Analyzes page naming conventions (List, Detail, Create, Edit, etc.)
+ * to generate an appropriate human-readable description.
+ * 
+ * @internal
  */
 function generateDescriptionFromName(name: string): string {
   // Remove "Page" suffix and convert to readable text
@@ -213,7 +228,12 @@ function generateDescriptionFromName(name: string): string {
 }
 
 /**
- * Generate a human-readable description from a section pattern and config
+ * Generate a human-readable description from a section pattern and config.
+ * 
+ * Maps pattern types (page-header, entity-list, form-section, etc.)
+ * to descriptive text based on their configuration.
+ * 
+ * @internal
  */
 function generateSectionDescription(pattern: string, config: Record<string, unknown>): string {
   switch (pattern) {
@@ -272,7 +292,12 @@ function generateSectionDescription(pattern: string, config: Record<string, unkn
 }
 
 /**
- * Convert camelCase/PascalCase to space-separated words
+ * Convert camelCase/PascalCase to space-separated words.
+ * 
+ * Inserts spaces before capital letters to convert camelCase
+ * or PascalCase text into readable words.
+ * 
+ * @internal
  */
 function toSpaceSeparated(text: string): string {
   return text
@@ -281,7 +306,12 @@ function toSpaceSeparated(text: string): string {
 }
 
 /**
- * Simple pluralization
+ * Simple pluralization.
+ * 
+ * Converts English words to their plural form using basic rules
+ * (s, x, ch, sh -> es; y -> ies; default -> s).
+ * 
+ * @internal
  */
 function pluralize(word: string): string {
   if (word.endsWith('s') || word.endsWith('x') || word.endsWith('ch') || word.endsWith('sh')) {

@@ -129,7 +129,18 @@ export const DEFAULT_INTERACTION_MODELS: Record<string, InteractionModel> = {
 };
 
 /**
- * Get the default interaction model for a domain
+ * Gets the interaction model for a domain.
+ * 
+ * Retrieves the appropriate interaction model configuration based on the
+ * specified domain. Falls back to the business model if no specific
+ * domain match is found.
+ * 
+ * @param {string} domain - Domain name (e.g., 'healthcare', 'education')
+ * @returns {InteractionModel} Interaction model configuration
+ * 
+ * @example
+ * getInteractionModelForDomain('healthcare'); // returns healthcare-specific model
+ * getInteractionModelForDomain('unknown'); // returns business fallback model
  */
 export function getInteractionModelForDomain(domain: string): InteractionModel {
     return DEFAULT_INTERACTION_MODELS[domain] ?? DEFAULT_INTERACTION_MODELS.business;
