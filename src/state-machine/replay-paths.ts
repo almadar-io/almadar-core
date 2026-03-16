@@ -31,12 +31,29 @@ export interface ReplayTransition extends GraphTransition {
 }
 
 /**
- * Build the shortest replay path from initialState to every reachable state.
- *
- * @param transitions - Transitions with render/payload info
- * @param initialState - Starting state
- * @param maxDepth - Maximum path length (default: 3, shorter than BFS exploration)
- * @returns Map of state -> replay steps to reach it
+ * Builds the shortest replay paths from initial state to all reachable states.
+ * 
+ * Computes step-by-step navigation paths for state machine testing and verification.
+ * Uses breadth-first search to find shortest paths up to specified depth limit.
+ * Each path contains replay steps with event, state, and payload information
+ * needed to reproduce state transitions in tests.
+ * 
+ * @param {ReplayTransition[]} transitions - Transitions with render/payload information
+ * @param {string} initialState - Starting state name
+ * @param {number} [maxDepth=3] - Maximum path length (default: 3)
+ * @returns {Map<string, ReplayStep[]>} Map of state names to replay step arrays
+ * 
+ * @example
+ * // Build paths from 'initial' state
+ * const paths = buildReplayPaths(transitions, 'initial', 5);
+ * 
+ * // Get steps to reach 'completed' state
+ * const stepsToComplete = paths.get('completed');
+ * 
+ * // Execute replay steps
+ * for (const step of stepsToComplete) {
+ *   await dispatchEvent(step.event, step.payload);
+ * }
  */
 export function buildReplayPaths(
   transitions: ReplayTransition[],

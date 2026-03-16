@@ -42,6 +42,17 @@ export {
 // Export domain language engine (lexer, parsers, formatters, sync)
 export * from './src/domain-language/index';
 
+// Export builders (compose behaviors, event wiring, layout strategy)
+export {
+  type LayoutStrategy,
+  detectLayoutStrategy,
+  type EventWiringEntry,
+  applyEventWiring,
+  type ComposeBehaviorsInput,
+  type ComposeBehaviorsResult,
+  composeBehaviors,
+} from './src/builders/index';
+
 // Export state machine graph algorithms (BFS, guard payloads, replay paths)
 // Note: PayloadFieldSchema is re-exported selectively to avoid collision with
 // the Zod PayloadFieldSchema from types/state-machine.ts

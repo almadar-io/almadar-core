@@ -418,12 +418,37 @@ export const TraitRefSchema = z.union([
 /**
  * Check if a trait ref is an inline Trait definition
  */
+/**
+ * Checks if a trait reference is an inline trait definition.
+ * 
+ * Type guard to determine if a TraitRef is an inline trait object
+ * (with 'name' property) rather than a string reference or object reference.
+ * 
+ * @param {TraitRef} traitRef - Trait reference to check
+ * @returns {boolean} True if traitRef is an inline trait, false otherwise
+ * 
+ * @example
+ * isInlineTrait({ name: 'MyTrait' }); // returns true (inline)
+ * isInlineTrait('MyTrait'); // returns false (string reference)
+ * isInlineTrait({ ref: 'MyTrait' }); // returns false (object reference)
+ */
 export function isInlineTrait(traitRef: TraitRef): traitRef is Trait {
     return typeof traitRef === 'object' && 'name' in traitRef && !('ref' in traitRef);
 }
 
 /**
- * Get trait name from a trait reference
+ * Extracts the trait name from a trait reference.
+ * 
+ * Handles all trait reference formats (string, inline object, object reference)
+ * and returns the canonical trait name.
+ * 
+ * @param {TraitRef} traitRef - Trait reference to extract name from
+ * @returns {string} Trait name
+ * 
+ * @example
+ * getTraitName('MyTrait'); // returns 'MyTrait'
+ * getTraitName({ name: 'MyTrait' }); // returns 'MyTrait'
+ * getTraitName({ ref: 'MyTrait' }); // returns 'MyTrait'
  */
 export function getTraitName(traitRef: TraitRef): string {
     if (typeof traitRef === 'string') {
@@ -436,7 +461,19 @@ export function getTraitName(traitRef: TraitRef): string {
 }
 
 /**
- * Get trait config from a trait reference
+ * Extracts the configuration from a trait reference.
+ * 
+ * Returns the configuration object for trait references that support it
+ * (object references with 'config' property). Returns undefined for
+ * string references and inline traits.
+ * 
+ * @param {TraitRef} traitRef - Trait reference to extract config from
+ * @returns {Record<string, unknown> | undefined} Trait configuration or undefined
+ * 
+ * @example
+ * getTraitConfig('MyTrait'); // returns undefined
+ * getTraitConfig({ name: 'MyTrait' }); // returns undefined
+ * getTraitConfig({ ref: 'MyTrait', config: { option: 'value' } }); // returns config object
  */
 export function getTraitConfig(traitRef: TraitRef): Record<string, unknown> | undefined {
     if (typeof traitRef === 'string') {
@@ -449,7 +486,18 @@ export function getTraitConfig(traitRef: TraitRef): Record<string, unknown> | un
 }
 
 /**
- * Normalize trait reference to object form
+ * Normalizes a trait reference to object form.
+ * 
+ * Converts any trait reference format (string, inline, object) to a
+ * standardized object format with 'ref' and optional 'config' properties.
+ * 
+ * @param {TraitRef} traitRef - Trait reference to normalize
+ * @returns {{ ref: string; config?: Record<string, unknown> }} Normalized trait reference
+ * 
+ * @example
+ * normalizeTraitRef('MyTrait'); // returns { ref: 'MyTrait' }
+ * normalizeTraitRef({ name: 'MyTrait' }); // returns { ref: 'MyTrait' }
+ * normalizeTraitRef({ ref: 'MyTrait', config: {...} }); // returns original
  */
 export function normalizeTraitRef(traitRef: TraitRef): { ref: string; config?: Record<string, unknown> } {
     if (typeof traitRef === 'string') {

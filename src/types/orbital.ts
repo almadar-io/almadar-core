@@ -118,7 +118,20 @@ export const UseDeclarationSchema = z.object({
 export type EntityRef = Entity | string;
 
 /**
- * Check if EntityRef is a reference string.
+ * Checks if an entity reference is a string reference.
+ * 
+ * Type guard to determine if an EntityRef is a string reference
+ * (format: "Alias.entity") rather than an inline entity definition.
+ * 
+ * @param {EntityRef} entity - Entity reference to check
+ * @returns {boolean} True if entity is a string reference, false if inline definition
+ * 
+ * @example
+ * const ref1 = "User.entity"; // string reference
+ * const ref2 = { name: "User", fields: [...] }; // inline definition
+ * 
+ * isEntityReference(ref1); // returns true
+ * isEntityReference(ref2); // returns false
  */
 export function isEntityReference(entity: EntityRef): entity is string {
   return typeof entity === "string";
@@ -178,21 +191,62 @@ export interface PageRefObject {
 export type PageRef = Page | string | PageRefObject;
 
 /**
- * Check if PageRef is a reference string.
+ * Checks if a page reference is a string reference.
+ * 
+ * Type guard to determine if a PageRef is a simple string reference
+ * (format: "Alias.pages.PageName") rather than an inline page definition or object reference.
+ * 
+ * @param {PageRef} page - Page reference to check
+ * @returns {boolean} True if page is a string reference, false otherwise
+ * 
+ * @example
+ * const ref1 = "User.pages.Profile"; // string reference
+ * const ref2 = { name: "Dashboard", path: "/" }; // inline definition
+ * 
+ * isPageReferenceString(ref1); // returns true
+ * isPageReferenceString(ref2); // returns false
  */
 export function isPageReferenceString(page: PageRef): page is string {
   return typeof page === "string";
 }
 
 /**
- * Check if PageRef is a reference object.
+ * Checks if a page reference is a reference object.
+ * 
+ * Type guard to determine if a PageRef is an object reference
+ * with a 'ref' property rather than an inline page definition.
+ * 
+ * @param {PageRef} page - Page reference to check
+ * @returns {boolean} True if page is a reference object, false otherwise
+ * 
+ * @example
+ * const ref1 = { ref: "User.pages.Profile", path: "/custom" }; // reference object
+ * const ref2 = { name: "Dashboard", path: "/" }; // inline definition
+ * 
+ * isPageReferenceObject(ref1); // returns true
+ * isPageReferenceObject(ref2); // returns false
  */
 export function isPageReferenceObject(page: PageRef): page is PageRefObject {
   return typeof page === "object" && "ref" in page && !("name" in page);
 }
 
 /**
- * Check if PageRef is a reference (string or object).
+ * Checks if a page reference is any type of reference.
+ * 
+ * Type guard to determine if a PageRef is a reference (string or object)
+ * rather than an inline page definition.
+ * 
+ * @param {PageRef} page - Page reference to check
+ * @returns {boolean} True if page is a reference, false if inline definition
+ * 
+ * @example
+ * const ref1 = "User.pages.Profile"; // string reference
+ * const ref2 = { ref: "User.pages.Profile", path: "/custom" }; // object reference
+ * const ref3 = { name: "Dashboard", path: "/" }; // inline definition
+ * 
+ * isPageReference(ref1); // returns true
+ * isPageReference(ref2); // returns true
+ * isPageReference(ref3); // returns false
  */
 export function isPageReference(page: PageRef): page is string | PageRefObject {
   return isPageReferenceString(page) || isPageReferenceObject(page);
@@ -244,15 +298,34 @@ export const ImportedTraitRefStringSchema = z
   );
 
 /**
- * Check if a trait reference is an imported reference (has Alias.traits. prefix)
+ * Checks if a trait reference is an imported reference.
+ * 
+ * Determines if a trait reference uses the imported format
+ * "Alias.traits.TraitName" rather than a simple "TraitName".
+ * 
+ * @param {string} ref - Trait reference to check
+ * @returns {boolean} True if reference is imported format, false otherwise
+ * 
+ * @example
+ * isImportedTraitRef("User.traits.Profile"); // returns true
+ * isImportedTraitRef("Profile"); // returns false
  */
 export function isImportedTraitRef(ref: string): boolean {
   return /^[A-Z][a-zA-Z0-9]*\.traits\.[A-Z][a-zA-Z0-9]*$/.test(ref);
 }
 
 /**
- * Parse an imported trait reference.
- * @returns { alias, traitName } or null if not an imported ref
+ * Parses an imported trait reference.
+ * 
+ * Extracts the alias and trait name from an imported trait reference
+ * in format "Alias.traits.TraitName". Returns null if not a valid imported reference.
+ * 
+ * @param {string} ref - Trait reference to parse
+ * @returns {{ alias: string; traitName: string } | null} Parsed reference or null
+ * 
+ * @example
+ * parseImportedTraitRef("User.traits.Profile"); // returns { alias: "User", traitName: "Profile" }
+ * parseImportedTraitRef("Profile"); // returns null
  */
 export function parseImportedTraitRef(
   ref: string,
@@ -263,8 +336,17 @@ export function parseImportedTraitRef(
 }
 
 /**
- * Parse an entity reference.
- * @returns { alias } or null if not a valid reference
+ * Parses an entity reference.
+ * 
+ * Extracts the alias from an entity reference in format "Alias.entity".
+ * Returns null if not a valid entity reference.
+ * 
+ * @param {string} ref - Entity reference to parse
+ * @returns {{ alias: string } | null} Parsed reference or null
+ * 
+ * @example
+ * parseEntityRef("User.entity"); // returns { alias: "User" }
+ * parseEntityRef("User"); // returns null
  */
 export function parseEntityRef(ref: string): { alias: string } | null {
   const match = ref.match(/^([A-Z][a-zA-Z0-9]*)\.entity$/);
@@ -273,8 +355,17 @@ export function parseEntityRef(ref: string): { alias: string } | null {
 }
 
 /**
- * Parse a page reference.
- * @returns { alias, pageName } or null if not a valid reference
+ * Parses a page reference.
+ * 
+ * Extracts the alias and page name from a page reference
+ * in format "Alias.pages.PageName". Returns null if not a valid page reference.
+ * 
+ * @param {string} ref - Page reference to parse
+ * @returns {{ alias: string; pageName: string } | null} Parsed reference or null
+ * 
+ * @example
+ * parsePageRef("User.pages.Profile"); // returns { alias: "User", pageName: "Profile" }
+ * parsePageRef("Profile"); // returns null
  */
 export function parsePageRef(
   ref: string,

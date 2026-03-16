@@ -190,7 +190,18 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
 // ============================================================================
 
 /**
- * Infer TypeScript type from schema type
+ * Infers TypeScript type from schema type string
+ * 
+ * Converts schema type strings to their TypeScript equivalents.
+ * Handles primitive types, arrays, and custom types.
+ * 
+ * @param {string} schemaType - Schema type string (e.g., 'string', 'number[]')
+ * @returns {string} TypeScript type string
+ * 
+ * @example
+ * inferTsType('string') // returns 'string'
+ * inferTsType('number[]') // returns 'number[]'
+ * inferTsType('custom') // returns 'custom'
  */
 function inferTsType(schemaType: string): string {
   const typeMap: Record<string, string> = {
@@ -215,7 +226,19 @@ function inferTsType(schemaType: string): string {
 }
 
 /**
- * Resolve a trait reference to a full trait
+ * Resolves a trait reference to a full trait definition
+ * 
+ * Looks up trait references in the resolved traits map or schema traits array.
+ * Creates appropriate trait structures for different reference types.
+ * 
+ * @param {PageTraitRef} traitRef - Trait reference (string or object)
+ * @param {Map<string, ResolvedTrait>} traitsMap - Map of resolved traits
+ * @param {Trait[]} schemaTraits - Array of schema traits
+ * @returns {ResolvedTrait} Resolved trait definition
+ * 
+ * @example
+ * const trait = resolveTraitRef('MyTrait', traitsMap, schemaTraits);
+ * const trait = resolveTraitRef({ ref: 'MyTrait' }, traitsMap, schemaTraits);
  */
 function resolveTraitRef(
   traitRef: PageTraitRef,

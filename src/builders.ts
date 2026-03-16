@@ -20,6 +20,15 @@ import type { OrbitalDefinition } from './types/orbital.js';
 import type { OrbitalSchema } from './types/schema.js';
 import type { TraitEventContract, TraitEventListener, Trait } from './types/trait.js';
 
+// Re-export compose-behaviors module
+export { type LayoutStrategy, detectLayoutStrategy } from './builders/layout-strategy.js';
+export { type EventWiringEntry, applyEventWiring } from './builders/event-wiring.js';
+export {
+  type ComposeBehaviorsInput,
+  type ComposeBehaviorsResult,
+  composeBehaviors,
+} from './builders/compose-behaviors.js';
+
 // ============================================================================
 // Utilities
 // ============================================================================

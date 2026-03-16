@@ -103,8 +103,18 @@ export const EntitySchema = OrbitalEntitySchema;
 // ============================================================================
 
 /**
- * Derive collection name from entity.
- * Only persistent entities have collections.
+ * Derives the collection name for a persistent entity.
+ * 
+ * Generates the database collection name by converting the entity name
+ * to lowercase and adding an 's' suffix (simple pluralization).
+ * Returns undefined for non-persistent entities (runtime/singleton).
+ * 
+ * @param {OrbitalEntity} entity - Entity to derive collection name for
+ * @returns {string | undefined} Collection name or undefined for non-persistent entities
+ * 
+ * @example
+ * deriveCollection({ name: 'User', persistence: 'persistent' }); // returns 'users'
+ * deriveCollection({ name: 'Task', persistence: 'runtime' }); // returns undefined
  */
 export function deriveCollection(entity: OrbitalEntity): string | undefined {
     if (entity.persistence !== 'persistent') {
@@ -115,14 +125,34 @@ export function deriveCollection(entity: OrbitalEntity): string | undefined {
 }
 
 /**
- * Check if entity is runtime-only (not persisted).
+ * Checks if an entity is runtime-only (not persisted).
+ * 
+ * Type guard to determine if an entity exists only at runtime
+ * and is not stored in the database.
+ * 
+ * @param {OrbitalEntity} entity - Entity to check
+ * @returns {boolean} True if entity is runtime-only, false otherwise
+ * 
+ * @example
+ * isRuntimeEntity({ persistence: 'runtime' }); // returns true
+ * isRuntimeEntity({ persistence: 'persistent' }); // returns false
  */
 export function isRuntimeEntity(entity: OrbitalEntity): boolean {
     return entity.persistence === 'runtime';
 }
 
 /**
- * Check if entity is a singleton.
+ * Checks if an entity is a singleton.
+ * 
+ * Type guard to determine if an entity has a single global instance
+ * rather than multiple records in a collection.
+ * 
+ * @param {OrbitalEntity} entity - Entity to check
+ * @returns {boolean} True if entity is a singleton, false otherwise
+ * 
+ * @example
+ * isSingletonEntity({ persistence: 'singleton' }); // returns true
+ * isSingletonEntity({ persistence: 'persistent' }); // returns false
  */
 export function isSingletonEntity(entity: OrbitalEntity): boolean {
     return entity.persistence === 'singleton';

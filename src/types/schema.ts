@@ -137,14 +137,53 @@ export const OrbitalSchemaSchema = z.object({
 // ============================================================================
 
 /**
- * Parse an OrbitalSchema with Zod validation
+ * Parses raw data into a validated OrbitalSchema.
+ * 
+ * Uses Zod validation to ensure the data conforms to the OrbitalSchema structure.
+ * Throws a ZodError if validation fails. For safe parsing that doesn't throw,
+ * use `safeParseOrbitalSchema()` instead.
+ * 
+ * @param {unknown} data - Raw data to parse (typically JSON)
+ * @returns {OrbitalSchema} Validated orbital schema
+ * @throws {z.ZodError} If data doesn't match OrbitalSchema structure
+ * 
+ * @example
+ * ```typescript
+ * try {
+ *   const schema = parseOrbitalSchema(jsonData);
+ *   console.log('Valid schema:', schema.name);
+ * } catch (error) {
+ *   console.error('Invalid schema:', error);
+ * }
+ * ```
+ * 
+ * @see safeParseOrbitalSchema
  */
 export function parseOrbitalSchema(data: unknown): OrbitalSchema {
   return OrbitalSchemaSchema.parse(data) as OrbitalSchema;
 }
 
 /**
- * Safe parse an OrbitalSchema
+ * Safely parses raw data into a validated OrbitalSchema without throwing.
+ * 
+ * Uses Zod's safeParse method to validate data and return a result object
+ * instead of throwing errors. This is useful for form validation and
+ * user input handling where you want to gracefully handle invalid data.
+ * 
+ * @param {unknown} data - Raw data to parse (typically JSON)
+ * @returns {z.SafeParseReturnType<OrbitalSchema, OrbitalSchema>} Parse result with success/status
+ * 
+ * @example
+ * ```typescript
+ * const result = safeParseOrbitalSchema(jsonData);
+ * if (result.success) {
+ *   console.log('Valid schema:', result.data.name);
+ * } else {
+ *   console.error('Validation errors:', result.error);
+ * }
+ * ```
+ * 
+ * @see parseOrbitalSchema
  */
 export function safeParseOrbitalSchema(data: unknown) {
   return OrbitalSchemaSchema.safeParse(data);

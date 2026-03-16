@@ -10,9 +10,20 @@
 import type { GuardPayload } from './types.js';
 
 /**
- * Extract the first @payload path segment from a binding reference.
- * "@payload.item" -> "item", "@payload.data.weight" -> "data".
- * Returns null for non-payload refs (@entity, @state, @user, etc.).
+ * Extracts the first segment of a payload field reference.
+ * 
+ * Parses binding references in the format "@payload.field" and extracts
+ * the first field name segment. Used for identifying payload fields in
+ * guard conditions for test data generation.
+ * 
+ * @param {unknown} ref - Binding reference to extract from
+ * @returns {string | null} First field segment or null for non-payload references
+ * 
+ * @example
+ * extractPayloadFieldRef('@payload.item'); // returns 'item'
+ * extractPayloadFieldRef('@payload.data.weight'); // returns 'data'
+ * extractPayloadFieldRef('@entity.id'); // returns null
+ * extractPayloadFieldRef('@user.name'); // returns null
  */
 export function extractPayloadFieldRef(ref: unknown): string | null {
   if (typeof ref !== 'string') return null;
@@ -21,15 +32,32 @@ export function extractPayloadFieldRef(ref: unknown): string | null {
 }
 
 /**
- * Derive pass and fail payloads from a guard s-expression.
- *
- * Pass payload: satisfies the guard condition (transition fires).
- * Fail payload: violates the guard condition (transition is blocked).
- *
- * For @entity.* and @user.* guards: returns { pass: {}, fail: {} } because
- * these reference runtime state that cannot be directly faked in tests.
- *
- * Handles operators: not-nil, nil, eq, not-eq, gt, gte, lt, lte, and, or, not
+ * Builds test payloads that satisfy or violate guard conditions.
+ * 
+ * Generates pass/fail test data for guard s-expressions used in state machine
+ * transitions. Pass payloads satisfy the guard condition (allowing transition),
+ * fail payloads violate it (blocking transition). Used for automated testing
+ * and validation of state machine behavior.
+ * 
+ * Supports operators: not-nil, nil, eq, not-eq, gt, gte, lt, lte, and, or, not
+ * 
+ * @param {unknown} guard - Guard s-expression to analyze
+ * @returns {GuardPayload} Object with pass and fail payloads
+ * 
+ * @example
+ * // Guard: ['not-nil', '@payload.completed']
+ * buildGuardPayloads(['not-nil', '@payload.completed']);
+ * // Returns: { pass: { completed: 'mock-test-value' }, fail: { completed: null } }
+ * 
+ * @example
+ * // Guard: ['eq', '@payload.status', 'active']
+ * buildGuardPayloads(['eq', '@payload.status', 'active']);
+ * // Returns: { pass: { status: 'active' }, fail: { status: 'not-active' } }
+ * 
+ * @example
+ * // Guard: ['and', ['not-nil', '@payload.id'], ['eq', '@payload.status', 'ready']]
+ * buildGuardPayloads(['and', ['not-nil', '@payload.id'], ['eq', '@payload.status', 'ready']]);
+ * // Returns: { pass: { id: 'mock-test-value', status: 'ready' }, fail: { id: null } }
  */
 export function buildGuardPayloads(guard: unknown): GuardPayload {
   if (!Array.isArray(guard) || guard.length === 0) {
