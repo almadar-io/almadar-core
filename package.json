@@ -67,7 +67,7 @@
     "url": "https://github.com/almadar-io/almadar-core.git",
     "directory": "docs/packages/core"
   },
-  "license": "MIT",
+  "license": "BSL-1.1",
   "keywords": [
     "almadar",
     "orbital",
