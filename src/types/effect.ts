@@ -242,6 +242,40 @@ export type LogEffect = ['log', ...unknown[]];
 export type WaitEffect = ['wait', number];
 
 // ============================================================================
+// ML Effects (from almadar-std/modules/nn, tensor, train)
+// ============================================================================
+
+/**
+ * Forward effect - runs a neural network forward pass (Python backend).
+ * @example ['forward', 'primary', { architecture: [...], input: '@payload.input', 'on-complete': 'PREDICTION_READY' }]
+ */
+export type ForwardEffect = ['forward', string, Record<string, unknown>];
+
+/**
+ * Train effect - runs a training loop (Python backend).
+ * @example ['train', { architecture: [...], dataset: '@entity.data', config: { epochs: 10 }, 'on-complete': 'TRAINING_DONE' }]
+ */
+export type TrainEffect = ['train', Record<string, unknown>];
+
+/**
+ * Evaluate effect - runs model evaluation (Python backend).
+ * @example ['evaluate', { architecture: [...], dataset: '@entity.testData', metrics: ['accuracy'], 'on-complete': 'EVAL_DONE' }]
+ */
+export type EvaluateEffect = ['evaluate', Record<string, unknown>];
+
+/**
+ * Checkpoint save effect - saves model weights.
+ * @example ['checkpoint/save', '/path/to/model.pt', '@entity.weights']
+ */
+export type CheckpointSaveEffect = ['checkpoint/save', string, unknown];
+
+/**
+ * Checkpoint load effect - loads model weights.
+ * @example ['checkpoint/load', '/path/to/model.pt']
+ */
+export type CheckpointLoadEffect = ['checkpoint/load', string];
+
+// ============================================================================
 // Async Effects (from almadar-std/modules/async)
 // ============================================================================
 
@@ -317,7 +351,12 @@ export type TypedEffect =
     | AsyncIntervalEffect
     | AsyncRaceEffect
     | AsyncAllEffect
-    | AsyncSequenceEffect;
+    | AsyncSequenceEffect
+    | ForwardEffect
+    | TrainEffect
+    | EvaluateEffect
+    | CheckpointSaveEffect
+    | CheckpointLoadEffect;
 
 // ============================================================================
 // Effect Type (Strictly Typed)
