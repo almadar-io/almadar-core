@@ -242,6 +242,56 @@ export type LogEffect = ['log', ...unknown[]];
 export type WaitEffect = ['wait', number];
 
 // ============================================================================
+// Resource Effects (reactive entity subscriptions and atomic operations)
+// ============================================================================
+
+/**
+ * Ref effect - creates a reactive entity subscription.
+ * Returns a reactive reference that auto-updates when the entity changes.
+ * @example ['ref', '@entity.health'] - reactive subscription to health
+ * @example ['ref', 'User', { id: '@payload.userId' }] - reactive ref to specific user
+ */
+export type RefEffect =
+    | ['ref', string]
+    | ['ref', string, Record<string, unknown>];
+
+/**
+ * Deref effect - snapshot read of an entity value.
+ * Returns the current value without subscribing to changes.
+ * @example ['deref', '@entity.health'] - read current health value
+ * @example ['deref', 'User', { id: '@payload.userId' }] - read specific user snapshot
+ */
+export type DerefEffect =
+    | ['deref', string]
+    | ['deref', string, Record<string, unknown>];
+
+/**
+ * Swap! effect - atomic compare-and-swap on an entity field.
+ * Only updates if the current value matches the expected value.
+ * @example ['swap!', '@entity.health', ['fn', ['old'], ['-', 'old', '@payload.damage']]]
+ * @example ['swap!', '@entity.counter', ['+', '@entity.counter', 1]]
+ */
+export type SwapEffect = ['swap!', string, SExpr];
+
+/**
+ * Watch effect - registers a callback for entity changes.
+ * Emits an event whenever the watched binding changes.
+ * @example ['watch', '@entity.health', 'HEALTH_CHANGED']
+ * @example ['watch', '@entity.status', 'STATUS_UPDATED', { debounce: 100 }]
+ */
+export type WatchEffect =
+    | ['watch', string, string]
+    | ['watch', string, string, Record<string, unknown>];
+
+/**
+ * Atomic effect - groups multiple effects into an atomic transaction.
+ * All effects either succeed together or are rolled back.
+ * @example ['atomic', ['set', '@entity.x', 10], ['set', '@entity.y', 20]]
+ * @example ['atomic', ['persist', 'update', 'User', { balance: 100 }], ['emit', 'BALANCE_UPDATED']]
+ */
+export type AtomicEffect = ['atomic', ...SExpr[]];
+
+// ============================================================================
 // ML Effects (from almadar-std/modules/nn, tensor, train)
 // ============================================================================
 
@@ -345,6 +395,11 @@ export type TypedEffect =
     | LetEffect
     | LogEffect
     | WaitEffect
+    | RefEffect
+    | DerefEffect
+    | SwapEffect
+    | WatchEffect
+    | AtomicEffect
     | AsyncDelayEffect
     | AsyncDebounceEffect
     | AsyncThrottleEffect
@@ -623,5 +678,105 @@ export function fetch(entity: string): FetchEffect;
 export function fetch(entity: string, options: FetchOptions): FetchEffect;
 export function fetch(entity: string, options?: FetchOptions): FetchEffect {
     return options ? ['fetch', entity, options as Record<string, unknown>] : ['fetch', entity];
+}
+
+// ============================================================================
+// Resource Effect Builder Helpers
+// ============================================================================
+
+/**
+ * Create a ref effect (reactive entity subscription).
+ *
+ * @param {string} binding - Binding or entity name to subscribe to
+ * @param {Record<string, unknown>} [selector] - Optional selector for specific entity
+ * @returns {RefEffect} Ref effect array
+ *
+ * @example
+ * ref('@entity.health'); // returns ["ref", "@entity.health"]
+ * ref('User', { id: '@payload.userId' }); // returns ["ref", "User", { id: "@payload.userId" }]
+ */
+export function ref(binding: string): RefEffect;
+export function ref(binding: string, selector: Record<string, unknown>): RefEffect;
+export function ref(binding: string, selector?: Record<string, unknown>): RefEffect {
+    return selector ? ['ref', binding, selector] : ['ref', binding];
+}
+
+/**
+ * Create a deref effect (snapshot read).
+ *
+ * @param {string} binding - Binding or entity name to read
+ * @param {Record<string, unknown>} [selector] - Optional selector for specific entity
+ * @returns {DerefEffect} Deref effect array
+ *
+ * @example
+ * deref('@entity.health'); // returns ["deref", "@entity.health"]
+ * deref('User', { id: '@payload.userId' }); // returns ["deref", "User", { id: "@payload.userId" }]
+ */
+export function deref(binding: string): DerefEffect;
+export function deref(binding: string, selector: Record<string, unknown>): DerefEffect;
+export function deref(binding: string, selector?: Record<string, unknown>): DerefEffect {
+    return selector ? ['deref', binding, selector] : ['deref', binding];
+}
+
+/**
+ * Create a swap! effect (atomic compare-and-swap).
+ *
+ * @param {string} binding - Binding to atomically update
+ * @param {SExpr} transform - Transformation expression applied to the current value
+ * @returns {SwapEffect} Swap effect array
+ *
+ * @example
+ * swap('@entity.counter', ['+', '@entity.counter', 1]);
+ * // returns ["swap!", "@entity.counter", ["+", "@entity.counter", 1]]
+ */
+export function swap(binding: string, transform: SExpr): SwapEffect {
+    return ['swap!', binding, transform];
+}
+
+/**
+ * Options for watch effect
+ */
+export interface WatchOptions {
+    /** Debounce duration in milliseconds */
+    debounce?: number;
+    /** Allow additional properties */
+    [key: string]: unknown;
+}
+
+/**
+ * Create a watch effect (entity change callback).
+ *
+ * @param {string} binding - Binding to watch for changes
+ * @param {string} event - Event name to emit on change
+ * @param {WatchOptions} [options] - Optional watch configuration
+ * @returns {WatchEffect} Watch effect array
+ *
+ * @example
+ * watch('@entity.health', 'HEALTH_CHANGED');
+ * // returns ["watch", "@entity.health", "HEALTH_CHANGED"]
+ *
+ * watch('@entity.status', 'STATUS_UPDATED', { debounce: 100 });
+ * // returns ["watch", "@entity.status", "STATUS_UPDATED", { debounce: 100 }]
+ */
+export function watch(binding: string, event: string): WatchEffect;
+export function watch(binding: string, event: string, options: WatchOptions): WatchEffect;
+export function watch(binding: string, event: string, options?: WatchOptions): WatchEffect {
+    return options
+        ? ['watch', binding, event, options as Record<string, unknown>]
+        : ['watch', binding, event];
+}
+
+/**
+ * Create an atomic effect (transaction group).
+ *
+ * @param {...SExpr[]} effects - Effects to execute atomically
+ * @returns {AtomicEffect} Atomic effect array
+ *
+ * @example
+ * atomic(['set', '@entity.x', 10], ['set', '@entity.y', 20]);
+ * // returns ["atomic", ["set", "@entity.x", 10], ["set", "@entity.y", 20]]
+ */
+export function atomic(...effects: SExpr[]): AtomicEffect {
+    return ['atomic', ...effects];
 }
 

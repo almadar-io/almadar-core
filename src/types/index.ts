@@ -237,6 +237,13 @@ export {
   type PatternConfig,
   type RenderUIConfig,
   type CallServiceConfig,
+  // Resource effect types
+  type RefEffect,
+  type DerefEffect,
+  type SwapEffect,
+  type WatchEffect,
+  type AtomicEffect,
+  type WatchOptions,
   // Schemas
   UI_SLOTS,
   EffectSchema,
@@ -255,6 +262,12 @@ export {
   despawn,
   doEffects,
   notify,
+  // Resource effect builders
+  ref,
+  deref,
+  swap,
+  watch,
+  atomic,
 } from "./effect.js";
 
 // ============================================================================

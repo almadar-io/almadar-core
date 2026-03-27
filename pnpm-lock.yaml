@@ -13,7 +13,7 @@ importers:
         version: 2.1.3
       '@almadar/patterns':
         specifier: '>=2.8.7'
-        version: 2.8.7
+        version: 2.8.11
       zod:
         specifier: ^3.22.0
         version: 3.25.76
@@ -50,8 +50,8 @@ packages:
   '@almadar/operators@2.1.3':
     resolution: {integrity: sha512-0wjRClcWT/DcYtmnTku/IIXWGCLzMzai/a/KwP4NorkqjDIEY9+vmAui4qB6rePhkT2aOfLb4sP8uX7vvyG7nw==}
 
-  '@almadar/patterns@2.8.7':
-    resolution: {integrity: sha512-5SCS3eQUTithpzpdmQd880MhpkhR4XqP0TZ+uluN0JOvbZLZQN6qospC1r9PvViIMV26FzqzuhFvpQFVtu0Uiw==}
+  '@almadar/patterns@2.8.11':
+    resolution: {integrity: sha512-QSRezI/VtwjWc3LgHCENL+U/2kvdIbF5dLKyDAqkAmOfQpEs9sZg8kwlzSGzTs22e19hf5PrEyVG2zquF4/YVA==}
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -649,11 +649,11 @@ packages:
     resolution: {integrity: sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==}
     engines: {node: 18 || 20 || >=22}
 
-  brace-expansion@2.0.2:
-    resolution: {integrity: sha512-Jt0vHyM+jmUBqojB7E1NIYadt0vI0Qxjxd2TErW94wDz+E2LAm5vKMXXwg6ZZBTHPuUlDgQHKXvjGBdfcF1ZDQ==}
+  brace-expansion@2.0.3:
+    resolution: {integrity: sha512-MCV/fYJEbqx68aE58kv2cA/kiky1G8vux3OR6/jbS+jIMe/6fJWa0DTzJU7dqijOWYwHi1t29FlfYI9uytqlpA==}
 
-  brace-expansion@5.0.4:
-    resolution: {integrity: sha512-h+DEnpVvxmfVefa4jFbCf5HdH5YMDXRsmKflpf1pILZWRFlTbJpxeU55nJl4Smt5HQaGzg1o6RHFPJaOqnmBDg==}
+  brace-expansion@5.0.5:
+    resolution: {integrity: sha512-VZznLgtwhn+Mact9tfiwx64fA9erHH/MCXEUfB/0bX/6Fz6ny5EGTXYltMocqg4xFAQZtnO3DHWWXi8RiuN7cQ==}
     engines: {node: 18 || 20 || >=22}
 
   bundle-require@5.1.0:
@@ -1271,7 +1271,7 @@ snapshots:
 
   '@almadar/operators@2.1.3': {}
 
-  '@almadar/patterns@2.8.7': {}
+  '@almadar/patterns@2.8.11': {}
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
@@ -1674,11 +1674,11 @@ snapshots:
 
   balanced-match@4.0.4: {}
 
-  brace-expansion@2.0.2:
+  brace-expansion@2.0.3:
     dependencies:
       balanced-match: 1.0.2
 
-  brace-expansion@5.0.4:
+  brace-expansion@5.0.5:
     dependencies:
       balanced-match: 4.0.4
 
@@ -1981,11 +1981,11 @@ snapshots:
 
   minimatch@10.2.4:
     dependencies:
-      brace-expansion: 5.0.4
+      brace-expansion: 5.0.5
 
   minimatch@9.0.9:
     dependencies:
-      brace-expansion: 2.0.2
+      brace-expansion: 2.0.3
 
   mlly@1.8.2:
     dependencies:
