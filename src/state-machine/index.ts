@@ -22,6 +22,8 @@ export type {
   PayloadFieldSchema,
   GuardPayload,
   GraphTransition,
+  EdgeWalkTransition,
+  WalkStep,
 } from './types.js';
 
 // Graph construction
@@ -35,3 +37,6 @@ export { buildGuardPayloads, extractPayloadFieldRef } from './guard-payloads.js'
 
 // Replay path building
 export { buildReplayPaths, type ReplayTransition } from './replay-paths.js';
+
+// Edge-covering walk
+export { buildEdgeCoveringWalk } from './edge-walk.js';

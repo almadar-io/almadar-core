@@ -67,3 +67,31 @@ export interface GraphTransition {
   event: string;
   to: string;
 }
+
+/**
+ * Transition input for the edge-covering walk algorithm.
+ * Extends GraphTransition with guard metadata for generating pass/fail walk steps.
+ */
+export interface EdgeWalkTransition extends GraphTransition {
+  hasGuard: boolean;
+  guard?: unknown[];
+}
+
+/**
+ * A single step in an edge-covering walk.
+ * The walk visits every transition (edge) in the state graph at least once.
+ */
+export interface WalkStep {
+  /** Source state */
+  from: string;
+  /** Event to fire */
+  event: string;
+  /** Target state */
+  to: string;
+  /** Guard branch: null for unguarded, 'pass' or 'fail' for guarded */
+  guardCase: 'pass' | 'fail' | null;
+  /** Payload to send with the event */
+  payload: Record<string, unknown>;
+  /** True if this step is a repositioning step (navigating to reach a source state with uncovered edges) */
+  isRepositioning: boolean;
+}

@@ -70,4 +70,7 @@ export {
   extractPayloadFieldRef,
   buildReplayPaths,
   type ReplayTransition,
+  buildEdgeCoveringWalk,
+  type EdgeWalkTransition,
+  type WalkStep,
 } from './src/state-machine/index';
