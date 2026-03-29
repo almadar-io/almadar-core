@@ -75,6 +75,10 @@ export interface GraphTransition {
 export interface EdgeWalkTransition extends GraphTransition {
   hasGuard: boolean;
   guard?: unknown[];
+  /** Event payload field declarations (e.g., [{ name: "id", type: "string", mockValue: "mock-products-1" }]).
+   *  Used to generate mock payloads for events that require data (VIEW, EDIT).
+   *  Callers should set mockValue for id fields using their entity context. */
+  payloadSchema?: Array<{ name: string; type: string; required?: boolean; mockValue?: unknown }>;
 }
 
 /**

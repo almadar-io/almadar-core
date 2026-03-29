@@ -245,16 +245,41 @@ function findNearestUncoveredState(
 }
 
 /**
- * Build a payload for a given edge based on its guard case.
+ * Build a payload for a given edge based on its guard case and payload schema.
+ * For guarded transitions, uses guard expressions to generate pass/fail payloads.
+ * For unguarded transitions with payload schemas (e.g., EDIT/VIEW with { id }),
+ * generates mock values so fetch-by-ID effects can resolve entity data.
  */
 function buildPayloadForEdge(
   transition: EdgeWalkTransition,
   guardCase: 'pass' | 'fail' | null,
 ): Record<string, unknown> {
-  if (!transition.hasGuard || !transition.guard || !guardCase) {
-    return {};
+  // Guard-based payload generation (existing behavior)
+  if (transition.hasGuard && transition.guard && guardCase) {
+    const payloads = buildGuardPayloads(transition.guard);
+    return guardCase === 'pass' ? payloads.pass : payloads.fail;
   }
 
-  const payloads = buildGuardPayloads(transition.guard);
-  return guardCase === 'pass' ? payloads.pass : payloads.fail;
+  // Schema-based payload generation for events that declare required fields
+  // (e.g., EDIT/VIEW declare { name: "id", type: "string", required: true })
+  if (transition.payloadSchema && transition.payloadSchema.length > 0) {
+    const payload: Record<string, unknown> = {};
+    for (const field of transition.payloadSchema) {
+      // Use caller-provided mockValue if available (set from entity context)
+      if (field.mockValue !== undefined) {
+        payload[field.name] = field.mockValue;
+      } else if (field.type === 'string') {
+        payload[field.name] = `mock-${field.name}`;
+      } else if (field.type === 'number') {
+        payload[field.name] = 1;
+      } else if (field.type === 'boolean') {
+        payload[field.name] = true;
+      } else {
+        payload[field.name] = `mock-${field.name}`;
+      }
+    }
+    return payload;
+  }
+
+  return {};
 }
