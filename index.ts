@@ -51,9 +51,6 @@ export {
   type ComposeBehaviorsInput,
   type ComposeBehaviorsResult,
   composeBehaviors,
-  type AdaptBehaviorInput,
-  type AdaptBehaviorResult,
-  adaptBehavior,
 } from './src/builders/index';
 
 // Export state machine graph algorithms (BFS, guard payloads, replay paths)
