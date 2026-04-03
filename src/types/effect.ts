@@ -137,6 +137,15 @@ export type RenderUIEffect =
     | ['render-ui', UISlot, null];
 
 /**
+ * Lambda expression for per-item rendering in data-grid/data-list.
+ * The compiler generates: {(paramName: Record<string, unknown>) => (<>JSX</>)}
+ * where @{paramName}.field bindings reference the current iteration item.
+ *
+ * @example ["fn", "item", { "type": "stack", "children": [{ "type": "typography", "content": "@item.title" }] }]
+ */
+export type RenderItemLambda = ['fn', string, AnyPatternConfig];
+
+/**
  * Navigate effect - navigates to a path.
  * @example ['navigate', '/tasks'] or ['navigate', '/tasks/:id', { id: '123' }]
  */

@@ -18,3 +18,10 @@ export {
   type ComposeBehaviorsResult,
   composeBehaviors,
 } from './compose-behaviors.js';
+
+// Adapt behavior (rebind entity/fields on a golden behavior)
+export {
+  type AdaptBehaviorInput,
+  type AdaptBehaviorResult,
+  adaptBehavior,
+} from './adapt-behavior.js';

@@ -28,6 +28,11 @@ export {
   type ComposeBehaviorsResult,
   composeBehaviors,
 } from './builders/compose-behaviors.js';
+export {
+  type AdaptBehaviorInput,
+  type AdaptBehaviorResult,
+  adaptBehavior,
+} from './builders/adapt-behavior.js';
 
 // ============================================================================
 // Utilities
