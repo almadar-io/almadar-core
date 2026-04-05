@@ -167,7 +167,7 @@ export function isSingletonEntity(entity: OrbitalEntity): boolean {
  * A single field value at runtime.
  * Union of all possible types from FieldType: string, number, boolean, date, array, nested.
  */
-export type FieldValue = string | number | boolean | Date | null | string[] | FieldValue[];
+export type FieldValue = string | number | boolean | Date | null | string[] | FieldValue[] | { [key: string]: FieldValue };
 
 /**
  * One instance of an entity with actual field values.
