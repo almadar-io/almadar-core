@@ -29,6 +29,7 @@ export type TraitCategory =
     | 'notification'
     | 'integration'
     | 'interaction'
+    | 'agent'
     | 'game-core'
     | 'game-character'
     | 'game-ai'
@@ -45,6 +46,7 @@ export const TraitCategorySchema = z.enum([
     'notification',
     'integration',
     'interaction',
+    'agent',
     'game-core',
     'game-character',
     'game-ai',

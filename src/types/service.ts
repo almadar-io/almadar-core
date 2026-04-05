@@ -400,3 +400,8 @@ export function hasService(
 ): boolean {
   return services.some((s) => s.name.toLowerCase() === name.toLowerCase());
 }
+
+/** Parameters passed to call-service effects. Recursive for nested request shapes. */
+export interface ServiceParams {
+  [key: string]: string | number | boolean | Date | null | string[] | ServiceParams | undefined;
+}

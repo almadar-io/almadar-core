@@ -335,6 +335,19 @@ export type CheckpointSaveEffect = ['checkpoint/save', string, unknown];
 export type CheckpointLoadEffect = ['checkpoint/load', string];
 
 // ============================================================================
+// Agent Effects (from agent/* operator namespace)
+// ============================================================================
+
+/**
+ * Agent effect - invokes an agent/* operator.
+ * Covers all 22 operators in the std-agent category.
+ * @example ['agent/memorize', 'use data-grid for tables', 'preference']
+ * @example ['agent/recall', 'user preferences']
+ * @example ['agent/generate', 'Summarize this schema']
+ */
+export type AgentEffect = [`agent/${string}`, ...SExpr[]];
+
+// ============================================================================
 // Async Effects (from almadar-std/modules/async)
 // ============================================================================
 
@@ -420,7 +433,8 @@ export type TypedEffect =
     | TrainEffect
     | EvaluateEffect
     | CheckpointSaveEffect
-    | CheckpointLoadEffect;
+    | CheckpointLoadEffect
+    | AgentEffect;
 
 // ============================================================================
 // Effect Type (Strictly Typed)
@@ -787,5 +801,19 @@ export function watch(binding: string, event: string, options?: WatchOptions): W
  */
 export function atomic(...effects: SExpr[]): AtomicEffect {
     return ['atomic', ...effects];
+}
+
+// ============================================================================
+// Runtime Pattern Types
+// ============================================================================
+
+/** A node in a render-ui effect tree. */
+export interface RenderUINode {
+  type: string;
+  props?: Record<string, import('./entity.js').FieldValue | string | undefined>;
+  children?: RenderUINode[];
+  content?: string;
+  entity?: string;
+  renderItem?: RenderUINode;
 }
 

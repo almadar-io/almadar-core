@@ -22,13 +22,14 @@ import { SemanticAssetRefSchema, type SemanticAssetRef } from './asset.js';
  * - singleton: Single global instance
  * - instance: Static data (read-only instances)
  */
-export type EntityPersistence = 'persistent' | 'runtime' | 'singleton' | 'instance';
+export type EntityPersistence = 'persistent' | 'runtime' | 'singleton' | 'instance' | 'local';
 
 export const EntityPersistenceSchema = z.enum([
     'persistent',
     'runtime',
     'singleton',
     'instance',
+    'local',
 ]);
 
 // ============================================================================
@@ -157,3 +158,35 @@ export function isRuntimeEntity(entity: OrbitalEntity): boolean {
 export function isSingletonEntity(entity: OrbitalEntity): boolean {
     return entity.persistence === 'singleton';
 }
+
+// ============================================================================
+// Entity Instance Data (Runtime)
+// ============================================================================
+
+/**
+ * A single field value at runtime.
+ * Union of all possible types from FieldType: string, number, boolean, date, array, nested.
+ */
+export type FieldValue = string | number | boolean | Date | null | string[] | FieldValue[];
+
+/**
+ * One instance of an entity with actual field values.
+ * The shape is determined by the Entity definition at schema time.
+ *
+ * @example
+ * // Entity defines: Patient { fullName: string, age: number, active: boolean }
+ * // EntityRow is: { id: "p1", fullName: "Sarah", age: 34, active: true }
+ */
+export type EntityRow = { id?: string } & Record<string, FieldValue>;
+
+/**
+ * Collection of entity instances keyed by entity name.
+ * Used by OrbPreview mockData, OrbitalServerRuntime state, data grids, etc.
+ *
+ * @example
+ * const data: EntityData = {
+ *   Patient: [{ id: "1", fullName: "Sarah", age: 34 }],
+ *   QueueEntry: [{ id: "1", patientName: "Sarah", waitMinutes: 12 }],
+ * };
+ */
+export type EntityData = Record<string, EntityRow[]>;

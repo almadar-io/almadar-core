@@ -338,3 +338,18 @@ export function collectBindings(expr: SExpr): string[] {
 
 export type SExprInput = z.input<typeof SExprSchema>;
 export type ExpressionInput = z.input<typeof ExpressionSchema>;
+
+// ============================================================================
+// Runtime Evaluation Types
+// ============================================================================
+
+/** Evaluation context for guards and s-expressions. Recursive. */
+export interface EvalContext {
+  [key: string]: string | number | boolean | Date | null | string[] | EvalContext | undefined;
+}
+
+/** Typed event payload map. */
+export type EventPayload = Record<string, string | number | boolean | null | undefined>;
+
+/** Structured log/event metadata. Constrains values to serializable types. */
+export type LogMeta = Record<string, string | number | boolean | null | undefined | Error>;

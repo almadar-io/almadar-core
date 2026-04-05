@@ -83,6 +83,9 @@ export {
   deriveCollection,
   isRuntimeEntity,
   isSingletonEntity,
+  type FieldValue,
+  type EntityRow,
+  type EntityData,
 } from "./entity.js";
 
 // Page - trait-driven UI entry
@@ -150,6 +153,10 @@ export {
   collectBindings,
   // Constants
   CORE_BINDINGS,
+  // Runtime evaluation types
+  type EvalContext,
+  type EventPayload,
+  type LogMeta,
 } from "./expression.js";
 
 // ============================================================================
@@ -244,6 +251,8 @@ export {
   type WatchEffect,
   type AtomicEffect,
   type WatchOptions,
+  // Agent effect type
+  type AgentEffect,
   // Schemas
   UI_SLOTS,
   EffectSchema,
@@ -268,7 +277,23 @@ export {
   swap,
   watch,
   atomic,
+  // Runtime pattern types
+  type RenderUINode,
 } from "./effect.js";
+
+// ============================================================================
+// Agent Types
+// ============================================================================
+
+export {
+  type AgentContext,
+  type AgentMemoryRecord,
+  type AgentMemoryCategory,
+  type AgentCompactStrategy,
+  type AgentCompactResult,
+  type AgentGenerateOptions,
+  type AgentCodeSearchResult,
+} from "./agent.js";
 
 // ============================================================================
 // Trait Types
@@ -428,6 +453,7 @@ export {
   getServiceNames,
   findService,
   hasService,
+  type ServiceParams,
 } from "./service.js";
 
 // ============================================================================
