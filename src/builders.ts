@@ -58,6 +58,7 @@ export interface MakeEntityOpts {
   persistence?: EntityPersistence;
   collection?: string;
   /** Pre-authored seed data instances */
+  // eslint-disable-next-line almadar/no-record-string-unknown -- Instances are arbitrary entity rows with schema-defined shapes
   instances?: Record<string, unknown>[];
 }
 

@@ -4,6 +4,8 @@
  * Converts KFlow Page schema to domain language text.
  */
 
+/* eslint-disable almadar/no-record-string-unknown -- This module converts loosely-typed legacy and orbital schema page objects to domain language AST. Record<string, unknown> is the correct boundary type for the formatter's public API. */
+
 import type { DomainPage, DomainPageSection, DomainPageAction } from '../types.js';
 
 /**

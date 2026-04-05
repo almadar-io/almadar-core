@@ -710,6 +710,7 @@ function parseValue(text: string): SExpr {
 
   // "nothing" or "null" → null
   if (text.toLowerCase() === 'nothing' || text.toLowerCase() === 'null') {
+    // eslint-disable-next-line almadar/no-record-string-unknown -- null is a valid SExprAtom, cast needed for SExpr union
     return null as unknown as SExpr;
   }
 
@@ -787,6 +788,7 @@ function parseEffectValue(text: string, ctx: ParseContext): SExpr {
  */
 function processBindingsInObject(obj: unknown): SExpr {
   if (obj === null || obj === undefined) {
+    // eslint-disable-next-line almadar/no-record-string-unknown -- null is a valid SExprAtom, cast needed for SExpr union
     return null as unknown as SExpr;
   }
 
@@ -807,6 +809,7 @@ function processBindingsInObject(obj: unknown): SExpr {
   }
 
   // Object
+  // eslint-disable-next-line almadar/no-record-string-unknown -- Building S-expression object node with arbitrary keys from parsed JSON
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     result[key] = processBindingsInObject(value);
@@ -1014,7 +1017,9 @@ function hasComplexSyntax(content: string): boolean {
  *
  * Works generically for any prop name - no need to hardcode specific keys.
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- Pattern props are parsed from free-text with dynamic keys
 function parseRenderProps(text: string): Record<string, unknown> {
+  // eslint-disable-next-line almadar/no-record-string-unknown -- Building props object with dynamic keys from parsed text
   const props: Record<string, unknown> = {};
 
   // Match "key 'value'" or "key [array]" or "key value"

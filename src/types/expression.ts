@@ -29,6 +29,7 @@ import { z } from 'zod';
  * - A binding reference (string starting with @)
  * - A call expression (array with operator as first element)
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- SExprAtom defines the base type for object literals in S-expressions
 export type SExprAtom = string | number | boolean | null | Record<string, unknown>;
 export type SExpr = SExprAtom | SExpr[];
 

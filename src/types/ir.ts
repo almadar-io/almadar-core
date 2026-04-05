@@ -66,9 +66,11 @@ export interface ResolvedEntity {
   hasInstances?: boolean;
 
   /** Pre-authored instances from the schema (seed data or static reference data) */
+  // eslint-disable-next-line almadar/no-record-string-unknown -- Entity instances have schema-defined shapes that vary per entity
   instances?: Record<string, unknown>[];
 
   /** Default field values from schema (for spawning singletons) */
+  // eslint-disable-next-line almadar/no-record-string-unknown -- Entity defaults have schema-defined shapes that vary per entity
   defaults?: Record<string, unknown>;
 
   // Cross-references
@@ -147,6 +149,7 @@ export interface ResolvedTraitUIBinding {
     /** Presentation type: modal, drawer, popover, inline, confirm-dialog */
     presentation: string;
     /** Content pattern(s) to render */
+    // eslint-disable-next-line almadar/no-record-string-unknown -- UI content patterns are dynamically typed per pattern definition
     content: Record<string, unknown> | Record<string, unknown>[];
     /** Presentation props */
     props?: {
@@ -197,6 +200,7 @@ export interface ResolvedTrait {
   dataEntities: ResolvedTraitDataEntity[];
 
   // Instance configuration (from page binding)
+  // eslint-disable-next-line almadar/no-record-string-unknown -- Trait config is dynamically typed per trait definition
   config?: Record<string, unknown>;
 
   // UI Bindings for interaction traits
@@ -217,6 +221,7 @@ export interface ResolvedTraitBinding {
   linkedEntity?: string;
 
   /** Instance configuration */
+  // eslint-disable-next-line almadar/no-record-string-unknown -- Binding config is dynamically typed per trait definition
   config?: Record<string, unknown>;
 }
 
@@ -229,6 +234,7 @@ export interface ResolvedPattern {
   type: string;
 
   /** Pattern configuration */
+  // eslint-disable-next-line almadar/no-record-string-unknown -- Pattern config is dynamically typed per pattern definition
   config: Record<string, unknown>;
 
   /** Shell component to use */

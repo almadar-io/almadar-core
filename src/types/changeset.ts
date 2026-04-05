@@ -71,6 +71,7 @@ export interface ChangeSetDocument {
 export interface SnapshotDocument {
   id: string;
   timestamp: number;
+  // eslint-disable-next-line almadar/no-record-string-unknown -- Snapshot schema is a raw JSON snapshot (pre-OrbitalSchema type)
   schema: Record<string, unknown>;
   reason: string;
   version?: number;

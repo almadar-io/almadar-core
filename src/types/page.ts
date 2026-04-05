@@ -43,6 +43,7 @@ export interface PageTraitRef {
     /** Entity this trait operates on */
     linkedEntity?: string;
     /** Additional trait configuration */
+    // eslint-disable-next-line almadar/no-record-string-unknown -- Trait config is dynamically typed per trait definition
     config?: Record<string, unknown>;
 }
 

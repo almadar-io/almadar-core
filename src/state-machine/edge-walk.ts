@@ -253,6 +253,7 @@ function findNearestUncoveredState(
 function buildPayloadForEdge(
   transition: EdgeWalkTransition,
   guardCase: 'pass' | 'fail' | null,
+// eslint-disable-next-line almadar/no-record-string-unknown -- Payloads are dynamically typed per event schema
 ): Record<string, unknown> {
   // Guard-based payload generation (existing behavior)
   if (transition.hasGuard && transition.guard && guardCase) {
@@ -263,6 +264,7 @@ function buildPayloadForEdge(
   // Schema-based payload generation for events that declare required fields
   // (e.g., EDIT/VIEW declare { name: "id", type: "string", required: true })
   if (transition.payloadSchema && transition.payloadSchema.length > 0) {
+    // eslint-disable-next-line almadar/no-record-string-unknown -- Mock payloads are dynamically typed per event schema
     const payload: Record<string, unknown> = {};
     for (const field of transition.payloadSchema) {
       // Use caller-provided mockValue if available (set from entity context)

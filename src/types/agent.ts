@@ -138,6 +138,7 @@ export interface AgentContext {
     tools(): string[];
 
     // Tools (effects)
+    // eslint-disable-next-line almadar/no-record-string-unknown -- Tool args are dynamically typed per tool contract
     invoke(toolName: string, args: Record<string, unknown>): Promise<unknown>;
 
     // Context (pure)

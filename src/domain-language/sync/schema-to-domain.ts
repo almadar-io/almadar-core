@@ -3,11 +3,13 @@
  *
  * Converts a complete OrbitalSchema to domain language text.
  * Generates three sections: Entities, Pages, and Behaviors.
- * 
+ *
  * Updated to read from OrbitalSchema where entities, pages, and traits
  * are grouped into Orbital units. Also supports legacy KFlowSchema format
  * for backward compatibility.
  */
+
+/* eslint-disable almadar/no-record-string-unknown -- This converter handles both legacy KFlowSchema (loosely typed) and OrbitalSchema formats. Entity/Page/Trait objects are cast to Record<string, unknown> for compatibility with the domain-language formatter API that predates typed schemas. */
 
 import type { DomainDocument, SectionMapping } from '../types.js';
 import { formatSchemaEntityToDomain, schemaEntityToDomainEntity } from '../formatters/entity-formatter.js';

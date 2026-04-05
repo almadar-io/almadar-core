@@ -227,6 +227,7 @@ export function resolveConflict(
 /**
  * Compute a simple hash of a schema for change detection
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- Hashes any JSON-serializable object for change detection
 export function computeSchemaHash(schema: Record<string, unknown>): string {
   const str = JSON.stringify(schema);
   let hash = 0;
@@ -241,6 +242,7 @@ export function computeSchemaHash(schema: Record<string, unknown>): string {
 /**
  * Check if schema has changed since last sync
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- Accepts any JSON-serializable schema object for change detection
 export function hasSchemaChanged(store: MappingStore, schema: Record<string, unknown>): boolean {
   const currentHash = computeSchemaHash(schema);
   return store.schemaHash !== currentHash;
@@ -249,6 +251,7 @@ export function hasSchemaChanged(store: MappingStore, schema: Record<string, unk
 /**
  * Update the schema hash in the store
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- Accepts any JSON-serializable schema object for change detection
 export function updateSchemaHash(store: MappingStore, schema: Record<string, unknown>): MappingStore {
   return {
     ...store,

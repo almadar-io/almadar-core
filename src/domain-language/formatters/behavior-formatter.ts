@@ -5,6 +5,8 @@
  * Supports both legacy typed effects and S-expression format.
  */
 
+/* eslint-disable almadar/no-record-string-unknown -- This module converts loosely-typed legacy and orbital schema objects to domain language AST. The input data shape varies between KFlowSchema and OrbitalSchema formats, so Record<string, unknown> is the correct boundary type for the formatter's public API and internal property access. */
+
 import type {
   DomainBehavior,
   DomainTransition,

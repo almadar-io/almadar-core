@@ -731,6 +731,7 @@ export function parseBehavior(text: string, entityName: string): ParseResult<Dom
             description: text,
             config: {
               slot: result[1] as string,
+              // eslint-disable-next-line almadar/no-record-string-unknown -- Parsed S-expression pattern config is dynamically typed
               pattern: result[2] as Record<string, unknown>,
             },
           };
@@ -837,7 +838,9 @@ export function formatBehaviorToDomain(behavior: DomainBehavior): string {
 /**
  * Format behavior AST to KFlow schema trait
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- Returns loosely-typed schema object for backward compatibility with both KFlowSchema and OrbitalSchema consumers
 export function formatBehaviorToSchema(behavior: DomainBehavior): Record<string, unknown> {
+  // eslint-disable-next-line almadar/no-record-string-unknown -- Building loosely-typed schema object incrementally
   const trait: Record<string, unknown> = {
     // Just remove spaces, preserve the casing from the source
     // Trust the LLM/author to use consistent PascalCase naming
@@ -854,6 +857,7 @@ export function formatBehaviorToSchema(behavior: DomainBehavior): Record<string,
       })),
       events: extractEventsFromTransitions(behavior.transitions),
       transitions: behavior.transitions.map(t => {
+        // eslint-disable-next-line almadar/no-record-string-unknown -- Building loosely-typed schema transition object incrementally
         const transition: Record<string, unknown> = {
           from: t.fromState,
           to: t.toState,

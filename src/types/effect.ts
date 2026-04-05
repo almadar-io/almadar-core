@@ -101,6 +101,7 @@ export interface RenderUIConfig {
     /** Target element (trait name or entity ID) */
     target?: string;
     /** Additional props for the pattern */
+    // eslint-disable-next-line almadar/no-record-string-unknown -- Pattern props are dynamically typed per pattern
     props?: Record<string, unknown>;
     /** Optional priority for slot ordering */
     priority?: number;
@@ -118,6 +119,7 @@ export interface CallServiceConfig {
     action: string;
     endpoint?: string;
     method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+    // eslint-disable-next-line almadar/no-record-string-unknown -- Service params are dynamically typed per service contract
     params?: Record<string, unknown>;
     onSuccess?: string;
     onError?: string;
@@ -133,6 +135,7 @@ export interface CallServiceConfig {
  */
 export type RenderUIEffect =
     | ['render-ui', UISlot, AnyPatternConfig]
+    // eslint-disable-next-line almadar/no-record-string-unknown -- Extra props for render-ui are dynamically typed per pattern
     | ['render-ui', UISlot, AnyPatternConfig, Record<string, unknown>]
     | ['render-ui', UISlot, null];
 
@@ -156,6 +159,7 @@ export type NavigateEffect = ['navigate', string] | ['navigate', string, Record<
  * @example ['emit', 'SAVE'] or ['emit', 'PLAYER_DIED', { playerId: '@entity.id' }]
  * @example ['emit', 'FILTER_CHANGED', '@entity.filters']
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- Emit payloads are dynamically typed per event contract
 export type EmitEffect = ['emit', string] | ['emit', string, Record<string, unknown> | string];
 
 /**
@@ -169,6 +173,7 @@ export type SetEffect = ['set', string, unknown];
  * @example ['persist', 'create', 'Task', { title: '@payload.title' }]
  * @example ['persist', 'update', '@entity.entityType', '@payload.data']
  */
+/* eslint-disable almadar/no-record-string-unknown -- Persist data payloads are dynamically typed per entity schema */
 export type PersistEffect =
     | ['persist', 'create', string, Record<string, unknown> | string]
     | ['persist', 'update', string, Record<string, unknown> | string]
@@ -176,6 +181,7 @@ export type PersistEffect =
     | ['persist', 'delete', string, Record<string, unknown> | string]
     | ['persist', 'clear', string]
     | ['persist', 'clear', string, Record<string, unknown> | string];
+/* eslint-enable almadar/no-record-string-unknown */
 
 /**
  * Call service effect - invokes an external service.
@@ -187,6 +193,7 @@ export type CallServiceEffect = ['call-service', string, CallServiceConfig];
  * Spawn effect - creates a new entity instance (games).
  * @example ['spawn', 'Bullet', { x: '@entity.x', y: '@entity.y' }]
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- Spawn initial state is dynamically typed per entity schema
 export type SpawnEffect = ['spawn', string] | ['spawn', string, Record<string, unknown>];
 
 /**
@@ -215,6 +222,7 @@ export type NotifyEffect =
  * Fetch effect - retrieves entity data (server-side).
  * @example ['fetch', 'User'] or ['fetch', 'User', { id: '@payload.userId' }]
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- Fetch filter options are dynamically typed
 export type FetchEffect = ['fetch', string] | ['fetch', string, Record<string, unknown>];
 
 /**
@@ -262,6 +270,7 @@ export type WaitEffect = ['wait', number];
  */
 export type RefEffect =
     | ['ref', string]
+    // eslint-disable-next-line almadar/no-record-string-unknown -- Ref selectors are dynamically typed per entity schema
     | ['ref', string, Record<string, unknown>];
 
 /**
@@ -272,6 +281,7 @@ export type RefEffect =
  */
 export type DerefEffect =
     | ['deref', string]
+    // eslint-disable-next-line almadar/no-record-string-unknown -- Deref selectors are dynamically typed per entity schema
     | ['deref', string, Record<string, unknown>];
 
 /**
@@ -290,6 +300,7 @@ export type SwapEffect = ['swap!', string, SExpr];
  */
 export type WatchEffect =
     | ['watch', string, string]
+    // eslint-disable-next-line almadar/no-record-string-unknown -- Watch options are dynamically typed
     | ['watch', string, string, Record<string, unknown>];
 
 /**
@@ -308,18 +319,21 @@ export type AtomicEffect = ['atomic', ...SExpr[]];
  * Forward effect - runs a neural network forward pass (Python backend).
  * @example ['forward', 'primary', { architecture: [...], input: '@payload.input', 'on-complete': 'PREDICTION_READY' }]
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- ML forward pass config is dynamically typed
 export type ForwardEffect = ['forward', string, Record<string, unknown>];
 
 /**
  * Train effect - runs a training loop (Python backend).
  * @example ['train', { architecture: [...], dataset: '@entity.data', config: { epochs: 10 }, 'on-complete': 'TRAINING_DONE' }]
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- ML training config is dynamically typed
 export type TrainEffect = ['train', Record<string, unknown>];
 
 /**
  * Evaluate effect - runs model evaluation (Python backend).
  * @example ['evaluate', { architecture: [...], dataset: '@entity.testData', metrics: ['accuracy'], 'on-complete': 'EVAL_DONE' }]
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- ML evaluation config is dynamically typed
 export type EvaluateEffect = ['evaluate', Record<string, unknown>];
 
 /**
@@ -540,6 +554,7 @@ export function set(binding: string, value: SExpr): Effect {
  * emit('PLAYER_DIED', { playerId: '@entity.id' }); // returns ["emit", "PLAYER_DIED", { playerId: "@entity.id" }]
  * emit('GAME_STARTED'); // returns ["emit", "GAME_STARTED"]
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- Emit payloads are dynamically typed per event contract
 export function emit(event: string, payload?: Record<string, unknown>): Effect {
     return payload ? ['emit', event, payload] : ['emit', event];
 }
@@ -576,11 +591,13 @@ export function renderUI(
 export function renderUI(
     target: UISlot,
     pattern: AnyPatternConfig,
+    // eslint-disable-next-line almadar/no-record-string-unknown -- Pattern props are dynamically typed per pattern
     props: Record<string, unknown>
 ): RenderUIEffect;
 export function renderUI(
     target: UISlot,
     pattern: AnyPatternConfig,
+    // eslint-disable-next-line almadar/no-record-string-unknown -- Pattern props are dynamically typed per pattern
     props?: Record<string, unknown>
 ): RenderUIEffect {
     return props
@@ -592,6 +609,7 @@ export function renderUI(
  * Create a persist effect
  * @example ["persist", "create", "Task", { "title": "@payload.title" }]
  */
+/* eslint-disable almadar/no-record-string-unknown -- Persist data payloads are dynamically typed per entity schema */
 export function persist(
     action: 'create' | 'update',
     entity: string,
@@ -607,6 +625,7 @@ export function persist(
     entity: string,
     data?: Record<string, unknown>
 ): PersistEffect {
+/* eslint-enable almadar/no-record-string-unknown */
     if (action === 'create' || action === 'update') {
         return ['persist', action, entity, data!] as PersistEffect;
     }
@@ -631,7 +650,9 @@ export function callService(
  * @example ["spawn", "Bullet", { "x": "@entity.x", "y": "@entity.y" }]
  */
 export function spawn(entity: string): SpawnEffect;
+// eslint-disable-next-line almadar/no-record-string-unknown -- Spawn initial state is dynamically typed per entity schema
 export function spawn(entity: string, initialState: Record<string, unknown>): SpawnEffect;
+// eslint-disable-next-line almadar/no-record-string-unknown -- Spawn initial state is dynamically typed per entity schema
 export function spawn(entity: string, initialState?: Record<string, unknown>): SpawnEffect {
     return initialState ? ['spawn', entity, initialState] : ['spawn', entity];
 }
@@ -700,6 +721,7 @@ export interface FetchOptions {
 export function fetch(entity: string): FetchEffect;
 export function fetch(entity: string, options: FetchOptions): FetchEffect;
 export function fetch(entity: string, options?: FetchOptions): FetchEffect {
+    // eslint-disable-next-line almadar/no-record-string-unknown -- FetchOptions has an index signature that extends Record<string, unknown>
     return options ? ['fetch', entity, options as Record<string, unknown>] : ['fetch', entity];
 }
 
@@ -719,7 +741,9 @@ export function fetch(entity: string, options?: FetchOptions): FetchEffect {
  * ref('User', { id: '@payload.userId' }); // returns ["ref", "User", { id: "@payload.userId" }]
  */
 export function ref(binding: string): RefEffect;
+// eslint-disable-next-line almadar/no-record-string-unknown -- Ref selectors are dynamically typed per entity schema
 export function ref(binding: string, selector: Record<string, unknown>): RefEffect;
+// eslint-disable-next-line almadar/no-record-string-unknown -- Ref selectors are dynamically typed per entity schema
 export function ref(binding: string, selector?: Record<string, unknown>): RefEffect {
     return selector ? ['ref', binding, selector] : ['ref', binding];
 }
@@ -736,7 +760,9 @@ export function ref(binding: string, selector?: Record<string, unknown>): RefEff
  * deref('User', { id: '@payload.userId' }); // returns ["deref", "User", { id: "@payload.userId" }]
  */
 export function deref(binding: string): DerefEffect;
+// eslint-disable-next-line almadar/no-record-string-unknown -- Deref selectors are dynamically typed per entity schema
 export function deref(binding: string, selector: Record<string, unknown>): DerefEffect;
+// eslint-disable-next-line almadar/no-record-string-unknown -- Deref selectors are dynamically typed per entity schema
 export function deref(binding: string, selector?: Record<string, unknown>): DerefEffect {
     return selector ? ['deref', binding, selector] : ['deref', binding];
 }
@@ -785,6 +811,7 @@ export function watch(binding: string, event: string): WatchEffect;
 export function watch(binding: string, event: string, options: WatchOptions): WatchEffect;
 export function watch(binding: string, event: string, options?: WatchOptions): WatchEffect {
     return options
+        // eslint-disable-next-line almadar/no-record-string-unknown -- WatchOptions has an index signature that extends Record<string, unknown>
         ? ['watch', binding, event, options as Record<string, unknown>]
         : ['watch', binding, event];
 }

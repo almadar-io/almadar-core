@@ -479,6 +479,7 @@ export function formatPageToDomain(page: DomainPage): string {
 /**
  * Format page AST to KFlow schema
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- Returns loosely-typed schema for backward compatibility with both KFlowSchema and OrbitalSchema
 export function formatPageToSchema(page: DomainPage): Record<string, unknown> {
   // Infer viewType from page name (this is acceptable - it's a display hint, not critical data)
   const viewType = inferViewTypeFromPageName(page.name);
@@ -543,6 +544,7 @@ function inferViewTypeFromPageName(name: string): string {
  * Pattern detection from description is acceptable (e.g., "list" → entity-list pattern)
  * but entity association MUST come from explicit data.
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- Pattern config shape varies per inferred pattern type
 function inferPatternConfigFromDescription(description: string, primaryEntity?: string): Record<string, unknown> {
   const lower = description.toLowerCase();
 

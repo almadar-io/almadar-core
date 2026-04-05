@@ -7,6 +7,8 @@
  * @packageDocumentation
  */
 
+/* eslint-disable almadar/no-record-string-unknown -- This module formats S-expressions (SExpr type) to domain text. SExprAtom includes Record<string, unknown> for object literals, so formatPrimitive and effect formatters must handle that type. */
+
 import type { SExpr } from '../../types/index.js';
 import { isSExpr, getOperator, getArgs } from '../../types/index.js';
 

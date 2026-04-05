@@ -3,10 +3,12 @@
  *
  * Applies domain language text changes to an OrbitalSchema.
  * Supports incremental updates (single section) and full replacement.
- * 
+ *
  * Updated to use OrbitalSchema where entities, pages, and traits
  * are grouped into Orbital units instead of flat arrays.
  */
+
+/* eslint-disable almadar/no-record-string-unknown -- This converter builds OrbitalSchema from parsed domain language. The formatBehaviorToSchema/formatEntityToSchema/formatPageToSchema APIs return Record<string, unknown> for legacy compatibility, so consuming code must work with that type. */
 
 import type { DomainDocument, ParseError, SectionMapping } from '../types.js';
 import { parseEntity, formatEntityToSchema } from '../parsers/entity-parser.js';

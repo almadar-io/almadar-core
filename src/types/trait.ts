@@ -302,6 +302,7 @@ export const RequiredFieldSchema = z.object({
 export interface TraitReference {
     ref: string;
     linkedEntity?: string;
+    // eslint-disable-next-line almadar/no-record-string-unknown -- Trait config is dynamically typed per trait definition
     config?: Record<string, Record<string, unknown>>;
     appliesTo?: string[];
 }
@@ -319,6 +320,7 @@ export const TraitReferenceSchema = z.object({
  * - { ref: "TraitName" }: reference object with optional config
  * - { name: "TraitName", stateMachine: {...} }: inline trait definition
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- TraitRef config is dynamically typed per trait definition
 export type TraitRef = string | { ref: string; config?: Record<string, unknown>; linkedEntity?: string } | Trait;
 
 // TraitRefSchema is defined after TraitSchema (see below) to avoid forward reference
@@ -332,6 +334,7 @@ export type PresentationType = 'modal' | 'drawer' | 'popover' | 'inline' | 'conf
 export interface TraitUIBinding {
     [stateName: string]: {
         presentation: PresentationType;
+        // eslint-disable-next-line almadar/no-record-string-unknown -- UI content patterns are dynamically typed per pattern definition
         content: Record<string, unknown> | Record<string, unknown>[];
         props?: {
             size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
@@ -477,6 +480,7 @@ export function getTraitName(traitRef: TraitRef): string {
  * getTraitConfig({ name: 'MyTrait' }); // returns undefined
  * getTraitConfig({ ref: 'MyTrait', config: { option: 'value' } }); // returns config object
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- Returns dynamically typed config from TraitRef
 export function getTraitConfig(traitRef: TraitRef): Record<string, unknown> | undefined {
     if (typeof traitRef === 'string') {
         return undefined;
@@ -501,6 +505,7 @@ export function getTraitConfig(traitRef: TraitRef): Record<string, unknown> | un
  * normalizeTraitRef({ name: 'MyTrait' }); // returns { ref: 'MyTrait' }
  * normalizeTraitRef({ ref: 'MyTrait', config: {...} }); // returns original
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- Returns dynamically typed config from TraitRef
 export function normalizeTraitRef(traitRef: TraitRef): { ref: string; config?: Record<string, unknown> } {
     if (typeof traitRef === 'string') {
         return { ref: traitRef };

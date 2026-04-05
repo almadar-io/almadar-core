@@ -287,6 +287,7 @@ export interface DomainEffect extends ASTNode {
   type: 'effect';
   effectType: EffectType;
   description: string;  // Human-readable description
+  // eslint-disable-next-line almadar/no-record-string-unknown -- Effect config varies per effect type (notify, set, navigate, etc.)
   config: Record<string, unknown>;
 }
 

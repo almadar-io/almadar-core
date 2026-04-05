@@ -605,7 +605,9 @@ export function formatEntityToDomain(entity: DomainEntity): string {
 /**
  * Format entity AST to KFlow schema
  */
+// eslint-disable-next-line almadar/no-record-string-unknown -- Returns loosely-typed schema for backward compatibility with both KFlowSchema and OrbitalSchema
 export function formatEntityToSchema(entity: DomainEntity): Record<string, unknown> {
+  // eslint-disable-next-line almadar/no-record-string-unknown -- Building loosely-typed field objects incrementally
   const fields: Record<string, unknown>[] = entity.fields.map(field => ({
     name: field.name,
     type: mapFieldTypeToSchema(field.fieldType),

@@ -7,6 +7,8 @@
  * Supports both legacy string-based conditions and S-expression format.
  */
 
+/* eslint-disable almadar/no-record-string-unknown -- Guard objects come in multiple formats (legacy string, S-expression, object with condition) so Record<string, unknown> is the correct boundary type. */
+
 import type {
   DomainGuard,
   GuardCondition,

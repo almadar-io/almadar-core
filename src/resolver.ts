@@ -93,13 +93,15 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
       const entity: ResolvedEntity = {
         name: entityDef.name,
         description: entityDef.description,
-        icon: (entityDef as unknown as Record<string, unknown>).icon as string | undefined,  // Optional icon (may not exist on type)
+        // eslint-disable-next-line almadar/no-record-string-unknown -- icon is an optional extension not on Entity type
+        icon: (entityDef as unknown as { icon?: string }).icon,
         collection: entityDef.collection || entityDef.name.toLowerCase() + 's',
         fields: (entityDef.fields || []).map((field: EntityField) => ({
           name: field.name,
           type: field.type,
           tsType: inferTsType(field.type),
-          description: (field as unknown as Record<string, unknown>).description as string | undefined,
+          // eslint-disable-next-line almadar/no-record-string-unknown -- description is an optional extension not on EntityField type
+          description: (field as unknown as { description?: string }).description,
           default: field.default,
           required: field.required ?? false,
           values: field.values,
@@ -110,7 +112,8 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
         singleton: entityDef.persistence === 'singleton',
         hasInstances: (entityDef.instances?.length ?? 0) > 0,
         instances: entityDef.instances,
-        defaults: (entityDef as unknown as Record<string, unknown>).defaults as Record<string, unknown> | undefined,  // Optional defaults (may not exist on type)
+        // eslint-disable-next-line almadar/no-record-string-unknown -- Entity defaults have schema-defined shapes that vary per entity
+        defaults: (entityDef as unknown as { defaults?: Record<string, unknown> }).defaults,  // Optional defaults (may not exist on Entity type)
         usedByTraits: [],
         usedByPages: [],
       };

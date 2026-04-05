@@ -4,6 +4,8 @@
  * Converts KFlow DataEntity schema to domain language text.
  */
 
+/* eslint-disable almadar/no-record-string-unknown -- This module converts loosely-typed legacy and orbital schema entity objects to domain language AST. Record<string, unknown> is the correct boundary type for the formatter's public API. */
+
 import type { DomainEntity, DomainField, DomainFieldType, DomainRelationship } from '../types.js';
 
 /**
