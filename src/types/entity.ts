@@ -56,8 +56,7 @@ export interface OrbitalEntity {
     fields: EntityField[];
 
     /** Pre-authored instances (seed data or static reference data) */
-    // eslint-disable-next-line almadar/no-record-string-unknown -- Entity instances have schema-defined shapes that vary per entity
-    instances?: Record<string, unknown>[];
+    instances?: EntityRow[];
 
     /** Auto-add createdAt/updatedAt timestamps */
     timestamps?: boolean;

@@ -8,6 +8,7 @@
  */
 
 import type { SExpr } from './expression.js';
+import type { EntityRow, FieldValue } from './entity.js';
 
 // ============================================================================
 // Transition Types
@@ -66,12 +67,10 @@ export interface ResolvedEntity {
   hasInstances?: boolean;
 
   /** Pre-authored instances from the schema (seed data or static reference data) */
-  // eslint-disable-next-line almadar/no-record-string-unknown -- Entity instances have schema-defined shapes that vary per entity
-  instances?: Record<string, unknown>[];
+  instances?: EntityRow[];
 
   /** Default field values from schema (for spawning singletons) */
-  // eslint-disable-next-line almadar/no-record-string-unknown -- Entity defaults have schema-defined shapes that vary per entity
-  defaults?: Record<string, unknown>;
+  defaults?: Record<string, FieldValue>;
 
   // Cross-references
   usedByTraits: string[];

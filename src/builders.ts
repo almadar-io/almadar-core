@@ -13,7 +13,7 @@
  * @packageDocumentation
  */
 
-import type { Entity, EntityPersistence } from './types/entity.js';
+import type { Entity, EntityPersistence, EntityRow } from './types/entity.js';
 import type { EntityField } from './types/field.js';
 import type { Page } from './types/page.js';
 import type { OrbitalDefinition } from './types/orbital.js';
@@ -58,8 +58,7 @@ export interface MakeEntityOpts {
   persistence?: EntityPersistence;
   collection?: string;
   /** Pre-authored seed data instances */
-  // eslint-disable-next-line almadar/no-record-string-unknown -- Instances are arbitrary entity rows with schema-defined shapes
-  instances?: Record<string, unknown>[];
+  instances?: EntityRow[];
 }
 
 /**

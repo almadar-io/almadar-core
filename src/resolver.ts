@@ -11,8 +11,18 @@ import type { OrbitalSchema } from './types/schema.js';
 import type { Orbital, Trait, Page, PageTraitRef, Entity } from './types/index.js';
 import type { ResolvedIR, ResolvedPage, ResolvedEntity, ResolvedTrait, ResolvedTraitEvent, ResolvedTraitTransition } from './types/ir.js';
 import type { EntityField } from './types/field.js';
+import type { FieldValue } from './types/entity.js';
 import type { State, Event, Transition } from './types/state-machine.js';
 import type { TraitEventListener } from './types/trait.js';
+
+/**
+ * Extended entity shape for schema data that may carry `defaults`.
+ * The core Entity type does not include `defaults`, but parsed schemas
+ * can attach it as extra data for singleton initialization.
+ */
+interface EntityWithDefaults extends Entity {
+  defaults?: Record<string, FieldValue>;
+}
 
 // ============================================================================
 // Cache
@@ -89,7 +99,7 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
   for (const orbital of schema.orbitals as Orbital[]) {
     // Resolve entity if present
     if (orbital.entity && typeof orbital.entity !== 'string') {
-      const entityDef = orbital.entity as Entity;
+      const entityDef = orbital.entity as EntityWithDefaults;
       const entity: ResolvedEntity = {
         name: entityDef.name,
         description: entityDef.description,
@@ -112,8 +122,7 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
         singleton: entityDef.persistence === 'singleton',
         hasInstances: (entityDef.instances?.length ?? 0) > 0,
         instances: entityDef.instances,
-        // eslint-disable-next-line almadar/no-record-string-unknown -- Entity defaults have schema-defined shapes that vary per entity
-        defaults: (entityDef as unknown as { defaults?: Record<string, unknown> }).defaults,  // Optional defaults (may not exist on Entity type)
+        defaults: entityDef.defaults,
         usedByTraits: [],
         usedByPages: [],
       };
