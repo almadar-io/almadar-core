@@ -349,8 +349,12 @@ export interface EvalContext {
   [key: string]: string | number | boolean | Date | null | string[] | EvalContext | undefined;
 }
 
-/** Typed event payload map. */
-export type EventPayload = Record<string, string | number | boolean | null | undefined>;
+/** Typed event payload map. Recursive to support nested objects like `{ data: { id: "..." } }`. */
+export interface EventPayload {
+  [key: string]: string | number | boolean | null | undefined | EventPayload;
+}
 
-/** Structured log/event metadata. Constrains values to serializable types. */
-export type LogMeta = Record<string, string | number | boolean | null | undefined | Error>;
+/** Structured log/event metadata. Recursive to support nested log data. */
+export interface LogMeta {
+  [key: string]: string | number | boolean | null | undefined | Error | LogMeta;
+}

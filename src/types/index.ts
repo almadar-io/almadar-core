@@ -278,6 +278,7 @@ export {
   watch,
   atomic,
   // Runtime pattern types
+  type ResolvedPatternProps,
   type RenderUINode,
 } from "./effect.js";
 

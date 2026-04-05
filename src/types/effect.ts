@@ -834,10 +834,15 @@ export function atomic(...effects: SExpr[]): AtomicEffect {
 // Runtime Pattern Types
 // ============================================================================
 
+/** Resolved pattern props for render-ui effects at runtime. Recursive for nested pattern configs. */
+export interface ResolvedPatternProps {
+  [prop: string]: string | number | boolean | null | undefined | ResolvedPatternProps | ResolvedPatternProps[];
+}
+
 /** A node in a render-ui effect tree. */
 export interface RenderUINode {
   type: string;
-  props?: Record<string, import('./entity.js').FieldValue | string | undefined>;
+  props?: ResolvedPatternProps;
   children?: RenderUINode[];
   content?: string;
   entity?: string;
