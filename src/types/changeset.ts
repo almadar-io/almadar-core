@@ -130,3 +130,37 @@ export interface ValidationMeta {
   warningCount: number;
   validatedAt: number;
 }
+
+// ============================================================================
+// Semantic Schema Change (concept-level diffing)
+// ============================================================================
+
+/**
+ * What kind of .orb concept changed between two schema versions.
+ * Used by canvas focus derivation, CLI narration, selective re-verification.
+ */
+export type SemanticChangeKind =
+  | 'orbital-added'
+  | 'orbital-removed'
+  | 'entity-fields-changed'
+  | 'trait-added'
+  | 'trait-removed'
+  | 'state-machine-changed'
+  | 'guard-changed'
+  | 'effect-changed'
+  | 'render-ui-changed'
+  | 'event-wiring-changed'
+  | 'page-changed'
+  | 'behavior-composed';
+
+/**
+ * A semantic change between two OrbitalSchema versions.
+ * Identifies WHAT concept changed and WHERE in the schema.
+ */
+export interface SemanticSchemaChange {
+  kind: SemanticChangeKind;
+  orbitalName: string;
+  traitName?: string;
+  transitionEvent?: string;
+  fieldName?: string;
+}

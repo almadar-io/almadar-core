@@ -522,6 +522,8 @@ export {
   type PageContentReduction,
   type HistoryMeta,
   type ValidationMeta,
+  type SemanticChangeKind,
+  type SemanticSchemaChange,
 } from "./changeset.js";
 
 // ============================================================================

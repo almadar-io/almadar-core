@@ -6,12 +6,20 @@
  */
 
 import type { OrbitalSchema } from './types/schema.js';
+import type { OrbitalDefinition, PageRef } from './types/orbital.js';
+import type { Trait, TraitRef } from './types/trait.js';
+import type { Page } from './types/page.js';
+// EntityField used transitively through entity.fields
+import type { State, Transition } from './types/state-machine.js';
+import type { Effect } from './types/effect.js';
 import type {
   SchemaChange,
   ChangeSetDocument,
   CategorizedRemovals,
   PageContentReduction,
+  SemanticSchemaChange,
 } from './types/changeset.js';
+import { isInlineTrait } from './types/trait.js';
 
 // ============================================================================
 // Schema Diffing
@@ -308,4 +316,211 @@ export function hasSignificantPageReduction(
   reductions: PageContentReduction[],
 ): boolean {
   return reductions.some((r) => r.isSignificant);
+}
+
+// ============================================================================
+// Semantic Schema Diffing
+// ============================================================================
+
+/** Stable JSON comparison. */
+function jsonEqual(a: unknown, b: unknown): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function setsEqual(a: Set<string>, b: Set<string>): boolean {
+  if (a.size !== b.size) return false;
+  for (const item of a) {
+    if (!b.has(item)) return false;
+  }
+  return true;
+}
+
+function inlineTraitMap(refs: TraitRef[]): Map<string, Trait> {
+  const map = new Map<string, Trait>();
+  for (const r of refs) {
+    if (isInlineTrait(r)) map.set((r as Trait).name, r as Trait);
+  }
+  return map;
+}
+
+function inlinePageMap(refs: PageRef[]): Map<string, Page> {
+  const map = new Map<string, Page>();
+  for (const r of refs) {
+    if (typeof r === 'string') continue;
+    if ('ref' in r && !('name' in r)) continue;
+    const page = r as Page;
+    if (page.path) map.set(page.path, page);
+  }
+  return map;
+}
+
+function isRenderUIEffect(effect: Effect): boolean {
+  if (!Array.isArray(effect)) return false;
+  return String(effect[0]) === 'render-ui' || String(effect[0]) === 'renderUI';
+}
+
+function tKey(t: Transition): string {
+  return `${t.from ?? ''}+${t.event}`;
+}
+
+function diffSemanticTransitions(
+  orbitalName: string, traitName: string,
+  before: Transition[], after: Transition[],
+): SemanticSchemaChange[] {
+  const changes: SemanticSchemaChange[] = [];
+  const bMap = new Map(before.map(t => [tKey(t), t]));
+  const aMap = new Map(after.map(t => [tKey(t), t]));
+
+  for (const [key, aT] of aMap) {
+    const bT = bMap.get(key);
+    if (!bT) continue;
+
+    if (!jsonEqual(bT.guard, aT.guard)) {
+      changes.push({ kind: 'guard-changed', orbitalName, traitName, transitionEvent: aT.event });
+    }
+
+    if (!jsonEqual(bT.effects, aT.effects)) {
+      const bEffects = bT.effects ?? [];
+      const aEffects = aT.effects ?? [];
+      const bRUI = bEffects.filter(isRenderUIEffect);
+      const aRUI = aEffects.filter(isRenderUIEffect);
+
+      if (bRUI.length !== aRUI.length || !jsonEqual(bRUI, aRUI)) {
+        changes.push({ kind: 'render-ui-changed', orbitalName, traitName, transitionEvent: aT.event });
+      } else {
+        changes.push({ kind: 'effect-changed', orbitalName, traitName, transitionEvent: aT.event });
+      }
+    }
+  }
+  return changes;
+}
+
+function diffSemanticOrbital(
+  name: string, before: OrbitalDefinition, after: OrbitalDefinition,
+): SemanticSchemaChange[] {
+  const changes: SemanticSchemaChange[] = [];
+
+  // Entity fields
+  const bEntity = typeof before.entity === 'object' ? before.entity : null;
+  const aEntity = typeof after.entity === 'object' ? after.entity : null;
+  if (bEntity && aEntity) {
+    if (!jsonEqual(bEntity.fields, aEntity.fields)) {
+      changes.push({ kind: 'entity-fields-changed', orbitalName: name });
+    }
+  } else if (bEntity !== aEntity) {
+    changes.push({ kind: 'entity-fields-changed', orbitalName: name });
+  }
+
+  // Traits
+  const bTraits = inlineTraitMap(before.traits ?? []);
+  const aTraits = inlineTraitMap(after.traits ?? []);
+
+  for (const [tName] of aTraits) {
+    if (!bTraits.has(tName)) changes.push({ kind: 'trait-added', orbitalName: name, traitName: tName });
+  }
+  for (const [tName] of bTraits) {
+    if (!aTraits.has(tName)) changes.push({ kind: 'trait-removed', orbitalName: name, traitName: tName });
+  }
+
+  for (const [tName, aTrait] of aTraits) {
+    const bTrait = bTraits.get(tName);
+    if (!bTrait) continue;
+
+    const bSM = bTrait.stateMachine;
+    const aSM = aTrait.stateMachine;
+
+    if (!bSM && !aSM) continue;
+    if (!bSM || !aSM) {
+      changes.push({ kind: 'state-machine-changed', orbitalName: name, traitName: tName });
+      continue;
+    }
+
+    const bStates = new Set((bSM.states ?? []).map((s: State) => s.name));
+    const aStates = new Set((aSM.states ?? []).map((s: State) => s.name));
+    if (!setsEqual(bStates, aStates)) {
+      changes.push({ kind: 'state-machine-changed', orbitalName: name, traitName: tName });
+    }
+
+    const bTKeys = new Set((bSM.transitions ?? []).map(tKey));
+    const aTKeys = new Set((aSM.transitions ?? []).map(tKey));
+    if (!setsEqual(bTKeys, aTKeys)) {
+      if (!changes.some(c => c.kind === 'state-machine-changed' && c.traitName === tName)) {
+        changes.push({ kind: 'state-machine-changed', orbitalName: name, traitName: tName });
+      }
+    }
+
+    changes.push(...diffSemanticTransitions(name, tName, bSM.transitions ?? [], aSM.transitions ?? []));
+
+    if (!jsonEqual(bTrait.emits, aTrait.emits) || !jsonEqual(bTrait.listens, aTrait.listens)) {
+      changes.push({ kind: 'event-wiring-changed', orbitalName: name, traitName: tName });
+    }
+  }
+
+  // Pages
+  const bPages = inlinePageMap(before.pages ?? []);
+  const aPages = inlinePageMap(after.pages ?? []);
+  const bPaths = new Set(bPages.keys());
+  const aPaths = new Set(aPages.keys());
+
+  if (!setsEqual(bPaths, aPaths)) {
+    changes.push({ kind: 'page-changed', orbitalName: name });
+  } else {
+    for (const [path, aPage] of aPages) {
+      if (!jsonEqual(bPages.get(path), aPage)) {
+        changes.push({ kind: 'page-changed', orbitalName: name });
+        break;
+      }
+    }
+  }
+
+  return changes;
+}
+
+/**
+ * Semantic diff: what .orb CONCEPTS changed between two schema versions.
+ *
+ * Unlike `diffSchemas()` which produces operational CRUD changes for persistence,
+ * this produces concept-level changes (guard-changed, render-ui-changed, etc.)
+ * for canvas focus derivation, CLI narration, and selective re-verification.
+ */
+export function diffSchemaSemantics(
+  before: OrbitalSchema,
+  after: OrbitalSchema,
+): SemanticSchemaChange[] {
+  const changes: SemanticSchemaChange[] = [];
+
+  const bOrbitals = new Map<string, OrbitalDefinition>();
+  for (const o of before.orbitals ?? []) {
+    const orb = o as OrbitalDefinition;
+    bOrbitals.set(orb.name, orb);
+  }
+
+  const aOrbitals = new Map<string, OrbitalDefinition>();
+  for (const o of after.orbitals ?? []) {
+    const orb = o as OrbitalDefinition;
+    aOrbitals.set(orb.name, orb);
+  }
+
+  const added: string[] = [];
+  for (const [name] of aOrbitals) {
+    if (!bOrbitals.has(name)) {
+      changes.push({ kind: 'orbital-added', orbitalName: name });
+      added.push(name);
+    }
+  }
+  for (const [name] of bOrbitals) {
+    if (!aOrbitals.has(name)) {
+      changes.push({ kind: 'orbital-removed', orbitalName: name });
+    }
+  }
+  if (added.length > 1) {
+    changes.push({ kind: 'behavior-composed', orbitalName: added[0] });
+  }
+
+  for (const [name, aOrb] of aOrbitals) {
+    const bOrb = bOrbitals.get(name);
+    if (bOrb) changes.push(...diffSemanticOrbital(name, bOrb, aOrb));
+  }
+
+  return changes;
 }
