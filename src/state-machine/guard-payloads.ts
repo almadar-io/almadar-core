@@ -149,5 +149,23 @@ export function buildGuardPayloads(guard: unknown): GuardPayload {
     return { pass: inner.fail, fail: inner.pass };
   }
 
+  // Agent pure operators used in guards
+  if (op === 'agent/is-pinned') {
+    const field = extractPayloadFieldRef(guard[1]);
+    if (field) return { pass: { [field]: 'mem_test_unpinned' }, fail: { [field]: 'mem_test_pinned' } };
+  }
+
+  if (op === 'agent/memory-strength') {
+    const field = extractPayloadFieldRef(guard[1]);
+    if (field) return { pass: { [field]: 'mem_test_id' }, fail: { [field]: 'mem_nonexistent' } };
+  }
+
+  // Agent operators in comparison contexts (e.g., [">=", ["agent/context-usage"], 0.85])
+  // These don't use @payload, they query agent state directly. Return empty payloads
+  // since the guard result depends on agent context, not event payload.
+  if (op.startsWith('agent/')) {
+    return { pass: {}, fail: {} };
+  }
+
   return { pass: {}, fail: {} };
 }
