@@ -24,6 +24,7 @@ export {
 // Export schema diffing & protection functions
 export {
   diffSchemas,
+  diffSchemaSemantics,
   isDestructiveChange,
   getRemovals,
   categorizeRemovals,
