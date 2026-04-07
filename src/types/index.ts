@@ -23,6 +23,7 @@ export {
   UseDeclarationSchema,
   // Entity/Page reference types
   type EntityRef,
+  type EntityCall,
   type PageRef,
   type PageRefObject,
   // Computed Event Types (Trait-Centric Model)
@@ -35,6 +36,7 @@ export {
   // Entity/Page reference schemas
   EntityRefSchema,
   EntityRefStringSchema,
+  EntityCallSchema,
   PageRefSchema,
   PageRefStringSchema,
   PageRefObjectSchema,
@@ -45,6 +47,8 @@ export {
   // Type guards
   isOrbitalDefinition,
   isEntityReference,
+  isEntityReferenceAny,
+  isEntityCall,
   isPageReference,
   isPageReferenceString,
   isPageReferenceObject,

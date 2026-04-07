@@ -297,11 +297,20 @@ export const RequiredFieldSchema = z.object({
 // ============================================================================
 
 /**
- * Reference to a trait from an entity or page
+ * Reference to a trait from an entity or page.
+ *
+ * Phase F treats a trait reference as a function call: `ref` names the
+ * imported trait and the sibling fields are arguments. The compiler's
+ * identifier-substitution pass uses these arguments to rewrite the
+ * inlined trait clone before lowering.
  */
 export interface TraitReference {
     ref: string;
     linkedEntity?: string;
+    /** Phase F: rename the inlined trait at the call site */
+    name?: string;
+    /** Phase F: rename atom event keys at the call site, e.g. {OPEN: "ADD_ITEM"} */
+    events?: Record<string, string>;
     // eslint-disable-next-line almadar/no-record-string-unknown -- Trait config is dynamically typed per trait definition
     config?: Record<string, Record<string, unknown>>;
     appliesTo?: string[];
@@ -310,6 +319,8 @@ export interface TraitReference {
 export const TraitReferenceSchema = z.object({
     ref: z.string().min(1),
     linkedEntity: z.string().optional(),
+    name: z.string().optional(),
+    events: z.record(z.string(), z.string()).optional(),
     config: z.record(z.record(z.unknown())).optional(),
     appliesTo: z.array(z.string()).optional(),
 });
@@ -317,11 +328,23 @@ export const TraitReferenceSchema = z.object({
 /**
  * Simplified trait reference - supports string, reference object, or inline Trait definition
  * - string: "TraitName" - reference to a trait by name
- * - { ref: "TraitName" }: reference object with optional config
+ * - { ref: "TraitName" }: reference object with optional config / overrides
  * - { name: "TraitName", stateMachine: {...} }: inline trait definition
+ *
+ * Phase F adds `name` and `events` to the reference object form so callers
+ * can rename the trait and remap atom event keys.
  */
-// eslint-disable-next-line almadar/no-record-string-unknown -- TraitRef config is dynamically typed per trait definition
-export type TraitRef = string | { ref: string; config?: Record<string, unknown>; linkedEntity?: string } | Trait;
+export type TraitRef =
+    | string
+    | {
+        ref: string;
+        // eslint-disable-next-line almadar/no-record-string-unknown -- TraitRef config is dynamically typed per trait definition
+        config?: Record<string, unknown>;
+        linkedEntity?: string;
+        name?: string;
+        events?: Record<string, string>;
+    }
+    | Trait;
 
 // TraitRefSchema is defined after TraitSchema (see below) to avoid forward reference
 
@@ -412,6 +435,8 @@ export const TraitRefSchema = z.union([
         ref: z.string().min(1),
         config: z.record(z.unknown()).optional(),
         linkedEntity: z.string().optional(),
+        name: z.string().optional(),
+        events: z.record(z.string(), z.string()).optional(),
     }),
     TraitSchema, // Allow inline trait definitions
 ]);

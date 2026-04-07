@@ -16,7 +16,8 @@
 import type { Entity, EntityPersistence, EntityRow } from './types/entity.js';
 import type { EntityField } from './types/field.js';
 import type { Page } from './types/page.js';
-import type { OrbitalDefinition } from './types/orbital.js';
+import type { EntityRef, OrbitalDefinition } from './types/orbital.js';
+import { isEntityCall, isEntityReference, parseEntityRef } from './types/orbital.js';
 import type { OrbitalSchema } from './types/schema.js';
 import type { TraitEventContract, TraitEventListener, Trait } from './types/trait.js';
 
@@ -46,6 +47,25 @@ export function ensureIdField(fields: EntityField[]): EntityField[] {
  */
 export function plural(name: string): string {
   return name + 's';
+}
+
+/**
+ * Resolve a printable entity name from any EntityRef shape.
+ *
+ * Handles:
+ * - inline Entity object (uses `name`)
+ * - bare string reference like "Modal.entity" (uses the alias)
+ * - EntityCall { extends: "Modal.entity", name? } (uses `name` if set, else the alias)
+ */
+function resolveEntityNameForBuilder(ref: EntityRef): string {
+  if (isEntityReference(ref)) {
+    return parseEntityRef(ref)?.alias ?? ref;
+  }
+  if (isEntityCall(ref)) {
+    if (ref.name) return ref.name;
+    return parseEntityRef(ref.extends)?.alias ?? ref.extends;
+  }
+  return ref.name;
 }
 
 // ============================================================================
@@ -334,7 +354,7 @@ export function pipe(
 
   // Auto-generate pages: one per orbital, first is initial
   const pages: Page[] = cloned.map((o, i) => {
-    const entityName = typeof o.entity === 'string' ? o.entity : o.entity.name;
+    const entityName = resolveEntityNameForBuilder(o.entity);
     const traitNames = (o.traits as Trait[]).map(t => t.name);
     return {
       name: `${entityName}Page`,

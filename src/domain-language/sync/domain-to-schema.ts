@@ -24,15 +24,18 @@ import type {
   TraitRef,
   Trait,
 } from '../../types/index.js';
-import { isOrbitalDefinition, getTraitName, isEntityReference, isPageReferenceString, isPageReferenceObject, EntityRef, PageRef } from '../../types/index.js';
+import { isOrbitalDefinition, getTraitName, isEntityReference, isEntityCall, isPageReferenceString, isPageReferenceObject, EntityRef, PageRef } from '../../types/index.js';
 
 /**
- * Helper to get entity name from EntityRef (handles string references)
+ * Helper to get entity name from EntityRef (handles string refs, EntityCall, and inline)
  */
 function getEntityName(entity: EntityRef): string {
   if (isEntityReference(entity)) {
     // Reference format: "Alias.entity" - extract alias
     return entity.replace('.entity', '');
+  }
+  if (isEntityCall(entity)) {
+    return entity.name ?? entity.extends.replace('.entity', '');
   }
   return entity.name;
 }

@@ -14,8 +14,10 @@
  */
 
 import { z } from "zod";
-import type { Entity } from "./entity.js";
-import { EntitySchema } from "./entity.js";
+import type { Entity, EntityPersistence } from "./entity.js";
+import { EntitySchema, EntityPersistenceSchema } from "./entity.js";
+import type { EntityField } from "./field.js";
+import { EntityFieldSchema } from "./field.js";
 import type { Page } from "./page.js";
 import { PageSchema } from "./page.js";
 import type {
@@ -102,39 +104,114 @@ export const UseDeclarationSchema = z.object({
 // ============================================================================
 
 /**
+ * EntityCall - Reference to an imported entity with optional override arguments.
+ *
+ * Treats the imported entity as a callable function: the atom's declared
+ * fields are defaults and the caller can append extra fields, rename, or
+ * override persistence/collection. The discriminator key is `extends` to
+ * stay consistent with the Phase A.5 Rust schema (`EntityRef::Extends`).
+ *
+ * @example
+ * ```json
+ * // Inherit ModalRecord's fields, rename to CartItem, add pendingId
+ * {
+ *   "extends": "Modal.entity",
+ *   "name": "CartItem",
+ *   "fields": [{ "name": "pendingId", "type": "string" }]
+ * }
+ * ```
+ */
+export interface EntityCall {
+  /** Reference to the imported entity using the "extends" discriminator key */
+  extends: string;
+  /** Optional rename for the resulting entity */
+  name?: string;
+  /** Additional fields appended to the inherited set (caller wins on name collision) */
+  fields?: EntityField[];
+  /** Optional persistence override */
+  persistence?: EntityPersistence;
+  /** Optional collection override */
+  collection?: string;
+}
+
+/**
  * EntityRef - Entity can be inline definition OR reference to imported entity.
  *
- * Reference format: "Alias.entity"
+ * Reference formats:
+ * - Simple string: "Alias.entity"
+ * - Call form (with overrides): { extends: "Alias.entity", name?, fields?, persistence?, collection? }
  *
  * @example
  * ```json
  * // Inline
  * { "entity": { "name": "Player", "fields": [...] } }
  *
- * // Reference
+ * // Simple reference
  * { "entity": "Goblin.entity" }
+ *
+ * // Call form with overrides (Phase F)
+ * { "entity": { "extends": "Modal.entity", "name": "CartItem", "fields": [...] } }
  * ```
  */
-export type EntityRef = Entity | string;
+export type EntityRef = Entity | string | EntityCall;
 
 /**
  * Checks if an entity reference is a string reference.
- * 
+ *
  * Type guard to determine if an EntityRef is a string reference
- * (format: "Alias.entity") rather than an inline entity definition.
- * 
+ * (format: "Alias.entity") rather than an inline entity definition or
+ * an EntityCall object.
+ *
+ * Note: This guard intentionally narrows to `string` only. To check for
+ * any non-inline form (string OR EntityCall), use `isEntityReferenceAny`.
+ *
  * @param {EntityRef} entity - Entity reference to check
- * @returns {boolean} True if entity is a string reference, false if inline definition
- * 
+ * @returns {boolean} True if entity is a string reference, false otherwise
+ *
  * @example
  * const ref1 = "User.entity"; // string reference
  * const ref2 = { name: "User", fields: [...] }; // inline definition
- * 
+ * const ref3 = { extends: "User.entity" }; // EntityCall
+ *
  * isEntityReference(ref1); // returns true
  * isEntityReference(ref2); // returns false
+ * isEntityReference(ref3); // returns false
  */
 export function isEntityReference(entity: EntityRef): entity is string {
   return typeof entity === "string";
+}
+
+/**
+ * Checks if an entity reference is an EntityCall (extends form).
+ *
+ * Type guard for the call-form EntityRef introduced in Phase F. EntityCall
+ * is identified by the presence of the "extends" discriminator key.
+ *
+ * @param {EntityRef} entity - Entity reference to check
+ * @returns {boolean} True if entity is an EntityCall object
+ *
+ * @example
+ * isEntityCall({ extends: "Modal.entity", name: "CartItem" }); // returns true
+ * isEntityCall("Modal.entity"); // returns false
+ * isEntityCall({ name: "Modal", fields: [] }); // returns false
+ */
+export function isEntityCall(entity: EntityRef): entity is EntityCall {
+  return typeof entity === "object" && entity !== null && "extends" in entity;
+}
+
+/**
+ * Checks if an entity reference is any non-inline form (string or EntityCall).
+ *
+ * Broader companion to `isEntityReference` that recognizes both the bare
+ * string reference and the Phase F EntityCall form.
+ *
+ * @param {EntityRef} entity - Entity reference to check
+ * @returns {boolean} True if entity is a string reference or EntityCall
+ */
+export function isEntityReferenceAny(
+  entity: EntityRef,
+): entity is string | EntityCall {
+  return isEntityReference(entity) || isEntityCall(entity);
 }
 
 /**
@@ -147,14 +224,38 @@ export const EntityRefStringSchema = z
     'Entity reference must be in format "Alias.entity" (e.g., "Goblin.entity")',
   );
 
-export const EntityRefSchema = z.union([EntitySchema, EntityRefStringSchema]);
+/**
+ * Validate EntityCall (extends form) shape.
+ */
+export const EntityCallSchema = z.object({
+  extends: z
+    .string()
+    .regex(
+      /^[A-Z][a-zA-Z0-9]*\.entity$/,
+      'EntityCall "extends" must be in format "Alias.entity"',
+    ),
+  name: z.string().optional(),
+  fields: z.array(EntityFieldSchema).optional(),
+  persistence: EntityPersistenceSchema.optional(),
+  collection: z.string().optional(),
+});
+
+export const EntityRefSchema = z.union([
+  EntitySchema,
+  EntityRefStringSchema,
+  EntityCallSchema,
+]);
 
 // ============================================================================
 // Page Reference (Inline OR Reference)
 // ============================================================================
 
 /**
- * PageRefObject - Reference to imported page with optional path override.
+ * PageRefObject - Reference to imported page with optional override arguments.
+ *
+ * Phase F adds `linkedEntity` and `traits` arguments so a caller can rebind
+ * the imported page's entity and trait set, treating the page as a callable
+ * function.
  */
 export interface PageRefObject {
   /**
@@ -167,6 +268,19 @@ export interface PageRefObject {
    * If provided, overrides the original page's path.
    */
   path?: string;
+
+  /**
+   * Phase F: rebind the page's entity to the caller's entity.
+   * Identifier-substitution pass rewrites references to the original
+   * entity inside the imported page.
+   */
+  linkedEntity?: string;
+
+  /**
+   * Phase F: override the page's trait set with the caller-supplied list.
+   * Each entry may be a string trait reference or an inline trait reference object.
+   */
+  traits?: TraitRef[];
 }
 
 /**
@@ -265,6 +379,8 @@ export const PageRefStringSchema = z
 export const PageRefObjectSchema = z.object({
   ref: PageRefStringSchema,
   path: z.string().startsWith("/").optional(),
+  linkedEntity: z.string().optional(),
+  traits: z.array(TraitRefSchema).optional(),
 });
 
 export const PageRefSchema = z.union([

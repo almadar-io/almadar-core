@@ -29,16 +29,20 @@ import {
   isOrbitalDefinition,
   getTraitName,
   isEntityReference,
+  isEntityCall,
   isPageReferenceString,
   isPageReferenceObject,
 } from '../../types/index.js';
 
 /**
- * Get entity name safely from EntityRef (string or inline Entity)
+ * Get entity name safely from EntityRef (string, inline Entity, or EntityCall)
  */
 function getEntityName(entity: EntityRef): string {
   if (isEntityReference(entity)) {
     return entity.replace('.entity', '');
+  }
+  if (isEntityCall(entity)) {
+    return entity.name ?? entity.extends.replace('.entity', '');
   }
   return entity.name;
 }
@@ -59,10 +63,10 @@ function getPageName(page: PageRef): string {
 }
 
 /**
- * Check if entity is an inline definition (not a reference)
+ * Check if entity is an inline definition (not a string ref or EntityCall)
  */
 function isInlineEntity(entity: EntityRef): entity is Entity {
-  return !isEntityReference(entity);
+  return !isEntityReference(entity) && !isEntityCall(entity);
 }
 
 /**

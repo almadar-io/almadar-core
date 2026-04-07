@@ -17,7 +17,7 @@
 
 import type { OrbitalSchema } from './types/schema.js';
 import type { OrbitalDefinition } from './types/orbital.js';
-import { isEntityReference } from './types/orbital.js';
+import { isEntityCall, isEntityReference, parseEntityRef } from './types/orbital.js';
 import type { Entity } from './types/entity.js';
 import type { EntityField } from './types/field.js';
 import type { Trait } from './types/trait.js';
@@ -227,6 +227,17 @@ export function summarizeOrbital(orbital: OrbitalDefinition): OrbitalDefinition 
   let entity: Entity;
   if (isEntityReference(orbital.entity)) {
     entity = { name: orbital.entity, fields: [] };
+  } else if (isEntityCall(orbital.entity)) {
+    // EntityCall (Phase F): synthesize a placeholder Entity from the call shape.
+    // The full inlined entity is only available after the compiler's inline phase.
+    const call = orbital.entity;
+    const name = call.name ?? parseEntityRef(call.extends)?.alias ?? call.extends;
+    entity = {
+      name,
+      fields: call.fields ?? [],
+      ...(call.persistence ? { persistence: call.persistence } : {}),
+      ...(call.collection ? { collection: call.collection } : {}),
+    };
   } else {
     entity = summarizeEntity(orbital.entity);
   }
