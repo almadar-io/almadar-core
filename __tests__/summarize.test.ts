@@ -207,7 +207,7 @@ describe('summarizeOrbital', () => {
   it('strips primaryKey and optional fields from entity', () => {
     const summary = summarizeOrbital(crudOrbital);
     const entity = summary.entity;
-    if (typeof entity === 'object') {
+    if (typeof entity === 'object' && entity.fields) {
       const fieldNames = entity.fields.map(f => f.name);
       // id (primaryKey) stripped
       expect(fieldNames).not.toContain('id');
@@ -224,7 +224,7 @@ describe('summarizeOrbital', () => {
   it('keeps enum fields with values', () => {
     const summary = summarizeOrbital(crudOrbital);
     const entity = summary.entity;
-    if (typeof entity === 'object') {
+    if (typeof entity === 'object' && entity.fields) {
       const statusField = entity.fields.find(f => f.name === 'status');
       expect(statusField).toBeDefined();
       expect(statusField!.type).toBe('enum');
@@ -235,7 +235,7 @@ describe('summarizeOrbital', () => {
   it('keeps relation fields', () => {
     const summary = summarizeOrbital(crudOrbital);
     const entity = summary.entity;
-    if (typeof entity === 'object') {
+    if (typeof entity === 'object' && entity.fields) {
       const rel = entity.fields.find(f => f.name === 'companyId');
       expect(rel).toBeDefined();
       expect(rel!.type).toBe('relation');
