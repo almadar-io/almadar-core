@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@almadar/operators':
         specifier: '>=2.1.3'
-        version: 2.3.0
+        version: 3.0.0
       '@almadar/patterns':
         specifier: '>=2.8.7'
         version: 2.12.0
@@ -32,7 +32,7 @@ importers:
         version: 10.0.0
       tsup:
         specifier: ^8.0.0
-        version: 8.5.1(postcss@8.5.8)(typescript@5.9.3)
+        version: 8.5.1(postcss@8.5.9)(typescript@5.9.3)
       typescript:
         specifier: ^5.4.0
         version: 5.9.3
@@ -42,16 +42,16 @@ importers:
 
 packages:
 
-  '@almadar/core@2.14.3':
-    resolution: {integrity: sha512-IevYIfuUJa9i9bWJ4F528+r6gzLf4w7qC5vjx0+VKfywBvPnOLODR+Q2P323y5aPTdEzKbUFfkwTXCwOH9v6Hg==}
+  '@almadar/core@3.0.0':
+    resolution: {integrity: sha512-vW9w/YlYMClNDOZi4jk+WlxgFtSFTd1caNJ+qwpWLFE98AJkx1vC+e4CTbOrzowWoJy12ecQ2Zq2CDiR0LjixA==}
 
   '@almadar/eslint-plugin@2.7.0':
     resolution: {integrity: sha512-d0WT80e9APcLB6HSP7cVOqJ2jfOzR6TjKkAV5GNbGWqqrRYW7Kj0EtaAMaJEESZD+br9Jr5u8Mub4FJQULhGSg==}
     peerDependencies:
       eslint: '>=8.0.0'
 
-  '@almadar/operators@2.3.0':
-    resolution: {integrity: sha512-Huv66irNgj0PkcFH7HG6WjwIeknMmqOO0dFB0uc9ViYhNg8x/5isA0O7/WFvup9rEqmY1Tp8SprffBoflTnJUg==}
+  '@almadar/operators@3.0.0':
+    resolution: {integrity: sha512-Ur6dD3FrWiq1A/XZ+I7lyjBev/eOZ77H1F6V2Xp4hZl2gHt7jbxatdCECEsG0qzJCwQen2vCKWLJEpl9yhFwMA==}
 
   '@almadar/patterns@2.12.0':
     resolution: {integrity: sha512-vy5niBqe/nyS0m9eEw+6rYfnQV/WocSEnk6R0RMQ4/48vf/1Y7ahXy3MZKnc3ixBAtHUmJO6ppAisOln6xmP+g==}
@@ -1022,8 +1022,8 @@ packages:
       yaml:
         optional: true
 
-  postcss@8.5.8:
-    resolution: {integrity: sha512-OW/rX8O/jXnm82Ey1k44pObPtdblfiuWnrd8X7GJ7emImCOstunGbXUpp7HdBrFQX6rJzn3sPT397Wp5aCwCHg==}
+  postcss@8.5.9:
+    resolution: {integrity: sha512-7a70Nsot+EMX9fFU3064K/kdHWZqGVY+BADLyXc8Dfv+mTLLVl6JzJpPaCZ2kQL9gIJvKXSLMHhqdRRjwQeFtw==}
     engines: {node: ^10 || ^12 || >=14}
 
   prelude-ls@1.2.1:
@@ -1113,8 +1113,8 @@ packages:
   tinyexec@0.3.2:
     resolution: {integrity: sha512-KQQR9yN7R5+OSwaK0XQoj22pwHoTlgYqmUscPYoknOoWCWfj/5/ABTMRi69FrKU5ffPVh5QcFikpWJI/P1ocHA==}
 
-  tinyglobby@0.2.15:
-    resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
+  tinyglobby@0.2.16:
+    resolution: {integrity: sha512-pn99VhoACYR8nFHhxqix+uvsbXineAasWm5ojXoN8xEwK5Kd3/TrhNn1wByuD52UxWRLy8pu+kRMniEi6Eq9Zg==}
     engines: {node: '>=12.0.0'}
 
   tinypool@0.8.4:
@@ -1267,9 +1267,9 @@ packages:
 
 snapshots:
 
-  '@almadar/core@2.14.3':
+  '@almadar/core@3.0.0':
     dependencies:
-      '@almadar/operators': 2.3.0
+      '@almadar/operators': 3.0.0
       '@almadar/patterns': 2.12.0
       zod: 3.25.76
 
@@ -1278,11 +1278,11 @@ snapshots:
       eslint: 10.0.0
       jsonc-eslint-parser: 3.1.0
 
-  '@almadar/operators@2.3.0': {}
+  '@almadar/operators@3.0.0': {}
 
   '@almadar/patterns@2.12.0':
     dependencies:
-      '@almadar/core': 2.14.3
+      '@almadar/core': 3.0.0
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
@@ -1618,7 +1618,7 @@ snapshots:
       debug: 4.4.3
       minimatch: 9.0.9
       semver: 7.7.4
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.16
       ts-api-utils: 2.5.0(typescript@5.9.3)
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -2072,13 +2072,13 @@ snapshots:
       mlly: 1.8.2
       pathe: 2.0.3
 
-  postcss-load-config@6.0.1(postcss@8.5.8):
+  postcss-load-config@6.0.1(postcss@8.5.9):
     dependencies:
       lilconfig: 3.1.3
     optionalDependencies:
-      postcss: 8.5.8
+      postcss: 8.5.9
 
-  postcss@8.5.8:
+  postcss@8.5.9:
     dependencies:
       nanoid: 3.3.11
       picocolors: 1.1.1
@@ -2164,7 +2164,7 @@ snapshots:
       lines-and-columns: 1.2.4
       mz: 2.7.0
       pirates: 4.0.7
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.16
       ts-interface-checker: 0.1.13
 
   thenify-all@1.6.0:
@@ -2179,7 +2179,7 @@ snapshots:
 
   tinyexec@0.3.2: {}
 
-  tinyglobby@0.2.15:
+  tinyglobby@0.2.16:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.4)
       picomatch: 4.0.4
@@ -2196,7 +2196,7 @@ snapshots:
 
   ts-interface-checker@0.1.13: {}
 
-  tsup@8.5.1(postcss@8.5.8)(typescript@5.9.3):
+  tsup@8.5.1(postcss@8.5.9)(typescript@5.9.3):
     dependencies:
       bundle-require: 5.1.0(esbuild@0.27.7)
       cac: 6.7.14
@@ -2207,16 +2207,16 @@ snapshots:
       fix-dts-default-cjs-exports: 1.0.1
       joycon: 3.1.1
       picocolors: 1.1.1
-      postcss-load-config: 6.0.1(postcss@8.5.8)
+      postcss-load-config: 6.0.1(postcss@8.5.9)
       resolve-from: 5.0.0
       rollup: 4.60.1
       source-map: 0.7.6
       sucrase: 3.35.1
       tinyexec: 0.3.2
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.16
       tree-kill: 1.2.2
     optionalDependencies:
-      postcss: 8.5.8
+      postcss: 8.5.9
       typescript: 5.9.3
     transitivePeerDependencies:
       - jiti
@@ -2261,7 +2261,7 @@ snapshots:
   vite@5.4.21(@types/node@22.19.17):
     dependencies:
       esbuild: 0.21.5
-      postcss: 8.5.8
+      postcss: 8.5.9
       rollup: 4.60.1
     optionalDependencies:
       '@types/node': 22.19.17
