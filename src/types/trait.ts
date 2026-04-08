@@ -314,16 +314,100 @@ export interface TraitReference {
     // eslint-disable-next-line almadar/no-record-string-unknown -- Trait config is dynamically typed per trait definition
     config?: Record<string, Record<string, unknown>>;
     appliesTo?: string[];
+    /**
+     * Phase F.7: replace the imported trait's `listens` array with the
+     * caller-supplied list. Empty array clears all upstream listens. The
+     * inliner applies this AFTER substitution, overwriting whatever the
+     * upstream declared. Use sparingly: this drops external event wiring.
+     */
+    listens?: TraitEventListener[];
+    /**
+     * Phase F.7: set every emit's `scope` to the caller-supplied value.
+     * `'internal'` confines emits to the orbital's internal bus; `'external'`
+     * broadcasts them. Applied after substitution and listens replacement.
+     */
+    emitsScope?: 'internal' | 'external';
+    /**
+     * Phase F.8: per-transition effects override. The map's keys are event
+     * names (the transition triggers, AFTER any rename via `events`). The
+     * values are the SExpression effect lists that REPLACE the matching
+     * transitions' `effects[]` arrays.
+     *
+     * This is the unified content + effect override mechanism. Whether the
+     * override list contains `["render-ui", ...]` (visual content),
+     * `["fetch", ...]` (data load), `["persist", ...]` (mutation), or any
+     * combination, the inliner just substitutes the whole list. Identifier
+     * substitution (entity refs, event refs) still runs over the merged
+     * trait body, so override effects can use either upstream or caller
+     * identifiers and the F.3 walker will rewrite them consistently.
+     *
+     * Example:
+     * ```json
+     * "effects": {
+     *   "ADD_ITEM": [
+     *     ["fetch", "CartItem"],
+     *     ["render-ui", "main", { ... }]
+     *   ],
+     *   "SAVE": [
+     *     ["persist", "create", "CartItem", "@payload.data"]
+     *   ]
+     * }
+     * ```
+     */
+    effects?: Record<string, unknown[]>;
 }
 
-export const TraitReferenceSchema = z.object({
-    ref: z.string().min(1),
-    linkedEntity: z.string().optional(),
-    name: z.string().optional(),
-    events: z.record(z.string(), z.string()).optional(),
-    config: z.record(z.record(z.unknown())).optional(),
-    appliesTo: z.array(z.string()).optional(),
-});
+export const TraitReferenceSchema = z
+    .object({
+        ref: z.string().min(1),
+        linkedEntity: z.string().optional(),
+        name: z.string().optional(),
+        events: z
+            .record(
+                z.string().min(1, "events key (atom event name) must be non-empty"),
+                z.string().min(1, "events value (caller event name) must be non-empty"),
+            )
+            .optional(),
+        config: z.record(z.record(z.unknown())).optional(),
+        appliesTo: z.array(z.string()).optional(),
+        // Phase F.7: zod accepts an array (the inliner validates element
+        // shape). The full ListenDefinition shape isn't recursively encoded
+        // here because TraitReference is the call-site form — listen entries
+        // pasted in are already-resolved structured definitions, not nested
+        // overrides.
+        listens: z.array(z.unknown()).optional(),
+        emitsScope: z.enum(['internal', 'external']).optional(),
+        // Phase F.8: per-transition effects override. The keys are event
+        // names (the transition triggers AFTER renames). Values are arrays
+        // of SExpression-shaped data; the inliner validates the SExpression
+        // shape during application, so the schema accepts loose `unknown[]`.
+        effects: z
+            .record(
+                z.string().min(1, "effects override key (event name) must be non-empty"),
+                z.array(z.unknown()),
+            )
+            .optional(),
+    })
+    .refine(
+        (ref) => {
+            if (!ref.events) return true;
+            // Phase F.4: reject empty event-name strings on either side of
+            // every entry. The substitution pass treats empty strings as
+            // no-ops at runtime, but accepting them at the schema boundary
+            // hides authoring errors. The per-entry .min(1) above already
+            // rejects most cases; this refine is the belt-and-braces check
+            // that survives any future relaxation of the inner validators.
+            for (const [from, to] of Object.entries(ref.events)) {
+                if (from.length === 0 || to.length === 0) return false;
+            }
+            return true;
+        },
+        {
+            message:
+                'TraitReference "events" entries must have non-empty atom and caller event names',
+            path: ["events"],
+        },
+    );
 
 /**
  * Simplified trait reference - supports string, reference object, or inline Trait definition
@@ -436,7 +520,15 @@ export const TraitRefSchema = z.union([
         config: z.record(z.unknown()).optional(),
         linkedEntity: z.string().optional(),
         name: z.string().optional(),
-        events: z.record(z.string(), z.string()).optional(),
+        // Phase F.4: same non-empty refine as TraitReferenceSchema.events.
+        // Both schemas accept the same call-site argument shape, so the
+        // validators should agree.
+        events: z
+            .record(
+                z.string().min(1, "events key (atom event name) must be non-empty"),
+                z.string().min(1, "events value (caller event name) must be non-empty"),
+            )
+            .optional(),
     }),
     TraitSchema, // Allow inline trait definitions
 ]);

@@ -252,27 +252,80 @@ export const ServiceDefinitionSchema = z.discriminatedUnion("type", [
 // ============================================================================
 
 /**
- * ServiceRef - Service can be inline definition OR reference to imported service.
+ * ServiceRef - Service can be inline definition, reference object with overrides,
+ * or bare string reference to an imported service.
  *
  * Reference format: "Alias.services.ServiceName"
  */
-export type ServiceRef = ServiceDefinition | string;
+export type ServiceRef = ServiceDefinition | ServiceRefObject | string;
 
 /**
- * Checks if a service reference is a string.
- * 
+ * Phase F: Service reference object with override fields.
+ *
+ * Mirrors the Rust `ServiceRefObject` at
+ * `orbital-rust/crates/orbital-core/src/schema/types.rs:353-375`. A caller
+ * imports a service via `uses[]`, references it by `ref`, and supplies
+ * any subset of these fields to override the imported service's defaults
+ * during inlining.
+ *
+ * @example
+ * ```typescript
+ * const ref: ServiceRefObject = {
+ *   ref: "Weather.services.openweather",
+ *   baseUrl: "https://staging.weather.example.com",
+ *   headers: { "X-Tenant": "acme" },
+ * };
+ * ```
+ */
+export interface ServiceRefObject {
+  /** Reference to imported service: "Alias.services.ServiceName" */
+  ref: string;
+  /** Override the service description */
+  description?: string;
+  /** Override the REST baseUrl */
+  baseUrl?: string;
+  /** Override or merge default headers (caller wins on key collision) */
+  headers?: Record<string, string>;
+  /** Override the WebSocket url */
+  url?: string;
+  /** Override the MCP server path */
+  serverPath?: string;
+}
+
+/**
+ * Checks if a service reference is a bare string reference.
+ *
  * Type guard to determine if a service reference is a string reference
- * (format: "Alias.services.ServiceName") rather than an inline service definition.
- * 
+ * (format: "Alias.services.ServiceName") rather than an inline service
+ * definition or a reference object.
+ *
  * @param {ServiceRef} service - Service reference to check
  * @returns {boolean} True if service is a string reference, false otherwise
- * 
+ *
  * @example
  * isServiceReference("Weather.services.openweather"); // returns true
  * isServiceReference({ name: "weather", type: "rest" }); // returns false
+ * isServiceReference({ ref: "Weather.services.openweather" }); // returns false
  */
 export function isServiceReference(service: ServiceRef): service is string {
   return typeof service === "string";
+}
+
+/**
+ * Phase F: Type guard for `ServiceRefObject` (the override-carrying form).
+ *
+ * @param {ServiceRef} service - Service reference to check
+ * @returns {boolean} True if service is a ServiceRefObject
+ */
+export function isServiceReferenceObject(
+  service: ServiceRef,
+): service is ServiceRefObject {
+  return (
+    typeof service === "object" &&
+    service !== null &&
+    "ref" in service &&
+    !("type" in service)
+  );
 }
 
 /**
@@ -285,8 +338,18 @@ export const ServiceRefStringSchema = z
     'Service reference must be in format "Alias.services.ServiceName" (e.g., "Weather.services.openweather")',
   );
 
+export const ServiceRefObjectSchema = z.object({
+  ref: ServiceRefStringSchema,
+  description: z.string().optional(),
+  baseUrl: z.string().url("baseUrl override must be a valid URL").optional(),
+  headers: z.record(z.string()).optional(),
+  url: z.string().url("url override must be a valid URL").optional(),
+  serverPath: z.string().optional(),
+});
+
 export const ServiceRefSchema = z.union([
   ServiceDefinitionSchema,
+  ServiceRefObjectSchema,
   ServiceRefStringSchema,
 ]);
 

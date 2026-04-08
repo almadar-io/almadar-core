@@ -226,19 +226,41 @@ export const EntityRefStringSchema = z
 
 /**
  * Validate EntityCall (extends form) shape.
+ *
+ * Phase F.4 refines:
+ * - The `fields` override array must not contain duplicate field names
+ *   (case-sensitive). Duplicates would silently shadow each other during
+ *   the inliner's field-merge step, so reject at the schema boundary.
  */
-export const EntityCallSchema = z.object({
-  extends: z
-    .string()
-    .regex(
-      /^[A-Z][a-zA-Z0-9]*\.entity$/,
-      'EntityCall "extends" must be in format "Alias.entity"',
-    ),
-  name: z.string().optional(),
-  fields: z.array(EntityFieldSchema).optional(),
-  persistence: EntityPersistenceSchema.optional(),
-  collection: z.string().optional(),
-});
+export const EntityCallSchema = z
+  .object({
+    extends: z
+      .string()
+      .regex(
+        /^[A-Z][a-zA-Z0-9]*\.entity$/,
+        'EntityCall "extends" must be in format "Alias.entity"',
+      ),
+    name: z.string().optional(),
+    fields: z.array(EntityFieldSchema).optional(),
+    persistence: EntityPersistenceSchema.optional(),
+    collection: z.string().optional(),
+  })
+  .refine(
+    (call) => {
+      if (!call.fields) return true;
+      const seen = new Set<string>();
+      for (const field of call.fields) {
+        if (seen.has(field.name)) return false;
+        seen.add(field.name);
+      }
+      return true;
+    },
+    {
+      message:
+        'EntityCall "fields" override list must not contain duplicate field names',
+      path: ["fields"],
+    },
+  );
 
 export const EntityRefSchema = z.union([
   EntitySchema,

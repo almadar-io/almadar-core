@@ -10,6 +10,9 @@ import {
     EffectSchema,
     SExprSchema,
     TraitRefSchema,
+    TraitReferenceSchema,
+    EntityCallSchema,
+    ServiceRefObjectSchema,
 
     // Parse functions
     parseOrbitalSchema,
@@ -21,6 +24,7 @@ import {
     isBinding,
     isSExprCall,
     isInlineTrait,
+    isServiceReferenceObject,
     getTraitName,
     normalizeTraitRef,
 
@@ -320,5 +324,133 @@ describe('schemaToIR', () => {
         };
         const ir = schemaToIR(schema as any);
         expect(ir).toBeDefined();
+    });
+});
+
+// ============================================================================
+// Phase 3.5.G.F.4 — Reference type refines and ServiceRefObject guard
+// ============================================================================
+
+describe('Phase F.4 — TraitReferenceSchema.events refine', () => {
+    it('accepts a well-formed events override', () => {
+        const ok = TraitReferenceSchema.safeParse({
+            ref: 'Modal.traits.ModalRecordModal',
+            linkedEntity: 'CartItem',
+            name: 'CartItemAddItem',
+            events: { OPEN: 'ADD_ITEM', CLOSE: 'CANCEL_ADD' },
+        });
+        expect(ok.success).toBe(true);
+    });
+
+    it('rejects an empty event-key string in `events`', () => {
+        const bad = TraitReferenceSchema.safeParse({
+            ref: 'Modal.traits.ModalRecordModal',
+            events: { '': 'ADD_ITEM' },
+        });
+        expect(bad.success).toBe(false);
+    });
+
+    it('rejects an empty event-value string in `events`', () => {
+        const bad = TraitReferenceSchema.safeParse({
+            ref: 'Modal.traits.ModalRecordModal',
+            events: { OPEN: '' },
+        });
+        expect(bad.success).toBe(false);
+    });
+
+    it('accepts the same event override on the TraitRefSchema union variant', () => {
+        const ok = TraitRefSchema.safeParse({
+            ref: 'Modal.traits.ModalRecordModal',
+            events: { OPEN: 'ADD_ITEM' },
+        });
+        expect(ok.success).toBe(true);
+    });
+
+    it('rejects empty event-key on the TraitRefSchema union variant', () => {
+        const bad = TraitRefSchema.safeParse({
+            ref: 'Modal.traits.ModalRecordModal',
+            events: { OPEN: '' },
+        });
+        expect(bad.success).toBe(false);
+    });
+});
+
+describe('Phase F.4 — EntityCallSchema.fields dedup refine', () => {
+    it('accepts an EntityCall with distinct field names', () => {
+        const ok = EntityCallSchema.safeParse({
+            extends: 'Modal.entity',
+            name: 'CartItem',
+            fields: [
+                { name: 'pendingId', type: 'string' },
+                { name: 'lineItemCount', type: 'number' },
+            ],
+        });
+        expect(ok.success).toBe(true);
+    });
+
+    it('accepts an EntityCall with no fields override at all', () => {
+        const ok = EntityCallSchema.safeParse({
+            extends: 'Modal.entity',
+            name: 'CartItem',
+        });
+        expect(ok.success).toBe(true);
+    });
+
+    it('rejects an EntityCall with duplicate field names', () => {
+        const bad = EntityCallSchema.safeParse({
+            extends: 'Modal.entity',
+            name: 'CartItem',
+            fields: [
+                { name: 'pendingId', type: 'string' },
+                { name: 'pendingId', type: 'number' },
+            ],
+        });
+        expect(bad.success).toBe(false);
+    });
+});
+
+describe('Phase F.4 — ServiceRefObject schema and guard', () => {
+    it('accepts a well-formed ServiceRefObject', () => {
+        const ok = ServiceRefObjectSchema.safeParse({
+            ref: 'Weather.services.openweather',
+            baseUrl: 'https://staging.weather.example.com',
+            headers: { 'X-Tenant': 'acme' },
+        });
+        expect(ok.success).toBe(true);
+    });
+
+    it('rejects a ServiceRefObject with a malformed ref', () => {
+        const bad = ServiceRefObjectSchema.safeParse({
+            ref: 'lowercase.bad.format',
+        });
+        expect(bad.success).toBe(false);
+    });
+
+    it('rejects a ServiceRefObject with an invalid baseUrl', () => {
+        const bad = ServiceRefObjectSchema.safeParse({
+            ref: 'Weather.services.openweather',
+            baseUrl: 'not-a-url',
+        });
+        expect(bad.success).toBe(false);
+    });
+
+    it('isServiceReferenceObject returns true for the object form', () => {
+        expect(
+            isServiceReferenceObject({ ref: 'Weather.services.openweather' }),
+        ).toBe(true);
+    });
+
+    it('isServiceReferenceObject returns false for a bare string ref', () => {
+        expect(isServiceReferenceObject('Weather.services.openweather')).toBe(false);
+    });
+
+    it('isServiceReferenceObject returns false for an inline ServiceDefinition', () => {
+        expect(
+            isServiceReferenceObject({
+                name: 'openweather',
+                type: 'rest',
+                baseUrl: 'https://api.example.com',
+            } as never),
+        ).toBe(false);
     });
 });
