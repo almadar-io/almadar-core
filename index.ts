@@ -10,6 +10,10 @@
 // Export all types
 export * from './src/types/index';
 
+// Phase F follow-up: type metadata snapshot for @almadar-tools/lolo-types-sync.
+// AUTO-GENERATED — regenerate via `npx tsx scripts/build-lolo-type-metadata.ts`.
+export { LOLO_TYPE_METADATA, type LoloTypeMetadata } from './src/generated/lolo-type-metadata';
+
 // Export schema resolution functions
 export {
   schemaToIR,
