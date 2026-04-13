@@ -10,6 +10,16 @@
 
 import type { OrbitalDefinition } from '../types/orbital.js';
 import type { OrbitalSchema } from '../types/schema.js';
+
+/** Unwrap OrbitalSchema | OrbitalDefinition inputs to a flat OrbitalDefinition[]. */
+function asDefinitions(inputs: (OrbitalDefinition | OrbitalSchema)[]): OrbitalDefinition[] {
+  return inputs.flatMap(input => {
+    if ('orbitals' in input && Array.isArray((input as OrbitalSchema).orbitals)) {
+      return (input as OrbitalSchema).orbitals as OrbitalDefinition[];
+    }
+    return [input as OrbitalDefinition];
+  });
+}
 import type { Page } from '../types/page.js';
 import type { EventWiringEntry } from './event-wiring.js';
 import { applyEventWiring } from './event-wiring.js';
@@ -26,8 +36,8 @@ import { detectLayoutStrategy } from './layout-strategy.js';
 export interface ComposeBehaviorsInput {
   /** Application name */
   appName: string;
-  /** Orbital definitions to compose */
-  orbitals: OrbitalDefinition[];
+  /** Orbital definitions (or schemas) to compose */
+  orbitals: (OrbitalDefinition | OrbitalSchema)[];
   /** Layout strategy override, or 'auto' to detect */
   layoutStrategy?: LayoutStrategy | 'auto';
   /** Cross-orbital event wiring */
@@ -142,10 +152,13 @@ export function composeBehaviors(
 ): ComposeBehaviorsResult {
   const {
     appName,
-    orbitals: rawOrbitals,
+    orbitals: rawInputs,
     layoutStrategy: strategyInput,
     eventWiring,
   } = input;
+
+  // Unwrap any OrbitalSchema inputs to OrbitalDefinition[]
+  const rawOrbitals = asDefinitions(rawInputs);
 
   // Step 1: Apply event wiring
   const wiredOrbitals =

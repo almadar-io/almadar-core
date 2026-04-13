@@ -137,6 +137,36 @@ export function makeOrbital(
   return { name, entity, traits, pages } as OrbitalDefinition;
 }
 
+/**
+ * Wrap one or more OrbitalDefinitions into an OrbitalSchema.
+ * Every .orb file should be a full OrbitalSchema — this is the builder for that.
+ */
+export function makeSchema(name: string, ...definitions: OrbitalDefinition[]): OrbitalSchema {
+  return { name, version: '1.0.0', orbitals: definitions };
+}
+
+/**
+ * Unwrap inputs that may be OrbitalSchema or OrbitalDefinition into a flat
+ * array of OrbitalDefinitions. Used internally by compose/pipe/connect/extractTrait
+ * so they accept both types.
+ */
+function asDefinitions(inputs: (OrbitalDefinition | OrbitalSchema)[]): OrbitalDefinition[] {
+  return inputs.flatMap(input => {
+    if ('orbitals' in input && Array.isArray((input as OrbitalSchema).orbitals)) {
+      return (input as OrbitalSchema).orbitals as OrbitalDefinition[];
+    }
+    return [input as OrbitalDefinition];
+  });
+}
+
+/** Unwrap a single OrbitalSchema | OrbitalDefinition to OrbitalDefinition. */
+function asDefinition(input: OrbitalDefinition | OrbitalSchema): OrbitalDefinition {
+  if ('orbitals' in input && Array.isArray((input as OrbitalSchema).orbitals)) {
+    return (input as OrbitalSchema).orbitals[0] as OrbitalDefinition;
+  }
+  return input as OrbitalDefinition;
+}
+
 // ============================================================================
 // Intra-Orbital Composition
 // ============================================================================
@@ -183,9 +213,11 @@ export function wire(
 }
 
 /**
- * Extract the first trait from an OrbitalDefinition.
+ * Extract the first trait from an OrbitalDefinition or OrbitalSchema.
+ * If given an OrbitalSchema, unwraps to the first orbital inside it.
  */
-export function extractTrait(orbital: OrbitalDefinition): Trait {
+export function extractTrait(input: OrbitalDefinition | OrbitalSchema): Trait {
+  const orbital = asDefinition(input);
   return structuredClone((orbital.traits as Trait[])[0]);
 }
 
@@ -199,13 +231,13 @@ export function extractTrait(orbital: OrbitalDefinition): Trait {
  * Pure: returns new orbitals, no mutation.
  */
 export function connect(
-  a: OrbitalDefinition,
-  b: OrbitalDefinition,
+  a: OrbitalDefinition | OrbitalSchema,
+  b: OrbitalDefinition | OrbitalSchema,
   event: TraitEventContract,
   triggers?: string,
 ): [OrbitalDefinition, OrbitalDefinition] {
-  const aClone = structuredClone(a);
-  const bClone = structuredClone(b);
+  const aClone = structuredClone(asDefinition(a));
+  const bClone = structuredClone(asDefinition(b));
 
   // Add emit to first trait of a
   const aTrait = (aClone.traits as Trait[])[0];
@@ -254,12 +286,12 @@ export interface ComposePage {
  * Applies connections (cross-orbital event wiring) and page assignments.
  */
 export function compose(
-  orbitals: OrbitalDefinition[],
+  orbitals: (OrbitalDefinition | OrbitalSchema)[],
   pages: ComposePage[],
   connections: ComposeConnection[],
   appName?: string,
 ): OrbitalSchema {
-  const cloned = structuredClone(orbitals);
+  const cloned = structuredClone(asDefinitions(orbitals));
 
   // Apply connections
   for (const conn of connections) {
@@ -323,7 +355,7 @@ export function compose(
  * Sugar over connect + compose: wires events[0] from orbital[0] to orbital[1], etc.
  */
 export function pipe(
-  orbitals: OrbitalDefinition[],
+  orbitals: (OrbitalDefinition | OrbitalSchema)[],
   events: TraitEventContract[],
   appName?: string,
 ): OrbitalSchema {
@@ -331,7 +363,7 @@ export function pipe(
     throw new Error(`pipe requires exactly ${orbitals.length - 1} events for ${orbitals.length} orbitals`);
   }
 
-  const cloned = structuredClone(orbitals);
+  const cloned = structuredClone(asDefinitions(orbitals));
 
   // Wire adjacent pairs
   for (let i = 0; i < events.length; i++) {
