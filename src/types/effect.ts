@@ -9,6 +9,7 @@
 
 import { z } from 'zod';
 import { type SExpr, type Expression } from './expression.js';
+import { type ServiceParams } from './service.js';
 
 // ============================================================================
 // UI Slots
@@ -185,9 +186,25 @@ export type PersistEffect =
 
 /**
  * Call service effect - invokes an external service.
+ *
+ * Two shapes are accepted:
+ *
+ * 1. Flat form (what the runtime reads and every .orb file uses):
+ *    `['call-service', serviceName, action, params?]` — args[0]=service,
+ *    args[1]=action, args[2]=params. This is the canonical form; the
+ *    runtime's EffectExecutor decodes exactly these positions.
+ *
+ * 2. Legacy config-object form (kept for the `callService()` helper):
+ *    `['call-service', serviceName, CallServiceConfig]` — retained so
+ *    older call sites using the builder helper continue to typecheck.
+ *
+ * @example ['call-service', 'llm', 'generate', { userPrompt: '@entity.inputText' }]
  * @example ['call-service', 'WeatherAPI', { service: 'weather', action: 'get', onSuccess: 'OK' }]
  */
-export type CallServiceEffect = ['call-service', string, CallServiceConfig];
+export type CallServiceEffect =
+    | ['call-service', string, string]
+    | ['call-service', string, string, ServiceParams]
+    | ['call-service', string, CallServiceConfig];
 
 /**
  * Spawn effect - creates a new entity instance (games).
