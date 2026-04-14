@@ -37,7 +37,8 @@ export {
 /**
  * Ensure the fields array has an `id` field. Prepends one if missing.
  */
-export function ensureIdField(fields: EntityField[]): EntityField[] {
+export function ensureIdField(fields?: EntityField[]): EntityField[] {
+  if (!fields || fields.length === 0) return [{ name: 'id', type: 'string', required: true }];
   if (fields.some(f => f.name === 'id')) return fields;
   return [{ name: 'id', type: 'string', required: true }, ...fields];
 }
