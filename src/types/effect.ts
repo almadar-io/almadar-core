@@ -165,9 +165,25 @@ export type EmitEffect = ['emit', string] | ['emit', string, Record<string, unkn
 
 /**
  * Set effect - sets a binding to a value.
- * @example ['set', '@entity.health', 100]
+ *
+ * Two forms are supported to match the runtime's `set` handler signature
+ * `(targetId, field, value)`:
+ *
+ * - 3-element binding form (legacy / std behaviors): ['set', '@entity.field', value]
+ * - 4-element target form (canonical runtime): ['set', entityId, fieldName, value]
+ *
+ * The 4-element form is what `OrbitalServerRuntime`'s set handler
+ * dispatches directly (`update(entityType, targetId, { field: value })`).
+ * Prefer the 4-element form when authoring schemas in TypeScript that
+ * load directly into the runtime.
+ *
+ * @example ['set', '@entity.health', 100]                       // 3-element
+ * @example ['set', '@entity.id', 'health', 100]                 // 4-element
+ * @example ['set', '@entity.id', 'count', ['+', '@entity.count', 1]]
  */
-export type SetEffect = ['set', string, unknown];
+export type SetEffect =
+    | ['set', string, unknown]
+    | ['set', string, string, unknown];
 
 /**
  * Persist effect - creates, updates, deletes, or clears entities.
