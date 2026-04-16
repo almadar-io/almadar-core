@@ -33,3 +33,18 @@ export {
 // its flat TraitReference list. Not exposed to the agent/LLM.
 export { explodeBehaviorComposition } from './explode-behavior-composition.js';
 
+// Phase 4.2 reference-form builders (mirrored from ../builders.ts for the
+// dual-export convention so both `@almadar/core/builders` and consumers
+// that pull from `./builders/index` get the same symbols).
+export {
+  type MakeTraitRefOpts,
+  type MakePageRefOpts,
+  type MakeOrbitalWithUsesOpts,
+  type MakeAtomOrbitalOpts,
+  type MakeAtomOrbitalTraitOverrides,
+  makeTraitRef,
+  makePageRef,
+  makeOrbitalWithUses,
+  makeAtomOrbital,
+} from '../builders.js';
+

@@ -16,10 +16,11 @@
 import type { Entity, EntityPersistence, EntityRow } from './types/entity.js';
 import type { EntityField } from './types/field.js';
 import type { Page } from './types/page.js';
-import type { EntityRef, OrbitalDefinition } from './types/orbital.js';
+import type { EntityRef, OrbitalDefinition, PageRef, PageRefObject, UseDeclaration } from './types/orbital.js';
 import { isEntityCall, isEntityReference, parseEntityRef } from './types/orbital.js';
 import type { OrbitalSchema } from './types/schema.js';
-import type { TraitEventContract, TraitEventListener, Trait } from './types/trait.js';
+import type { TraitEventContract, TraitEventListener, Trait, TraitRef, TraitReference } from './types/trait.js';
+import type { SExpr } from './types/expression.js';
 
 // Re-export compose-behaviors module
 export { type LayoutStrategy, detectLayoutStrategy } from './builders/layout-strategy.js';
@@ -137,6 +138,232 @@ export function makeOrbital(
   pages: Page[],
 ): OrbitalDefinition {
   return { name, entity, traits, pages } as OrbitalDefinition;
+}
+
+// ============================================================================
+// Reference-form Builders (Phase 4.2)
+// ============================================================================
+//
+// The atom/molecule/organism composition model (see CLAUDE.md "Std Behaviors")
+// treats every imported orbital as a callable unit: a reference site is a call
+// site whose sibling fields are call arguments. The compiler's inline pass
+// applies overrides from the reference to a cloned copy of the imported unit.
+//
+// These four helpers are convenience factories for constructing the reference
+// payloads (TraitReference, PageRefObject) and the orbital skeleton that
+// holds them. They exist to compress the otherwise ~200-line-per-behavior TS
+// rewrite down to ~30 lines. They purely pass-through fields: undefined
+// optionals are omitted (the emitted object never contains `key: undefined`),
+// so the result stays compatible with the inliner's "present-means-override"
+// semantics.
+
+/**
+ * Options for {@link makeTraitRef}.
+ */
+export interface MakeTraitRefOpts {
+  /**
+   * Optional registry path disambiguator that pairs with {@link ref}
+   * (see {@link TraitReference.from}).
+   */
+  from?: string;
+  /** Trait reference string, e.g. "Browse.traits.BrowseItemBrowse". */
+  ref: string;
+  /** Rename the inlined trait at the call site. */
+  name?: string;
+  /** Rebind the trait to a different linkedEntity. */
+  linkedEntity?: string;
+  /** Per-key rename map, e.g. `{ OPEN: "ADD_ITEM" }`. */
+  events?: Record<string, string>;
+  /**
+   * Per-event SExpression effect replacement. Keys are POST-rename event
+   * names. See {@link TraitReference.effects} for the full contract.
+   */
+  effects?: Record<string, SExpr[]>;
+  /** Replace the imported trait's `listens` array entirely. */
+  listens?: TraitEventListener[];
+  /** Set every emit's scope. */
+  emitsScope?: 'internal' | 'external';
+  /**
+   * Nested config overrides. Matches the real {@link TraitReference.config}
+   * shape: `Record<string, Record<string, unknown>>` (the outer key is the
+   * config field name, the inner record is its value shape).
+   */
+  // eslint-disable-next-line almadar/no-record-string-unknown -- Mirrors TraitReference.config dynamic shape
+  config?: Record<string, Record<string, unknown>>;
+}
+
+/**
+ * Build a {@link TraitReference} from options.
+ *
+ * Pass-through factory: copies only the fields that are actually provided,
+ * so optionals stay absent (no `key: undefined` slots) and the emitted
+ * object matches the inliner's expectation that "present = override".
+ */
+export function makeTraitRef(opts: MakeTraitRefOpts): TraitReference {
+  const ref: TraitReference = { ref: opts.ref };
+  if (opts.from !== undefined) ref.from = opts.from;
+  if (opts.name !== undefined) ref.name = opts.name;
+  if (opts.linkedEntity !== undefined) ref.linkedEntity = opts.linkedEntity;
+  if (opts.events !== undefined) ref.events = opts.events;
+  if (opts.effects !== undefined) ref.effects = opts.effects;
+  if (opts.listens !== undefined) ref.listens = opts.listens;
+  if (opts.emitsScope !== undefined) ref.emitsScope = opts.emitsScope;
+  if (opts.config !== undefined) ref.config = opts.config;
+  return ref;
+}
+
+/**
+ * Options for {@link makePageRef}.
+ */
+export interface MakePageRefOpts {
+  /**
+   * Optional registry path disambiguator that pairs with {@link ref}
+   * (see {@link PageRefObject.from}).
+   */
+  from?: string;
+  /** Page reference string, e.g. "Browse.pages.BrowseItemPage". */
+  ref: string;
+  /** URL path override. */
+  path?: string;
+  /** Rebind the page's primary entity. */
+  linkedEntity?: string;
+  /** Replace the page's trait list. */
+  traits?: TraitRef[];
+}
+
+/**
+ * Build a {@link PageRefObject} from options. Pass-through factory — omits
+ * optional keys that are `undefined`.
+ */
+export function makePageRef(opts: MakePageRefOpts): PageRefObject {
+  const ref: PageRefObject = { ref: opts.ref };
+  if (opts.from !== undefined) ref.from = opts.from;
+  if (opts.path !== undefined) ref.path = opts.path;
+  if (opts.linkedEntity !== undefined) ref.linkedEntity = opts.linkedEntity;
+  if (opts.traits !== undefined) ref.traits = opts.traits;
+  return ref;
+}
+
+/**
+ * Options for {@link makeOrbitalWithUses}.
+ */
+export interface MakeOrbitalWithUsesOpts {
+  /** Orbital name. */
+  name: string;
+  /**
+   * Per-orbital `uses:` header entries (see CLAUDE.md "uses: lives inside
+   * the orbital").
+   */
+  uses: UseDeclaration[];
+  /** Entity (inline or reference form). */
+  entity: EntityRef;
+  /** Trait references. */
+  traits: TraitRef[];
+  /** Optional page references (omitted entirely when not provided). */
+  pages?: PageRef[];
+}
+
+/**
+ * Build an {@link OrbitalDefinition} with the `uses:` header set. Follows
+ * the convention that `uses:` lives on the orbital (not the schema).
+ *
+ * When `pages` is omitted, the result has no `pages` property (matches the
+ * existing {@link OrbitalDefinition.pages} optionality in descriptors that
+ * carry trait-only atoms).
+ */
+export function makeOrbitalWithUses(opts: MakeOrbitalWithUsesOpts): OrbitalDefinition {
+  const orbital: OrbitalDefinition = {
+    name: opts.name,
+    uses: opts.uses,
+    entity: opts.entity,
+    traits: opts.traits,
+    pages: opts.pages ?? [],
+  };
+  return orbital;
+}
+
+/**
+ * Options for {@link makeAtomOrbital}.
+ *
+ * Overrides for the single trait reference. Mirrors the {@link MakeTraitRefOpts}
+ * subset that is meaningful at the atom-wrapping call site.
+ */
+export interface MakeAtomOrbitalTraitOverrides {
+  name?: string;
+  events?: Record<string, string>;
+  effects?: Record<string, SExpr[]>;
+  listens?: TraitEventListener[];
+  emitsScope?: 'internal' | 'external';
+  // eslint-disable-next-line almadar/no-record-string-unknown -- Mirrors TraitReference.config dynamic shape
+  config?: Record<string, Record<string, unknown>>;
+}
+
+/**
+ * Options for {@link makeAtomOrbital}.
+ */
+export interface MakeAtomOrbitalOpts {
+  /** Orbital name, e.g. `${entityName}Orbital`. */
+  name: string;
+  /** Atom registry path, e.g. `std/behaviors/atoms/std-browse`. */
+  atomPath: string;
+  /** Import alias (PascalCase), e.g. `Browse`. */
+  alias: string;
+  /** Entity definition to attach to the orbital. */
+  entity: Entity;
+  /** Trait reference string, e.g. `Browse.traits.BrowseItemBrowse`. */
+  traitRef: string;
+  /** Optional trait-level overrides applied at the call site. */
+  traitOverrides?: MakeAtomOrbitalTraitOverrides;
+  /** Optional page reference string, e.g. `Browse.pages.BrowseItemPage`. */
+  pageRef?: string;
+  /** Optional page-level overrides applied at the call site. */
+  pageOverrides?: { path?: string };
+}
+
+/**
+ * Build a single-atom {@link OrbitalDefinition}.
+ *
+ * The common atom shape: one entity + one trait reference + (optionally) one
+ * page reference, all under a single `uses:` import. Wraps
+ * {@link makeTraitRef}, {@link makePageRef}, and {@link makeOrbitalWithUses}.
+ *
+ * The trait reference is linkedEntity-bound to `entity.name` by default so
+ * that the inliner's entity-substitution pass rewrites every `["ref", X]`
+ * and `@X.path` reference inside the atom.
+ */
+export function makeAtomOrbital(opts: MakeAtomOrbitalOpts): OrbitalDefinition {
+  const traitRef = makeTraitRef({
+    from: opts.atomPath,
+    ref: opts.traitRef,
+    linkedEntity: opts.entity.name,
+    ...(opts.traitOverrides?.name !== undefined ? { name: opts.traitOverrides.name } : {}),
+    ...(opts.traitOverrides?.events !== undefined ? { events: opts.traitOverrides.events } : {}),
+    ...(opts.traitOverrides?.effects !== undefined ? { effects: opts.traitOverrides.effects } : {}),
+    ...(opts.traitOverrides?.listens !== undefined ? { listens: opts.traitOverrides.listens } : {}),
+    ...(opts.traitOverrides?.emitsScope !== undefined
+      ? { emitsScope: opts.traitOverrides.emitsScope }
+      : {}),
+    ...(opts.traitOverrides?.config !== undefined ? { config: opts.traitOverrides.config } : {}),
+  });
+
+  const pages: PageRef[] | undefined = opts.pageRef
+    ? [
+        makePageRef({
+          from: opts.atomPath,
+          ref: opts.pageRef,
+          linkedEntity: opts.entity.name,
+          ...(opts.pageOverrides?.path !== undefined ? { path: opts.pageOverrides.path } : {}),
+        }),
+      ]
+    : undefined;
+
+  return makeOrbitalWithUses({
+    name: opts.name,
+    uses: [{ from: opts.atomPath, as: opts.alias }],
+    entity: opts.entity,
+    traits: [traitRef],
+    ...(pages !== undefined ? { pages } : {}),
+  });
 }
 
 /**
