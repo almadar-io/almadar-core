@@ -30,7 +30,6 @@ export {
   type ComposeBehaviorsResult,
   composeBehaviors,
 } from './builders/compose-behaviors.js';
-export { explodeBehaviorComposition } from './builders/explode-behavior-composition.js';
 
 // ============================================================================
 // Utilities
