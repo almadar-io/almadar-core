@@ -29,3 +29,7 @@ export {
   composeBehaviors,
 } from './compose-behaviors.js';
 
+// Human-authoring primitive: explode a behavior's .orb composition into
+// its flat TraitReference list. Not exposed to the agent/LLM.
+export { explodeBehaviorComposition } from './explode-behavior-composition.js';
+
