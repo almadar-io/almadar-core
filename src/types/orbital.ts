@@ -286,6 +286,15 @@ export interface PageRefObject {
   ref: string;
 
   /**
+   * Phase 1.2: optional registry path disambiguator. Pairs with `ref` to
+   * explicitly name which `uses` entry the alias was imported from
+   * (e.g. "std/behaviors/atoms/std-browse"). Helpful for programmatic
+   * descriptor construction and inline-phase disambiguation when multiple
+   * registries expose the same alias prefix.
+   */
+  from?: string;
+
+  /**
    * Optional path override.
    * If provided, overrides the original page's path.
    */
@@ -400,6 +409,8 @@ export const PageRefStringSchema = z
 
 export const PageRefObjectSchema = z.object({
   ref: PageRefStringSchema,
+  // Phase 1.2: optional registry path disambiguator, pairs with `ref`.
+  from: z.string().optional(),
   path: z.string().startsWith("/").optional(),
   linkedEntity: z.string().optional(),
   traits: z.array(TraitRefSchema).optional(),

@@ -306,6 +306,14 @@ export const RequiredFieldSchema = z.object({
  */
 export interface TraitReference {
     ref: string;
+    /**
+     * Phase 1.2: optional registry path disambiguator. Pairs with `ref` to
+     * explicitly name which `uses` entry the alias was imported from
+     * (e.g. "std/behaviors/atoms/std-browse"). Helpful for programmatic
+     * descriptor construction and inline-phase disambiguation when multiple
+     * registries expose the same alias prefix.
+     */
+    from?: string;
     linkedEntity?: string;
     /** Phase F: rename the inlined trait at the call site */
     name?: string;
@@ -360,6 +368,8 @@ export interface TraitReference {
 export const TraitReferenceSchema = z
     .object({
         ref: z.string().min(1),
+        // Phase 1.2: optional registry path disambiguator, pairs with `ref`.
+        from: z.string().optional(),
         linkedEntity: z.string().optional(),
         name: z.string().optional(),
         events: z

@@ -173,34 +173,73 @@ export interface EntityField {
     relation?: RelationConfig;
 }
 
-export const EntityFieldSchema: z.ZodType<EntityField> = z.lazy(() =>
-    z.object({
-        name: z.string().min(1, 'Field name is required'),
-        type: FieldTypeSchema,
-        required: z.boolean().optional(),
-        default: z.unknown().optional(),
-        values: z.array(z.string()).optional(),
-        enum: z.array(z.string()).optional(),
-        format: FieldFormatSchema.optional(),
-        min: z.number().optional(),
-        max: z.number().optional(),
-        items: EntityFieldSchema.optional(),
-        relation: RelationConfigSchema.optional(),
-    }).refine(
-        (field) => field.type !== 'relation' || field.relation !== undefined,
-        { message: 'Relation config is required when type is "relation"', path: ['relation'] }
-    ).refine(
-        // Enum fields must carry their allowed values. Without this refine,
-        // the type was lying about what's valid — bare `type: 'enum'` without
-        // `values` passed zod but failed `orb validate` downstream with
-        // ORB_E_EMPTY_ENUM_VALUES, stalling the agent pipeline for 20 minutes.
-        // `enum` is the legacy field-name alias; accept either.
-        (field) => {
-            if (field.type !== 'enum') return true;
-            const vals = field.values ?? field.enum;
-            return Array.isArray(vals) && vals.length > 0;
+/**
+ * Alias map for legacy/loose field-type spellings. Preprocessed into the
+ * canonical `FieldType` enum before zod validates. Without this, agent-produced
+ * schemas using `text`/`int`/`float`/`ts` were rejected at parse time — this
+ * normalizes them so the rest of the pipeline sees only canonical types.
+ */
+const FIELD_TYPE_ALIASES: Record<string, FieldType> = {
+    text: 'string',
+    int: 'number',
+    float: 'number',
+    ts: 'timestamp',
+};
+
+export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = z.lazy(() =>
+    z.preprocess(
+        (input) => {
+            if (
+                input !== null &&
+                typeof input === 'object' &&
+                'type' in input &&
+                typeof (input as { type: unknown }).type === 'string'
+            ) {
+                const raw = (input as { type: string }).type;
+                const canonical = FIELD_TYPE_ALIASES[raw];
+                if (canonical !== undefined) {
+                    return { ...(input as object), type: canonical };
+                }
+            }
+            return input;
         },
-        { message: 'Enum field requires a non-empty `values` array', path: ['values'] }
+        z.object({
+            name: z.string().min(1, 'Field name is required'),
+            type: FieldTypeSchema,
+            required: z.boolean().optional(),
+            default: z.unknown().optional(),
+            values: z.array(z.string()).optional(),
+            enum: z.array(z.string()).optional(),
+            format: FieldFormatSchema.optional(),
+            min: z.number().optional(),
+            max: z.number().optional(),
+            items: EntityFieldSchema.optional(),
+            relation: RelationConfigSchema.optional(),
+        }).refine(
+            (field) => field.type !== 'relation' || field.relation !== undefined,
+            { message: 'Relation config is required when type is "relation"', path: ['relation'] }
+        ).refine(
+            // Enum fields must carry their allowed values. Without this refine,
+            // the type was lying about what's valid — bare `type: 'enum'` without
+            // `values` passed zod but failed `orb validate` downstream with
+            // ORB_E_EMPTY_ENUM_VALUES, stalling the agent pipeline for 20 minutes.
+            // `enum` is the legacy field-name alias; accept either.
+            (field) => {
+                if (field.type !== 'enum') return true;
+                const vals = field.values ?? field.enum;
+                return Array.isArray(vals) && vals.length > 0;
+            },
+            { message: 'Enum field requires a non-empty `values` array', path: ['values'] }
+        ).refine(
+            // Array fields must describe their element shape. Bare `type: 'array'`
+            // with no `items` forces downstream consumers (builders, UI renderers,
+            // persistence) to guess, so reject it at the schema boundary.
+            (field) => {
+                if (field.type !== 'array') return true;
+                return field.items !== undefined;
+            },
+            { message: 'Array field requires an `items` schema describing each element', path: ['items'] }
+        )
     )
 );
 

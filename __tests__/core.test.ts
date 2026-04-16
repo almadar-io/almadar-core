@@ -13,6 +13,7 @@ import {
     TraitReferenceSchema,
     EntityCallSchema,
     ServiceRefObjectSchema,
+    PageRefObjectSchema,
 
     // Parse functions
     parseOrbitalSchema,
@@ -83,7 +84,8 @@ describe('FieldSchema', () => {
     it('parses all scalar field types without extra config', () => {
         // Enum excluded — requires `values` (see dedicated enum tests below).
         // Relation excluded — requires `relation` config.
-        const types = ['string', 'number', 'boolean', 'date', 'array', 'object', 'timestamp', 'datetime'];
+        // Array excluded — requires `items` (see dedicated array tests below).
+        const types = ['string', 'number', 'boolean', 'date', 'object', 'timestamp', 'datetime'];
         for (const type of types) {
             const result = FieldSchema.safeParse({ name: 'testField', type });
             expect(result.success, `type "${type}" should be valid`).toBe(true);
@@ -106,6 +108,88 @@ describe('FieldSchema', () => {
     it('rejects invalid field type', () => {
         const result = FieldSchema.safeParse({ name: 'testField', type: 'invalid' });
         expect(result.success).toBe(false);
+    });
+
+    // ------------------------------------------------------------------------
+    // Phase 1.1 — array fields require `items`
+    // ------------------------------------------------------------------------
+
+    it('rejects array fields without an `items` schema', () => {
+        const result = FieldSchema.safeParse({ name: 'xs', type: 'array' });
+        expect(result.success).toBe(false);
+        if (!result.success) {
+            const issue = result.error.issues.find((i) => i.path.join('.') === 'items');
+            expect(issue?.message).toBe(
+                'Array field requires an `items` schema describing each element',
+            );
+        }
+    });
+
+    it('accepts array fields with an `items` schema', () => {
+        const result = FieldSchema.safeParse({
+            name: 'xs',
+            type: 'array',
+            items: { name: 'x', type: 'string' },
+        });
+        expect(result.success).toBe(true);
+    });
+
+    // ------------------------------------------------------------------------
+    // Phase 1.1 — field-type alias normalization (text/int/float/ts)
+    // ------------------------------------------------------------------------
+
+    it('normalizes `text` alias to canonical `string`', () => {
+        const result = FieldSchema.safeParse({ name: 'title', type: 'text' });
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.data.type).toBe('string');
+        }
+    });
+
+    it('normalizes `int` alias to canonical `number`', () => {
+        const result = FieldSchema.safeParse({ name: 'count', type: 'int' });
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.data.type).toBe('number');
+        }
+    });
+
+    it('normalizes `float` alias to canonical `number`', () => {
+        const result = FieldSchema.safeParse({ name: 'price', type: 'float' });
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.data.type).toBe('number');
+        }
+    });
+
+    it('normalizes `ts` alias to canonical `timestamp`', () => {
+        const result = FieldSchema.safeParse({ name: 'created', type: 'ts' });
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.data.type).toBe('timestamp');
+        }
+    });
+
+    it('leaves existing canonical types untouched after alias preprocess', () => {
+        const plain = FieldSchema.safeParse({ name: 'title', type: 'string' });
+        expect(plain.success).toBe(true);
+        if (plain.success) {
+            expect(plain.data.type).toBe('string');
+        }
+
+        const enumField = FieldSchema.safeParse({
+            name: 'status',
+            type: 'enum',
+            values: ['open', 'closed'],
+        });
+        expect(enumField.success).toBe(true);
+
+        const relationField = FieldSchema.safeParse({
+            name: 'authorId',
+            type: 'relation',
+            relation: { entity: 'User', cardinality: 'one' },
+        });
+        expect(relationField.success).toBe(true);
     });
 });
 
@@ -467,5 +551,71 @@ describe('Phase F.4 — ServiceRefObject schema and guard', () => {
                 baseUrl: 'https://api.example.com',
             } as never),
         ).toBe(false);
+    });
+});
+
+// ============================================================================
+// Phase 1.2 — Optional `from` disambiguator on TraitReference and PageRefObject
+// ============================================================================
+
+describe('Phase 1.2 — TraitReferenceSchema.from', () => {
+    it('accepts a TraitReference without `from` (undefined preserved)', () => {
+        const result = TraitReferenceSchema.safeParse({
+            ref: 'Alias.traits.X',
+        });
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.data.from).toBeUndefined();
+        }
+    });
+
+    it('accepts a TraitReference with `from` and preserves the value', () => {
+        const result = TraitReferenceSchema.safeParse({
+            ref: 'Alias.traits.X',
+            from: 'std/behaviors/atoms/std-browse',
+        });
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.data.from).toBe('std/behaviors/atoms/std-browse');
+        }
+    });
+
+    it('rejects a non-string `from` value', () => {
+        const result = TraitReferenceSchema.safeParse({
+            ref: 'X',
+            from: 123,
+        });
+        expect(result.success).toBe(false);
+    });
+});
+
+describe('Phase 1.2 — PageRefObjectSchema.from', () => {
+    it('accepts a PageRefObject without `from` (undefined preserved)', () => {
+        const result = PageRefObjectSchema.safeParse({
+            ref: 'Alias.pages.X',
+        });
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.data.from).toBeUndefined();
+        }
+    });
+
+    it('accepts a PageRefObject with `from` and preserves the value', () => {
+        const result = PageRefObjectSchema.safeParse({
+            ref: 'Alias.pages.X',
+            from: 'std/behaviors/atoms/std-browse',
+        });
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.data.from).toBe('std/behaviors/atoms/std-browse');
+        }
+    });
+
+    it('rejects a non-string `from` value', () => {
+        const result = PageRefObjectSchema.safeParse({
+            ref: 'Alias.pages.X',
+            from: 123,
+        });
+        expect(result.success).toBe(false);
     });
 });
