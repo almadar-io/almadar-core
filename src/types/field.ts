@@ -189,6 +189,18 @@ export const EntityFieldSchema: z.ZodType<EntityField> = z.lazy(() =>
     }).refine(
         (field) => field.type !== 'relation' || field.relation !== undefined,
         { message: 'Relation config is required when type is "relation"', path: ['relation'] }
+    ).refine(
+        // Enum fields must carry their allowed values. Without this refine,
+        // the type was lying about what's valid — bare `type: 'enum'` without
+        // `values` passed zod but failed `orb validate` downstream with
+        // ORB_E_EMPTY_ENUM_VALUES, stalling the agent pipeline for 20 minutes.
+        // `enum` is the legacy field-name alias; accept either.
+        (field) => {
+            if (field.type !== 'enum') return true;
+            const vals = field.values ?? field.enum;
+            return Array.isArray(vals) && vals.length > 0;
+        },
+        { message: 'Enum field requires a non-empty `values` array', path: ['values'] }
     )
 );
 

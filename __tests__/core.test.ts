@@ -80,12 +80,27 @@ describe('EntitySchema', () => {
 // ============================================================================
 
 describe('FieldSchema', () => {
-    it('parses all valid field types', () => {
-        const types = ['string', 'number', 'boolean', 'date', 'array', 'object', 'timestamp', 'datetime', 'enum'];
+    it('parses all scalar field types without extra config', () => {
+        // Enum excluded — requires `values` (see dedicated enum tests below).
+        // Relation excluded — requires `relation` config.
+        const types = ['string', 'number', 'boolean', 'date', 'array', 'object', 'timestamp', 'datetime'];
         for (const type of types) {
             const result = FieldSchema.safeParse({ name: 'testField', type });
             expect(result.success, `type "${type}" should be valid`).toBe(true);
         }
+    });
+
+    it('parses enum fields with non-empty values', () => {
+        const result = FieldSchema.safeParse({ name: 'status', type: 'enum', values: ['open', 'closed'] });
+        expect(result.success).toBe(true);
+    });
+
+    it('rejects enum fields without values (GAP-AGB-9 regression guard)', () => {
+        const bare = FieldSchema.safeParse({ name: 'status', type: 'enum' });
+        expect(bare.success).toBe(false);
+
+        const empty = FieldSchema.safeParse({ name: 'status', type: 'enum', values: [] });
+        expect(empty.success).toBe(false);
     });
 
     it('rejects invalid field type', () => {
