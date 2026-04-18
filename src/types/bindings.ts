@@ -104,8 +104,9 @@ export const BINDING_CONTEXT_RULES = {
     description: 'Guards can access entity fields, event payload, current state, and time',
   },
   effect: {
-    allowed: ['entity', 'payload', 'state', 'now'] as const,
-    description: 'Effects can access and modify entity fields, use payload data',
+    allowed: ['entity', 'payload', 'state', 'now', 'trait'] as const,
+    description:
+      'Effects can access and modify entity fields, use payload data, and embed another trait\'s live frame via @trait.X inside render-ui children',
   },
   tick: {
     allowed: ['entity', 'state', 'now'] as const,
