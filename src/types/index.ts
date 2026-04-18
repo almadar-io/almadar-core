@@ -249,6 +249,7 @@ export {
   type PatternConfig,
   type RenderUIConfig,
   type CallServiceConfig,
+  type EmitConfig,
   // Typed effect tuples (per-operator tuple shapes)
   type RenderUIEffect,
   type NavigateEffect,

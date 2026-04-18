@@ -164,6 +164,40 @@ export type NavigateEffect = ['navigate', string] | ['navigate', string, Record<
 export type EmitEffect = ['emit', string] | ['emit', string, Record<string, unknown> | string];
 
 /**
+ * `emit:` config block attached to async / reactive data operators.
+ *
+ * Each key names an event the runtime should fire on the bus when the
+ * effect reaches the corresponding lifecycle point. The set of keys an
+ * operator actually supports is enforced by the compiler validator:
+ *
+ * | Operator         | Supported keys            |
+ * |------------------|---------------------------|
+ * | `fetch`          | `success`, `failure`      |
+ * | `persist`        | `success`, `failure`      |
+ * | `call-service`   | `success`, `failure`      |
+ * | `set`            | `success`                 |
+ * | `ref`            | `on_change`, `failure`    |
+ * | `os/watch-*`     | `on_message`, `failure`   |
+ *
+ * Payload convention:
+ * - `success` / `on_change` → the effect's result (fetched entity, new value)
+ * - `failure`               → `{ error: string, code?: string }`
+ * - `on_message`            → the incoming message (os/watch-* streams)
+ *
+ * See `docs/Almadar_Std_Gaps.md` §3.1 for the close-the-circuit design.
+ */
+export interface EmitConfig {
+    /** Fires after a one-shot async effect resolves successfully. */
+    success?: string;
+    /** Fires when the effect throws; payload is `{ error: string }`. */
+    failure?: string;
+    /** Reactive-subscription event (per update for `ref`). */
+    on_change?: string;
+    /** Per-event fire for `os/watch-*` streams. */
+    on_message?: string;
+}
+
+/**
  * Set effect - sets a binding to a value.
  *
  * Two forms are supported to match the runtime's `set` handler signature
