@@ -8,12 +8,9 @@ importers:
 
   .:
     dependencies:
-      '@almadar/operators':
-        specifier: '>=3.0.0'
-        version: 3.0.0
       '@almadar/patterns':
         specifier: '>=2.14.0'
-        version: 2.14.0
+        version: 2.14.1
       zod:
         specifier: ^3.22.0
         version: 3.25.76
@@ -42,8 +39,8 @@ importers:
 
 packages:
 
-  '@almadar/core@4.8.1':
-    resolution: {integrity: sha512-hrTIgHKf+bYtTOuKVhTIJfh3QbKnkv9VxZB1ghCE1bBrp+itlr2xSQ5s6u1s8FFa6q2D93D9/H/ZEgNeAUpBQg==}
+  '@almadar/core@4.8.2':
+    resolution: {integrity: sha512-fc7GRURxLTIP+HrDZZnroVxCeePkuqi3pW4KuhhbRNQYYH3K4iECCgxzCr3UDlfVUD9tHaSVCV14UFZUd76XrQ==}
 
   '@almadar/eslint-plugin@2.8.0':
     resolution: {integrity: sha512-8abtGsVP+YBaUEchSfGfQV3ZHEPtWt+4Swtu3P0AFofr+OMSfHLnor4aIwULzag+nHD9FQ7cQkVCTfBVgTHgiw==}
@@ -53,8 +50,8 @@ packages:
   '@almadar/operators@3.0.0':
     resolution: {integrity: sha512-Ur6dD3FrWiq1A/XZ+I7lyjBev/eOZ77H1F6V2Xp4hZl2gHt7jbxatdCECEsG0qzJCwQen2vCKWLJEpl9yhFwMA==}
 
-  '@almadar/patterns@2.14.0':
-    resolution: {integrity: sha512-tn3yE+clGDP/VM6YAzEagjPPIvX1lXPVK3BF9avbIjNC9GeeGRwgOYgSywVLKfk4g6ufHthPIgDPPPSEbVp3Pg==}
+  '@almadar/patterns@2.14.1':
+    resolution: {integrity: sha512-52oaXIOUpbezQZhKlJqqVSDhC57Hz6BOOQD2k0VBwmoHlDE3rteMRwY6jwQGe+EvsLGO6UcVcQnvLpr35KOjYA==}
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -1271,10 +1268,10 @@ packages:
 
 snapshots:
 
-  '@almadar/core@4.8.1':
+  '@almadar/core@4.8.2':
     dependencies:
       '@almadar/operators': 3.0.0
-      '@almadar/patterns': 2.14.0
+      '@almadar/patterns': 2.14.1
       zod: 3.25.76
 
   '@almadar/eslint-plugin@2.8.0(eslint@10.0.0)':
@@ -1284,9 +1281,9 @@ snapshots:
 
   '@almadar/operators@3.0.0': {}
 
-  '@almadar/patterns@2.14.0':
+  '@almadar/patterns@2.14.1':
     dependencies:
-      '@almadar/core': 4.8.1
+      '@almadar/core': 4.8.2
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true

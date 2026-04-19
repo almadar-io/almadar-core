@@ -1,6 +1,6 @@
 {
   "name": "@almadar/core",
-  "version": "4.8.2",
+  "version": "4.9.0",
   "description": "Core schema types and definitions for Almadar",
   "type": "module",
   "main": "./dist/index.js",
@@ -49,7 +49,6 @@
     "prepare": "git config core.hooksPath .githooks"
   },
   "dependencies": {
-    "@almadar/operators": ">=3.0.0",
     "@almadar/patterns": ">=2.14.0",
     "zod": "^3.22.0"
   },

@@ -164,36 +164,6 @@ export {
 } from "./expression.js";
 
 // ============================================================================
-// S-Expression Operators
-// ============================================================================
-
-export {
-  // Types
-  type OperatorCategory,
-  type TargetPlatform,
-  type CategoryMeta,
-  type OperatorMeta,
-  type OperatorsSchema,
-  type OperatorStats,
-  type OperatorName,
-  // Data
-  OPERATORS_SCHEMA,
-  OPERATORS,
-  CATEGORIES,
-  OPERATOR_NAMES,
-  // Functions
-  getOperatorMeta,
-  isKnownOperator,
-  isEffectOperator,
-  isGuardOperator,
-  getOperatorsByCategory,
-  getOperatorsForTarget,
-  validateOperatorArity,
-  getOperatorStats,
-  getAllOperators,
-} from "./operators.js";
-
-// ============================================================================
 // S-Expression Bindings
 // ============================================================================
 
