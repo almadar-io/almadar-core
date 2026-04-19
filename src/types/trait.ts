@@ -477,11 +477,32 @@ export interface TraitUIBinding {
  * - `emits`: Events this trait can emit (with scope and payload schema)
  * - `listens`: Events this trait listens for (with optional payloadMapping)
  */
+/**
+ * Instance vs collection scope for a trait.
+ *
+ * Mirrors the `.lolo` trait modifier list (`[interaction, instance]` /
+ * `[interaction, collection]`). Instance traits own a single entity record
+ * (typed by `linkedEntity`) and read/write `@entity.field`. Collection
+ * traits render records of `linkedEntity` without owning any one; data flows
+ * through `@payload.data` typed as `Array<linkedEntity>`.
+ *
+ * Optional today. A future phase (Almadar_Entity_V2_Plan.md Phase 4) makes
+ * it required and adds static checks in the compiler.
+ */
+export type TraitScope = 'instance' | 'collection';
+
+export const TraitScopeSchema = z.enum(['instance', 'collection']);
+
 export interface Trait {
     name: string;
     description?: string;
     description_visual_prompt?: string;
     category?: TraitCategory;
+    /**
+     * Instance or collection scope. Optional in V2 Phase 0; required from
+     * Phase 4 onward.
+     */
+    scope?: TraitScope;
     /**
      * The entity this trait is linked to.
      * Required for inline trait definitions within an orbital.
@@ -511,6 +532,7 @@ export const TraitSchema = z.object({
     description: z.string().optional(),
     description_visual_prompt: z.string().optional(),
     category: TraitCategorySchema.optional(),
+    scope: TraitScopeSchema.optional(),
     linkedEntity: z.string().optional(),
     requiredFields: z.array(RequiredFieldSchema).optional(),
     dataEntities: z.array(TraitDataEntitySchema).optional(),
