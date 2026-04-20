@@ -42,7 +42,7 @@ import {
 const VALID_ORBITAL = {
     name: 'UserOrbital',
     entity: { name: 'User', fields: [{ name: 'name', type: 'string' }] },
-    traits: [{ name: 'user-lifecycle' }],
+    traits: [{ name: 'user-lifecycle', scope: 'instance' }],
     pages: [{ name: 'UserList', path: '/users' }],
 };
 
@@ -234,6 +234,7 @@ describe('TraitSchema', () => {
         const trait = {
             name: 'lifecycle',
             category: 'lifecycle',
+            scope: 'instance',
             linkedEntity: 'User',
             stateMachine: {
                 states: [{ name: 'idle' }, { name: 'loading' }],
@@ -274,7 +275,7 @@ describe('TraitRefSchema', () => {
     });
 
     it('accepts an inline trait', () => {
-        expect(TraitRefSchema.safeParse({ name: 'inline-trait' }).success).toBe(true);
+        expect(TraitRefSchema.safeParse({ name: 'inline-trait', scope: 'instance' }).success).toBe(true);
     });
 
     it('rejects empty string', () => {
