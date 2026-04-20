@@ -248,8 +248,36 @@ export const TraitEventContractSchema = z.object({
  * Guards can be legacy strings or S-expressions.
  * Enhanced with scope and payloadMapping for cross-orbital communication.
  */
+/**
+ * Source-scoping for a `listens {}` entry. Determines which emitters the
+ * listener responds to.
+ *
+ * - `{ kind: "any" }`: wildcard (`* EVENT -> TRIGGER`). Any trait, any orbital.
+ * - `{ kind: "trait", trait: "X" }`: intra-orbital (`X EVENT -> TRIGGER`).
+ *   Only emits from the same orbital's trait `X`.
+ * - `{ kind: "orbital", orbital: "O", trait: "X" }`: cross-orbital
+ *   (`O.X EVENT -> TRIGGER`). Only emits from orbital `O`'s trait `X`.
+ *
+ * Absent (undefined) means the listener is a local payload-declaration only
+ * — pure type metadata, no bus subscription.
+ */
+export type ListenSource =
+    | { kind: 'any' }
+    | { kind: 'trait'; trait: string }
+    | { kind: 'orbital'; orbital: string; trait: string };
+
+export const ListenSourceSchema = z.union([
+    z.object({ kind: z.literal('any') }),
+    z.object({ kind: z.literal('trait'), trait: z.string().min(1) }),
+    z.object({
+        kind: z.literal('orbital'),
+        orbital: z.string().min(1),
+        trait: z.string().min(1),
+    }),
+]);
+
 export interface TraitEventListener {
-    /** Event key to listen for (may be namespaced: TraitName.EVENT_NAME) */
+    /** Event key to listen for (bare event name, no source prefix in the new shape) */
     event: string;
     /** State machine event to trigger */
     triggers: string;
@@ -263,6 +291,11 @@ export interface TraitEventListener {
     scope?: EventScope;
     /** Map event payload fields to transition payload */
     payloadMapping?: Record<string, string>;
+    /**
+     * Source scoping (see `ListenSource`). Undefined when the listen entry is
+     * a local payload declaration rather than a bus subscription.
+     */
+    source?: ListenSource;
 }
 
 export const TraitEventListenerSchema = z.object({
@@ -271,6 +304,7 @@ export const TraitEventListenerSchema = z.object({
     guard: ExpressionSchema.optional(),
     scope: EventScopeSchema.optional(),
     payloadMapping: z.record(z.string()).optional(),
+    source: ListenSourceSchema.optional(),
 });
 
 // ============================================================================
