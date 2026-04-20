@@ -170,8 +170,12 @@ export function convertDomainToSchema(domainText: string, baseSchema?: OrbitalSc
     const result = parseBehavior(text, '');
     if (result.success && result.data) {
       const traitRecord = formatBehaviorToSchema(result.data);
+      // FIXME(Phase 7): `parseBehavior` does not carry `scope` today; default
+      // to 'instance' until the behavior parser threads it through. Tracked
+      // in docs/Almadar_Entity_V2_Plan.md §9a.
       const trait: Trait = {
         name: traitRecord.name as string,
+        scope: (traitRecord.scope as Trait['scope']) ?? 'instance',
         stateMachine: traitRecord.stateMachine as Trait['stateMachine'],
       };
       // Use explicit "Entity: X" from behavior syntax if present
@@ -432,8 +436,11 @@ export function applySectionUpdate(
       const result = parseBehavior(newDomainText, '');
       if (result.success && result.data) {
         const traitRecord = formatBehaviorToSchema(result.data);
+        // FIXME(Phase 7): same as above — default scope until parseBehavior
+        // threads it through. Tracked in V2 Plan §9a.
         const trait: Trait = {
           name: traitRecord.name as string,
+          scope: (traitRecord.scope as Trait['scope']) ?? 'instance',
           stateMachine: traitRecord.stateMachine as Trait['stateMachine'],
         };
         const traitRef: TraitRef = trait.name; // Simple string ref

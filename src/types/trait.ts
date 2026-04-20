@@ -499,10 +499,13 @@ export interface Trait {
     description_visual_prompt?: string;
     category?: TraitCategory;
     /**
-     * Instance or collection scope. Optional in V2 Phase 0; required from
-     * Phase 4 onward.
+     * Instance or collection scope. Required in V2: every trait operates on
+     * either a single record (`instance`) or a group (`collection`). Drives
+     * payload-inference rules for emits declared via `type X = Event<T>` and
+     * shapes the runtime's binding semantics. Authored in `.lolo` as the
+     * `[instance]` / `[collection]` modifier on the trait header.
      */
-    scope?: TraitScope;
+    scope: TraitScope;
     /**
      * The entity this trait is linked to.
      * Required for inline trait definitions within an orbital.
@@ -532,7 +535,7 @@ export const TraitSchema = z.object({
     description: z.string().optional(),
     description_visual_prompt: z.string().optional(),
     category: TraitCategorySchema.optional(),
-    scope: TraitScopeSchema.optional(),
+    scope: TraitScopeSchema,
     linkedEntity: z.string().optional(),
     requiredFields: z.array(RequiredFieldSchema).optional(),
     dataEntities: z.array(TraitDataEntitySchema).optional(),

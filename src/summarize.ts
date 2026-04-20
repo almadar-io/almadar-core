@@ -160,7 +160,7 @@ function summarizeTrait(trait: Trait): Trait {
   const events = trait.stateMachine?.events ?? [];
   const transitions = trait.stateMachine?.transitions ?? [];
 
-  const result: Trait = { name: trait.name };
+  const result: Trait = { name: trait.name, scope: trait.scope };
   if (trait.category) result.category = trait.category;
   if (trait.linkedEntity) result.linkedEntity = trait.linkedEntity;
 

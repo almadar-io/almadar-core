@@ -225,7 +225,7 @@ describe('StateMachineSchema', () => {
 
 describe('TraitSchema', () => {
     it('parses a minimal trait', () => {
-        const trait = { name: 'my-trait' };
+        const trait = { name: 'my-trait', scope: 'instance' };
         const result = TraitSchema.safeParse(trait);
         expect(result.success).toBe(true);
     });
@@ -288,7 +288,7 @@ describe('TraitRefSchema', () => {
 
 describe('Trait helpers', () => {
     it('isInlineTrait identifies inline traits', () => {
-        expect(isInlineTrait({ name: 'my-trait' })).toBe(true);
+        expect(isInlineTrait({ name: 'my-trait', scope: 'instance' })).toBe(true);
         expect(isInlineTrait({ ref: 'my-trait' })).toBe(false);
         expect(isInlineTrait('my-trait')).toBe(false);
     });
@@ -296,13 +296,13 @@ describe('Trait helpers', () => {
     it('getTraitName extracts name from all ref forms', () => {
         expect(getTraitName('ListBehavior')).toBe('ListBehavior');
         expect(getTraitName({ ref: 'ListBehavior' })).toBe('ListBehavior');
-        expect(getTraitName({ name: 'InlineTrait' })).toBe('InlineTrait');
+        expect(getTraitName({ name: 'InlineTrait', scope: 'instance' })).toBe('InlineTrait');
     });
 
     it('normalizeTraitRef converts all forms to object', () => {
         expect(normalizeTraitRef('List')).toEqual({ ref: 'List' });
         expect(normalizeTraitRef({ ref: 'List', config: { x: 1 } })).toEqual({ ref: 'List', config: { x: 1 } });
-        expect(normalizeTraitRef({ name: 'Inline' })).toEqual({ ref: 'Inline' });
+        expect(normalizeTraitRef({ name: 'Inline', scope: 'instance' })).toEqual({ ref: 'Inline' });
     });
 });
 
