@@ -166,8 +166,13 @@ export function isSingletonEntity(entity: OrbitalEntity): boolean {
 /**
  * A single field value at runtime.
  * Union of all possible types from FieldType: string, number, boolean, date, array, nested.
+ * The nested-record branch's index signature tolerates `undefined` so that
+ * TypeScript optional properties (`x?: string`, carrying `string | undefined`)
+ * on EntityRow extenders typecheck without ceremony. At JSON serialization
+ * time `undefined` is equivalent to "key absent" and never appears on the
+ * wire; the inclusion here is a pure type-surface accommodation.
  */
-export type FieldValue = string | number | boolean | Date | null | string[] | FieldValue[] | { [key: string]: FieldValue };
+export type FieldValue = string | number | boolean | Date | null | string[] | FieldValue[] | { [key: string]: FieldValue | undefined };
 
 /**
  * One instance of an entity with actual field values.
@@ -177,7 +182,7 @@ export type FieldValue = string | number | boolean | Date | null | string[] | Fi
  * // Entity defines: Patient { fullName: string, age: number, active: boolean }
  * // EntityRow is: { id: "p1", fullName: "Sarah", age: 34, active: true }
  */
-export type EntityRow = { id?: string } & Record<string, FieldValue>;
+export type EntityRow = { id?: string } & Record<string, FieldValue | undefined>;
 
 /**
  * Collection of entity instances keyed by entity name.
