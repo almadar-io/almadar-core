@@ -199,8 +199,7 @@ export interface ResolvedTrait {
   dataEntities: ResolvedTraitDataEntity[];
 
   // Instance configuration (from page binding)
-  // eslint-disable-next-line almadar/no-record-string-unknown -- Trait config is dynamically typed per trait definition
-  config?: Record<string, unknown>;
+  config?: import('./trait.js').TraitConfig;
 
   // UI Bindings for interaction traits
   ui?: ResolvedTraitUIBinding;
@@ -220,8 +219,7 @@ export interface ResolvedTraitBinding {
   linkedEntity?: string;
 
   /** Instance configuration */
-  // eslint-disable-next-line almadar/no-record-string-unknown -- Binding config is dynamically typed per trait definition
-  config?: Record<string, unknown>;
+  config?: import('./trait.js').TraitConfig;
 }
 
 // ============================================================================

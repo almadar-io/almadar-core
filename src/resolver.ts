@@ -129,8 +129,21 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
       ir.entities.set(entity.name, entity);
     }
 
-    // Resolve traits
-    for (const trait of (orbital.traits || []) as Trait[]) {
+    // Resolve traits. Preprocessed ref traits from @almadar/runtime's
+    // preprocessSchema arrive as wrappers { ref, config, linkedEntity,
+    // _resolved: <full trait> }. Unwrap those before projecting so the
+    // page-level trait binding can find them by name in ir.traits.
+    // Without this unwrap, `trait.name` on a ref wrapper is undefined,
+    // and useTraitStateMachine subscribes to zero events for every ref.
+    for (const rawTrait of (orbital.traits || [])) {
+      // eslint-disable-next-line almadar/no-record-string-unknown -- dynamic shape from preprocessor
+      const wrap = rawTrait as Record<string, unknown>;
+      const maybeResolved = wrap['_resolved'] as Trait | undefined;
+      const trait: Trait =
+        maybeResolved && maybeResolved.stateMachine
+          ? maybeResolved
+          : (rawTrait as Trait);
+      if (!trait.name) continue;
       const resolvedTrait: ResolvedTrait = {
         name: trait.name,
         description: trait.description,

@@ -10,6 +10,7 @@
  */
 
 import { z } from 'zod';
+import { TraitConfigSchema, type TraitConfig } from './trait.js';
 
 // ============================================================================
 // View Type
@@ -43,14 +44,13 @@ export interface PageTraitRef {
     /** Entity this trait operates on */
     linkedEntity?: string;
     /** Additional trait configuration */
-    // eslint-disable-next-line almadar/no-record-string-unknown -- Trait config is dynamically typed per trait definition
-    config?: Record<string, unknown>;
+    config?: TraitConfig;
 }
 
 export const PageTraitRefSchema = z.object({
     ref: z.string().min(1, 'Trait ref is required'),
     linkedEntity: z.string().optional(),
-    config: z.record(z.unknown()).optional(),
+    config: TraitConfigSchema.optional(),
 });
 
 // ============================================================================
