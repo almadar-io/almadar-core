@@ -608,3 +608,11 @@ export {
 
 // Context Extensions (declaration-merging surface for consumers)
 export { type ContextExtensions } from "./context.js";
+
+// Bus event envelope (unified across @almadar/ui and @almadar/runtime)
+export {
+  type BusEvent,
+  type BusEventSource,
+  type BusEventListener,
+  type Unsubscribe,
+} from "./bus.js";
