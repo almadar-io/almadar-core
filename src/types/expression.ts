@@ -355,11 +355,16 @@ export interface EvalContext {
  * objects, or arrays of the same. Arrays are allowed so real-world emits
  * like `{ files: [{ name, size, type }, ...] }` or `{ selected: string[] }`
  * are typed natively instead of forcing consumers to wrap at every call.
+ *
+ * `Date` is included so `EntityRow` (whose values are `FieldValue`, which
+ * includes `Date`) is assignable to a payload field without a cast —
+ * emitted entity rows flow through the bus without boundary widening.
  */
 export type EventPayloadValue =
   | string
   | number
   | boolean
+  | Date
   | null
   | undefined
   | EventPayload
