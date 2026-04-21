@@ -181,6 +181,16 @@ export {
   getBindingExamples,
 } from "./bindings.js";
 
+// Binding root classification (narrow union + helper). Complements the
+// `parseBinding` / `ParsedBinding` shapes exported from ./expression.js
+// (which return `root: string`) — use `toBindingRoot(parsed.root)` to
+// narrow to the exhaustive `BindingRoot` union.
+export {
+  BINDING_ROOTS,
+  toBindingRoot,
+  type BindingRoot,
+} from "./binding.js";
+
 // ============================================================================
 // State Machine Types
 // ============================================================================
