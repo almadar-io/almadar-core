@@ -160,6 +160,7 @@ export {
   // Runtime evaluation types
   type EvalContext,
   type EventPayload,
+  type EventPayloadValue,
   type LogMeta,
 } from "./expression.js";
 

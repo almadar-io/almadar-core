@@ -349,9 +349,28 @@ export interface EvalContext {
   [key: string]: string | number | boolean | Date | null | string[] | EvalContext | undefined;
 }
 
-/** Typed event payload map. Recursive to support nested objects like `{ data: { id: "..." } }`. */
+/**
+ * A single value carried by an event payload field. The top-level payload
+ * is always an object; the VALUES in that object can be primitives, nested
+ * objects, or arrays of the same. Arrays are allowed so real-world emits
+ * like `{ files: [{ name, size, type }, ...] }` or `{ selected: string[] }`
+ * are typed natively instead of forcing consumers to wrap at every call.
+ */
+export type EventPayloadValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | EventPayload
+  | EventPayloadValue[];
+
+/**
+ * Typed event payload. Object-shaped so it's assignable to the bus's
+ * `EventPayload` parameter without casts.
+ */
 export interface EventPayload {
-  [key: string]: string | number | boolean | null | undefined | EventPayload;
+  [key: string]: EventPayloadValue;
 }
 
 /** Structured log/event metadata. Recursive to support nested log data. */
