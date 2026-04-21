@@ -182,13 +182,8 @@ export interface MakeTraitRefOpts {
   listens?: TraitEventListener[];
   /** Set every emit's scope. */
   emitsScope?: 'internal' | 'external';
-  /**
-   * Nested config overrides. Matches the real {@link TraitReference.config}
-   * shape: `Record<string, Record<string, unknown>>` (the outer key is the
-   * config field name, the inner record is its value shape).
-   */
-  // eslint-disable-next-line almadar/no-record-string-unknown -- Mirrors TraitReference.config dynamic shape
-  config?: Record<string, Record<string, unknown>>;
+  /** Call-site config overrides. Matches {@link TraitReference.config}. */
+  config?: import('./types/trait.js').TraitConfig;
 }
 
 /**
@@ -293,8 +288,7 @@ export interface MakeAtomOrbitalTraitOverrides {
   effects?: Record<string, SExpr[]>;
   listens?: TraitEventListener[];
   emitsScope?: 'internal' | 'external';
-  // eslint-disable-next-line almadar/no-record-string-unknown -- Mirrors TraitReference.config dynamic shape
-  config?: Record<string, Record<string, unknown>>;
+  config?: import('./types/trait.js').TraitConfig;
 }
 
 /**

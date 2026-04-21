@@ -16,6 +16,45 @@ import type { Expression } from './expression.js';
 import { ExpressionSchema } from './expression.js';
 
 // ============================================================================
+// Trait Configuration
+// ============================================================================
+
+/**
+ * A single value in a trait's call-site `config: { ... }` block. Supports
+ * scalars (string, number, boolean, null), arrays (e.g. `fields: ["name",
+ * "description"]`), and nested objects. This is the authoring surface for
+ * molecules to parameterize imported atoms: the atom's render-ui reads back
+ * via `@config.<key>` bindings.
+ */
+export type TraitConfigValue =
+    | string
+    | number
+    | boolean
+    | null
+    | ReadonlyArray<TraitConfigValue>
+    | TraitConfigObject;
+
+export interface TraitConfigObject {
+    readonly [key: string]: TraitConfigValue;
+}
+
+export type TraitConfig = TraitConfigObject;
+
+/** Zod schema for TraitConfig. Recursive via z.lazy to allow nested structures. */
+export const TraitConfigValueSchema: z.ZodType<TraitConfigValue> = z.lazy(() =>
+    z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.null(),
+        z.array(TraitConfigValueSchema),
+        z.record(TraitConfigValueSchema),
+    ])
+);
+
+export const TraitConfigSchema: z.ZodType<TraitConfig> = z.record(TraitConfigValueSchema);
+
+// ============================================================================
 // Trait Categories
 // ============================================================================
 
@@ -353,8 +392,7 @@ export interface TraitReference {
     name?: string;
     /** Phase F: rename atom event keys at the call site, e.g. {OPEN: "ADD_ITEM"} */
     events?: Record<string, string>;
-    // eslint-disable-next-line almadar/no-record-string-unknown -- Trait config is dynamically typed per trait definition
-    config?: Record<string, Record<string, unknown>>;
+    config?: TraitConfig;
     appliesTo?: string[];
     /**
      * Phase F.7: replace the imported trait's `listens` array with the
@@ -412,7 +450,7 @@ export const TraitReferenceSchema = z
                 z.string().min(1, "events value (caller event name) must be non-empty"),
             )
             .optional(),
-        config: z.record(z.record(z.unknown())).optional(),
+        config: TraitConfigSchema.optional(),
         appliesTo: z.array(z.string()).optional(),
         // Phase F.7: zod accepts an array (the inliner validates element
         // shape). The full ListenDefinition shape isn't recursively encoded
@@ -466,8 +504,7 @@ export type TraitRef =
     | string
     | {
         ref: string;
-        // eslint-disable-next-line almadar/no-record-string-unknown -- TraitRef config is dynamically typed per trait definition
-        config?: Record<string, unknown>;
+        config?: TraitConfig;
         linkedEntity?: string;
         name?: string;
         events?: Record<string, string>;
@@ -586,7 +623,7 @@ export const TraitRefSchema = z.union([
     z.string().min(1),
     z.object({
         ref: z.string().min(1),
-        config: z.record(z.unknown()).optional(),
+        config: TraitConfigSchema.optional(),
         linkedEntity: z.string().optional(),
         name: z.string().optional(),
         // Phase F.4: same non-empty refine as TraitReferenceSchema.events.
