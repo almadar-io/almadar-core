@@ -627,3 +627,21 @@ export {
   type BusEventListener,
   type Unsubscribe,
 } from "./bus.js";
+
+// Verification wire types (shared by @almadar/ui's verificationRegistry
+// producer and @almadar-io/verify's state-bridge consumer — hoisted
+// so the window.__orbitalVerification contract can't drift).
+export {
+  type CheckStatus,
+  type VerificationCheck,
+  type EffectTrace,
+  type ServerResponseTrace,
+  type TransitionTrace,
+  type BridgeHealth,
+  type VerificationSummary,
+  type TraitStateSnapshot,
+  type VerificationSnapshot,
+  type AssetLoadStatus,
+  type EventLogEntry,
+  type OrbitalVerificationAPI,
+} from "./verification.js";
