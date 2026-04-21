@@ -605,3 +605,6 @@ export {
   // Type guards
   isResolvedIR,
 } from "./ir.js";
+
+// Context Extensions (declaration-merging surface for consumers)
+export { type ContextExtensions } from "./context.js";
