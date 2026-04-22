@@ -368,7 +368,7 @@ export type EventPayloadValue =
   | null
   | undefined
   | EventPayload
-  | EventPayloadValue[];
+  | readonly EventPayloadValue[];
 
 /**
  * Typed event payload. Object-shaped so it's assignable to the bus's
