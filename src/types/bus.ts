@@ -12,6 +12,28 @@
 import type { EventPayload } from "./expression.js";
 
 /**
+ * Declared event key. A trait's event names (INIT, SAVE, CLOSE,
+ * CONFIRM_REMOVE, ...) flow through the orbital schema and the UI as
+ * strings; this alias marks "this string is a declared event key, not
+ * arbitrary text."
+ *
+ * Component props typed as `EventKey` are detected by the pattern-sync
+ * tool (`tools/almadar-pattern-sync/parser.ts`) via a TS-type lookup and
+ * marked as `kind: "event"` in the patterns registry
+ * (`@almadar/patterns`). Consumers of the registry — the Rust compiler's
+ * inline phase and the `@almadar/runtime` preprocess — read that marker
+ * to apply call-site `events: { OLD: NEW }` renames to render-ui trees
+ * without name-matching heuristics.
+ *
+ * Plain alias over `string`. Not branded because event keys originate
+ * from user data at runtime (orb schema literals, bus emits), so cast
+ * friction would buy nothing. The value of the alias is at the type
+ * surface — it's a marker the pattern-sync tool can find via
+ * `getSymbolAtLocation`.
+ */
+export type EventKey = string;
+
+/**
  * Identifies the origin of a bus event. Used by cross-trait listeners to
  * filter emits from specific orbitals, traits, transitions, or ticks.
  *
@@ -34,7 +56,7 @@ export interface BusEventSource {
  */
 export interface BusEvent {
   /** Event type identifier (e.g., 'CartItemLoaded', 'TASK_COMPLETED') */
-  type: string;
+  type: EventKey;
   /** Optional structured payload */
   payload?: EventPayload;
   /** Timestamp when the event was emitted */
