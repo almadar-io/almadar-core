@@ -276,6 +276,15 @@ function buildPayloadForEdge(
         payload[field.name] = 1;
       } else if (field.type === 'boolean') {
         payload[field.name] = true;
+      } else if (field.type === 'object' || field.type === 'any') {
+        // `mock-<name>` is a plain string; persisting that for an object
+        // field (e.g. SAVE's `data: object` carrying a form row) spreads
+        // the string's characters across numeric keys server-side and
+        // the downstream grid renders blank cards. An empty object is a
+        // safer default — callers that need entity-shaped mocks should
+        // set `mockValue` at the call site (see orbital-verify-unified's
+        // phase4-browser TraitWalkConfig builder).
+        payload[field.name] = {};
       } else {
         payload[field.name] = `mock-${field.name}`;
       }
