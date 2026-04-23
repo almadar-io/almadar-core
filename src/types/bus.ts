@@ -45,6 +45,15 @@ export interface BusEventSource {
   trait?: string;
   transition?: string;
   tick?: string;
+  /**
+   * True when the orbital bridge is re-broadcasting a transition event
+   * on the bus so cross-trait `listens { X EVENT → Y }` wiring fires on
+   * user-click flows. The originating trait's own `useUIEvents` plain-
+   * event listener checks this flag and skips — otherwise the trait
+   * that just dispatched E would hear its own bridge echo and dispatch
+   * E again, infinitely.
+   */
+  fromBridge?: boolean;
 }
 
 /**
