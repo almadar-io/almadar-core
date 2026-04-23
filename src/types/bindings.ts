@@ -104,9 +104,9 @@ export const BINDING_CONTEXT_RULES = {
     description: 'Guards can access entity fields, event payload, current state, and time',
   },
   effect: {
-    allowed: ['entity', 'payload', 'state', 'now', 'trait'] as const,
+    allowed: ['entity', 'payload', 'state', 'now', 'trait', 'config'] as const,
     description:
-      'Effects can access and modify entity fields, use payload data, and embed another trait\'s live frame via @trait.X inside render-ui children',
+      'Effects can access and modify entity fields, use payload data, embed another trait\'s live frame via @trait.X inside render-ui children, and read trait config values (@config.X) for atoms parameterized by their call-site. At molecule/organism inline time, @config.X is substituted with the literal value from the call-site config block; at atom-scope validate, @config is allowed-but-unresolved.',
   },
   tick: {
     allowed: ['entity', 'state', 'now'] as const,
