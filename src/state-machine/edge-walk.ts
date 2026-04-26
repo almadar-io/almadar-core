@@ -32,9 +32,13 @@ export function buildEdgeCoveringWalk(
   transitions: EdgeWalkTransition[],
   initialState: string,
 ): WalkStep[] {
-  // 1. Build adjacency list, skip wildcards and INIT
+  // 1. Build adjacency list. Skip wildcards (pseudostates) and skip the
+  // boot INIT (the runtime auto-fires INIT from the initial state on
+  // mount, so the walker doesn't need to fire it). User-triggered INITs
+  // from non-initial states (refresh, retry) ARE walkable edges and
+  // stay in the graph so coverage can reach them.
   const filtered = transitions.filter(
-    (t) => t.from !== '*' && t.event !== 'INIT',
+    (t) => t.from !== '*' && !(t.event === 'INIT' && t.from === initialState),
   );
 
   const graph = new Map<string, Array<{ event: string; to: string; transition: EdgeWalkTransition }>>();
