@@ -258,8 +258,10 @@ export interface TraitEventContract {
     event: string;
     /** Human-readable description */
     description?: string;
-    /** Payload schema - what data this event carries */
-    payload?: EventPayloadField[];
+    /** Payload schema — declarative type info for the event's payload.
+     *  Distinct from the runtime payload value (`@payload.X` bindings,
+     *  `EventPayload`) which is a separate concept. */
+    payloadSchema?: EventPayloadField[];
     /**
      * Event scope:
      * - 'internal': Trait-to-trait within same orbital (default)
@@ -274,7 +276,7 @@ export const TraitEventContractSchema = z.object({
         'Event name must be UPPER_SNAKE_CASE'
     ),
     description: z.string().optional(),
-    payload: z.array(EventPayloadFieldSchema).optional(),
+    payloadSchema: z.array(EventPayloadFieldSchema).optional(),
     scope: EventScopeSchema.optional(),
 });
 
