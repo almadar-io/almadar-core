@@ -250,6 +250,7 @@ export const EntityCallSchema = z
       if (!call.fields) return true;
       const seen = new Set<string>();
       for (const field of call.fields) {
+        if (field.name === undefined) continue;
         if (seen.has(field.name)) return false;
         seen.add(field.name);
       }

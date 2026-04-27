@@ -106,7 +106,11 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
         // eslint-disable-next-line almadar/no-record-string-unknown -- icon is an optional extension not on Entity type
         icon: (entityDef as unknown as { icon?: string }).icon,
         collection: entityDef.collection || entityDef.name.toLowerCase() + 's',
-        fields: (entityDef.fields || []).map((field: EntityField) => ({
+        fields: (entityDef.fields || [])
+          .filter((field: EntityField): field is EntityField & { name: string } =>
+            typeof field.name === 'string' && field.name.length > 0,
+          )
+          .map((field) => ({
           name: field.name,
           type: field.type,
           tsType: inferTsType(field.type),

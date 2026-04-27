@@ -239,7 +239,17 @@ export interface EventPayloadField {
 
 export const EventPayloadFieldSchema = z.object({
     name: z.string().min(1),
-    type: z.enum(['string', 'number', 'boolean', 'object', 'array', 'entity']),
+    /**
+     * Field type. Mirrors the Rust validator's acceptance: any non-empty
+     * string. Primitives ('string' | 'number' | 'boolean' | 'object' |
+     * 'array') are the canonical values; entity-name references like
+     * 'ModalRecord' and array-of-entity references like '[ModalRecord]'
+     * are also valid because the Rust IR's PayloadField.field_type is
+     * just a String. Only enforced narrowly at the call site (e.g.
+     * emit-literal type-mismatch warnings in
+     * orbital-compiler/phases/validation/emit_payload.rs) — not here.
+     */
+    type: z.string().min(1),
     required: z.boolean().optional(),
     description: z.string().optional(),
     entityType: z.string().optional(),
@@ -271,9 +281,16 @@ export interface TraitEventContract {
 }
 
 export const TraitEventContractSchema = z.object({
+    /**
+     * Event name. Mirrors the Rust validator's `is_valid_event_identifier`:
+     * starts with a letter, then any letters / digits / underscores. Both
+     * UPPER_SNAKE_CASE and PascalCase shapes are valid identifiers in the
+     * post-Phase 2.5 nominal-event type system (events declared via
+     * `type X = Event<T>`).
+     */
     event: z.string().min(1).regex(
-        /^[A-Z][A-Z0-9_]*$/,
-        'Event name must be UPPER_SNAKE_CASE'
+        /^[A-Za-z][A-Za-z0-9_]*$/,
+        'Event name must start with a letter and contain only letters, digits, and underscores'
     ),
     description: z.string().optional(),
     payloadSchema: z.array(EventPayloadFieldSchema).optional(),

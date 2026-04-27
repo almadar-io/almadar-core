@@ -149,8 +149,12 @@ export const FieldFormatSchema = z.enum([
  * Entity field definition.
  */
 export interface EntityField {
-    /** Field name (camelCase) */
-    name: string;
+    /**
+     * Field name (camelCase). Optional for nested item/property descriptors
+     * where the name is implied by the parent (`items`, `properties[k]`).
+     * Mirrors Rust's `FieldDefinition.name: Option<String>`.
+     */
+    name?: string;
     /** Data type */
     type: FieldType;
     /** Whether the field is required */
@@ -204,7 +208,7 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
             return input;
         },
         z.object({
-            name: z.string().min(1, 'Field name is required'),
+            name: z.string().min(1, 'Field name is required').optional(),
             type: FieldTypeSchema,
             required: z.boolean().optional(),
             default: z.unknown().optional(),

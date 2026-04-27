@@ -56,13 +56,20 @@ export const StateSchema = z.object({
  */
 export interface PayloadField {
   name: string;
-  type: "string" | "number" | "boolean" | "object" | "array";
+  /**
+   * Field type. Mirrors the Rust validator's acceptance: any non-empty
+   * string. Primitives ('string' | 'number' | 'boolean' | 'object' |
+   * 'array') are the canonical values; entity-name references like
+   * 'CartItem' and array-of-entity references like '[CartItem]' are also
+   * valid because the Rust IR's PayloadField.field_type is just a String.
+   */
+  type: string;
   required?: boolean;
 }
 
 export const PayloadFieldSchema = z.object({
   name: z.string().min(1),
-  type: z.enum(["string", "number", "boolean", "object", "array"]),
+  type: z.string().min(1),
   required: z.boolean().optional(),
 });
 
