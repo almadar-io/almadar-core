@@ -7,6 +7,8 @@
  * @packageDocumentation
  */
 
+import type { SExpr } from '../types/expression.js';
+
 /** An edge in the state graph adjacency list */
 export interface StateEdge {
   event: string;
@@ -77,7 +79,19 @@ export interface GraphTransition {
  */
 export interface EdgeWalkTransition extends GraphTransition {
   hasGuard: boolean;
-  guard?: unknown[];
+  /**
+   * Guard expression (when present). Mirrors `@almadar/core`'s `SExpr`
+   * union — a string atom (e.g. `"@payload.row"` for bare-binding
+   * existence guards declared by std-confirmation) OR an array
+   * (`["or", ...]`, `["=", ...]`). Pre-fix, the type was `unknown[]`
+   * which rejected the string form and `toEdgeWalkTransition`
+   * silently dropped it; downstream `buildGuardPayloads` then saw no
+   * guard and synthesized `{}` for the verifier's pass-case bus
+   * replay, leaving the modal closed and the portal observer
+   * reporting "slot not mounted" for every single-binding-guarded
+   * event.
+   */
+  guard?: SExpr;
   /** Event payload field declarations (e.g., [{ name: "id", type: "string", mockValue: "mock-products-1" }]).
    *  Used to generate mock payloads for events that require data (VIEW, EDIT).
    *  Callers should set mockValue for id fields using their entity context. */

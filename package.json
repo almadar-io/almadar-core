@@ -1,6 +1,6 @@
 {
   "name": "@almadar/core",
-  "version": "7.1.0",
+  "version": "7.2.0",
   "description": "Core schema types and definitions for Almadar",
   "type": "module",
   "main": "./dist/index.js",
