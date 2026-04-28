@@ -60,6 +60,18 @@ export function extractPayloadFieldRef(ref: unknown): string | null {
  * // Returns: { pass: { id: 'mock-test-value', status: 'ready' }, fail: { id: null } }
  */
 export function buildGuardPayloads(guard: unknown): GuardPayload {
+  // Bare-binding existence guard: e.g. `when @payload.row` lowers to
+  // the string `"@payload.row"`. The transition fires iff that field is
+  // truthy. Synthesize pass with a truthy mock and fail with null so
+  // the verifier can drive both branches. Without this, std-confirmation
+  // and std-modal's existence guards (REQUEST/EDIT requiring @payload.row)
+  // get empty payloads in both cases — the pass case then fails the
+  // server-side guard and the portal observer flags "slot not mounted".
+  if (typeof guard === 'string') {
+    const field = extractPayloadFieldRef(guard);
+    if (field) return { pass: { [field]: { id: 'mock-test-id', name: 'mock-test-name' } }, fail: { [field]: null } };
+  }
+
   if (!Array.isArray(guard) || guard.length === 0) {
     return { pass: {}, fail: {} };
   }
@@ -135,11 +147,19 @@ export function buildGuardPayloads(guard: unknown): GuardPayload {
   }
 
   if (op === 'or') {
-    const subs = (guard.slice(1) as unknown[]).filter(Array.isArray);
+    // Accept BOTH array sub-guards and bare-binding string sub-guards
+    // (post-substitution mode-aware guards like
+    // `(or (= "edit" "create") "@payload.row")` mix array + string children).
+    const subs = guard.slice(1) as unknown[];
     if (subs.length >= 2) {
       const s1 = buildGuardPayloads(subs[0]);
       const s2 = buildGuardPayloads(subs[1]);
-      return { pass: s1.pass, fail: { ...s1.fail, ...s2.fail } };
+      // For OR: pass if EITHER branch passes. Prefer the second branch's
+      // pass payload if the first yields nothing useful — the literal-fold
+      // case `(= "edit" "create") || @payload.row` has the first branch
+      // return `{}` and the row-payload comes from the second.
+      const combinedPass = Object.keys(s1.pass).length > 0 ? s1.pass : s2.pass;
+      return { pass: combinedPass, fail: { ...s1.fail, ...s2.fail } };
     }
     if (subs.length === 1) return buildGuardPayloads(subs[0]);
   }
