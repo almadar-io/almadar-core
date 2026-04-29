@@ -205,8 +205,20 @@ export interface OrbitalVerificationAPI {
    * Send an event into the runtime. Requires {@link bindEventBus} (in
    * `@almadar/ui`) to have run at least once. Payload typed as
    * {@link EventPayload} so callers can't slip non-bus-shaped data in.
+   *
+   * `traitScope` is the qualified `Orbital.Trait` (or `App.Trait`)
+   * scope that bus listeners subscribe under. The bridge constructs
+   * `UI:${traitScope}.${event}` and emits that on the bus, matching
+   * the codegen-emitted subscription keys (gap #13). When omitted,
+   * the legacy bare-prefix form `UI:${event}` is used — kept only
+   * for system-scope events like `UI:NOTIFY`; trait-driven dispatch
+   * MUST pass a `traitScope`.
    */
-  sendEvent?: (event: string, payload?: EventPayload) => void;
+  sendEvent?: (
+    event: string,
+    payload?: EventPayload,
+    traitScope?: string,
+  ) => void;
   /** Current state name for a given trait, if known. */
   getTraitState?: (traitName: string) => string | undefined;
   /** Per-trait reducer snapshots (VG4/VG6/VG11a/b/c). */
