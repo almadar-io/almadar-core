@@ -272,11 +272,13 @@ export type PersistEffect =
  *    older call sites using the builder helper continue to typecheck.
  *
  * @example ['call-service', 'llm', 'generate', { userPrompt: '@entity.inputText' }]
+ * @example ['call-service', 'llm', 'generate', { userPrompt: '...' }, { emit: { success: 'OK', failure: 'ERR' } }]
  * @example ['call-service', 'WeatherAPI', { service: 'weather', action: 'get', onSuccess: 'OK' }]
  */
 export type CallServiceEffect =
     | ['call-service', string, string]
     | ['call-service', string, string, ServiceParams]
+    | ['call-service', string, string, ServiceParams, PersistEmitConfig]
     | ['call-service', string, CallServiceConfig];
 
 /**
@@ -527,6 +529,20 @@ export type CheckpointLoadEffect = ['checkpoint/load', string];
  */
 export type AgentEffect = [`agent/${string}`, ...SExpr[]];
 
+/**
+ * OS effect - invokes an os/* operator.
+ *
+ * Covers reactive subscriptions to OS / network resources:
+ * - `os/watch-http`, `os/watch-ws`, `os/watch-sse` — long-lived streams
+ *   that fire `on_message` / `failure` events through a trailing
+ *   `EmitConfig` block (see `EmitConfig` for the supported keys).
+ * - `os/read-file`, `os/exec`, etc. — one-shot OS operations.
+ *
+ * @example ['os/watch-http', 'wss://push.example.com', { emit: { on_message: 'PUSH_RECEIVED', failure: 'PUSH_DISCONNECTED' } }]
+ * @example ['os/read-file', '/etc/hosts']
+ */
+export type OsEffect = [`os/${string}`, ...SExpr[]];
+
 // ============================================================================
 // Async Effects (from almadar-std/modules/async)
 // ============================================================================
@@ -614,7 +630,8 @@ export type TypedEffect =
     | EvaluateEffect
     | CheckpointSaveEffect
     | CheckpointLoadEffect
-    | AgentEffect;
+    | AgentEffect
+    | OsEffect;
 
 // ============================================================================
 // Effect Type (Strictly Typed)

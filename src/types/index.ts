@@ -267,6 +267,8 @@ export {
   type CheckpointLoadEffect,
   // Agent effect type
   type AgentEffect,
+  // OS effect type
+  type OsEffect,
   // Schemas
   UI_SLOTS,
   EffectSchema,
