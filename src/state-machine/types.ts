@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import type { SExpr } from '../types/expression.js';
+import type { SExpr, EventPayload } from '../types/expression.js';
 
 /** An edge in the state graph adjacency list */
 export interface StateEdge {
@@ -42,8 +42,7 @@ export interface ReplayStep {
   /** True if this step requires entity rows to be visible before clicking */
   needsEntityData: boolean;
   /** Payload to supply for this step (derived from guard pass case if guarded) */
-  // eslint-disable-next-line almadar/no-record-string-unknown -- Guard payloads are dynamically derived from guard expressions
-  guardPayload?: Record<string, unknown>;
+  guardPayload?: EventPayload;
   /** Full payload schema for mock data generation */
   payloadSchema?: PayloadFieldSchema[];
 }
@@ -56,12 +55,10 @@ export interface PayloadFieldSchema {
 }
 
 /** Pass and fail payloads derived from a guard s-expression */
-/* eslint-disable almadar/no-record-string-unknown -- Guard payloads are dynamically derived from guard s-expressions */
 export interface GuardPayload {
-  pass: Record<string, unknown>;
-  fail: Record<string, unknown>;
+  pass: EventPayload;
+  fail: EventPayload;
 }
-/* eslint-enable almadar/no-record-string-unknown */
 
 /**
  * Minimal transition interface for graph algorithms.
@@ -112,8 +109,7 @@ export interface WalkStep {
   /** Guard branch: null for unguarded, 'pass' or 'fail' for guarded */
   guardCase: 'pass' | 'fail' | null;
   /** Payload to send with the event */
-  // eslint-disable-next-line almadar/no-record-string-unknown -- Walk step payloads are dynamically derived from guard and schema data
-  payload: Record<string, unknown>;
+  payload: EventPayload;
   /** True if this step is a repositioning step (navigating to reach a source state with uncovered edges) */
   isRepositioning: boolean;
 }

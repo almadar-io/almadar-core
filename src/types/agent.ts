@@ -7,6 +7,9 @@
  * @packageDocumentation
  */
 
+import type { ServiceParams } from './service.js';
+import type { EventPayloadValue } from './expression.js';
+
 // ============================================================================
 // Agent Memory Types
 // ============================================================================
@@ -138,8 +141,7 @@ export interface AgentContext {
     tools(): string[];
 
     // Tools (effects)
-    // eslint-disable-next-line almadar/no-record-string-unknown -- Tool args are dynamically typed per tool contract
-    invoke(toolName: string, args: Record<string, unknown>): Promise<unknown>;
+    invoke(toolName: string, args: ServiceParams): Promise<EventPayloadValue>;
 
     // Context (pure)
     tokenCount(): number;

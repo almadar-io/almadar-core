@@ -19,6 +19,7 @@
  */
 
 import type { EdgeWalkTransition, WalkStep, StateEdge } from './types.js';
+import type { EventPayload, EventPayloadValue } from '../types/expression.js';
 import { buildGuardPayloads } from './guard-payloads.js';
 
 /**
@@ -257,8 +258,7 @@ function findNearestUncoveredState(
 function buildPayloadForEdge(
   transition: EdgeWalkTransition,
   guardCase: 'pass' | 'fail' | null,
-// eslint-disable-next-line almadar/no-record-string-unknown -- Payloads are dynamically typed per event schema
-): Record<string, unknown> {
+): EventPayload {
   // Guard-based payload generation (existing behavior)
   if (transition.hasGuard && transition.guard && guardCase) {
     const payloads = buildGuardPayloads(transition.guard);
@@ -268,12 +268,11 @@ function buildPayloadForEdge(
   // Schema-based payload generation for events that declare required fields
   // (e.g., EDIT/VIEW declare { name: "id", type: "string", required: true })
   if (transition.payloadSchema && transition.payloadSchema.length > 0) {
-    // eslint-disable-next-line almadar/no-record-string-unknown -- Mock payloads are dynamically typed per event schema
-    const payload: Record<string, unknown> = {};
+    const payload: EventPayload = {};
     for (const field of transition.payloadSchema) {
       // Use caller-provided mockValue if available (set from entity context)
       if (field.mockValue !== undefined) {
-        payload[field.name] = field.mockValue;
+        payload[field.name] = field.mockValue as EventPayloadValue;
       } else if (field.type === 'string') {
         payload[field.name] = `mock-${field.name}`;
       } else if (field.type === 'number') {

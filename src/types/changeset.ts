@@ -5,6 +5,8 @@
  * Used by @almadar/server for Firestore storage and by consumers for type safety.
  */
 
+import type { OrbitalSchema } from './schema.js';
+
 // ============================================================================
 // Schema Change Types
 // ============================================================================
@@ -71,8 +73,7 @@ export interface ChangeSetDocument {
 export interface SnapshotDocument {
   id: string;
   timestamp: number;
-  // eslint-disable-next-line almadar/no-record-string-unknown -- Snapshot schema is a raw JSON snapshot (pre-OrbitalSchema type)
-  schema: Record<string, unknown>;
+  schema: OrbitalSchema;
   reason: string;
   version?: number;
 }

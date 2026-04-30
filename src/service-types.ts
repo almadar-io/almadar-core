@@ -12,6 +12,9 @@
  * @packageDocumentation
  */
 
+import type { EventPayload, EventPayloadValue, LogMeta } from './types/expression.js';
+import type { ServiceParams } from './types/service.js';
+
 // ============================================================================
 // Service Action Names (generated from services-registry.json)
 // ============================================================================
@@ -137,12 +140,20 @@ export type ServiceActionName =
 
 /**
  * Action definition for a service contract.
- * Each action has typed params and a typed result.
+ *
+ * - `params` is bus-payload-shaped (`ServiceParams`): JSON-serializable
+ *   key/value bag with optional nesting. Service contracts override this
+ *   with stricter shapes via the generic position on `ServiceContract`.
+ *
+ * - `result` is JSON-serializable too (`EventPayloadValue`): a primitive,
+ *   `null`/`undefined`, an array of values, or an `EventPayload` object.
+ *   This is the same recursive shape the bus accepts when an effect's
+ *   `success` event fires with the call-service result, so no boundary
+ *   widening is needed when the runtime forwards the value.
  */
 export interface ServiceAction {
-  // eslint-disable-next-line almadar/no-record-string-unknown -- Service params are dynamically typed per service contract
-  params: Record<string, unknown>;
-  result: unknown;
+  params: ServiceParams;
+  result: EventPayloadValue;
 }
 
 /**
@@ -192,11 +203,9 @@ export interface ServiceContract<
  * events.emit('LLM_RESPONSE', { requestId: '1', content: '...', tokensUsed: 42 });
  * ```
  */
-/* eslint-disable almadar/no-record-string-unknown -- EventMap generic constraint defines the event payload contract */
 export interface ServiceEvents<
-  EventMap extends Record<string, Record<string, unknown>>,
+  EventMap extends Record<string, EventPayload>,
 > {
-/* eslint-enable almadar/no-record-string-unknown */
   emit<E extends keyof EventMap & string>(
     event: E,
     payload: EventMap[E],
@@ -244,13 +253,11 @@ export interface ServiceEvents<
  * const typedBus = createTypedEventBus<MyEvents>(rawBus);
  * typedBus.emit('user.created', { id: '123', name: 'Alice' });
  */
-/* eslint-disable almadar/no-record-string-unknown -- EventMap generic and bus interface use Record for dynamic event payloads */
 export function createTypedEventBus<
-  EventMap extends Record<string, Record<string, unknown>>,
+  EventMap extends Record<string, EventPayload>,
 >(bus: {
-  emit(event: string, payload?: unknown, meta?: Record<string, unknown>): void;
-  on(event: string, handler: (payload: unknown, meta?: Record<string, unknown>) => void): () => void;
-/* eslint-enable almadar/no-record-string-unknown */
+  emit(event: string, payload?: unknown, meta?: LogMeta): void;
+  on(event: string, handler: (payload: unknown, meta?: LogMeta) => void): () => void;
 }): ServiceEvents<EventMap> {
   return {
     emit<E extends keyof EventMap & string>(event: E, payload: EventMap[E]): void {

@@ -9,6 +9,7 @@
 
 import type { SExpr } from './expression.js';
 import type { EntityRow, FieldValue } from './entity.js';
+import type { AnyPatternConfig } from '@almadar/patterns';
 
 // ============================================================================
 // Transition Types
@@ -148,8 +149,7 @@ export interface ResolvedTraitUIBinding {
     /** Presentation type: modal, drawer, popover, inline, confirm-dialog */
     presentation: string;
     /** Content pattern(s) to render */
-    // eslint-disable-next-line almadar/no-record-string-unknown -- UI content patterns are dynamically typed per pattern definition
-    content: Record<string, unknown> | Record<string, unknown>[];
+    content: AnyPatternConfig | AnyPatternConfig[];
     /** Presentation props */
     props?: {
       size?: string;
@@ -231,8 +231,7 @@ export interface ResolvedPattern {
   type: string;
 
   /** Pattern configuration */
-  // eslint-disable-next-line almadar/no-record-string-unknown -- Pattern config is dynamically typed per pattern definition
-  config: Record<string, unknown>;
+  config: AnyPatternConfig;
 
   /** Shell component to use */
   shellComponent?: string;

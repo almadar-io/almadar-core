@@ -12,6 +12,7 @@ import type { StateMachine } from './state-machine.js';
 import { StateMachineSchema } from './state-machine.js';
 import type { Effect } from './effect.js';
 import { EffectSchema } from './effect.js';
+import type { AnyPatternConfig } from '@almadar/patterns';
 import type { Expression } from './expression.js';
 import { ExpressionSchema } from './expression.js';
 
@@ -227,8 +228,18 @@ export const EventScopeSchema = z.enum(['internal', 'external']);
 export interface EventPayloadField {
     /** Field name */
     name: string;
-    /** Field type */
-    type: 'string' | 'number' | 'boolean' | 'object' | 'array' | 'entity';
+    /**
+     * Field type. Any non-empty string, mirroring the Rust validator's
+     * acceptance (Zod schema below uses `z.string().min(1)`). Well-known
+     * values include the primitives (`string`, `number`, `boolean`,
+     * `object`, `array`, `entity`), date variants (`date`, `datetime`,
+     * `timestamp`), entity-name references (`User`), and array-of-entity
+     * shorthand (`[User]`). Narrowing happens at the call sites that care
+     * (e.g. `orbital-compiler/phases/validation/emit_payload.rs`), not at
+     * the structural type level — this keeps `.orb`-emitted payloads
+     * round-trippable through TypeScript without losing precision.
+     */
+    type: string;
     /** Whether field is required in payload */
     required?: boolean;
     /** Human-readable description */
@@ -541,8 +552,7 @@ export type PresentationType = 'modal' | 'drawer' | 'popover' | 'inline' | 'conf
 export interface TraitUIBinding {
     [stateName: string]: {
         presentation: PresentationType;
-        // eslint-disable-next-line almadar/no-record-string-unknown -- UI content patterns are dynamically typed per pattern definition
-        content: Record<string, unknown> | Record<string, unknown>[];
+        content: AnyPatternConfig | AnyPatternConfig[];
         props?: {
             size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
             position?: 'left' | 'right' | 'top' | 'bottom' | 'center';
@@ -715,15 +725,14 @@ export function getTraitName(traitRef: TraitRef): string {
  * string references and inline traits.
  * 
  * @param {TraitRef} traitRef - Trait reference to extract config from
- * @returns {Record<string, unknown> | undefined} Trait configuration or undefined
- * 
+ * @returns {TraitConfig | undefined} Trait configuration or undefined
+ *
  * @example
  * getTraitConfig('MyTrait'); // returns undefined
  * getTraitConfig({ name: 'MyTrait' }); // returns undefined
  * getTraitConfig({ ref: 'MyTrait', config: { option: 'value' } }); // returns config object
  */
-// eslint-disable-next-line almadar/no-record-string-unknown -- Returns dynamically typed config from TraitRef
-export function getTraitConfig(traitRef: TraitRef): Record<string, unknown> | undefined {
+export function getTraitConfig(traitRef: TraitRef): TraitConfig | undefined {
     if (typeof traitRef === 'string') {
         return undefined;
     }
@@ -740,15 +749,14 @@ export function getTraitConfig(traitRef: TraitRef): Record<string, unknown> | un
  * standardized object format with 'ref' and optional 'config' properties.
  * 
  * @param {TraitRef} traitRef - Trait reference to normalize
- * @returns {{ ref: string; config?: Record<string, unknown> }} Normalized trait reference
- * 
+ * @returns {{ ref: string; config?: TraitConfig }} Normalized trait reference
+ *
  * @example
  * normalizeTraitRef('MyTrait'); // returns { ref: 'MyTrait' }
  * normalizeTraitRef({ name: 'MyTrait' }); // returns { ref: 'MyTrait' }
  * normalizeTraitRef({ ref: 'MyTrait', config: {...} }); // returns original
  */
-// eslint-disable-next-line almadar/no-record-string-unknown -- Returns dynamically typed config from TraitRef
-export function normalizeTraitRef(traitRef: TraitRef): { ref: string; config?: Record<string, unknown> } {
+export function normalizeTraitRef(traitRef: TraitRef): { ref: string; config?: TraitConfig } {
     if (typeof traitRef === 'string') {
         return { ref: traitRef };
     }

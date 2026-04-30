@@ -268,8 +268,7 @@ export function detectPageContentReduction(
     page: unknown,
   ): { sections: number; actions: number } => {
     if (!page || typeof page !== 'object') return { sections: 0, actions: 0 };
-    // eslint-disable-next-line almadar/no-record-string-unknown -- Page structure is unknown at this generic diff level
-    const p = page as Record<string, unknown>;
+    const p = page as { traits?: unknown[] };
     const traits = Array.isArray(p.traits) ? p.traits : [];
     return { sections: traits.length, actions: 0 };
   };

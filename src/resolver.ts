@@ -140,9 +140,8 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
     // Without this unwrap, `trait.name` on a ref wrapper is undefined,
     // and useTraitStateMachine subscribes to zero events for every ref.
     for (const rawTrait of (orbital.traits || [])) {
-      // eslint-disable-next-line almadar/no-record-string-unknown -- dynamic shape from preprocessor
-      const wrap = rawTrait as Record<string, unknown>;
-      const maybeResolved = wrap['_resolved'] as Trait | undefined;
+      const wrap = rawTrait as { _resolved?: Trait };
+      const maybeResolved = wrap._resolved;
       const trait: Trait =
         maybeResolved && maybeResolved.stateMachine
           ? maybeResolved
