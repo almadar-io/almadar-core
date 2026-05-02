@@ -722,6 +722,21 @@ export interface OrbitalDefinition {
    */
   entity: EntityRef;
 
+  /**
+   * Imported atom entities surfaced into this orbital's resolution
+   * scope WITHOUT modifying the primary `entity`. Populated by the
+   * compiler's inline phase when a trait reference imports an atom
+   * and OMITS the `-> Entity` linkedEntity rebind: the atom keeps its
+   * own entity (e.g. `SearchResult` from std-search), and that entity
+   * is registered here so validators / codegen / runtime can resolve
+   * `linkedEntity = "SearchResult"` lookups, register persistence for
+   * it, and emit its TypeScript type alongside the primary entity.
+   * The orbital's per-trait entity arity stays 1:1 — this is purely a
+   * NAME-RESOLUTION side channel for cross-import linkedEntity
+   * references.
+   */
+  auxiliaryEntities?: EntityRef[];
+
   /** Trait references (local or imported via "Alias.traits.TraitName") */
   traits: TraitRef[];
 
