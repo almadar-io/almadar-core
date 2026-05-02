@@ -177,6 +177,7 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
           guard: l.guard,
         })),
         dataEntities: [],
+        config: trait.config,
       };
       ir.traits.set(trait.name, resolvedTrait);
     }

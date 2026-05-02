@@ -55,6 +55,37 @@ export const TraitConfigValueSchema: z.ZodType<TraitConfigValue> = z.lazy(() =>
 
 export const TraitConfigSchema: z.ZodType<TraitConfig> = z.record(TraitConfigValueSchema);
 
+/**
+ * Per-field entry in a trait's DECLARED `config { }` schema as it lives
+ * on the `.orb` JSON: `{ type: "string" | "[string]" | "object" | ...,
+ * default?: <value> }`. Distinct from `TraitConfigValue` (which is the
+ * resolved runtime value). The runtime reads `default` to seed the
+ * `@config.X` binding context when no call-site override is supplied.
+ *
+ * Authored as `config { foo : string = "bar" }` in `.lolo`; lowered to
+ * `{ foo: { type: "string", default: "bar" } }` in `.orb`.
+ */
+export interface ConfigFieldDeclaration {
+    readonly type: string;
+    readonly default?: TraitConfigValue;
+}
+
+export const ConfigFieldDeclarationSchema: z.ZodType<ConfigFieldDeclaration> = z.object({
+    type: z.string(),
+    default: TraitConfigValueSchema.optional(),
+});
+
+/**
+ * Map of declared config fields keyed by name. Lives on `Trait.config`
+ * and `ResolvedTrait.config` for atoms/molecules that expose typed
+ * configuration to consumers.
+ */
+export type DeclaredTraitConfig = Readonly<Record<string, ConfigFieldDeclaration>>;
+
+export const DeclaredTraitConfigSchema: z.ZodType<DeclaredTraitConfig> = z.record(
+    ConfigFieldDeclarationSchema,
+);
+
 // ============================================================================
 // Trait Categories
 // ============================================================================
@@ -628,6 +659,13 @@ export interface Trait {
      */
     listens?: TraitEventListener[];
     ui?: TraitUIBinding;
+    /**
+     * Declared `config { }` schema authored on the trait. Drives
+     * `@config.X` substitution: each field's `default` seeds the
+     * binding context behind any caller-supplied call-site
+     * `config: { ... }` override.
+     */
+    config?: DeclaredTraitConfig;
 }
 
 export const TraitSchema = z.object({
@@ -645,6 +683,7 @@ export const TraitSchema = z.object({
     emits: z.array(TraitEventContractSchema).optional(),
     listens: z.array(TraitEventListenerSchema).optional(),
     ui: z.record(z.unknown()).optional(),
+    config: DeclaredTraitConfigSchema.optional(),
 });
 
 // TraitRefSchema defined here after TraitSchema to avoid forward reference

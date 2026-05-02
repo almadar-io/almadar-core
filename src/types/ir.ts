@@ -198,8 +198,18 @@ export interface ResolvedTrait {
   // Data
   dataEntities: ResolvedTraitDataEntity[];
 
-  // Instance configuration (from page binding)
-  config?: import('./trait.js').TraitConfig;
+  /**
+   * The trait's DECLARED `config { }` schema (per-field
+   * `{ type, default? }`). Drives `@config.X` substitution: each
+   * field's `default` seeds the binding context behind any caller-
+   * supplied call-site `config: { ... }` override on the trait
+   * reference. Authored on the atom; flows through verbatim from
+   * `Trait.config`.
+   *
+   * (Caller-supplied call-site overrides live on the page-trait
+   * binding's `config: TraitConfig` — see `ResolvedTraitBinding`.)
+   */
+  config?: import('./trait.js').DeclaredTraitConfig;
 
   // UI Bindings for interaction traits
   ui?: ResolvedTraitUIBinding;
