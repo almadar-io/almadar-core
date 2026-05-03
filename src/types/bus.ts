@@ -46,14 +46,26 @@ export interface BusEventSource {
   transition?: string;
   tick?: string;
   /**
-   * True when the orbital bridge is re-broadcasting a transition event
-   * on the bus so cross-trait `listens { X EVENT → Y }` wiring fires on
-   * user-click flows. The originating trait's own `useUIEvents` plain-
-   * event listener checks this flag and skips — otherwise the trait
-   * that just dispatched E would hear its own bridge echo and dispatch
-   * E again, infinitely.
+   * True when the orbital bridge re-broadcasts an event onto the bus
+   * (any source — both echoes of the dispatched event and server-side
+   * cascade emits via `(emit X)` / `fetch.emit.success`). Cross-trait
+   * listeners filter on this flag so the click-time qualified emit
+   * (which has no `fromBridge`) doesn't double-fire alongside the
+   * post-server bridge confirmation. See `dispatched` for the narrower
+   * "echo of the just-dispatched event" signal.
    */
   fromBridge?: boolean;
+  /**
+   * True ONLY for the bridge echo of the event the source trait JUST
+   * dispatched (path 1 of useOrbitalBridge). The originating trait's
+   * `useUIEvents` skips events with this flag to prevent the source
+   * from re-dispatching its own bridge echo (infinite loop). Server-
+   * side cascade emits (path 2) carry `fromBridge: true` but NOT
+   * `dispatched`, so they reach the source trait's transition handler
+   * — that's how a fetch's `emit.success` advances the trait's own
+   * state machine (e.g. `loading -> browsing` on `BrowseItemLoaded`).
+   */
+  dispatched?: boolean;
 }
 
 /**
