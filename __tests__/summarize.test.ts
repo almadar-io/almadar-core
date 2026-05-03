@@ -57,7 +57,7 @@ const crudOrbital: OrbitalDefinition = {
         },
         {
           from: 'browsing', to: 'creating', event: 'CREATE',
-          effects: [['render-ui', 'modal', { type: 'form-section', entity: 'Inspector' }]],
+          effects: [['render-ui', 'modal', { type: 'form-section', entity: 'Inspector', fields: [] }]],
         },
         {
           from: 'creating', to: 'browsing', event: 'SAVE',
@@ -110,7 +110,7 @@ const wizardOrbital: OrbitalDefinition = {
         { key: 'COMPLETE', name: 'Complete' },
       ],
       transitions: [
-        { from: 'introduction', to: 'introduction', event: 'INIT', effects: [['render-ui', 'main', { type: 'form-section' }]] },
+        { from: 'introduction', to: 'introduction', event: 'INIT', effects: [['render-ui', 'main', { type: 'form-section', fields: [] }]] },
         { from: 'introduction', to: 'content', event: 'NEXT', effects: [] },
         { from: 'content', to: 'introduction', event: 'PREV', effects: [] },
         { from: 'content', to: 'record', event: 'NEXT', effects: [] },
