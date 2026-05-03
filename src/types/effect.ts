@@ -337,6 +337,21 @@ export interface FetchOptions {
 export type FetchEffect = ['fetch', string] | ['fetch', string, FetchOptions];
 
 /**
+ * Result returned by a fetch / ref / deref handler.
+ *
+ * `rows` carries the entity (or entities) that survived `filter` AND
+ * pagination (`offset`/`limit`). `total` is the count of rows that
+ * matched the filter BEFORE pagination, so paginating consumers can
+ * compute `totalPages = ceil(total / pageSize)` without a second
+ * round-trip. Single-entity fetches by id return `total: 1` (or `0`
+ * if not found, in which case the handler returns `null` instead).
+ */
+export interface FetchResult {
+    rows: EntityRow | EntityRow[];
+    total: number;
+}
+
+/**
  * If effect - conditional effect execution.
  * Uses SExpr to allow deeply nested conditionals.
  * @example ['if', ['>', '@entity.health', 0], ['emit', 'ALIVE'], ['emit', 'DEAD']]

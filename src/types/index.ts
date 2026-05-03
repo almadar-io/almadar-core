@@ -253,6 +253,7 @@ export {
   type AtomicEffect,
   type WatchOptions,
   type FetchOptions,
+  type FetchResult,
   type PersistEmitConfig,
   type PersistData,
   type ForwardEffect,
