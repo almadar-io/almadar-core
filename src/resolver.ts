@@ -191,13 +191,33 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
         viewType: page.viewType && ['list', 'detail', 'create', 'edit', 'dashboard'].includes(page.viewType) ?
           page.viewType as ('list' | 'detail' | 'create' | 'edit' | 'dashboard') : undefined,
         sections: [],
-        traits: (page.traits || []).map((traitRef: PageTraitRef) => ({
-          ref: traitRef.ref,
-          trait: resolveTraitRef(traitRef, ir.traits, orbital.traits as Trait[] || []),
-          linkedEntity: traitRef.linkedEntity ??
-            (orbital.entity ? (typeof orbital.entity === 'string' ? orbital.entity.replace('.entity', '') : (orbital.entity as Entity).name) : undefined),
-          config: traitRef.config,
-        })),
+        traits: (page.traits || []).map((traitRef: PageTraitRef) => {
+          const resolvedTrait = resolveTraitRef(traitRef, ir.traits, orbital.traits as Trait[] || []);
+          // Precedence: page-level rebind → orbital-trait-wrapper rebind →
+          // atom's resolved trait linkedEntity (from `uses` import) →
+          // orbital primary entity. Without walking past the wrapper to
+          // the atom's _resolved, atoms imported via `uses` without an
+          // explicit `-> Entity` rebind silently rebind to the orbital's
+          // primary entity (gap #22 design said atoms keep their own
+          // auxiliary entity).
+          const orbitalTrait = (orbital.traits as Trait[] || []).find(
+            (t): t is Trait => typeof t === 'object' && t !== null
+              && (
+                ('name' in t && (t as { name?: string }).name === traitRef.ref)
+                || ('ref' in t && (t as { ref?: string }).ref === traitRef.ref)
+              )
+          );
+          const orbitalTraitWrapped = orbitalTrait as (Trait & { linkedEntity?: string; _resolved?: { linkedEntity?: string } }) | undefined;
+          const wrapperLinked = orbitalTraitWrapped?.linkedEntity ?? orbitalTraitWrapped?._resolved?.linkedEntity;
+          const resolvedLinked = (resolvedTrait as { linkedEntity?: string } | undefined)?.linkedEntity;
+          return {
+            ref: traitRef.ref,
+            trait: resolvedTrait,
+            linkedEntity: traitRef.linkedEntity ?? wrapperLinked ?? resolvedLinked ??
+              (orbital.entity ? (typeof orbital.entity === 'string' ? orbital.entity.replace('.entity', '') : (orbital.entity as Entity).name) : undefined),
+            config: traitRef.config,
+          };
+        }),
         entityBindings: [],
         navigation: [],
         singletonEntities: [],

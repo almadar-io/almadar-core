@@ -39,8 +39,8 @@ importers:
 
 packages:
 
-  '@almadar/core@7.6.0':
-    resolution: {integrity: sha512-59IdR17F5L27DL3TCNi4AakjpGRHJbluVcr00dmTRxcLRbwww4zTzQIEtYKp5Jp6TYjXHd79mfg5p7jbaT3oKg==}
+  '@almadar/core@7.7.0':
+    resolution: {integrity: sha512-0QbNKMGMw5+x/czK6fpcQXmySv6JPmTyskrDODIoNNwAegHqGd3c9OHTriOLRRDNjj0eeJcW67Lyhc3W+g4Hdw==}
 
   '@almadar/eslint-plugin@2.8.1':
     resolution: {integrity: sha512-DaWThhbtFMT/IrqEyc+XADrhAqTjc+jeSO9CeiSJKs0+UoBDuNLZNhLy1kiXT61XdHSxCNZD7jjjtHbXbe59+g==}
@@ -1265,7 +1265,7 @@ packages:
 
 snapshots:
 
-  '@almadar/core@7.6.0':
+  '@almadar/core@7.7.0':
     dependencies:
       '@almadar/patterns': 2.18.2
       zod: 3.25.76
@@ -1277,7 +1277,7 @@ snapshots:
 
   '@almadar/patterns@2.18.2':
     dependencies:
-      '@almadar/core': 7.6.0
+      '@almadar/core': 7.7.0
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
