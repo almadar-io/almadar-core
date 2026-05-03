@@ -177,6 +177,7 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
           guard: l.guard,
         })),
         dataEntities: [],
+        linkedEntity: trait.linkedEntity,
         config: trait.config,
       };
       ir.traits.set(trait.name, resolvedTrait);
@@ -207,9 +208,9 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
                 || ('ref' in t && (t as { ref?: string }).ref === traitRef.ref)
               )
           );
-          const orbitalTraitWrapped = orbitalTrait as (Trait & { linkedEntity?: string; _resolved?: { linkedEntity?: string } }) | undefined;
+          const orbitalTraitWrapped = orbitalTrait as (Trait & { _resolved?: Trait }) | undefined;
           const wrapperLinked = orbitalTraitWrapped?.linkedEntity ?? orbitalTraitWrapped?._resolved?.linkedEntity;
-          const resolvedLinked = (resolvedTrait as { linkedEntity?: string } | undefined)?.linkedEntity;
+          const resolvedLinked = resolvedTrait?.linkedEntity;
           return {
             ref: traitRef.ref,
             trait: resolvedTrait,

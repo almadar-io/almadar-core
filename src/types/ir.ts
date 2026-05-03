@@ -199,6 +199,16 @@ export interface ResolvedTrait {
   dataEntities: ResolvedTraitDataEntity[];
 
   /**
+   * Atom-declared linked entity. The atom (e.g. std-pagination)
+   * declares which entity its `@entity.X` bindings resolve against
+   * (e.g. `PagedItem`). Distinct from the call-site rebind on
+   * `ResolvedTraitBinding.linkedEntity`, which a molecule may use
+   * to override the atom's default. Either side may be undefined
+   * for traits that don't bind any entity (pure interaction).
+   */
+  linkedEntity?: string;
+
+  /**
    * The trait's DECLARED `config { }` schema (per-field
    * `{ type, default? }`). Drives `@config.X` substitution: each
    * field's `default` seeds the binding context behind any caller-
