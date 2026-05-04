@@ -19,7 +19,7 @@ import type { Page } from './types/page.js';
 import type { EntityRef, OrbitalDefinition, PageRef, PageRefObject, UseDeclaration } from './types/orbital.js';
 import { isEntityCall, isEntityReference, parseEntityRef } from './types/orbital.js';
 import type { OrbitalSchema } from './types/schema.js';
-import type { TraitEventContract, TraitEventListener, Trait, TraitRef, TraitReference } from './types/trait.js';
+import type { TraitEventContract, TraitEventListener, Trait, TraitRef, TraitReference, TraitConfig } from './types/trait.js';
 import type { SExpr } from './types/expression.js';
 
 // Re-export compose-behaviors module
@@ -183,7 +183,53 @@ export interface MakeTraitRefOpts {
   /** Set every emit's scope. */
   emitsScope?: 'internal' | 'external';
   /** Call-site config overrides. Matches {@link TraitReference.config}. */
-  config?: import('./types/trait.js').TraitConfig;
+  config?: TraitConfig;
+}
+
+/**
+ * Typed-narrowing variant of {@link MakeTraitRefOpts} for callers that know
+ * the imported atom's overridable surfaces — its event-key set, listen-key
+ * set, and config shape. Generated std factories use this variant so an LLM
+ * tool consumer (orbital-agent) sees the closed event-name set and the
+ * config field schema instead of the un-narrowed `Record<string, string>` /
+ * `TraitConfig` defaults.
+ *
+ * Type parameters:
+ * - `EventKey`   — string union of the atom's emit event names. Narrows the
+ *   `events` rename map's keys to legal originals only.
+ * - `ConfigShape` — typed shape of the trait's `config { ... }` block (literal
+ *   unions intact). Narrows the `config` override to the atom's actual fields.
+ * - `ListenKey`  — string union of the atom's listen-key contract. Narrows
+ *   each listens entry's `event` against the atom's real subscription set.
+ *
+ * Runtime behavior is unchanged — {@link makeTraitRef} accepts both the
+ * narrow and wide forms via the standard structural-typing rules. This is
+ * a type-level narrowing only; widening at the call boundary is intentional.
+ */
+export interface MakeTraitRefOptsTyped<
+  EventKey extends string = string,
+  ConfigShape extends TraitConfig = Record<string, never>,
+  ListenKey extends string = string,
+> extends Omit<
+    MakeTraitRefOpts,
+    'events' | 'effects' | 'listens' | 'config'
+  > {
+  /** Per-key rename map, narrowed to the atom's actual event keys. */
+  events?: Partial<Record<EventKey, string>>;
+  /**
+   * Per-event SExpression effect replacement. Keys are POST-rename event
+   * names so they're caller-defined (no narrowing here); values stay typed
+   * as `SExpr[]`.
+   */
+  effects?: Partial<Record<string, SExpr[]>>;
+  /**
+   * Replace the imported trait's `listens` array entirely. Each entry's
+   * `event` field is narrowed to {@link ListenKey} where the atom's
+   * subscription set is fixed; otherwise this widens to plain string.
+   */
+  listens?: Array<TraitEventListener & { event?: ListenKey }>;
+  /** Typed call-site config overrides — narrowed to {@link ConfigShape}. */
+  config?: ConfigShape;
 }
 
 /**
@@ -223,6 +269,21 @@ export interface MakePageRefOpts {
   linkedEntity?: string;
   /** Replace the page's trait list. */
   traits?: TraitRef[];
+}
+
+/**
+ * Typed-narrowing variant of {@link MakePageRefOpts}. Narrows the `traits`
+ * override array's entries to the orbital's known trait-name union — so the
+ * agent can't pass a trait name that doesn't exist on the page's owning
+ * orbital. Generated std page-helpers use this variant to surface the
+ * trait set in the tool schema; un-narrowed call sites stay compatible.
+ *
+ * Type parameter:
+ * - `TraitName` — string union of trait names the page may reference.
+ */
+export interface MakePageRefOptsTyped<TraitName extends string = string>
+  extends Omit<MakePageRefOpts, 'traits'> {
+  traits?: Array<{ ref: TraitName } | TraitRef>;
 }
 
 /**
@@ -288,7 +349,7 @@ export interface MakeAtomOrbitalTraitOverrides {
   effects?: Record<string, SExpr[]>;
   listens?: TraitEventListener[];
   emitsScope?: 'internal' | 'external';
-  config?: import('./types/trait.js').TraitConfig;
+  config?: TraitConfig;
 }
 
 /**
