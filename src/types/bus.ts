@@ -34,6 +34,64 @@ import type { EventPayload } from "./expression.js";
 export type EventKey = string;
 
 /**
+ * Phantom-typed brand for declarative bus-emit props on UI components.
+ *
+ * Used by component authors to BOTH mark a prop as a bus-event reference
+ * AND document the payload shape that the component will fire onto the
+ * bus when that prop is bound. Authors write:
+ *
+ *     // Tabs.tsx
+ *     export interface TabsProps {
+ *       tabChangeEvent?: EventEmit<{ tabId: string }>;
+ *     }
+ *
+ * Consumers see only the structural `string` (no UX impact: passing a
+ * literal `"TAB_CHANGED"` keeps working). The phantom `P` parameter
+ * carries the bus-payload schema at the type level for pattern-sync to
+ * extract.
+ *
+ * Pattern-sync (`tools/almadar-pattern-sync/parser.ts`) detects this
+ * brand via TS type-lookup (mirrors how it detects `EventKey`) and
+ * writes two registry fields per prop:
+ * - `kind: "event-ref"` — the discriminant rules read in lolo / orb
+ *   validator to know "this prop's string value is a bus event name."
+ * - `emitPayloadSchema` — the structural shape of `P`, serialized as
+ *   the same JSON-Schema-shaped record Almadar uses for trait
+ *   `payloadSchema`. Validator rules cross-check this against the
+ *   trait's declared `emits { EVENT { ... } }` payload to catch mismatches
+ *   at parse / validate time instead of runtime.
+ *
+ * Example payload bus emission inside the component (no wrapper —
+ * `EventEmit<P>` erases to `string`):
+ *
+ *     if (tabChangeEvent) eventBus.emit(`UI:${tabChangeEvent}`, { tabId });
+ *
+ * The brand is structurally an unused optional readonly property; TS
+ * never asks for it at construction, so authors and consumers never
+ * see it.
+ */
+export type EventEmit<P> = string & { readonly __emitPayload?: P };
+
+/**
+ * Phantom-typed brand for declarative bus-listen props on UI components.
+ *
+ * Mirror of `EventEmit<P>`. Used by future patterns where a UI component
+ * subscribes to a bus event and forwards its payload upward via prop
+ * (e.g. an editor pattern that listens for `EXTERNAL_RESET` and exposes
+ * the consumed payload to the parent). Pattern-sync detects this brand
+ * the same way as `EventEmit<P>` and writes:
+ * - `kind: "event-listen"` (or a sub-discriminant of `event-ref`)
+ * - `listenPayloadSchema` with the structural shape of `P`
+ *
+ * Validator rules use this to verify the trait the prop is bound to
+ * actually emits a payload of the expected shape.
+ *
+ * Reserved for symmetry; no @almadar/ui component uses it as of this
+ * commit. Add usages incrementally as patterns require them.
+ */
+export type EventListen<P> = string & { readonly __listenPayload?: P };
+
+/**
  * Identifies the origin of a bus event. Used by cross-trait listeners to
  * filter emits from specific orbitals, traits, transitions, or ticks.
  *
