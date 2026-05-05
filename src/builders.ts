@@ -30,6 +30,13 @@ export {
   type ComposeBehaviorsResult,
   composeBehaviors,
 } from './builders/compose-behaviors.js';
+// LayoutTrait + slot-embedding helpers (Phase 7.6 — atom-composition recipe path).
+export {
+  type MakeLayoutTraitOpts,
+  makeSlot,
+  makeRenderUI,
+  makeLayoutTrait,
+} from './builders/layout-trait.js';
 
 // ============================================================================
 // Utilities

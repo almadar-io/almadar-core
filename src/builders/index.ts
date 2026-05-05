@@ -44,3 +44,14 @@ export {
   makeAtomOrbital,
 } from '../builders.js';
 
+// LayoutTrait + slot-embedding helpers — used by std layout-shell molecules
+// (std-filtered-list, std-master-detail-layout, etc.) to construct the
+// canonical inline LayoutTrait that wraps embedded atom traits via @trait.X
+// slot references.
+export {
+  type MakeLayoutTraitOpts,
+  makeSlot,
+  makeRenderUI,
+  makeLayoutTrait,
+} from './layout-trait.js';
+
