@@ -31,6 +31,8 @@
  * @packageDocumentation
  */
 
+import { z } from 'zod';
+
 export type BindingRoot =
   | 'entity'
   | 'payload'
@@ -68,3 +70,26 @@ const KNOWN_ROOTS = new Set<string>(BINDING_ROOTS.filter((r) => r !== 'other'));
 export function toBindingRoot(root: string): BindingRoot {
   return KNOWN_ROOTS.has(root) ? (root as BindingRoot) : 'other';
 }
+
+/**
+ * A trait reference string of the form `@trait.<TraitName>`. Used as the
+ * value type for `trait`-typed config fields. The runtime + compiled codegen
+ * both substitute this with embedded trait UI at render time.
+ *
+ * Branded as a literal-template type so TS narrows on use; consumers should
+ * call {@link isTraitFieldRef} to validate runtime values before assignment.
+ */
+export type TraitFieldRef = `@trait.${string}`;
+
+const TRAIT_REF_PATTERN = /^@trait\.[A-Z][a-zA-Z0-9]*$/;
+
+/** Type guard: narrow an unknown value to {@link TraitFieldRef}. */
+export function isTraitFieldRef(value: unknown): value is TraitFieldRef {
+  return typeof value === 'string' && TRAIT_REF_PATTERN.test(value);
+}
+
+/** Zod schema for {@link TraitFieldRef} values. Useful when validating analyzer
+ *  JSON or recipe overrides at runtime boundaries. */
+export const TraitFieldRefSchema = z
+  .string()
+  .regex(TRAIT_REF_PATTERN, 'expected `@trait.<TraitName>` reference');

@@ -30,7 +30,8 @@ export type FieldType =
     | 'array'
     | 'object'
     | 'enum'
-    | 'relation';
+    | 'relation'
+    | 'trait';
 
 export const FieldTypeSchema = z.enum([
     'string',
@@ -43,6 +44,7 @@ export const FieldTypeSchema = z.enum([
     'object',
     'enum',
     'relation',
+    'trait',
 ]);
 
 // ============================================================================

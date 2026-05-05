@@ -189,6 +189,9 @@ export {
   BINDING_ROOTS,
   toBindingRoot,
   type BindingRoot,
+  type TraitFieldRef,
+  TraitFieldRefSchema,
+  isTraitFieldRef,
 } from "./binding.js";
 
 // ============================================================================
