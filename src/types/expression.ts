@@ -387,6 +387,7 @@ export type LogMetaValue =
   | string
   | number
   | boolean
+  | Date
   | null
   | undefined
   | Error
