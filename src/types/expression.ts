@@ -378,7 +378,22 @@ export interface EventPayload {
   [key: string]: EventPayloadValue;
 }
 
+/**
+ * Allowed leaf value for `LogMeta`. Mirrors `EventPayloadValue` shape so
+ * the same row/list data flows through logs without manual flattening,
+ * with `Error` added since structured logs carry exception detail.
+ */
+export type LogMetaValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | Error
+  | LogMeta
+  | readonly LogMetaValue[];
+
 /** Structured log/event metadata. Recursive to support nested log data. */
 export interface LogMeta {
-  [key: string]: string | number | boolean | null | undefined | Error | LogMeta;
+  [key: string]: LogMetaValue;
 }
