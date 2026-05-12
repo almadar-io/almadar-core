@@ -464,7 +464,25 @@ export function hasService(
   return services.some((s) => s.name.toLowerCase() === name.toLowerCase());
 }
 
+/**
+ * Allowed leaf value for `ServiceParams`. Mirrors `EventPayloadValue`'s
+ * recursive-array shape so integration call signatures can express the
+ * nested structures real services need (port mappings, volume mounts,
+ * pagination cursors), and so a value satisfying `EventPayloadValue`
+ * also satisfies `ServiceParamsValue` without a cast — the same data
+ * flows through `call-service` and `emit` without boundary widening.
+ */
+export type ServiceParamsValue =
+  | string
+  | number
+  | boolean
+  | Date
+  | null
+  | undefined
+  | ServiceParams
+  | readonly ServiceParamsValue[];
+
 /** Parameters passed to call-service effects. Recursive for nested request shapes. */
 export interface ServiceParams {
-  [key: string]: string | number | boolean | Date | null | string[] | ServiceParams | undefined;
+  [key: string]: ServiceParamsValue;
 }

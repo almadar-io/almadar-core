@@ -489,6 +489,7 @@ export {
   findService,
   hasService,
   type ServiceParams,
+  type ServiceParamsValue,
 } from "./service.js";
 
 // ============================================================================
