@@ -16,6 +16,7 @@ import type {
   SchemaChange,
   ChangeSetDocument,
   CategorizedRemovals,
+  ChangesetValue,
   PageContentReduction,
   SemanticSchemaChange,
 } from './types/changeset.js';
@@ -522,4 +523,234 @@ export function diffSchemaSemantics(
   }
 
   return changes;
+}
+
+// ============================================================================
+// High-level Orbital Schema Diff (changeset envelope)
+// ============================================================================
+
+/**
+ * Source label for a changeset. The persistence layer accepts the canonical
+ * agent labels plus `skill-agent:<skill>`-style identifiers, so the type stays
+ * open as a string.
+ */
+export type SchemaDiffSource =
+  | 'requirements-agent'
+  | 'builder-agent'
+  | 'user'
+  | 'auto-fix'
+  | (string & {});
+
+/** Tracking granularity used when generating the diff. */
+export type SchemaDiffMode = 'initial' | 'update';
+
+/** Author identification carried on the changeset envelope. */
+export interface SchemaDiffAuthor {
+  userId: string;
+  name?: string;
+}
+
+/** Options that shape the resulting diff envelope. */
+export interface SchemaDiffOptions {
+  mode: SchemaDiffMode;
+  author: SchemaDiffAuthor;
+  source: SchemaDiffSource;
+}
+
+/** Per-change entry in the diff envelope. */
+export interface SchemaDiffChange {
+  operation: 'add' | 'modify' | 'remove' | 'rename' | 'merge' | 'set';
+  path: string;
+  value?: ChangesetValue;
+  previousValue?: ChangesetValue;
+}
+
+/** Aggregate orbital/trait deltas surfaced by the diff. */
+export interface SchemaDiffSummary {
+  orbitalsAdded: string[];
+  orbitalsRemoved: string[];
+  orbitalsModified: string[];
+  traitsAdded: string[];
+  traitsModified: string[];
+  traitsRemoved: string[];
+}
+
+/** Changeset envelope produced by `diffOrbitalSchemas`. */
+export interface SchemaDiffChangeset {
+  id: string;
+  source: SchemaDiffSource;
+  author: SchemaDiffAuthor;
+  description: string;
+  changes: SchemaDiffChange[];
+}
+
+/** Result of comparing two OrbitalSchema versions. */
+export interface SchemaDiff {
+  hasChanges: boolean;
+  changeCount: number;
+  changeset: SchemaDiffChangeset;
+  summary: SchemaDiffSummary;
+}
+
+/**
+ * Compare two `OrbitalSchema` versions and produce a changeset envelope.
+ *
+ * Higher-level companion to `diffSchemas`: where `diffSchemas` returns a flat
+ * list of `SchemaChange` entries keyed by structural path, this returns the
+ * envelope the persistence layer ships to Firestore (id, author, source,
+ * summary buckets).
+ *
+ * Identifier generation: `changeset.id` is a deterministic `chg_<hex>` value
+ * derived from the schema name + change count when `globalThis.crypto.randomUUID`
+ * is unavailable; otherwise a UUID is used. Callers that need a stable id
+ * across regenerations should supply one themselves.
+ */
+export function diffOrbitalSchemas(
+  before: OrbitalSchema | null,
+  after: OrbitalSchema,
+  options: SchemaDiffOptions,
+): SchemaDiff {
+  const summary: SchemaDiffSummary = {
+    orbitalsAdded: [],
+    orbitalsRemoved: [],
+    orbitalsModified: [],
+    traitsAdded: [],
+    traitsModified: [],
+    traitsRemoved: [],
+  };
+  const changes: SchemaDiffChange[] = [];
+
+  if (!before) {
+    for (const orbital of after.orbitals ?? []) {
+      const orb = orbital as OrbitalDefinition;
+      summary.orbitalsAdded.push(orb.name);
+      changes.push({
+        operation: 'add',
+        path: `orbitals[${summary.orbitalsAdded.length - 1}]`,
+        value: orb,
+      });
+    }
+  } else {
+    const beforeOrbitals = new Map<string, OrbitalDefinition>();
+    for (const o of before.orbitals ?? []) {
+      const orb = o as OrbitalDefinition;
+      beforeOrbitals.set(orb.name, orb);
+    }
+    const afterOrbitals = new Map<string, OrbitalDefinition>();
+    for (const o of after.orbitals ?? []) {
+      const orb = o as OrbitalDefinition;
+      afterOrbitals.set(orb.name, orb);
+    }
+
+    let idx = 0;
+    for (const [name, orb] of afterOrbitals) {
+      const prev = beforeOrbitals.get(name);
+      if (!prev) {
+        summary.orbitalsAdded.push(name);
+        changes.push({
+          operation: 'add',
+          path: `orbitals[${idx}]`,
+          value: orb,
+        });
+      } else if (JSON.stringify(prev) !== JSON.stringify(orb)) {
+        summary.orbitalsModified.push(name);
+        changes.push({
+          operation: 'merge',
+          path: `orbitals[${idx}]`,
+          previousValue: prev,
+          value: orb,
+        });
+      }
+      idx++;
+    }
+    for (const [name, orb] of beforeOrbitals) {
+      if (!afterOrbitals.has(name)) {
+        summary.orbitalsRemoved.push(name);
+        changes.push({
+          operation: 'remove',
+          path: `orbitals[${name}]`,
+          previousValue: orb,
+        });
+      }
+    }
+
+    if (before.name !== after.name) {
+      changes.push({
+        operation: 'set',
+        path: 'name',
+        previousValue: before.name,
+        value: after.name,
+      });
+    }
+    if (before.version !== after.version) {
+      changes.push({
+        operation: 'set',
+        path: 'version',
+        previousValue: before.version,
+        value: after.version,
+      });
+    }
+    if (before.description !== after.description) {
+      changes.push({
+        operation: 'set',
+        path: 'description',
+        previousValue: before.description,
+        value: after.description,
+      });
+    }
+    if (before.summary !== after.summary) {
+      changes.push({
+        operation: 'set',
+        path: 'summary',
+        previousValue: before.summary,
+        value: after.summary,
+      });
+    }
+  }
+
+  const hasChanges = changes.length > 0;
+  const description = describeDiff(summary, options.mode, after.name);
+
+  return {
+    hasChanges,
+    changeCount: changes.length,
+    changeset: {
+      id: generateChangesetId(after.name, changes.length),
+      source: options.source,
+      author: options.author,
+      description,
+      changes,
+    },
+    summary,
+  };
+}
+
+function describeDiff(
+  summary: SchemaDiffSummary,
+  mode: SchemaDiffMode,
+  schemaName: string,
+): string {
+  const parts: string[] = [];
+  if (summary.orbitalsAdded.length > 0) {
+    parts.push(`+${summary.orbitalsAdded.length} orbital(s)`);
+  }
+  if (summary.orbitalsModified.length > 0) {
+    parts.push(`~${summary.orbitalsModified.length} orbital(s)`);
+  }
+  if (summary.orbitalsRemoved.length > 0) {
+    parts.push(`-${summary.orbitalsRemoved.length} orbital(s)`);
+  }
+  if (parts.length === 0) return 'No changes';
+  return `${mode === 'initial' ? 'Initial' : 'Update'} ${schemaName}: ${parts.join(', ')}`;
+}
+
+function generateChangesetId(seed: string, count: number): string {
+  const cryptoApi = (globalThis as { crypto?: { randomUUID?: () => string } }).crypto;
+  if (cryptoApi?.randomUUID) return cryptoApi.randomUUID();
+  let hash = 0;
+  const source = `${seed}:${count}:${Date.now()}`;
+  for (let i = 0; i < source.length; i++) {
+    hash = (hash * 31 + source.charCodeAt(i)) | 0;
+  }
+  return `chg_${(hash >>> 0).toString(16)}_${count}`;
 }

@@ -5,6 +5,7 @@
  */
 
 import type { CategorizedRemovals } from './changeset.js';
+import type { DomainContext } from './domain.js';
 
 // ============================================================================
 // GitHub Integration
@@ -49,7 +50,11 @@ export interface AppSummary {
   createdAt: number;
   stats: StatsView;
   domain?: { category: string; subDomain?: string };
-  domainContext?: unknown;
+  /**
+   * Canonical domain classification + vocabulary projected onto the list
+   * view. Same shape as `OrbitalSchema.domainContext`.
+   */
+  domainContext?: DomainContext;
   hasValidationErrors: boolean;
   github?: GitHubLink;
 }

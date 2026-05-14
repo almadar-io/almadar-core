@@ -24,6 +24,7 @@ import {
 } from "./domain.js";
 import type { ServiceDefinition } from "./service.js";
 import { ServiceDefinitionSchema } from "./service.js";
+import type { Trait } from "./trait.js";
 
 // ============================================================================
 // Orbital Config
@@ -86,6 +87,15 @@ export interface OrbitalSchema {
   /** Description */
   description?: string;
 
+  /**
+   * Short human-readable summary distinct from `description`. Typically an
+   * AI-generated one-liner used by app list views, breadcrumbs, and the
+   * `GET /graphs/:appId/domain-text` projection. Kept separate from
+   * `description` (which may be longer / authored copy) so consumers can
+   * present a stable short label without truncating.
+   */
+  summary?: string;
+
   /** Version (semver) */
   version?: string;
 
@@ -120,6 +130,7 @@ export interface OrbitalSchema {
 export const OrbitalSchemaSchema = z.object({
   name: z.string().min(1, "Schema name is required"),
   description: z.string().optional(),
+  summary: z.string().optional(),
   version: z.string().optional(),
   domainContext: DomainContextSchema.optional(),
   design: DesignPreferencesSchema.optional(),
@@ -131,6 +142,29 @@ export const OrbitalSchemaSchema = z.object({
   services: z.array(ServiceDefinitionSchema).optional(),
   config: OrbitalConfigSchema.optional(),
 });
+
+// ============================================================================
+// Persisted/Flattened View
+// ============================================================================
+
+/**
+ * Flattened `OrbitalSchema` view used by the persistence/runtime layer.
+ *
+ * Canonical `OrbitalSchema` keeps every trait inside its owning
+ * `OrbitalDefinition.traits`. Some runtime paths (e.g. the orbital-agent
+ * stream, Firestore persistence) additionally roll the resolved trait set up
+ * to the top level as `traits[]` so diffs and list views don't have to walk
+ * every orbital.
+ *
+ * This is intentionally a LOSSY persisted view, NOT the canonical authoring
+ * shape: it carries the rolled-up array alongside the per-orbital trait
+ * lists, and consumers should prefer `OrbitalSchema` whenever the rolled-up
+ * surface isn't required.
+ */
+export interface OrbitalSchemaWithTraits extends OrbitalSchema {
+  /** Flattened trait set rolled up from all orbitals. Persisted-view only. */
+  traits?: Trait[];
+}
 
 // ============================================================================
 // Parsing Functions

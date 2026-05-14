@@ -25,12 +25,21 @@ export {
 export {
   diffSchemas,
   diffSchemaSemantics,
+  diffOrbitalSchemas,
   isDestructiveChange,
   getRemovals,
   categorizeRemovals,
   requiresConfirmation,
   detectPageContentReduction,
   hasSignificantPageReduction,
+  type SchemaDiff,
+  type SchemaDiffOptions,
+  type SchemaDiffMode,
+  type SchemaDiffAuthor,
+  type SchemaDiffSource,
+  type SchemaDiffChange,
+  type SchemaDiffChangeset,
+  type SchemaDiffSummary,
 } from './src/diff';
 
 // Export schema summarization functions

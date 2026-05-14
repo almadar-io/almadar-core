@@ -63,6 +63,7 @@ export {
 export {
   type OrbitalSchema,
   type OrbitalSchema as AppSchema, // Alias
+  type OrbitalSchemaWithTraits,
   type OrbitalConfig,
   type OrbitalSchemaInput,
   type OrbitalConfigInput,
@@ -549,6 +550,7 @@ export {
 
 export {
   type SchemaChange,
+  type ChangesetValue,
   type ChangeAuthor,
   type ChangeSummary,
   type ChangeSetDocument,

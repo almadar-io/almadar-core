@@ -6,10 +6,35 @@
  */
 
 import type { OrbitalSchema } from './schema.js';
+import type { Orbital } from './orbital.js';
+import type { Trait } from './trait.js';
+import type { Entity } from './entity.js';
+import type { Page } from './page.js';
+import type { EventPayloadValue } from './expression.js';
 
 // ============================================================================
 // Schema Change Types
 // ============================================================================
+
+/**
+ * Value attached to a SchemaChange entry's `before` / `after`.
+ *
+ * Either a JSON-shaped LLM payload (`EventPayloadValue`), a single schema
+ * fragment (`Orbital`, `Trait`, `Entity`, `Page`, `OrbitalSchema`), or an
+ * array of such fragments. Mirrors the exact shapes the builder's changeset
+ * writers actually persist when adding/replacing a slice of the schema.
+ */
+export type ChangesetValue =
+  | EventPayloadValue
+  | OrbitalSchema
+  | Orbital
+  | Trait
+  | Entity
+  | Page
+  | Orbital[]
+  | Trait[]
+  | Entity[]
+  | Page[];
 
 /**
  * A single change within a changeset.
@@ -19,8 +44,8 @@ export interface SchemaChange {
   operation: 'add' | 'modify' | 'remove' | 'rename';
   target: string;
   path: (string | number)[];
-  before?: unknown;
-  after?: unknown;
+  before?: ChangesetValue;
+  after?: ChangesetValue;
   description: string;
   reason?: string;
   dependsOn?: string[];
