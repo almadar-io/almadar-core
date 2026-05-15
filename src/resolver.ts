@@ -29,26 +29,45 @@ interface EntityWithDefaults extends Entity {
 // ============================================================================
 
 /**
- * Cache for resolved schemas (keyed by schema name + version)
+ * Cache for resolved schemas, keyed on the schema object reference.
+ *
+ * Identity-based caching (WeakMap) is the only correct shape here: two
+ * versions of the same logical schema with the same `name` + `version`
+ * can have different content (e.g. a palette drop adds a render-ui
+ * pattern, an agent edit rewrites a trait's effects). The old
+ * `${name}-${version}` key collided across content mutations and
+ * returned a stale IR — fine for the compiler's one-shot path, fatal
+ * for the runtime's live-editing path where downstream identity checks
+ * (`traits` array refs, trait state-machine references) depend on the
+ * IR being fresh when the schema's content moved.
+ *
+ * WeakMap also means we don't have to think about cache invalidation:
+ * when the consumer drops its reference to the schema, the entry is
+ * garbage-collected automatically.
  */
-const schemaCache = new Map<string, ResolvedIR>();
+let schemaCache = new WeakMap<OrbitalSchema, ResolvedIR>();
 
 /**
  * Clear the schema resolution cache.
- * Useful for hot-reloading during development.
+ *
+ * With WeakMap-on-reference caching, cache entries die naturally when
+ * the schema object is GC'd, so explicit clearing is rarely necessary.
+ * Kept for hot-reload paths that want to force fresh resolution; since
+ * WeakMap has no `clear()`, we swap in a fresh instance.
  */
 export function clearSchemaCache(): void {
-  schemaCache.clear();
+  schemaCache = new WeakMap<OrbitalSchema, ResolvedIR>();
 }
 
 /**
- * Get cache statistics (for debugging)
+ * Get cache statistics (for debugging).
+ *
+ * WeakMap doesn't expose size or keys; the best we can do is signal
+ * that the cache is identity-keyed. Kept for API parity with the old
+ * Map-based cache.
  */
-export function getSchemaCacheStats() {
-  return {
-    size: schemaCache.size,
-    keys: Array.from(schemaCache.keys()),
-  };
+export function getSchemaCacheStats(): { size: number; keys: string[] } {
+  return { size: -1, keys: [] };
 }
 
 // ============================================================================
@@ -75,12 +94,11 @@ export function getSchemaCacheStats() {
  * console.log(ir.pages.size); // Number of pages
  */
 export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): ResolvedIR {
-  // Generate cache key
-  const cacheKey = `${schema.name}-${schema.version || '1.0.0'}`;
-
-  // Check cache
-  if (useCache && schemaCache.has(cacheKey)) {
-    return schemaCache.get(cacheKey)!;
+  // Identity cache: same object reference → same IR. Caller is responsible
+  // for handing us a fresh ref when content moved (e.g. immutable update).
+  if (useCache) {
+    const cached = schemaCache.get(schema);
+    if (cached) return cached;
   }
 
   // Create empty IR structure
@@ -227,9 +245,9 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
     }
   }
 
-  // Cache result
+  // Cache result against the schema's object identity.
   if (useCache) {
-    schemaCache.set(cacheKey, ir);
+    schemaCache.set(schema, ir);
   }
 
   return ir;
