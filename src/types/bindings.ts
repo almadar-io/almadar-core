@@ -93,6 +93,11 @@ export const BINDING_DOCS = {
     examples: ['@trait.name', '@trait.category'],
     requiresPath: true,
   },
+  user: {
+    description: 'Authenticated user / agent context for ownership and role-based gating',
+    examples: ['@user.id', '@user.role'],
+    requiresPath: true,
+  },
 } as const;
 
 /**
