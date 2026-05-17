@@ -184,9 +184,12 @@ export interface ParsedBinding {
 
 /**
  * Core bindings that are always available.
- * Phase 4.5 adds: config, computed, trait (for behavior support)
+ * Phase 4.5 adds: config, computed, trait (for behavior support).
+ * `user` is the authenticated user / agent context (see binding.ts) and is
+ * read-only in guards/effects/ticks — atoms reference `@user.id` and
+ * `@user.role` for ownership / role-based gating.
  */
-export const CORE_BINDINGS = ['entity', 'payload', 'state', 'now', 'config', 'computed', 'trait'] as const;
+export const CORE_BINDINGS = ['entity', 'payload', 'state', 'now', 'config', 'computed', 'trait', 'user'] as const;
 export type CoreBinding = (typeof CORE_BINDINGS)[number];
 
 /**

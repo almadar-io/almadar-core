@@ -100,18 +100,18 @@ export const BINDING_DOCS = {
  */
 export const BINDING_CONTEXT_RULES = {
   guard: {
-    allowed: ['entity', 'payload', 'state', 'now', 'config'] as const,
+    allowed: ['entity', 'payload', 'state', 'now', 'config', 'user'] as const,
     description:
-      'Guards can access entity fields, event payload, current state, time, and the call-site trait config (@config.X). Config access lets atoms write mode-aware guards — e.g. std-modal\'s OPEN can require @payload.row only when @config.mode equals "edit", letting create-mode legitimately fire OPEN with no row. Like effects, @config.X is substituted at molecule/organism inline time with the literal call-site value; at atom-scope validate, @config is allowed-but-unresolved.',
+      'Guards can access entity fields, event payload, current state, time, the call-site trait config (@config.X), and the authenticated user context (@user.id, @user.role) for ownership / role gates. Config access lets atoms write mode-aware guards — e.g. std-modal\'s OPEN can require @payload.row only when @config.mode equals "edit", letting create-mode legitimately fire OPEN with no row. Like effects, @config.X is substituted at molecule/organism inline time with the literal call-site value; at atom-scope validate, @config is allowed-but-unresolved.',
   },
   effect: {
-    allowed: ['entity', 'payload', 'state', 'now', 'trait', 'config'] as const,
+    allowed: ['entity', 'payload', 'state', 'now', 'trait', 'config', 'user'] as const,
     description:
-      'Effects can access and modify entity fields, use payload data, embed another trait\'s live frame via @trait.X inside render-ui children, and read trait config values (@config.X) for atoms parameterized by their call-site. At molecule/organism inline time, @config.X is substituted with the literal value from the call-site config block; at atom-scope validate, @config is allowed-but-unresolved.',
+      'Effects can access and modify entity fields, use payload data, embed another trait\'s live frame via @trait.X inside render-ui children, read trait config values (@config.X) for atoms parameterized by their call-site, and read the authenticated user context (@user.id, @user.role). At molecule/organism inline time, @config.X is substituted with the literal value from the call-site config block; at atom-scope validate, @config is allowed-but-unresolved.',
   },
   tick: {
-    allowed: ['entity', 'state', 'now', 'config'] as const,
-    description: 'Ticks can access entity fields, current state, time, and trait config (@config.X) for parameterized atoms. Same substitution semantics as guards/effects.',
+    allowed: ['entity', 'state', 'now', 'config', 'user'] as const,
+    description: 'Ticks can access entity fields, current state, time, trait config (@config.X) for parameterized atoms, and the authenticated user context (@user.id, @user.role). Same substitution semantics as guards/effects.',
   },
 } as const;
 
