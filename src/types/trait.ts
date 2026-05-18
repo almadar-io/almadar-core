@@ -12,6 +12,8 @@ import type { StateMachine } from './state-machine.js';
 import { StateMachineSchema } from './state-machine.js';
 import type { Effect } from './effect.js';
 import { EffectSchema } from './effect.js';
+import type { Entity } from './entity.js';
+import { EntitySchema } from './entity.js';
 import type { AnyPatternConfig } from '@almadar/patterns';
 import type { Expression } from './expression.js';
 import { ExpressionSchema } from './expression.js';
@@ -666,7 +668,45 @@ export interface Trait {
      * `config: { ... }` override.
      */
     config?: DeclaredTraitConfig;
+    /**
+     * Set by the resolve/inline phase when this trait was cloned from a
+     * `uses[]` import. Absent for traits authored directly on the
+     * orbital. Viewport-only metadata — runtime and codegen ignore it.
+     * Drives Studio's L2 grouping (imported traits collapse under one
+     * card per alias) and L3 drill (alias → that behavior's transitions).
+     */
+    sourceBehavior?: SourceBehaviorMetadata;
+    /**
+     * Set by the resolve/inline phase alongside `sourceBehavior`. Carries
+     * the resolved `Entity` definition of the imported behavior so the
+     * client-side mock-data generator can produce rows for the trait's
+     * `linkedEntity` without re-walking the import graph at runtime.
+     */
+    sourceEntityDefinition?: Entity;
 }
+
+/**
+ * Provenance attached to a trait that was cloned from a `uses[]` import
+ * during the inline phase. The resolved schema carries this so Studio
+ * can group L2 cards by source behavior and offer an L3 drill into the
+ * import's own transitions.
+ */
+export interface SourceBehaviorMetadata {
+    /** Behavior name (e.g. "std-stat-card") — the resolved `from:` value. */
+    behavior: string;
+    /** Alias used at the import site (e.g. "Stat"). Multiple imports of
+     *  the same atom group by alias, not by behavior. */
+    alias: string;
+    /** Original trait name inside the imported behavior, before any
+     *  call-site `name:` rename. */
+    originalName: string;
+}
+
+export const SourceBehaviorMetadataSchema = z.object({
+    behavior: z.string().min(1),
+    alias: z.string().min(1),
+    originalName: z.string().min(1),
+});
 
 export const TraitSchema = z.object({
     name: z.string().min(1),
@@ -684,6 +724,8 @@ export const TraitSchema = z.object({
     listens: z.array(TraitEventListenerSchema).optional(),
     ui: z.record(z.unknown()).optional(),
     config: DeclaredTraitConfigSchema.optional(),
+    sourceBehavior: SourceBehaviorMetadataSchema.optional(),
+    sourceEntityDefinition: EntitySchema.optional(),
 });
 
 // TraitRefSchema defined here after TraitSchema to avoid forward reference
