@@ -8,8 +8,11 @@
 import type {
   DomainEntity,
   DomainField,
+  DomainFieldDefault,
+  DomainFieldItems,
   DomainFieldType,
   DomainRelationship,
+  EntityPersistence,
   RelationshipType,
   ParseResult,
   ParseError,
@@ -153,6 +156,23 @@ export function parseEntity(text: string): ParseResult<DomainEntity> {
 
   function parseSection(entity: DomainEntity): boolean {
     const token = current();
+
+    // `Persistence: <value>` — Phase 0 drift fix. Mirrors
+    // `Entity.persistence: EntityPersistence` on @almadar/core.
+    if (token.type === TokenType.IDENTIFIER && peek(1).type === TokenType.COLON) {
+      const propName = token.value.toLowerCase();
+      if (propName === 'persistence') {
+        advance(); advance(); // Persistence, :
+        if (current().type === TokenType.IDENTIFIER) {
+          const val = current().value.toLowerCase();
+          if (val === 'persistent' || val === 'runtime' || val === 'singleton' || val === 'instance' || val === 'local') {
+            entity.persistence = val as EntityPersistence;
+            advance();
+          }
+        }
+        return true;
+      }
+    }
 
     // INDENT followed by "- has [field] as [type]" (SKILL.md format)
     if (token.type === TokenType.INDENT) {
@@ -466,48 +486,105 @@ export function parseEntity(text: string): ParseResult<DomainEntity> {
     };
 
     const parts: string[] = [];
-
-    // Collect all tokens until newline
     while (!isAtEnd() && current().type !== TokenType.NEWLINE) {
-      parts.push(current().value);
+      // Re-quote STRING tokens so empty `""` defaults survive the join.
+      // Without this, the empty value gets joined-and-trimmed out of
+      // existence and `default ""` becomes `default` (no payload).
+      const tok = current();
+      parts.push(tok.type === TokenType.STRING ? `"${tok.value}"` : tok.value);
       advance();
     }
-
-    // Parse the parts
     const content = parts.join(' ').trim();
 
-    // Check for enum (contains |)
-    if (content.includes('|')) {
-      field.fieldType = 'enum';
-      field.enumValues = content.split('|').map(v => v.trim()).filter(v => v);
-      return field;
+    // Top-level segmentation by comma — type spec then constraints. This
+    // ordering (vs early-returning on `|`) keeps the default clause
+    // (`default "active"`) separated from the enum-value list.
+    const segments = content.split(',').map(s => s.trim());
+    if (segments.length === 0) return field;
+
+    // First segment: type spec — one of:
+    //   • `a | b | c`           enum values (constrains a string field)
+    //   • `list of <itemType>`  list with typed items
+    //   • a plain type keyword (`text`, `number`, …)
+    const typeSpec = segments[0];
+    if (typeSpec.includes('|')) {
+      field.fieldType = 'text';
+      field.enumValues = typeSpec.split('|').map(v => v.trim()).filter(v => v.length > 0);
+    } else {
+      const lower = typeSpec.toLowerCase();
+      if (lower.startsWith('list of ')) {
+        field.fieldType = 'list';
+        field.items = { type: parseDomainFieldType(lower.slice('list of '.length).trim()) };
+      } else {
+        field.fieldType = parseDomainFieldType(lower);
+      }
     }
 
-    // Split by comma for type and constraints
-    const segments = content.split(',').map(s => s.trim().toLowerCase());
-
-    for (const segment of segments) {
-      // Check for field types (all types from DOMAIN_TO_SCHEMA_FIELD_TYPE)
-      if (segment === 'text') field.fieldType = 'text';
-      else if (segment === 'long text') field.fieldType = 'long text';
-      else if (segment === 'number') field.fieldType = 'number';
-      else if (segment === 'currency') field.fieldType = 'currency';
-      else if (segment === 'date') field.fieldType = 'date';
-      else if (segment === 'timestamp') field.fieldType = 'timestamp';
-      else if (segment === 'datetime') field.fieldType = 'datetime';
-      else if (segment === 'yes/no' || segment === 'boolean') field.fieldType = 'yes/no';
-      else if (segment === 'list') field.fieldType = 'list';
-      else if (segment === 'object') field.fieldType = 'object';
-      // Check for constraints
-      else if (segment === 'required') field.required = true;
-      else if (segment === 'unique') field.unique = true;
-      else if (segment === 'auto') field.auto = true;
-      else if (segment.startsWith('default ')) {
-        field.default = parseValue(segment.slice(8));
+    // Remaining segments: constraints. Preserve original casing for the
+    // default value so `default "Active"` doesn't lowercase to `active`.
+    for (let i = 1; i < segments.length; i++) {
+      const segment = segments[i];
+      const lower = segment.toLowerCase();
+      if (lower === 'required') field.required = true;
+      else if (lower === 'unique') field.unique = true;
+      else if (lower === 'auto') field.auto = true;
+      else if (lower.startsWith('default ')) {
+        field.default = parseDefaultLiteral(segment.slice('default '.length).trim());
       }
     }
 
     return field;
+  }
+
+  /** Map a domain-syntax type keyword to `DomainFieldType`. Unknown → 'text'. */
+  function parseDomainFieldType(keyword: string): DomainFieldType {
+    if (keyword === 'long text') return 'long text';
+    if (keyword === 'text' || keyword === 'string') return 'text';
+    if (keyword === 'number' || keyword === 'integer') return 'number';
+    if (keyword === 'currency') return 'currency';
+    if (keyword === 'date') return 'date';
+    if (keyword === 'timestamp') return 'timestamp';
+    if (keyword === 'datetime') return 'datetime';
+    if (keyword === 'yes/no' || keyword === 'boolean') return 'yes/no';
+    if (keyword === 'list' || keyword === 'array') return 'list';
+    if (keyword === 'object') return 'object';
+    if (keyword === 'enum') return 'enum';
+    if (keyword === 'relation') return 'relation';
+    return 'text';
+  }
+
+  /**
+   * Parse a `default <token>` literal. Handles quoted strings (including
+   * empty `""`), structural JSON (`[]`, `{...}`), and scalars. Mirrors
+   * the formatter's `formatDefaultValue` (entity-formatter.ts) so the
+   * pair roundtrips byte-for-byte.
+   */
+  function parseDefaultLiteral(text: string): DomainFieldDefault {
+    const trimmed = text.trim();
+    // Quoted string (including empty `""`)
+    if (
+      (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+      (trimmed.startsWith("'") && trimmed.endsWith("'"))
+    ) {
+      return trimmed.slice(1, -1);
+    }
+    // Structural JSON (list / object)
+    if (
+      (trimmed.startsWith('[') && trimmed.endsWith(']')) ||
+      (trimmed.startsWith('{') && trimmed.endsWith('}'))
+    ) {
+      try {
+        return JSON.parse(trimmed) as DomainFieldDefault;
+      } catch {
+        // fall through to scalar parsing
+      }
+    }
+    if (trimmed.toLowerCase() === 'true') return true;
+    if (trimmed.toLowerCase() === 'false') return false;
+    if (trimmed.toLowerCase() === 'null') return null;
+    const num = Number(trimmed);
+    if (!Number.isNaN(num) && trimmed !== '') return num;
+    return trimmed;
   }
 
   function parseRelationship(entity: DomainEntity, relType: RelationshipType): void {
@@ -608,15 +685,34 @@ export function formatEntityToDomain(entity: DomainEntity): string {
 // eslint-disable-next-line almadar/no-record-string-unknown -- Returns loosely-typed schema for backward compatibility with both KFlowSchema and OrbitalSchema
 export function formatEntityToSchema(entity: DomainEntity): Record<string, unknown> {
   // eslint-disable-next-line almadar/no-record-string-unknown -- Building loosely-typed field objects incrementally
-  const fields: Record<string, unknown>[] = entity.fields.map(field => ({
-    name: field.name,
-    type: mapFieldTypeToSchema(field.fieldType),
-    required: field.required || undefined,
-    unique: field.unique || undefined,
-    auto: field.auto || undefined,
-    values: field.enumValues,  // OrbitalSchema uses 'values' not 'enumValues'
-    default: field.default,
-  }));
+  const fields: Record<string, unknown>[] = entity.fields.map(field => {
+    // Enum-constrained fields keep the canonical type `'string'` per the
+    // std schema convention; the constraint lives on `values: []` rather
+    // than re-typing the field.
+    const schemaType = field.enumValues && field.enumValues.length > 0
+      ? mapFieldTypeToSchema(field.fieldType === 'enum' ? 'text' : field.fieldType)
+      : mapFieldTypeToSchema(field.fieldType);
+    // eslint-disable-next-line almadar/no-record-string-unknown -- Field object built incrementally
+    const out: Record<string, unknown> = {
+      name: field.name,
+      type: schemaType,
+    };
+    if (field.required) out.required = true;
+    if (field.unique) out.unique = true;
+    if (field.auto) out.auto = true;
+    if (field.enumValues && field.enumValues.length > 0) {
+      out.values = field.enumValues; // OrbitalSchema uses `values` not `enumValues`
+    }
+    if (field.items) {
+      out.items = { type: mapFieldTypeToSchema(field.items.type) };
+    }
+    // `default` may legitimately be `''` / `0` / `false` / `null` — only
+    // skip the property when it's explicitly `undefined`.
+    if (field.default !== undefined) {
+      out.default = field.default;
+    }
+    return out;
+  });
 
   // Add relationship fields
   for (const rel of entity.relationships) {
@@ -627,11 +723,6 @@ export function formatEntityToSchema(entity: DomainEntity): Record<string, unkno
       fields.push({
         name: fieldName,
         type: 'relation',
-        required: undefined,
-        unique: undefined,
-        auto: undefined,
-        values: undefined,
-        default: undefined,
         relation: {
           entity: rel.targetEntity,
           type: 'many-to-one',
@@ -640,13 +731,16 @@ export function formatEntityToSchema(entity: DomainEntity): Record<string, unkno
     }
   }
 
-  return {
+  // eslint-disable-next-line almadar/no-record-string-unknown -- Building loosely-typed entity object incrementally
+  const out: Record<string, unknown> = {
     name: entity.name,
     collection: toKebabCase(entity.name) + 's',
     fields: fields.filter(f => Object.keys(f).length > 0),
-    states: entity.states,
-    initialState: entity.initialState,
   };
+  if (entity.states && entity.states.length > 0) out.states = entity.states;
+  if (entity.initialState !== undefined) out.initialState = entity.initialState;
+  if (entity.persistence !== undefined) out.persistence = entity.persistence;
+  return out;
 }
 
 // === Utility Functions ===

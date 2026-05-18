@@ -6,7 +6,15 @@
 
 /* eslint-disable almadar/no-record-string-unknown -- This module converts loosely-typed legacy and orbital schema entity objects to domain language AST. Record<string, unknown> is the correct boundary type for the formatter's public API. */
 
-import type { DomainEntity, DomainField, DomainFieldType, DomainRelationship } from '../types.js';
+import type {
+  DomainEntity,
+  DomainField,
+  DomainFieldDefault,
+  DomainFieldItems,
+  DomainFieldType,
+  DomainRelationship,
+  EntityPersistence,
+} from '../types.js';
 
 /**
  * Convert a KFlow DataEntity to domain language text
@@ -81,17 +89,23 @@ export function schemaEntityToDomainEntity(entity: Record<string, unknown>): Dom
       auto: (field.auto as boolean) || false,
     };
 
-    // Handle enum values - check both 'enumValues' and 'values' properties
-    if (fieldType === 'enum') {
-      const enumValues = (field.enumValues || field.values) as string[] | undefined;
-      if (enumValues && enumValues.length > 0) {
-        domainField.enumValues = enumValues;
-      }
+    // Enum-like constraint — present whenever the field carries `values`
+    // (regardless of declared `type`; std schema uses `type: 'string'`
+    // with `values: [...]` for constrained strings).
+    const enumValues = (field.enumValues ?? field.values) as string[] | undefined;
+    if (enumValues && enumValues.length > 0) {
+      domainField.enumValues = enumValues;
     }
 
-    // Handle default value
+    // List-of-X item type
+    const items = field.items as DomainFieldItems | undefined;
+    if (items && typeof items.type === 'string') {
+      domainField.items = { type: mapSchemaTypeToDomain(items.type) };
+    }
+
+    // Default value — pass through structurally; widest is JSON-leaf shape
     if (field.default !== undefined) {
-      domainField.default = field.default;
+      domainField.default = field.default as DomainFieldDefault;
     }
 
     fields.push(domainField);
@@ -101,6 +115,9 @@ export function schemaEntityToDomainEntity(entity: Record<string, unknown>): Dom
   const states = entity.states as string[] | undefined;
   const initialState = entity.initialState as string | undefined;
 
+  // Persistence mode (defaults to 'persistent' downstream when omitted).
+  const persistence = entity.persistence as EntityPersistence | undefined;
+
   return {
     type: 'entity',
     name,
@@ -109,6 +126,7 @@ export function schemaEntityToDomainEntity(entity: Record<string, unknown>): Dom
     relationships,
     states,
     initialState,
+    persistence,
   };
 }
 
@@ -126,6 +144,11 @@ function formatEntityText(entity: DomainEntity): string {
   // Header line
   const article = startsWithVowel(entity.name) ? 'An' : 'A';
   lines.push(`${article} ${entity.name} is ${entity.description}`);
+
+  // Persistence (only when non-default, to keep canonical entities readable).
+  if (entity.persistence !== undefined && entity.persistence !== 'persistent') {
+    lines.push(`Persistence: ${entity.persistence}`);
+  }
 
   // Fields section
   if (entity.fields.length > 0) {
@@ -198,6 +221,8 @@ function formatFieldType(field: DomainField): string {
 
   if (field.enumValues && field.enumValues.length > 0) {
     parts.push(field.enumValues.join(' | '));
+  } else if (field.fieldType === 'list' && field.items) {
+    parts.push(`list of ${field.items.type}`);
   } else {
     parts.push(field.fieldType);
   }
@@ -206,13 +231,23 @@ function formatFieldType(field: DomainField): string {
   if (field.unique) parts.push('unique');
   if (field.auto) parts.push('auto');
   if (field.default !== undefined) {
-    const defaultStr = typeof field.default === 'string'
-      ? `"${field.default}"`
-      : String(field.default);
-    parts.push(`default ${defaultStr}`);
+    parts.push(`default ${formatDefaultValue(field.default)}`);
   }
 
   return parts.join(', ');
+}
+
+/**
+ * Render a `DomainFieldDefault` as a single inline token. Strings are
+ * always quoted (so `""` roundtrips cleanly), structural values as JSON
+ * (so list / object defaults roundtrip through `parseValue`).
+ */
+function formatDefaultValue(value: DomainFieldDefault): string {
+  if (typeof value === 'string') return `"${value}"`;
+  if (value === null || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  return JSON.stringify(value);
 }
 
 /**

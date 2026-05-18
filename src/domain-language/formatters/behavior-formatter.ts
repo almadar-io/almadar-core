@@ -216,6 +216,11 @@ export function schemaTraitToDomainBehavior(trait: Record<string, unknown>, enti
     });
   }
 
+  // Trait scope (instance | collection). Mirrors `Trait.scope` on
+  // `@almadar/core/types/trait.ts`; omitted ⇒ defaulted to 'instance'
+  // downstream in `domain-to-schema`.
+  const scope = trait.scope as DomainBehavior['scope'];
+
   return {
     type: 'behavior',
     name: formatBehaviorName(name),
@@ -225,6 +230,7 @@ export function schemaTraitToDomainBehavior(trait: Record<string, unknown>, enti
     transitions,
     ticks,
     rules: [],
+    scope,
   };
 }
 
@@ -243,6 +249,12 @@ function formatBehaviorText(behavior: DomainBehavior): string {
   // Behavior name
   lines.push(behavior.name);
   lines.push('');
+
+  // Scope (only when non-default, to keep canonical behaviors readable).
+  if (behavior.scope !== undefined && behavior.scope !== 'instance') {
+    lines.push(`Scope: ${behavior.scope}`);
+    lines.push('');
+  }
 
   // States
   if (behavior.states.length > 0) {

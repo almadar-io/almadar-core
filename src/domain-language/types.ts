@@ -8,6 +8,10 @@
  * @packageDocumentation
  */
 
+import type { EntityPersistence } from '../types/entity.js';
+import type { TraitScope } from '../types/trait.js';
+export type { EntityPersistence, TraitScope };
+
 // ============================================================================
 // Type Registry (OrbitalSchema ↔ Domain Language Mapping)
 // ============================================================================
@@ -158,6 +162,29 @@ export type DomainFieldType =
  */
 export type SchemaFieldType = keyof typeof FIELD_TYPE_MAPPING;
 
+/**
+ * Default value for a `DomainField`. Mirrors the JSON-leaf shape an
+ * `EntityField.default` may carry on `OrbitalSchema`: scalar, list, or
+ * nested object (when the field type is `'object'` or `'list'`).
+ */
+export type DomainFieldDefault =
+  | string
+  | number
+  | boolean
+  | null
+  | DomainFieldDefault[]
+  | { [k: string]: DomainFieldDefault };
+
+/**
+ * For `fieldType: 'list'`, the typed shape of each item. Mirrors
+ * `EntityField.items` on `OrbitalSchema`. Currently a single-level
+ * type tag (matching how the schema uses it); extend if/when nested
+ * list-of-list / list-of-object signatures are required.
+ */
+export interface DomainFieldItems {
+  type: DomainFieldType;
+}
+
 export interface DomainField extends ASTNode {
   type: 'field';
   name: string;
@@ -165,8 +192,10 @@ export interface DomainField extends ASTNode {
   required: boolean;
   unique: boolean;
   auto: boolean;
-  default?: unknown;
+  default?: DomainFieldDefault;
   enumValues?: string[];  // For enum types
+  /** List-of-X item type when `fieldType === 'list'`. */
+  items?: DomainFieldItems;
 }
 
 // ============================================================================
@@ -194,6 +223,13 @@ export interface DomainEntity extends ASTNode {
   relationships: DomainRelationship[];
   states?: string[];
   initialState?: string;
+  /**
+   * Storage mode on the resolved schema. Mirrors `EntityPersistence` in
+   * `@almadar/core/types/entity.ts`. Omitted ⇒ projector defaults to
+   * `'persistent'`. Domain text syntax: `Persistence: <value>` line in
+   * the entity section.
+   */
+  persistence?: EntityPersistence;
 }
 
 // ============================================================================
@@ -322,6 +358,13 @@ export interface DomainBehavior extends ASTNode {
   transitions: DomainTransition[];
   ticks: DomainTick[];
   rules: string[];        // Business rules in natural language
+  /**
+   * Instance- vs collection-scoped state machine. Mirrors
+   * `Trait.scope: TraitScope` in `@almadar/core/types/trait.ts`.
+   * Omitted ⇒ projector defaults to `'instance'`. Domain text syntax:
+   * `Scope: instance|collection` line in the behavior section.
+   */
+  scope?: TraitScope;
 }
 
 // ============================================================================

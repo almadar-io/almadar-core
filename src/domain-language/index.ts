@@ -57,6 +57,12 @@ export type {
   // Field types
   DomainFieldType,
   DomainField,
+  DomainFieldDefault,
+  DomainFieldItems,
+
+  // Canonical re-exports (so consumers don't import from two places)
+  EntityPersistence,
+  TraitScope,
 
   // Relationship types
   RelationshipType,

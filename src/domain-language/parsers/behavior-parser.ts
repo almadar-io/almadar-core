@@ -175,6 +175,21 @@ export function parseBehavior(text: string, entityName: string): ParseResult<Dom
       return true;
     }
 
+    // "Scope: instance|collection" — Phase 0 drift fix. Mirrors
+    // `Trait.scope: TraitScope` on @almadar/core.
+    if (token.type === TokenType.IDENTIFIER && token.value.toLowerCase() === 'scope') {
+      advance();
+      skip(TokenType.COLON);
+      if (current().type === TokenType.IDENTIFIER) {
+        const val = current().value.toLowerCase();
+        if (val === 'instance' || val === 'collection') {
+          behavior.scope = val;
+          advance();
+        }
+      }
+      return true;
+    }
+
     // "States: [state1], [state2], ..."
     if (token.type === TokenType.STATES) {
       advance();
@@ -847,6 +862,9 @@ export function formatBehaviorToSchema(behavior: DomainBehavior): Record<string,
     name: behavior.name.replace(/\s+/g, ''),
     description: behavior.name,
   };
+  if (behavior.scope !== undefined) {
+    trait.scope = behavior.scope;
+  }
 
   // Only include stateMachine if there are states
   if (behavior.states.length > 0) {
@@ -864,32 +882,44 @@ export function formatBehaviorToSchema(behavior: DomainBehavior): Record<string,
           event: t.event,
         };
 
-        // Only include guard if present - convert to S-Expression
+        // Only include guard if present - convert to S-Expression. Wrap
+        // parseDomainGuard in a try/catch so malformed natural-language
+        // guards (which formatSExprGuardToDomain may emit when the
+        // source guard isn't a structured S-expression) don't abort the
+        // whole behavior conversion. Failed guards drop with a warning;
+        // the rest of the trait still roundtrips.
         if (t.guards.length > 0) {
-          // Convert guards to S-Expressions
-          const guardExprs = t.guards.map(g => {
-            // Use the raw text to parse to S-Expression
-            if (g.raw) {
-              return parseDomainGuard(g.raw, behavior.entityName);
+          const guardExprs: unknown[] = [];
+          for (const g of t.guards) {
+            const raw = g.raw ?? formatGuardToCondition(g);
+            try {
+              guardExprs.push(parseDomainGuard(raw, behavior.entityName));
+            } catch {
+              // Skip malformed guard. Domain text holds the raw string
+              // for visual inspection; the projector (Phase 2) is the
+              // authoritative path for guards anyway.
             }
-            return parseDomainGuard(formatGuardToCondition(g), behavior.entityName);
-          });
-          // Combine multiple guards with AND
-          transition.guard = guardExprs.length === 1
-            ? guardExprs[0]
-            : ['and', ...guardExprs];
+          }
+          if (guardExprs.length === 1) transition.guard = guardExprs[0];
+          else if (guardExprs.length > 1) transition.guard = ['and', ...guardExprs];
         }
 
         // Only include effects if present - convert to S-Expressions
         if (t.effects.length > 0) {
-          transition.effects = t.effects.map(e => {
+          const effectExprs: unknown[] = [];
+          for (const e of t.effects) {
             // If effect has pre-parsed S-expression (from raw JSON in domain text), use it directly
             if (e.config && '_rawSExpr' in e.config && Array.isArray(e.config._rawSExpr)) {
-              return e.config._rawSExpr;
+              effectExprs.push(e.config._rawSExpr);
+              continue;
             }
-            // Otherwise, parse the description text to S-Expression
-            return parseDomainEffect(e.description, behavior.entityName);
-          });
+            try {
+              effectExprs.push(parseDomainEffect(e.description, behavior.entityName));
+            } catch {
+              // Skip malformed effect — symmetric to guard handling above.
+            }
+          }
+          if (effectExprs.length > 0) transition.effects = effectExprs;
         }
 
         return transition;

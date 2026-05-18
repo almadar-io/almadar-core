@@ -108,7 +108,7 @@ export function convertDomainToSchema(domainText: string, baseSchema?: OrbitalSc
       const entity: Entity = {
         name: entityRecord.name as string,
         fields: (entityRecord.fields || []) as Entity['fields'],
-        persistence: 'persistent',
+        persistence: (entityRecord.persistence as Entity['persistence']) ?? 'persistent',
       };
       parsedEntities.push({
         name: result.data.name,
