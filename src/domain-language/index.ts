@@ -65,7 +65,6 @@ export type {
   TraitScope,
 
   // Factory signatures (Phase 1 — almadar-pattern-sync emits these)
-  FactoryTraitKind,
   FactorySignatureEntityField,
   FactoryEntitySignature,
   FactoryTraitSignature,
