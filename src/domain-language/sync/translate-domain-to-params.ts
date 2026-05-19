@@ -24,17 +24,24 @@
  */
 
 import type { EntityField } from '../../types/field.js';
+import type { TraitReference } from '../../types/trait.js';
 import type {
   DomainEntity,
   DomainField,
   DomainFieldDefault,
   DomainPage,
+  DomainRuleOverlayEntry,
   FactoryCallSite,
   FactoryCallSiteParams,
   FactoryParamValue,
   FactorySignature,
+  FactoryTraitSignature,
+  OwnershipOverlayEntry,
   PresentationNavItem,
   PresentationOverlay,
+  RuleOverlay,
+  TraitOverlay,
+  TraitOverlayEntry,
 } from '../types.js';
 import { DOMAIN_TO_SCHEMA_FIELD_TYPE } from '../types.js';
 
@@ -68,6 +75,9 @@ export function translateDomainToParams(
   binding: TranslationBinding,
   signature: FactorySignature,
   presentation?: PresentationOverlay,
+  ruleOverlay?: RuleOverlay,
+  traitOverlay?: TraitOverlay,
+  catalog?: ReadonlyArray<FactorySignature>,
 ): TranslationResult {
   const warnings: TranslationWarning[] = [];
   const params: FactoryCallSiteParams = {};
@@ -77,6 +87,8 @@ export function translateDomainToParams(
   applyPersistence(binding.entity, signature, params, warnings);
   applyPagePaths(binding.pages ?? [], signature, params, warnings);
   applyPresentation(presentation, signature, params, warnings);
+  applyTraitOverlay(traitOverlay, signature, params, warnings);
+  applyRuleOverlay(ruleOverlay, signature, binding, catalog, params, warnings);
 
   return {
     callSite: {
@@ -197,6 +209,250 @@ function applyPresentation(
     [target.name]: {
       ...existing,
       config: { ...existingConfig, navItems: items },
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Phase 4 overlay rows
+// ---------------------------------------------------------------------------
+
+function applyTraitOverlay(
+  overlay: TraitOverlay | undefined,
+  signature: FactorySignature,
+  params: FactoryCallSiteParams,
+  warnings: TranslationWarning[],
+): void {
+  if (!overlay) return;
+  const traitsByName = new Map(signature.traits.map((t) => [t.name, t]));
+  for (const [traitName, entry] of Object.entries(overlay)) {
+    const trait = traitsByName.get(traitName);
+    if (!trait) {
+      warnings.push({
+        field: `traitOverlay.${traitName}`,
+        reason: `factory signature has no trait named "${traitName}"`,
+      });
+      continue;
+    }
+    mergeTraitOverride(traitName, entry, trait, params, warnings);
+  }
+}
+
+function mergeTraitOverride(
+  traitName: string,
+  entry: TraitOverlayEntry,
+  trait: FactoryTraitSignature,
+  params: FactoryCallSiteParams,
+  warnings: TranslationWarning[],
+): void {
+  const advertised = new Set(trait.overridableConfigKeys);
+  const existing = params.traitOverrides?.[traitName] ?? {};
+  const existingConfig = existing.config ?? {};
+  const mergedConfig: Record<string, FactoryParamValue> = { ...existingConfig };
+
+  if (entry.config) {
+    for (const [k, v] of Object.entries(entry.config)) {
+      if (!advertised.has(k)) {
+        warnings.push({
+          field: `traitOverlay.${traitName}.config.${k}`,
+          reason: `trait does not advertise config key "${k}" (overridableConfigKeys: [${trait.overridableConfigKeys.join(', ')}])`,
+        });
+        continue;
+      }
+      mergedConfig[k] = v;
+    }
+  }
+
+  const next: FactoryCallSiteParams['traitOverrides'] extends infer T
+    ? T extends Readonly<Record<string, infer V>>
+      ? V
+      : never
+    : never = {
+    ...existing,
+    ...(Object.keys(mergedConfig).length > 0 ? { config: mergedConfig } : {}),
+  };
+
+  params.traitOverrides = {
+    ...params.traitOverrides,
+    [traitName]: next,
+  };
+}
+
+function applyRuleOverlay(
+  overlay: RuleOverlay | undefined,
+  signature: FactorySignature,
+  binding: TranslationBinding,
+  catalog: ReadonlyArray<FactorySignature> | undefined,
+  params: FactoryCallSiteParams,
+  warnings: TranslationWarning[],
+): void {
+  if (!overlay) return;
+
+  for (const rule of overlay.rules) {
+    if (!ruleAppliesToBinding(rule, binding)) continue;
+    if (!catalog) {
+      warnings.push({
+        field: `ruleOverlay.rules.${rule.id}`,
+        reason: 'rule overlay supplied without a catalog — capability lookup requires one',
+      });
+      continue;
+    }
+    const match = findTraitByCapability(catalog, rule.capability);
+    if (!match) {
+      warnings.push({
+        field: `ruleOverlay.rules.${rule.id}`,
+        reason: `no trait in the catalog advertises capability "${rule.capability}"`,
+      });
+      continue;
+    }
+    appendRuleExtraTrait(rule, match, binding, params);
+    if (rule.config) {
+      threadRuleConfig(rule, match.trait, params, warnings);
+    }
+  }
+
+  if (overlay.ownership) {
+    for (const entry of overlay.ownership) {
+      if (entry.entity !== binding.entity.name) continue;
+      applyOwnership(entry, params, signature, catalog, warnings);
+    }
+  }
+}
+
+function ruleAppliesToBinding(
+  rule: DomainRuleOverlayEntry,
+  binding: TranslationBinding,
+): boolean {
+  if (rule.appliesTo.length === 0) return true;
+  return rule.appliesTo.includes(binding.entity.name);
+}
+
+interface CapabilityMatch {
+  signature: FactorySignature;
+  trait: FactoryTraitSignature;
+}
+
+function findTraitByCapability(
+  catalog: ReadonlyArray<FactorySignature>,
+  capability: string,
+): CapabilityMatch | undefined {
+  // Deterministic order: catalog is sorted by (organism, orbital) at
+  // emit time; first hit wins. No scoring, no tie-break heuristics.
+  for (const sig of catalog) {
+    for (const trait of sig.traits) {
+      if (trait.capabilities.includes(capability)) {
+        return { signature: sig, trait };
+      }
+    }
+  }
+  return undefined;
+}
+
+function appendRuleExtraTrait(
+  rule: DomainRuleOverlayEntry,
+  match: CapabilityMatch,
+  binding: TranslationBinding,
+  params: FactoryCallSiteParams,
+): void {
+  const fromPath = `std/behaviors/${match.signature.organism}`;
+  const alias = organismToAlias(match.signature.organism);
+  const ref: TraitReference = {
+    from: fromPath,
+    ref: `${alias}.traits.${match.trait.name}`,
+    linkedEntity: binding.entity.name,
+  };
+  const existing = params.extraTraits ?? [];
+  params.extraTraits = [...existing, ref];
+}
+
+/**
+ * `std-row-access-control` → `RowAccess`,
+ * `std-audit-capture` → `AuditCapture`, etc.
+ * Strips `std-` prefix, splits on `-`, title-cases each segment.
+ */
+function organismToAlias(organism: string): string {
+  const trimmed = organism.startsWith('std-') ? organism.slice(4) : organism;
+  return trimmed
+    .split('-')
+    .filter((s) => s.length > 0)
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+    .join('');
+}
+
+function threadRuleConfig(
+  rule: DomainRuleOverlayEntry,
+  trait: FactoryTraitSignature,
+  params: FactoryCallSiteParams,
+  warnings: TranslationWarning[],
+): void {
+  if (!rule.config) return;
+  const advertised = new Set(trait.overridableConfigKeys);
+  const existing = params.traitOverrides?.[trait.name] ?? {};
+  const existingConfig = existing.config ?? {};
+  const merged: Record<string, FactoryParamValue> = { ...existingConfig };
+  for (const [k, v] of Object.entries(rule.config)) {
+    if (!advertised.has(k)) {
+      warnings.push({
+        field: `ruleOverlay.rules.${rule.id}.config.${k}`,
+        reason: `trait "${trait.name}" does not advertise config key "${k}"`,
+      });
+      continue;
+    }
+    merged[k] = v;
+  }
+  if (Object.keys(merged).length > 0) {
+    params.traitOverrides = {
+      ...params.traitOverrides,
+      [trait.name]: { ...existing, config: merged },
+    };
+  }
+}
+
+function applyOwnership(
+  entry: OwnershipOverlayEntry,
+  params: FactoryCallSiteParams,
+  signature: FactorySignature,
+  catalog: ReadonlyArray<FactorySignature> | undefined,
+  warnings: TranslationWarning[],
+): void {
+  // Look first on the bound signature; then in the catalog (an
+  // ExtraTrait emitted by a rule above may carry the ownerField knob).
+  const local = signature.traits.find((t) =>
+    t.overridableConfigKeys.includes('ownerField'),
+  );
+  if (local) {
+    writeOwnerField(local.name, entry.ownerField, params);
+    return;
+  }
+  if (catalog) {
+    for (const sig of catalog) {
+      const trait = sig.traits.find((t) =>
+        t.overridableConfigKeys.includes('ownerField'),
+      );
+      if (trait) {
+        writeOwnerField(trait.name, entry.ownerField, params);
+        return;
+      }
+    }
+  }
+  warnings.push({
+    field: `ruleOverlay.ownership.${entry.entity}`,
+    reason: 'no trait in the bound signature or catalog advertises an `ownerField` config knob',
+  });
+}
+
+function writeOwnerField(
+  traitName: string,
+  ownerField: string,
+  params: FactoryCallSiteParams,
+): void {
+  const existing = params.traitOverrides?.[traitName] ?? {};
+  const existingConfig = existing.config ?? {};
+  params.traitOverrides = {
+    ...params.traitOverrides,
+    [traitName]: {
+      ...existing,
+      config: { ...existingConfig, ownerField },
     },
   };
 }

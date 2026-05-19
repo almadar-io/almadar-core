@@ -665,3 +665,87 @@ export interface PresentationNavItem {
   icon?: string;
 }
 
+// ============================================================================
+// Phase 4 — Agent-authored overlays for the translator
+// ============================================================================
+// The agent's Stage A LLM emits two typed overlays alongside the
+// `DomainDocument` slice. The translator's `applyTraitOverlay` +
+// `applyRuleOverlay` rows lower them onto the chosen factory's param
+// surface.
+//
+// Both overlays are typed-but-free-form on the key dimension that
+// matters (trait names, capability strings): the catalog is the
+// source of truth, atoms grow the vocabulary, the translator looks
+// up by exact set membership. No central enum.
+// ============================================================================
+
+/**
+ * LLM-authored trait-level overrides keyed by trait name (matches
+ * `signature.traits[].name`). Each entry's `config` keys are
+ * validated against `signature.traits[i].overridableConfigKeys`;
+ * unknown trait names or unknown config keys emit typed warnings
+ * and are skipped. Mirrors the existing call-site override surface
+ * on `TraitReference` in `OrbitalSchema`.
+ */
+export type TraitOverlay = Readonly<Record<string, TraitOverlayEntry>>;
+
+export interface TraitOverlayEntry {
+  config?: Readonly<Record<string, FactoryParamValue>>;
+  linkedEntity?: string;
+  events?: Readonly<Record<string, string>>;
+  name?: string;
+  emitsScope?: 'internal' | 'external';
+  listens?: ReadonlyArray<TraitOverlayListener>;
+}
+
+export interface TraitOverlayListener {
+  event: string;
+  source?: { orbital?: string; trait?: string };
+}
+
+/**
+ * Rules carry a free-form `capability: string` that the translator
+ * matches against `signature.traits[].capabilities` (source-tagged
+ * in `.lolo`, propagated via `@almadar/core@7.22.0`).
+ *
+ * NO closed enum on `capability` — atoms advertise capability
+ * strings in their `.lolo` headers, and the catalog grows the
+ * vocabulary organically. The agent emits whatever capability
+ * string the user's domain expresses; if no trait in the catalog
+ * advertises that capability, the translator emits a typed warning.
+ */
+export interface RuleOverlay {
+  rules: ReadonlyArray<DomainRuleOverlayEntry>;
+  /**
+   * Entity-level ownership signal. Until Phase 1.5 promotes
+   * `ownedBy` into `DomainEntity`, ownership rides here as a
+   * parallel typed channel. The translator threads it into the
+   * matched trait's `config.ownerField` (when the matched trait
+   * advertises that key in `overridableConfigKeys`).
+   */
+  ownership?: ReadonlyArray<OwnershipOverlayEntry>;
+}
+
+export interface DomainRuleOverlayEntry {
+  id: string;
+  /** Free-form capability label, matched against
+   *  `signature.traits[].capabilities` by exact set membership. */
+  capability: string;
+  description: string;
+  /** Entity names this rule binds to. Empty array = cross-cutting:
+   *  the rule applies to every orbital the translator visits. */
+  appliesTo: ReadonlyArray<string>;
+  /** Optional role name (e.g. `"admin"`) when the rule is role-scoped. */
+  role?: string;
+  /** Optional extra config knobs threaded into the matched trait's
+   *  `config`. Validated against the trait's `overridableConfigKeys`. */
+  config?: Readonly<Record<string, FactoryParamValue>>;
+}
+
+export interface OwnershipOverlayEntry {
+  /** Entity name (matches `DomainEntity.name`). */
+  entity: string;
+  /** Field name on the entity that carries the owner identifier. */
+  ownerField: string;
+}
+

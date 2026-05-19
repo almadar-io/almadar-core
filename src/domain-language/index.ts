@@ -81,6 +81,14 @@ export type {
   PresentationOverlay,
   PresentationNavItem,
 
+  // Phase 4 — agent-authored overlays
+  TraitOverlay,
+  TraitOverlayEntry,
+  TraitOverlayListener,
+  RuleOverlay,
+  DomainRuleOverlayEntry,
+  OwnershipOverlayEntry,
+
   // Relationship types
   RelationshipType,
   DomainRelationship,

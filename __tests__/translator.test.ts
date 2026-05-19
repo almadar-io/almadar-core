@@ -189,6 +189,167 @@ describe('translateDomainToParams', () => {
       },
     ]);
   });
+
+  it('trait overlay merges into params + warns on unknown trait name', () => {
+    const entity: DomainEntity = {
+      type: 'entity',
+      name: 'CartItem',
+      description: '',
+      fields: [field('name', 'text', true), field('description', 'text')],
+      relationships: [],
+    };
+    const { callSite, warnings } = translateDomainToParams(
+      { entity },
+      minimalCartSignature,
+      undefined,
+      undefined,
+      {
+        CartItemCartLayout: { config: { title: 'My Cart' } },
+        NoSuchTrait: { config: { whatever: 1 } },
+      },
+    );
+    expect(callSite.params.traitOverrides).toEqual({
+      CartItemCartLayout: { config: { title: 'My Cart' } },
+    });
+    expect(warnings).toEqual([
+      {
+        field: 'traitOverlay.NoSuchTrait',
+        reason: 'factory signature has no trait named "NoSuchTrait"',
+      },
+    ]);
+  });
+
+  it('rule overlay with capability=privacy emits an ExtraTrait via catalog lookup', () => {
+    const rowAccessSignature: FactorySignature = {
+      organism: 'std-row-access-control',
+      orbital: 'RowAccessControlOrbital',
+      tier: 'atoms',
+      factoryPath: 'behaviors/functions/core/atoms/std-row-access-control.ts',
+      entities: [],
+      traits: [
+        {
+          name: 'RowAccessGate',
+          emittedEvents: [],
+          listenedEvents: [],
+          overridableConfigKeys: ['ownerField', 'visibleRoles'],
+          capabilities: ['access', 'privacy'],
+        },
+      ],
+      pages: [],
+      emittedEvents: [],
+      listenedEvents: [],
+    };
+    const entity: DomainEntity = {
+      type: 'entity',
+      name: 'CartItem',
+      description: '',
+      fields: [field('name', 'text', true), field('description', 'text')],
+      relationships: [],
+    };
+    const { callSite, warnings } = translateDomainToParams(
+      { entity },
+      minimalCartSignature,
+      undefined,
+      {
+        rules: [
+          {
+            id: 'r1',
+            capability: 'privacy',
+            description: 'Sellers see only their own products',
+            appliesTo: ['CartItem'],
+          },
+        ],
+      },
+      undefined,
+      [minimalCartSignature, rowAccessSignature],
+    );
+    expect(warnings).toEqual([]);
+    expect(callSite.params.extraTraits).toEqual([
+      {
+        from: 'std/behaviors/std-row-access-control',
+        ref: 'RowAccessControl.traits.RowAccessGate',
+        linkedEntity: 'CartItem',
+      },
+    ]);
+  });
+
+  it('rule overlay with unmatched capability emits a typed warning + skips', () => {
+    const entity: DomainEntity = {
+      type: 'entity',
+      name: 'CartItem',
+      description: '',
+      fields: [field('name', 'text', true), field('description', 'text')],
+      relationships: [],
+    };
+    const { callSite, warnings } = translateDomainToParams(
+      { entity },
+      minimalCartSignature,
+      undefined,
+      {
+        rules: [
+          {
+            id: 'r1',
+            capability: 'no-such-capability',
+            description: '',
+            appliesTo: [],
+          },
+        ],
+      },
+      undefined,
+      [minimalCartSignature],
+    );
+    expect(callSite.params.extraTraits).toBeUndefined();
+    expect(warnings).toEqual([
+      {
+        field: 'ruleOverlay.rules.r1',
+        reason: 'no trait in the catalog advertises capability "no-such-capability"',
+      },
+    ]);
+  });
+
+  it('ownership entry writes ownerField on the matching trait', () => {
+    const rowAccessSignature: FactorySignature = {
+      organism: 'std-row-access-control',
+      orbital: 'RowAccessControlOrbital',
+      tier: 'atoms',
+      factoryPath: 'behaviors/functions/core/atoms/std-row-access-control.ts',
+      entities: [],
+      traits: [
+        {
+          name: 'RowAccessGate',
+          emittedEvents: [],
+          listenedEvents: [],
+          overridableConfigKeys: ['ownerField', 'visibleRoles'],
+          capabilities: ['access', 'privacy'],
+        },
+      ],
+      pages: [],
+      emittedEvents: [],
+      listenedEvents: [],
+    };
+    const entity: DomainEntity = {
+      type: 'entity',
+      name: 'Product',
+      description: '',
+      fields: [field('name', 'text', true)],
+      relationships: [],
+    };
+    const { callSite, warnings } = translateDomainToParams(
+      { entity },
+      minimalCartSignature,
+      undefined,
+      {
+        rules: [],
+        ownership: [{ entity: 'Product', ownerField: 'sellerId' }],
+      },
+      undefined,
+      [minimalCartSignature, rowAccessSignature],
+    );
+    expect(warnings).toEqual([]);
+    expect(callSite.params.traitOverrides).toEqual({
+      RowAccessGate: { config: { ownerField: 'sellerId' } },
+    });
+  });
 });
 
 describe('applyMutation', () => {
