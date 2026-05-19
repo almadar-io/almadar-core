@@ -85,6 +85,7 @@ export function translateDomainToParams(
   applyEntityName(binding.entity, signature, params);
   applyEntityFields(binding.entity, signature, params, warnings);
   applyPersistence(binding.entity, signature, params, warnings);
+  applyCollection(binding.entity, params);
   applyPagePaths(binding.pages ?? [], signature, params, warnings);
   applyPresentation(presentation, signature, params, warnings);
   applyTraitOverlay(traitOverlay, signature, params, warnings);
@@ -156,6 +157,20 @@ function applyPersistence(
   }
   if (entity.persistence === signature.entities[0].persistence) return;
   params.persistence = entity.persistence;
+}
+
+/**
+ * Thread the entity's `collection` field through to params verbatim.
+ * The factory dispatcher defaults to `plural(entityName).toLowerCase()`
+ * when omitted, so the translator only writes through an explicit
+ * authored value.
+ */
+function applyCollection(
+  entity: DomainEntity,
+  params: FactoryCallSiteParams,
+): void {
+  if (!entity.collection) return;
+  params.collection = entity.collection;
 }
 
 function applyPagePaths(

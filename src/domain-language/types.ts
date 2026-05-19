@@ -232,6 +232,14 @@ export interface DomainEntity extends ASTNode {
    * the entity section.
    */
   persistence?: EntityPersistence;
+  /**
+   * Storage collection key. Mirrors `OrbitalSchema.entities[i].collection`.
+   * Omitted ⇒ defaults to `plural(name).toLowerCase()`. Surfaced to the
+   * factory translator so the LLM can override the storage key without
+   * touching the entity name (e.g. entity `Product` → collection
+   * `"catalog"`).
+   */
+  collection?: string;
 }
 
 // ============================================================================
@@ -579,6 +587,10 @@ export interface FactoryCallSiteParams {
   entityFields?: ReadonlyArray<EntityField>;
   /** Override `signature.entities[0].persistence`. */
   persistence?: EntityPersistence;
+  /** Override the entity's storage collection key. Defaults to
+   *  `plural(entityName).toLowerCase()` at factory dispatch time
+   *  when omitted. */
+  collection?: string;
   /** Per-page path overrides keyed by `signature.pages[i].name`. */
   pagePaths?: Readonly<Record<string, string>>;
   /** Trait config overrides keyed by `signature.traits[i].name`. Each
