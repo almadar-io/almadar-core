@@ -62,6 +62,7 @@ const minimalCartSignature: FactorySignature = {
       emittedEvents: [],
       listenedEvents: [],
       overridableConfigKeys: ['navItems', 'title'],
+      capabilities: [],
     },
   ],
   pages: [
@@ -163,6 +164,7 @@ describe('translateDomainToParams', () => {
           emittedEvents: [],
           listenedEvents: [],
           overridableConfigKeys: [],
+          capabilities: [],
         },
       ],
     };

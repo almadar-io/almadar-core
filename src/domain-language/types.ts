@@ -476,6 +476,12 @@ export interface FactoryTraitSignature {
   /** Config keys overridable via `traitOverrides.<name>.config.<key>`.
    *  Read directly from the trait's `config` declaration block. */
   overridableConfigKeys: ReadonlyArray<string>;
+  /** Capability tags lifted directly from the source `.lolo` trait's
+   *  header annotations. Free-form strings — the Phase 4 translator
+   *  overlay matches rules to traits by exact set membership. Empty
+   *  when the trait declared none. See `docs/Almadar_Domain_Language.md`
+   *  Phase 3. */
+  capabilities: ReadonlyArray<string>;
 }
 
 /** One page the factory emits. The path is the factory default; the
@@ -658,3 +664,4 @@ export interface PresentationNavItem {
   /** Optional icon key (consumer-resolved). */
   icon?: string;
 }
+

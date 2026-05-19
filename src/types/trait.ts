@@ -632,6 +632,16 @@ export interface Trait {
     description_visual_prompt?: string;
     category?: TraitCategory;
     /**
+     * Author-supplied capability tags lifted from the `.lolo` trait header's
+     * bracket list. Anything beyond the known scope tokens (`instance` /
+     * `collection`) and the first category identifier accumulates here.
+     * Free-form strings — the lolo parser does not validate them against a
+     * known set. The Phase 4 translator overlay matches rules to traits by
+     * exact set membership against this list. Empty when no capabilities
+     * were declared. See `docs/Almadar_Domain_Language.md` Phase 3.
+     */
+    capabilities?: string[];
+    /**
      * Instance or collection scope. Required in V2: every trait operates on
      * either a single record (`instance`) or a group (`collection`). Drives
      * payload-inference rules for emits declared via `type X = Event<T>` and
@@ -713,6 +723,7 @@ export const TraitSchema = z.object({
     description: z.string().optional(),
     description_visual_prompt: z.string().optional(),
     category: TraitCategorySchema.optional(),
+    capabilities: z.array(z.string()).optional(),
     scope: TraitScopeSchema,
     linkedEntity: z.string().optional(),
     requiredFields: z.array(RequiredFieldSchema).optional(),
