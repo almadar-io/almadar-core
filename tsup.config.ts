@@ -5,6 +5,7 @@ export default defineConfig({
     'index': 'index.ts',
     'types/index': 'src/types/index.ts',
     'domain-language/index': 'src/domain-language/index.ts',
+    'factory/index': 'src/factory/index.ts',
     'state-machine/index': 'src/state-machine/index.ts',
     'builders': 'src/builders.ts'
   },

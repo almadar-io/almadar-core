@@ -50,6 +50,9 @@ export {
 } from './src/summarize';
 
 // Export domain language engine (lexer, parsers, formatters, sync)
+// DEPRECATED — see docs/Almadar_Domain_Language.md. The `factory/`
+// sub-export (import from `@almadar/core/factory`) is the
+// post-Phase-6 canonical surface; consumers migrate Step by Step.
 export * from './src/domain-language/index';
 
 // Export builders (compose behaviors, event wiring, layout strategy)
