@@ -1,16 +1,3 @@
-/**
- * Factory namespace — the post-Phase-6 canonical home for the
- * factory-call surface, overlays, projector, diff, and mutation
- * reducer.
- *
- * During the transition the underlying type definitions stay in
- * `../domain-language/types.ts`; this barrel exposes them under the
- * `factory/` namespace so consumers can migrate imports independently.
- * Step 8 physically relocates the definitions here.
- *
- * @packageDocumentation
- */
-
 export type {
   FactorySignatureEntityField,
   FactoryEntitySignature,
@@ -35,10 +22,7 @@ export type {
   OwnershipOverlayEntry,
 } from './overlays.js';
 
-export {
-  translateOverlaysToParams,
-  translateDomainToParams,
-} from './translate.js';
+export { translateOverlaysToParams } from './translate.js';
 export type {
   TranslationBinding,
   TranslationResult,

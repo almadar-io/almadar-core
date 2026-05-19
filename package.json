@@ -1,6 +1,6 @@
 {
   "name": "@almadar/core",
-  "version": "8.0.0",
+  "version": "8.1.0",
   "description": "Core schema types and definitions for Almadar",
   "type": "module",
   "main": "./dist/index.js",
@@ -16,11 +16,6 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/types/index.js",
       "require": "./dist/types/index.js"
-    },
-    "./domain-language": {
-      "types": "./dist/domain-language/index.d.ts",
-      "import": "./dist/domain-language/index.js",
-      "require": "./dist/domain-language/index.js"
     },
     "./factory": {
       "types": "./dist/factory/index.d.ts",

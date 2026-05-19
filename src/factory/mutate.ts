@@ -1,28 +1,8 @@
-/**
- * Mutation surface for the factory-call plan.
- *
- * Replaces the deleted `DomainMutation` + `applyMutation` reducer. The
- * studio + questionnaire emit `FactoryCallPlanMutation[]` to express
- * incremental edits to the agent's per-orbital params + cross-cutting
- * overlays. The planner applies them via `applyFactoryCallPlanMutation`
- * and re-projects to `FactoryCallSite[]`.
- *
- * Initial scope covers per-orbital config edits. Structural ops
- * (add-orbital / remove-orbital / rename-orbital) ride the analysis
- * surface directly via `analysis.orbitals` / `analysis.deletedOrbitals`
- * / `analysis.renames`.
- *
- * @packageDocumentation
- */
-
 import type { EntityField } from '../types/field.js';
 import type { TraitReference } from '../types/trait.js';
 import type { EntityPersistence } from '../types/entity.js';
-import type {
-  RuleOverlay,
-  DomainRuleOverlayEntry as RuleOverlayEntry,
-} from '../domain-language/types.js';
-import type { FactoryParamValue } from '../domain-language/types.js';
+import type { RuleOverlay, RuleOverlayEntry } from './overlays.js';
+import type { FactoryParamValue } from './types.js';
 
 /**
  * One slot the agent emits per orbital. Slim shape — agent-facing,
