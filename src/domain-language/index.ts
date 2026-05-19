@@ -73,6 +73,14 @@ export type {
   FactorySignature,
   FactorySignatureCatalog,
 
+  // Phase 2 — translator output + mutation reducer
+  FactoryCallSite,
+  FactoryCallSiteParams,
+  FactoryParamValue,
+  DomainMutation,
+  PresentationOverlay,
+  PresentationNavItem,
+
   // Relationship types
   RelationshipType,
   DomainRelationship,
@@ -177,6 +185,14 @@ export {
   deleteSection,
   type DomainToSchemaResult,
 
+  // Phase 2 — typed translator + diff
+  translateDomainToParams,
+  type TranslationBinding,
+  type TranslationResult,
+  type TranslationWarning,
+  diffFactoryCalls,
+  type CallSiteDiff,
+
   // Section Mapping
   createMappingStore,
   findMapping,
@@ -235,3 +251,6 @@ export {
 
 // Documentation generation (pure function — no fs/path deps)
 export { generateDomainLanguageReference } from './domain-language-reference.js';
+
+// Phase 2 — typed mutation reducer
+export { applyMutation } from './applyMutation.js';

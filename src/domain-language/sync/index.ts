@@ -22,6 +22,19 @@ export {
   type DomainToSchemaResult,
 } from './domain-to-schema.js';
 
+// Phase 2 — typed translator + diff (deterministic per-field
+// lowering against a chosen FactorySignature)
+export {
+  translateDomainToParams,
+  type TranslationBinding,
+  type TranslationResult,
+  type TranslationWarning,
+} from './translate-domain-to-params.js';
+export {
+  diffFactoryCalls,
+  type CallSiteDiff,
+} from './diff-factory-calls.js';
+
 // Section Mapping
 export {
   createMappingStore,

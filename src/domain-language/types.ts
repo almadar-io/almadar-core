@@ -9,7 +9,9 @@
  */
 
 import type { EntityPersistence } from '../types/entity.js';
+import type { EntityField } from '../types/field.js';
 import type { TraitScope } from '../types/trait.js';
+import type { TraitReference } from '../types/trait.js';
 export type { EntityPersistence, TraitScope };
 
 // ============================================================================
@@ -516,4 +518,143 @@ export interface FactorySignatureCatalog {
   generatedFromStdVersion: string;
   /** Sorted list of factory signatures. */
   signatures: ReadonlyArray<FactorySignature>;
+}
+
+// ============================================================================
+// Phase 2 — Deterministic translator + mutation reducer
+// ============================================================================
+// `translateDomainToParams(doc, signature)` takes ONE chosen signature
+// (the agent picked it upstream via embedding-search over the catalog)
+// and lowers the relevant `DomainDocument` slice into that factory's
+// param surface — field-by-field, no scoring. The result is one
+// `FactoryCallSite` per orbital the doc maps onto.
+//
+// `applyMutation(doc, mut)` is the reducer over a typed discriminated
+// union of edits — what a UI questionnaire or agent emits when it
+// wants to change the doc.
+//
+// `PresentationOverlay` separates concerns: nav items and theme refs
+// are presentation-layer and pass through to factory params via the
+// translator's overlay step, NOT through `DomainDocument`.
+// ============================================================================
+
+/**
+ * A single factory invocation, as the typed result of the translator.
+ * Lower into runtime by calling the factory at `factoryPath` with
+ * these `params`. Stable identity for downstream diffing is
+ * `(organism, orbital)`.
+ */
+export interface FactoryCallSite {
+  /** Matches `FactorySignature.organism`. */
+  organism: string;
+  /** Matches `FactorySignature.orbital`. */
+  orbital: string;
+  /** Matches `FactorySignature.factoryPath`. Convenience pointer; the
+   *  authoritative source remains the signature catalog. */
+  factoryPath: string;
+  /** Typed param surface fed to the factory at invocation time. */
+  params: FactoryCallSiteParams;
+}
+
+/**
+ * The typed param surface every factory's call site populates. Each
+ * field on this interface corresponds to one row in the translator's
+ * domain↔factory mapping table. Adding a new domain concept means
+ * adding a field here AND wiring it in `translateDomainToParams`.
+ *
+ * Fields are all optional because not every factory consumes every
+ * concept; the translator only sets what the chosen signature
+ * advertises.
+ */
+export interface FactoryCallSiteParams {
+  /** Override `signature.entities[0].name` (entity rename). */
+  entityName?: string;
+  /** Additional or overriding entity fields. Caller wins on collision. */
+  entityFields?: ReadonlyArray<EntityField>;
+  /** Override `signature.entities[0].persistence`. */
+  persistence?: EntityPersistence;
+  /** Per-page path overrides keyed by `signature.pages[i].name`. */
+  pagePaths?: Readonly<Record<string, string>>;
+  /** Trait config overrides keyed by `signature.traits[i].name`. Each
+   *  value is a record keyed by the trait's `overridableConfigKeys`. */
+  traitOverrides?: Readonly<
+    Record<string, { config?: Readonly<Record<string, FactoryParamValue>> }>
+  >;
+  /** Extra traits to compose into the orbital that aren't part of the
+   *  canonical signature trait stack. Used when a domain behavior
+   *  isn't covered by any canonical trait. */
+  extraTraits?: ReadonlyArray<TraitReference>;
+}
+
+/**
+ * Allowed leaf values for the typed factory-param surface. Same as
+ * `DomainFieldDefault` minus null, plus arrays + records to mirror
+ * the trait-config shape factories accept today.
+ */
+export type FactoryParamValue =
+  | string
+  | number
+  | boolean
+  | ReadonlyArray<FactoryParamValue>
+  | { readonly [key: string]: FactoryParamValue };
+
+/**
+ * Discriminated union of edits to a `DomainDocument`. Each variant
+ * carries typed AST nodes already defined in this file — never raw
+ * JSON. `applyMutation` is total over this union.
+ */
+export type DomainMutation =
+  | { kind: 'add-entity'; entity: DomainEntity }
+  | { kind: 'remove-entity'; entityName: string }
+  | { kind: 'rename-entity'; from: string; to: string }
+  | { kind: 'update-entity'; entityName: string; entity: DomainEntity }
+  | { kind: 'add-field'; entityName: string; field: DomainField }
+  | { kind: 'remove-field'; entityName: string; fieldName: string }
+  | { kind: 'update-field'; entityName: string; field: DomainField }
+  | { kind: 'add-page'; page: DomainPage }
+  | { kind: 'remove-page'; pageName: string }
+  | { kind: 'update-page'; pageName: string; page: DomainPage }
+  | { kind: 'add-behavior'; behavior: DomainBehavior }
+  | { kind: 'remove-behavior'; behaviorName: string }
+  | { kind: 'update-behavior'; behaviorName: string; behavior: DomainBehavior }
+  | { kind: 'add-transition'; behaviorName: string; transition: DomainTransition }
+  | {
+      kind: 'remove-transition';
+      behaviorName: string;
+      from: string;
+      to: string;
+      event: string;
+    }
+  | {
+      kind: 'add-relationship';
+      entityName: string;
+      relationship: DomainRelationship;
+    }
+  | {
+      kind: 'remove-relationship';
+      entityName: string;
+      targetEntity: string;
+      relationshipType: RelationshipType;
+    };
+
+/**
+ * Cross-cutting presentation knobs that don't live in `DomainDocument`
+ * because they're factory-layer concerns (nav items live on a layout
+ * trait; theme is a separate `ThemeRef`). The translator reads these
+ * and threads them into the matching factory params.
+ */
+export interface PresentationOverlay {
+  /** Nav items to add to the orbital's layout trait. The translator
+   *  looks for a `signature.traits[i]` with `overridableConfigKeys`
+   *  including `navItems` and writes into `traitOverrides[name].config.navItems`. */
+  navAdditions?: ReadonlyArray<PresentationNavItem>;
+  /** Optional theme ref override for the orbital. */
+  themeRef?: string;
+}
+
+export interface PresentationNavItem {
+  label: string;
+  path: string;
+  /** Optional icon key (consumer-resolved). */
+  icon?: string;
 }
