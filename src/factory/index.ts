@@ -1,4 +1,5 @@
 export type {
+  FactoryConfigParam,
   FactorySignatureEntityField,
   FactoryEntitySignature,
   FactoryTraitSignature,

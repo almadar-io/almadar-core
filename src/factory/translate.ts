@@ -170,7 +170,7 @@ function applyPresentation(
 ): void {
   if (!overlay?.navAdditions || overlay.navAdditions.length === 0) return;
   const target = signature.traits.find((t) =>
-    t.overridableConfigKeys.includes('navItems'),
+    t.overridableConfigKeys.some((p) => p.key === 'navItems'),
   );
   if (!target) {
     warnings.push({
@@ -222,7 +222,7 @@ function mergeTraitOverride(
   params: FactoryCallSiteParams,
   warnings: TranslationWarning[],
 ): void {
-  const advertised = new Set(trait.overridableConfigKeys);
+  const advertised = new Set(trait.overridableConfigKeys.map((p) => p.key));
   const existing = params.traitOverrides?.[traitName] ?? {};
   const existingConfig = existing.config ?? {};
   const mergedConfig: Record<string, FactoryParamValue> = { ...existingConfig };
@@ -230,9 +230,10 @@ function mergeTraitOverride(
   if (entry.config) {
     for (const [k, v] of Object.entries(entry.config)) {
       if (!advertised.has(k)) {
+        const advertisedKeys = trait.overridableConfigKeys.map((p) => p.key).join(', ');
         warnings.push({
           field: `traitOverlay.${traitName}.config.${k}`,
-          reason: `trait does not advertise config key "${k}" (overridableConfigKeys: [${trait.overridableConfigKeys.join(', ')}])`,
+          reason: `trait does not advertise config key "${k}" (overridableConfigKeys: [${advertisedKeys}])`,
         });
         continue;
       }
@@ -350,7 +351,7 @@ function threadRuleConfig(
   warnings: TranslationWarning[],
 ): void {
   if (!rule.config) return;
-  const advertised = new Set(trait.overridableConfigKeys);
+  const advertised = new Set(trait.overridableConfigKeys.map((p) => p.key));
   const existing = params.traitOverrides?.[trait.name] ?? {};
   const existingConfig = existing.config ?? {};
   const merged: Record<string, FactoryParamValue> = { ...existingConfig };
@@ -380,7 +381,7 @@ function applyOwnership(
   warnings: TranslationWarning[],
 ): void {
   const local = signature.traits.find((t) =>
-    t.overridableConfigKeys.includes('ownerField'),
+    t.overridableConfigKeys.some((p) => p.key === 'ownerField'),
   );
   if (local) {
     writeOwnerField(local.name, entry.ownerField, params);
@@ -389,7 +390,7 @@ function applyOwnership(
   if (catalog) {
     for (const sig of catalog) {
       const trait = sig.traits.find((t) =>
-        t.overridableConfigKeys.includes('ownerField'),
+        t.overridableConfigKeys.some((p) => p.key === 'ownerField'),
       );
       if (trait) {
         writeOwnerField(trait.name, entry.ownerField, params);

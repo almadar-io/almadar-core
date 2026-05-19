@@ -41,6 +41,39 @@ export interface FactoryEntitySignature {
 }
 
 /**
+ * One overridable config knob a trait advertises. Lifted directly from
+ * the source `.lolo` `config { }` block (which carries typed
+ * declarations + defaults). Consumers (the questionnaire generator,
+ * the studio) pick a widget from `type` and pre-fill from `default`.
+ *
+ * `label` is reserved for a future `.lolo` grammar extension that
+ * lets atom authors author a human-friendly question prompt; today
+ * it's always undefined and the questionnaire derives a fallback
+ * from the key name.
+ */
+export interface FactoryConfigParam {
+  /** Key name as advertised by the trait. Matches the override path
+   *  `traitOverrides.<traitName>.config.<key>`. */
+  key: string;
+  /** Type tag lifted from the `.lolo` config declaration. Drives the
+   *  question widget selection. Free-form to admit array/object
+   *  brackets (`[object]`, `[string]`) and atom-defined custom tags. */
+  type: string;
+  /** Canonical default value the factory uses when no override is
+   *  supplied. Pre-fills the form widget so users see what they're
+   *  about to change. */
+  default?: FactoryParamValue;
+  /** Optional human-friendly question prompt. Reserved for a future
+   *  `.lolo` `@label` annotation. */
+  label?: string;
+  /** Optional help-text. Reserved for the same future annotation. */
+  description?: string;
+  /** Optional closed-enum value set. Reserved for the same future
+   *  annotation. */
+  enumValues?: ReadonlyArray<string>;
+}
+
+/**
  * One trait the factory composes into the orbital. The projector reads
  * these to determine which factory's trait stack covers a given
  * orbital + which override knobs a presentation overlay can target.
@@ -52,8 +85,10 @@ export interface FactoryTraitSignature {
   emittedEvents: ReadonlyArray<string>;
   /** Event keys this trait listens for. */
   listenedEvents: ReadonlyArray<string>;
-  /** Config keys overridable via `traitOverrides.<name>.config.<key>`. */
-  overridableConfigKeys: ReadonlyArray<string>;
+  /** Config knobs overridable via `traitOverrides.<name>.config.<key>`.
+   *  Each entry carries the key name plus the typed declaration lifted
+   *  from the source `.lolo` `config { }` block. */
+  overridableConfigKeys: ReadonlyArray<FactoryConfigParam>;
   /** Capability tags lifted directly from the source `.lolo` trait's
    *  header annotations. Free-form strings — the translator overlay
    *  matches rules to traits by exact set membership. */
