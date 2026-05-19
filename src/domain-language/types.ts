@@ -11,7 +11,7 @@
 import type { EntityPersistence } from '../types/entity.js';
 import type { EntityField } from '../types/field.js';
 import type { TraitScope } from '../types/trait.js';
-import type { TraitReference } from '../types/trait.js';
+import type { TraitEventListener, TraitReference } from '../types/trait.js';
 export type { EntityPersistence, TraitScope };
 
 // ============================================================================
@@ -695,13 +695,16 @@ export interface TraitOverlayEntry {
   events?: Readonly<Record<string, string>>;
   name?: string;
   emitsScope?: 'internal' | 'external';
-  listens?: ReadonlyArray<TraitOverlayListener>;
+  /** Reuses `TraitEventListener` from `@almadar/core/types/trait` so the
+   *  overlay's listen entries carry the same `event` / `triggers` /
+   *  `source` / `guard` shape as everywhere else — no narrower clone. */
+  listens?: ReadonlyArray<TraitEventListener>;
 }
 
-export interface TraitOverlayListener {
-  event: string;
-  source?: { orbital?: string; trait?: string };
-}
+/** @deprecated Phase 4.1 placeholder — use `TraitEventListener` instead.
+ *  Kept as a structural type alias so callers that imported it keep
+ *  compiling through the transition; will be removed in 7.25.0. */
+export type TraitOverlayListener = TraitEventListener;
 
 /**
  * Rules carry a free-form `capability: string` that the translator
