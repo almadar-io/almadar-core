@@ -64,6 +64,15 @@ export type {
   EntityPersistence,
   TraitScope,
 
+  // Factory signatures (Phase 1 — almadar-pattern-sync emits these)
+  FactoryTraitKind,
+  FactorySignatureEntityField,
+  FactoryEntitySignature,
+  FactoryTraitSignature,
+  FactoryPageSignature,
+  FactorySignature,
+  FactorySignatureCatalog,
+
   // Relationship types
   RelationshipType,
   DomainRelationship,
