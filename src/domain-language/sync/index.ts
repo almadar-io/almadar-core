@@ -74,3 +74,6 @@ export {
   type DomainChunk,
   type MergeResult,
 } from './merge-chunks.js';
+
+// Phase 5 — Document overlay merge (factory base + user overlay)
+export { mergeDocuments } from './merge-documents.js';

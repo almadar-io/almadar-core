@@ -519,6 +519,20 @@ export interface FactorySignature {
   emittedEvents: ReadonlyArray<string>;
   /** Union of all `traits[].listenedEvents`. */
   listenedEvents: ReadonlyArray<string>;
+  /**
+   * Phase 5 — canonical starting `DomainDocument` fragment the studio
+   * questionnaire renders before any user input. Lifted verbatim from
+   * the factory's resolved `.orb` by `almadar-pattern-sync`. Users
+   * append / override via `DomainMutation` from the questionnaire UI;
+   * the base itself is never edited in place (consumers compose with
+   * `mergeDocuments(base, overlay)`).
+   *
+   * Optional during the 7.26.x transition — older catalog snapshots
+   * predating the sync regeneration omit it. Consumers should fall
+   * back to building a minimal document from `entities` + `pages`
+   * when this is missing.
+   */
+  baseDocument?: DomainDocument;
 }
 
 /**

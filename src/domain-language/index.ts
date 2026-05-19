@@ -233,6 +233,9 @@ export {
   formatMergeSummary,
   type DomainChunk,
   type MergeResult,
+
+  // Phase 5 — Document overlay merge
+  mergeDocuments,
 } from './sync/index.js';
 
 // Registry (Type Mappings)
