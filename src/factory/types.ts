@@ -63,14 +63,25 @@ export interface FactoryConfigParam {
    *  supplied. Pre-fills the form widget so users see what they're
    *  about to change. */
   default?: FactoryParamValue;
-  /** Optional human-friendly question prompt. Reserved for a future
-   *  `.lolo` `@label` annotation. */
+  /** Optional human-friendly question prompt. Lifted from the source
+   *  `.lolo` `@label "..."` annotation. */
   label?: string;
-  /** Optional help-text. Reserved for the same future annotation. */
+  /** Optional help-text. Lifted from `.lolo` `@description "..."`. */
   description?: string;
-  /** Optional closed-enum value set. Reserved for the same future
-   *  annotation. */
+  /** Optional closed-enum value set. Lifted from `.lolo` enum syntax. */
   enumValues?: ReadonlyArray<string>;
+  /** Comma-separated user-vocabulary synonyms. Authored in `.lolo` as
+   *  `@synonyms "..."` next to the knob declaration. Used by the agent's
+   *  catalog-summary prompt (so the LLM connects user phrases to knob
+   *  names) and by the publish-time knob-embeddings bake (so cosine
+   *  narrowing recalls knobs voiced via synonym).
+   *
+   *  Example for the `height` knob on `std-graphs`:
+   *    `@synonyms "taller, shorter, vertical size, pixel height"`
+   *
+   *  Stays a single free-form string; consumers decide their own
+   *  splitting/formatting policy. */
+  synonyms?: string;
 }
 
 /**
