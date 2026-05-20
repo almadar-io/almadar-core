@@ -179,6 +179,12 @@ export interface EntityField {
     max?: number;
     /** Array item schema (for array type) */
     items?: EntityField;
+    /** Object property schemas keyed by property name (for object type).
+     *  Mirrors Rust's `FieldDefinition.properties: Option<HashMap<String,
+     *  FieldDefinition>>`. Populated by the lolo lowerer when a field /
+     *  config slot's type expression resolves to a struct shape
+     *  (`TypeExpr::Object`), including named-type aliases like `[MetricSpec]`. */
+    properties?: Record<string, EntityField>;
     /** Relation configuration (required when type is 'relation') */
     relation?: RelationConfig;
 }
@@ -224,6 +230,7 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
             min: z.number().optional(),
             max: z.number().optional(),
             items: EntityFieldSchema.optional(),
+            properties: z.record(EntityFieldSchema).optional(),
             relation: RelationConfigSchema.optional(),
         }).refine(
             (field) => field.type !== 'relation' || field.relation !== undefined,

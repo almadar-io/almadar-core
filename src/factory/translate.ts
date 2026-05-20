@@ -241,11 +241,21 @@ function mergeTraitOverride(
     }
   }
 
+  // Thread every documented override field through verbatim — `config`
+  // gets the merged + validated map; the rest pass through as the overlay
+  // authored them. Pre-unification only `config` was preserved, so any
+  // overlay-authored `linkedEntity` / `events` / `name` / `emitsScope` /
+  // `listens` was silently dropped before reaching the factory.
   params.traitOverrides = {
     ...params.traitOverrides,
     [traitName]: {
       ...existing,
       ...(Object.keys(mergedConfig).length > 0 ? { config: mergedConfig } : {}),
+      ...(entry.linkedEntity !== undefined ? { linkedEntity: entry.linkedEntity } : {}),
+      ...(entry.events !== undefined ? { events: entry.events } : {}),
+      ...(entry.name !== undefined ? { name: entry.name } : {}),
+      ...(entry.emitsScope !== undefined ? { emitsScope: entry.emitsScope } : {}),
+      ...(entry.listens !== undefined ? { listens: entry.listens } : {}),
     },
   };
 }

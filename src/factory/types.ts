@@ -1,6 +1,7 @@
 import type { EntityPersistence } from '../types/entity.js';
 import type { EntityField } from '../types/field.js';
 import type { TraitReference } from '../types/trait.js';
+import type { TraitOverlayEntry } from './overlays.js';
 export type { EntityPersistence };
 
 /**
@@ -70,6 +71,16 @@ export interface FactoryConfigParam {
   description?: string;
   /** Optional closed-enum value set. Lifted from `.lolo` enum syntax. */
   enumValues?: ReadonlyArray<string>;
+  /** Array element schema when the slot's type is `[T]`. Mirrors the
+   *  `.orb` `ConfigField.items` carrier (`FieldDefinition`-shaped). Lets
+   *  consumers see the per-element typing — e.g. `metrics : [MetricSpec]`
+   *  exposes `items.properties` with every MetricSpec field + its own
+   *  `values: [...]` enum constraints. */
+  items?: EntityField;
+  /** Object property schemas keyed by property name when the slot's type
+   *  is an inline `{ ... }` or a named struct alias. Mirrors the `.orb`
+   *  `ConfigField.properties` carrier. */
+  properties?: Readonly<Record<string, EntityField>>;
   /** Comma-separated user-vocabulary synonyms. Authored in `.lolo` as
    *  `@synonyms "..."` next to the knob declaration. Used by the agent's
    *  catalog-summary prompt (so the LLM connects user phrases to knob
@@ -92,6 +103,13 @@ export interface FactoryConfigParam {
 export interface FactoryTraitSignature {
   /** Canonical trait name post-rename (e.g. `"ChatMessageList"`). */
   name: string;
+  /** Upstream trait reference path when this trait is a call-site override
+   *  of an imported atom — e.g. `"Stats.traits.StatsItemStats"`. Absent
+   *  when the trait is inline-defined (atom-tier traits). The catalog
+   *  inheritance pass uses this to resolve the upstream atom signature
+   *  so each call-site `overridableConfigKeys` entry gets `type` /
+   *  `items` / `properties` filled in from the canonical declaration. */
+  ref?: string;
   /** Event keys this trait emits (post-rename). */
   emittedEvents: ReadonlyArray<string>;
   /** Event keys this trait listens for. */
@@ -176,10 +194,18 @@ export interface FactoryCallSiteParams {
   collection?: string;
   /** Per-page path overrides keyed by `signature.pages[i].name`. */
   pagePaths?: Readonly<Record<string, string>>;
-  /** Trait config overrides keyed by `signature.traits[i].name`. */
-  traitOverrides?: Readonly<
-    Record<string, { config?: Readonly<Record<string, FactoryParamValue>> }>
-  >;
+  /** Trait-level overrides keyed by `signature.traits[i].name`. Each value
+   *  is a {@link TraitOverlayEntry} — the canonical override surface that
+   *  admits the full documented set (`config`, `linkedEntity`, `events`,
+   *  `name`, `emitsScope`, `listens`) and mirrors what `TraitOverlay` (the
+   *  LLM-facing input) and {@link MakeTraitRefOpts} (the builder input)
+   *  both accept. The translator threads each field from the overlay
+   *  through to here verbatim; the factory applies them via the same
+   *  `TraitReference` override semantics the inliner uses on hand-authored
+   *  `.orb` traits. Pre-unification this carried only `{ config? }`, which
+   *  silently dropped every other override field even though both the
+   *  overlay layer above and the factory builders below accepted them. */
+  traitOverrides?: Readonly<Record<string, TraitOverlayEntry>>;
   /** Extra traits to compose into the orbital that aren't part of the
    *  canonical signature trait stack. */
   extraTraits?: ReadonlyArray<TraitReference>;
