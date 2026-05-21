@@ -10,6 +10,8 @@ export type {
   FactoryCallSiteParams,
   FactoryParamValue,
   SchemaFieldType,
+  JsonSchema,
+  JsonSchemaType,
 } from './types.js';
 
 export type {

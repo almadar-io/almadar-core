@@ -4,6 +4,43 @@ import type { TraitReference } from '../types/trait.js';
 import type { TraitOverlayEntry } from './overlays.js';
 export type { EntityPersistence };
 
+// ============================================================================
+// JSON Schema (minimal subset — covers what the signature → schema generator
+// emits + what OpenAI's strict-mode tool calling consumes).
+// ============================================================================
+
+/**
+ * Recursive JSON Schema. Intentionally narrow — only the keywords V2's
+ * signature → schema generator emits. Custom `x-*` extensions carry
+ * descriptive metadata (synonyms, label) that doesn't shape validation
+ * but stays in the schema for prompt rendering / studio UIs.
+ */
+export interface JsonSchema {
+  type?: JsonSchemaType | ReadonlyArray<JsonSchemaType>;
+  description?: string;
+  properties?: Readonly<Record<string, JsonSchema>>;
+  required?: ReadonlyArray<string>;
+  additionalProperties?: boolean | JsonSchema;
+  items?: JsonSchema;
+  enum?: ReadonlyArray<string | number | boolean>;
+  oneOf?: ReadonlyArray<JsonSchema>;
+  anyOf?: ReadonlyArray<JsonSchema>;
+  default?: string | number | boolean | ReadonlyArray<unknown> | Readonly<Record<string, unknown>> | null;
+  /** Knob's `@synonyms` from the source `.lolo`. */
+  'x-synonyms'?: string;
+  /** Knob's `@label` from the source `.lolo`. */
+  'x-label'?: string;
+}
+
+export type JsonSchemaType =
+  | 'string'
+  | 'number'
+  | 'integer'
+  | 'boolean'
+  | 'array'
+  | 'object'
+  | 'null';
+
 /**
  * OrbitalSchema field type tags. The factory-signature extractor lifts
  * these directly from the resolved `.orb`; consumers narrow further at
@@ -151,6 +188,27 @@ export interface FactorySignature {
   emittedEvents: ReadonlyArray<string>;
   /** Union of all `traits[].listenedEvents`. */
   listenedEvents: ReadonlyArray<string>;
+  /**
+   * JSON Schema for the orbital's `AnalysisOrbitalParams` shape. Walks
+   * `traitOverrides.<TraitName>.config.<knob>` with the exact type
+   * (string/number/boolean/array/object) lifted from each knob's
+   * declaration, `enum` from `enumValues`, recursive `items` for array
+   * slots, recursive `properties` for struct slots. Every level carries
+   * `additionalProperties: false` so the LLM cannot emit unknown trait
+   * names, invented knob keys, or out-of-set enum values.
+   *
+   * Pre-computed at signature extraction time by
+   * `tools/almadar-pattern-sync/src/std-ts/signatures/`. V2 tool-calling
+   * (`@almadar-io/agent`'s coordinator + per-orbital subagent) feeds this
+   * directly to OpenAI's `tool.parameters` with `strict: true` — the
+   * LLM is physically constrained by the schema instead of relying on
+   * post-hoc validation.
+   *
+   * Optional for backward compatibility: signatures emitted by older
+   * pattern-sync versions don't carry it, in which case V2 tools fall
+   * back to a loose schema + post-hoc validation.
+   */
+  paramsSchema?: JsonSchema;
 }
 
 /**
