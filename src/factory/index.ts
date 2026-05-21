@@ -1,5 +1,6 @@
 export type {
   FactoryConfigParam,
+  FactoryConfigTier,
   FactorySignatureEntityField,
   FactoryEntitySignature,
   FactoryTraitSignature,
@@ -14,6 +15,20 @@ export type {
   JsonSchemaType,
   JsonValue,
 } from './types.js';
+
+export type {
+  DomainQuestion,
+  DomainQuestionAnswer,
+  DomainQuestionAnswers,
+  DomainQuestionInputType,
+  FactoryCallPlanMutationTemplate,
+} from './questions/index.js';
+export {
+  deriveInputType,
+  generateQuestions,
+  answerToMutations,
+  answersToMutations,
+} from './questions/index.js';
 
 export type {
   PresentationOverlay,

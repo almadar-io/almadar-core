@@ -270,8 +270,17 @@ function applyRuleOverlay(
 ): void {
   if (!overlay) return;
 
+  // `rule.appliesTo` is frozen at the name in scope when the rule was
+  // CAPTURED — typically the canonical entity name. If the caller later
+  // rebinds via `params.entityName`, `binding.entityName` carries the
+  // rebound name and a direct equality check fails. Match against BOTH
+  // the rebound name (current binding) AND the canonical name (the
+  // signature's authored entity) so cross-turn rule references survive
+  // entity renames.
+  const matchableNames = collectMatchableEntityNames(signature, binding);
+
   for (const rule of overlay.rules) {
-    if (!ruleAppliesToBinding(rule, binding)) continue;
+    if (!ruleAppliesToAnyName(rule, matchableNames)) continue;
     if (!catalog) {
       warnings.push({
         field: `ruleOverlay.rules.${rule.id}`,
@@ -295,18 +304,38 @@ function applyRuleOverlay(
 
   if (overlay.ownership) {
     for (const entry of overlay.ownership) {
-      if (entry.entity !== binding.entityName) continue;
+      if (!matchableNames.includes(entry.entity)) continue;
       applyOwnership(entry, params, signature, catalog, warnings);
     }
   }
 }
 
-function ruleAppliesToBinding(
-  rule: RuleOverlayEntry,
+/**
+ * Names the rule overlay may legitimately target for THIS binding.
+ * Includes the rebound entity name (current `binding.entityName`) AND
+ * every canonical name on `signature.entities[*]`. Deduped, empty-safe.
+ */
+function collectMatchableEntityNames(
+  signature: FactorySignature,
   binding: TranslationBinding,
+): ReadonlyArray<string> {
+  const out = new Set<string>();
+  if (binding.entityName.length > 0) out.add(binding.entityName);
+  for (const ent of signature.entities) {
+    if (typeof ent.name === 'string' && ent.name.length > 0) out.add(ent.name);
+  }
+  return [...out];
+}
+
+function ruleAppliesToAnyName(
+  rule: RuleOverlayEntry,
+  matchableNames: ReadonlyArray<string>,
 ): boolean {
   if (rule.appliesTo.length === 0) return true;
-  return rule.appliesTo.includes(binding.entityName);
+  for (const n of rule.appliesTo) {
+    if (matchableNames.includes(n)) return true;
+  }
+  return false;
 }
 
 interface CapabilityMatch {

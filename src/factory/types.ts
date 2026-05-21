@@ -145,7 +145,32 @@ export interface FactoryConfigParam {
    *  Stays a single free-form string; consumers decide their own
    *  splitting/formatting policy. */
   synonyms?: string;
+  /** Visibility tier authored in `.lolo` as `@tier "..."` next to the
+   *  knob declaration. Drives the studio Questionnaire's filter +
+   *  disclosure: `internal` knobs are hidden entirely, `advanced` knobs
+   *  collapse under a "Show advanced" toggle, `essential` /
+   *  `customization` knobs render inline. Untagged knobs are treated as
+   *  `customization` by the studio (current visible behavior). */
+  tier?: FactoryConfigTier;
 }
+
+/**
+ * Audience tier for a `FactoryConfigParam`. Source-tagged via the
+ * `@tier "..."` annotation in `.lolo` — no heuristic inference on the
+ * consumer side. Missing tag = author did not tag = treat as
+ * `customization` at render time.
+ *
+ *  - `essential` — every project of this kind needs to answer (app
+ *    name, entity fields, primary nav items).
+ *  - `customization` — meaningful refinement most projects will tweak.
+ *  - `advanced` — sensible defaults; only specialised projects override.
+ *  - `internal` — platform-internal; the studio never surfaces these.
+ */
+export type FactoryConfigTier =
+  | 'essential'
+  | 'customization'
+  | 'advanced'
+  | 'internal';
 
 /**
  * One trait the factory composes into the orbital. The projector reads
