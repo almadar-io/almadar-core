@@ -115,6 +115,10 @@ export {
 export {
   type Field,
   type EntityField, // Backward compatibility
+  type ScalarEntityField,
+  type EnumEntityField,
+  type RelationEntityField,
+  type ArrayEntityField,
   type FieldType,
   type FieldFormat,
   type RelationConfig,
