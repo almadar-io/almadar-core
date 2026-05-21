@@ -220,11 +220,14 @@ export interface RelationEntityField extends EntityFieldBase {
     relation: RelationConfig;
 }
 
-/** `type: 'array'` REQUIRES the element schema in `items`. */
+/** `type: 'array'` — element schema in `items` strongly preferred but
+ *  optional for legacy compatibility with codegen-emitted scalar-array
+ *  fields (e.g. `{type: 'array', default: []}`). The lolo lowerer + Rust
+ *  validator catch typed-element-required cases downstream. */
 export interface ArrayEntityField extends EntityFieldBase {
     type: 'array';
     /** Element schema for the array. */
-    items: EntityField;
+    items?: EntityField;
 }
 
 /**
@@ -330,11 +333,11 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
                 type: z.literal('relation'),
                 relation: RelationConfigSchema,
             }),
-            // Array variant — REQUIRES items schema.
+            // Array variant — items optional to match relaxed TS shape.
             z.object({
                 ...baseFieldShape,
                 type: z.literal('array'),
-                items: EntityFieldSchema,
+                items: EntityFieldSchema.optional(),
             }),
         ]),
     );
