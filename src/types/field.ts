@@ -148,46 +148,93 @@ export const FieldFormatSchema = z.enum([
 ]);
 
 // ============================================================================
-// Entity Field
+// Entity Field — discriminated union by `type`
 // ============================================================================
 
 /**
- * Entity field definition.
+ * Field-type tags that don't carry a type-dependent payload. The base
+ * `EntityField` shape applies as-is.
  */
-export interface EntityField {
+type ScalarFieldType =
+    | 'string'
+    | 'number'
+    | 'boolean'
+    | 'date'
+    | 'timestamp'
+    | 'datetime'
+    | 'object'
+    | 'trait'
+    | 'slot'
+    | 'pattern';
+
+/** Fields shared across every variant. */
+interface EntityFieldBase {
     /**
      * Field name (camelCase). Optional for nested item/property descriptors
      * where the name is implied by the parent (`items`, `properties[k]`).
      * Mirrors Rust's `FieldDefinition.name: Option<String>`.
      */
     name?: string;
-    /** Data type */
-    type: FieldType;
     /** Whether the field is required */
     required?: boolean;
     /** Default value */
     default?: unknown;
-    /** Allowed values for enum types */
-    values?: string[];
-    /** @deprecated Use 'values' instead */
-    enum?: string[];
     /** Validation format */
     format?: FieldFormat;
     /** Minimum value (for number) or length (for string) */
     min?: number;
     /** Maximum value or length */
     max?: number;
-    /** Array item schema (for array type) */
-    items?: EntityField;
     /** Object property schemas keyed by property name (for object type).
      *  Mirrors Rust's `FieldDefinition.properties: Option<HashMap<String,
      *  FieldDefinition>>`. Populated by the lolo lowerer when a field /
      *  config slot's type expression resolves to a struct shape
      *  (`TypeExpr::Object`), including named-type aliases like `[MetricSpec]`. */
     properties?: Record<string, EntityField>;
-    /** Relation configuration (required when type is 'relation') */
-    relation?: RelationConfig;
 }
+
+/** Scalar / structural fields — no type-dependent payload required. */
+export interface ScalarEntityField extends EntityFieldBase {
+    type: ScalarFieldType;
+}
+
+/** `type: 'enum'` REQUIRES the closed vocabulary in `values`. */
+export interface EnumEntityField extends EntityFieldBase {
+    type: 'enum';
+    /** Closed string vocabulary the field accepts. */
+    values: string[];
+}
+
+/** `type: 'relation'` REQUIRES the relation target binding. */
+export interface RelationEntityField extends EntityFieldBase {
+    type: 'relation';
+    /** Relation target binding (entity + cardinality). */
+    relation: RelationConfig;
+}
+
+/** `type: 'array'` REQUIRES the element schema in `items`. */
+export interface ArrayEntityField extends EntityFieldBase {
+    type: 'array';
+    /** Element schema for the array. */
+    items: EntityField;
+}
+
+/**
+ * Entity field definition — discriminated union by `type`. Each variant
+ * statically enforces its dependent payload (`values` for enum,
+ * `relation` for relation, `items` for array) so TS / Zod / JSON Schema
+ * consumers all agree on the dependency, not just the Rust validator.
+ *
+ * @example
+ * { name: 'status', type: 'enum', values: ['draft', 'published'] }
+ * { name: 'authorId', type: 'relation', relation: { entity: 'User', cardinality: 'one' } }
+ * { name: 'tags', type: 'array', items: { type: 'string' } }
+ */
+export type EntityField =
+    | ScalarEntityField
+    | EnumEntityField
+    | RelationEntityField
+    | ArrayEntityField;
 
 /**
  * Alias map for legacy/loose field-type spellings. Preprocessed into the
@@ -202,63 +249,83 @@ const FIELD_TYPE_ALIASES: Record<string, FieldType> = {
     ts: 'timestamp',
 };
 
-export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = z.lazy(() =>
-    z.preprocess(
+/**
+ * Zod schema for `EntityField`. Preprocess normalizes:
+ *   - legacy `type` aliases (text → string, int → number, etc.)
+ *   - legacy `enum: string[]` alias → `values: string[]`
+ *
+ * Branches on `type` so TS narrows the parsed output to the matching
+ * discriminated-union variant.
+ */
+export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = z.lazy(() => {
+    const baseFieldShape = {
+        name: z.string().min(1, 'Field name is required').optional(),
+        required: z.boolean().optional(),
+        default: z.unknown().optional(),
+        format: FieldFormatSchema.optional(),
+        min: z.number().optional(),
+        max: z.number().optional(),
+        properties: z.record(EntityFieldSchema).optional(),
+    };
+
+    /** Build a scalar variant schema (no type-dependent payload). */
+    function scalarVariant<T extends ScalarFieldType>(t: T) {
+        return z.object({ ...baseFieldShape, type: z.literal(t) });
+    }
+
+    return z.preprocess(
         (input) => {
             if (
-                input !== null &&
-                typeof input === 'object' &&
-                'type' in input &&
-                typeof (input as { type: unknown }).type === 'string'
+                input === null ||
+                typeof input !== 'object' ||
+                !('type' in input) ||
+                typeof (input as { type: unknown }).type !== 'string'
             ) {
-                const raw = (input as { type: string }).type;
-                const canonical = FIELD_TYPE_ALIASES[raw];
-                if (canonical !== undefined) {
-                    return { ...(input as object), type: canonical };
-                }
+                return input;
             }
-            return input;
+            const obj = input as { type: string; enum?: unknown; values?: unknown };
+            const next: Record<string, unknown> = { ...obj };
+            const aliased = FIELD_TYPE_ALIASES[obj.type];
+            if (aliased !== undefined) next['type'] = aliased;
+            // Fold legacy `enum: string[]` into `values: string[]`.
+            if (next['enum'] !== undefined && next['values'] === undefined) {
+                next['values'] = next['enum'];
+            }
+            delete next['enum'];
+            return next;
         },
-        z.object({
-            name: z.string().min(1, 'Field name is required').optional(),
-            type: FieldTypeSchema,
-            required: z.boolean().optional(),
-            default: z.unknown().optional(),
-            values: z.array(z.string()).optional(),
-            enum: z.array(z.string()).optional(),
-            format: FieldFormatSchema.optional(),
-            min: z.number().optional(),
-            max: z.number().optional(),
-            items: EntityFieldSchema.optional(),
-            properties: z.record(EntityFieldSchema).optional(),
-            relation: RelationConfigSchema.optional(),
-        }).refine(
-            (field) => field.type !== 'relation' || field.relation !== undefined,
-            { message: 'Relation config is required when type is "relation"', path: ['relation'] }
-        ).refine(
-            // Enum fields must carry their allowed values. Without this refine,
-            // the type was lying about what's valid — bare `type: 'enum'` without
-            // `values` passed zod but failed `orb validate` downstream with
-            // ORB_E_EMPTY_ENUM_VALUES, stalling the agent pipeline for 20 minutes.
-            // `enum` is the legacy field-name alias; accept either.
-            (field) => {
-                if (field.type !== 'enum') return true;
-                const vals = field.values ?? field.enum;
-                return Array.isArray(vals) && vals.length > 0;
-            },
-            { message: 'Enum field requires a non-empty `values` array', path: ['values'] }
-        ).refine(
-            // Array fields must describe their element shape. Bare `type: 'array'`
-            // with no `items` forces downstream consumers (builders, UI renderers,
-            // persistence) to guess, so reject it at the schema boundary.
-            (field) => {
-                if (field.type !== 'array') return true;
-                return field.items !== undefined;
-            },
-            { message: 'Array field requires an `items` schema describing each element', path: ['items'] }
-        )
-    )
-);
+        z.discriminatedUnion('type', [
+            scalarVariant('string'),
+            scalarVariant('number'),
+            scalarVariant('boolean'),
+            scalarVariant('date'),
+            scalarVariant('timestamp'),
+            scalarVariant('datetime'),
+            scalarVariant('object'),
+            scalarVariant('trait'),
+            scalarVariant('slot'),
+            scalarVariant('pattern'),
+            // Enum variant — REQUIRES non-empty values.
+            z.object({
+                ...baseFieldShape,
+                type: z.literal('enum'),
+                values: z.array(z.string()).min(1, 'Enum field requires a non-empty `values` array'),
+            }),
+            // Relation variant — REQUIRES relation config.
+            z.object({
+                ...baseFieldShape,
+                type: z.literal('relation'),
+                relation: RelationConfigSchema,
+            }),
+            // Array variant — REQUIRES items schema.
+            z.object({
+                ...baseFieldShape,
+                type: z.literal('array'),
+                items: EntityFieldSchema,
+            }),
+        ]),
+    );
+});
 
 export type EntityFieldInput = z.input<typeof EntityFieldSchema>;
 

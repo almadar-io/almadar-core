@@ -229,8 +229,10 @@ describe('summarizeOrbital', () => {
     if (typeof entity === 'object' && entity.fields) {
       const statusField = entity.fields.find(f => f.name === 'status');
       expect(statusField).toBeDefined();
-      expect(statusField!.type).toBe('enum');
-      expect(statusField!.values).toEqual(['active', 'inactive']);
+      expect(statusField?.type).toBe('enum');
+      if (statusField?.type === 'enum') {
+        expect(statusField.values).toEqual(['active', 'inactive']);
+      }
     }
   });
 
@@ -240,8 +242,10 @@ describe('summarizeOrbital', () => {
     if (typeof entity === 'object' && entity.fields) {
       const rel = entity.fields.find(f => f.name === 'companyId');
       expect(rel).toBeDefined();
-      expect(rel!.type).toBe('relation');
-      expect(rel!.relation).toEqual({ entity: 'Company', cardinality: 'one' });
+      expect(rel?.type).toBe('relation');
+      if (rel?.type === 'relation') {
+        expect(rel.relation).toEqual({ entity: 'Company', cardinality: 'one' });
+      }
     }
   });
 

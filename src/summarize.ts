@@ -96,18 +96,43 @@ function isBusinessField(field: EntityField): boolean {
  * @internal
  */
 function summarizeEntity(entity: Entity): Entity {
-  const fields: EntityField[] = entity.fields.filter(isBusinessField).map(f => {
-    const summary: EntityField = { name: f.name, type: f.type };
-    if (f.required) summary.required = true;
-    if (f.type === 'enum' && f.values) summary.values = f.values;
-    if (f.type === 'relation' && f.relation) summary.relation = f.relation;
-    return summary;
-  });
-
+  const fields: EntityField[] = entity.fields.filter(isBusinessField).map(summarizeField);
   return {
     name: entity.name,
     collection: entity.collection,
     fields,
+  };
+}
+
+function summarizeField(f: EntityField): EntityField {
+  if (f.type === 'enum') {
+    return {
+      ...(f.name !== undefined ? { name: f.name } : {}),
+      type: 'enum',
+      values: f.values,
+      ...(f.required ? { required: true } : {}),
+    };
+  }
+  if (f.type === 'relation') {
+    return {
+      ...(f.name !== undefined ? { name: f.name } : {}),
+      type: 'relation',
+      relation: f.relation,
+      ...(f.required ? { required: true } : {}),
+    };
+  }
+  if (f.type === 'array') {
+    return {
+      ...(f.name !== undefined ? { name: f.name } : {}),
+      type: 'array',
+      items: f.items,
+      ...(f.required ? { required: true } : {}),
+    };
+  }
+  return {
+    ...(f.name !== undefined ? { name: f.name } : {}),
+    type: f.type,
+    ...(f.required ? { required: true } : {}),
   };
 }
 
