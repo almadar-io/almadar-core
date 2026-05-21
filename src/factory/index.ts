@@ -12,6 +12,7 @@ export type {
   SchemaFieldType,
   JsonSchema,
   JsonSchemaType,
+  JsonValue,
 } from './types.js';
 
 export type {

@@ -10,6 +10,21 @@ export type { EntityPersistence };
 // ============================================================================
 
 /**
+ * Recursive JSON value — the shape any JSON document can hold. Used by
+ * `JsonSchema.default` (which carries an arbitrary JSON literal) and
+ * `JsonSchema.enum` (closed set of leaf values). Recursive structural
+ * type with no `unknown` anywhere: every nested value is itself a
+ * `JsonValue`.
+ */
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | ReadonlyArray<JsonValue>
+  | Readonly<{ [key: string]: JsonValue }>;
+
+/**
  * Recursive JSON Schema. Intentionally narrow — only the keywords V2's
  * signature → schema generator emits. Custom `x-*` extensions carry
  * descriptive metadata (synonyms, label) that doesn't shape validation
@@ -18,14 +33,14 @@ export type { EntityPersistence };
 export interface JsonSchema {
   type?: JsonSchemaType | ReadonlyArray<JsonSchemaType>;
   description?: string;
-  properties?: Readonly<Record<string, JsonSchema>>;
+  properties?: Readonly<{ [key: string]: JsonSchema }>;
   required?: ReadonlyArray<string>;
   additionalProperties?: boolean | JsonSchema;
   items?: JsonSchema;
   enum?: ReadonlyArray<string | number | boolean>;
   oneOf?: ReadonlyArray<JsonSchema>;
   anyOf?: ReadonlyArray<JsonSchema>;
-  default?: string | number | boolean | ReadonlyArray<unknown> | Readonly<Record<string, unknown>> | null;
+  default?: JsonValue;
   /** Knob's `@synonyms` from the source `.lolo`. */
   'x-synonyms'?: string;
   /** Knob's `@label` from the source `.lolo`. */
