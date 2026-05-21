@@ -193,9 +193,17 @@ interface EntityFieldBase {
     properties?: Record<string, EntityField>;
 }
 
-/** Scalar / structural fields — no type-dependent payload required. */
+/**
+ * Scalar / structural fields — no type-dependent payload required.
+ * `values?` is permitted as an OPTIONAL UI/validation hint (e.g. lolo's
+ * `'a' | 'b' | 'c'` string-union sugar lowers to `type: 'string', values:
+ * [...]`). Only `EnumEntityField` MANDATES values.
+ */
 export interface ScalarEntityField extends EntityFieldBase {
     type: ScalarFieldType;
+    /** Optional vocabulary hint for scalar fields (e.g. string unions
+     *  authored as `'a'|'b'|'c'` in lolo). Not required at this variant. */
+    values?: string[];
 }
 
 /** `type: 'enum'` REQUIRES the closed vocabulary in `values`. */
@@ -268,9 +276,14 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
         properties: z.record(EntityFieldSchema).optional(),
     };
 
-    /** Build a scalar variant schema (no type-dependent payload). */
+    /** Build a scalar variant schema. `values?` is permitted as a hint;
+     *  only the enum variant mandates a non-empty values array. */
     function scalarVariant<T extends ScalarFieldType>(t: T) {
-        return z.object({ ...baseFieldShape, type: z.literal(t) });
+        return z.object({
+            ...baseFieldShape,
+            type: z.literal(t),
+            values: z.array(z.string()).optional(),
+        });
     }
 
     return z.preprocess(
