@@ -300,14 +300,14 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
                 return input;
             }
             const obj = input as { type: string; enum?: unknown; values?: unknown };
-            const next: Record<string, unknown> = { ...obj };
+            const next: { type: string; enum?: unknown; values?: unknown } = { ...obj };
             const aliased = FIELD_TYPE_ALIASES[obj.type];
-            if (aliased !== undefined) next['type'] = aliased;
+            if (aliased !== undefined) next.type = aliased;
             // Fold legacy `enum: string[]` into `values: string[]`.
-            if (next['enum'] !== undefined && next['values'] === undefined) {
-                next['values'] = next['enum'];
+            if (next.enum !== undefined && next.values === undefined) {
+                next.values = next.enum;
             }
-            delete next['enum'];
+            delete next.enum;
             return next;
         },
         z.discriminatedUnion('type', [
