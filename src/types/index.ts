@@ -678,3 +678,49 @@ export {
   type EventLogEntry,
   type OrbitalVerificationAPI,
 } from "./verification.js";
+
+// ============================================================================
+// JSON Primitives (universal "data crossed a boundary" types)
+// ============================================================================
+
+export {
+  type JsonValue,
+  type JsonObject,
+  type ToolArgs,
+  isJsonPrimitive,
+  isJsonObject,
+  isJsonArray,
+} from "./json.js";
+
+// ============================================================================
+// Validation Errors
+// ============================================================================
+
+export {
+  type ValidationError,
+  type ValidationErrorCode,
+  type KnownValidationErrorCode,
+  KNOWN_VALIDATION_ERROR_CODES,
+  isKnownValidationErrorCode,
+} from "./validation.js";
+
+// ============================================================================
+// Parsed AST (LLM-emit relaxed views of the canonical orbital types)
+// ============================================================================
+
+export {
+  type ParsedOrbital,
+  type ParsedEntity,
+  type ParsedTrait,
+  type ParsedTraitConfig,
+  type ParsedStateMachine,
+  type ParsedState,
+  type ParsedEvent,
+  type ParsedTransition,
+  type ParsedEmitDeclaration,
+  type ParsedListenDeclaration,
+  type ParsedPage,
+  type ParsedDomainContext,
+  type ParsedDesign,
+  type ValidatedOrbital,
+} from "./parsed-ast.js";

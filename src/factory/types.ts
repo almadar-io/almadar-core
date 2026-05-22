@@ -2,27 +2,19 @@ import type { EntityPersistence } from '../types/entity.js';
 import type { EntityField } from '../types/field.js';
 import type { TraitReference } from '../types/trait.js';
 import type { TraitOverlayEntry } from './overlays.js';
+import type { JsonValue } from '../types/json.js';
 export type { EntityPersistence };
+export type { JsonValue };
 
 // ============================================================================
 // JSON Schema (minimal subset — covers what the signature → schema generator
 // emits + what OpenAI's strict-mode tool calling consumes).
 // ============================================================================
-
-/**
- * Recursive JSON value — the shape any JSON document can hold. Used by
- * `JsonSchema.default` (which carries an arbitrary JSON literal) and
- * `JsonSchema.enum` (closed set of leaf values). Recursive structural
- * type with no `unknown` anywhere: every nested value is itself a
- * `JsonValue`.
- */
-export type JsonValue =
-  | string
-  | number
-  | boolean
-  | null
-  | ReadonlyArray<JsonValue>
-  | Readonly<{ [key: string]: JsonValue }>;
+//
+// `JsonValue` (re-exported above) lives in `src/types/json.ts`. The
+// canonical shape is mutable; consumers that want immutability take
+// `Readonly<JsonValue>` at their boundary. Used by `JsonSchema.default`
+// (arbitrary JSON literal) and any other JSON-shaped field.
 
 /**
  * Recursive JSON Schema. Intentionally narrow — only the keywords V2's
