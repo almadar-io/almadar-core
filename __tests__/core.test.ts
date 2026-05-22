@@ -114,15 +114,9 @@ describe('FieldSchema', () => {
     // Phase 1.1 — array fields require `items`
     // ------------------------------------------------------------------------
 
-    it('rejects array fields without an `items` schema', () => {
+    it('accepts array fields without an `items` schema (8.6.2 relaxation for std codegen)', () => {
         const result = FieldSchema.safeParse({ name: 'xs', type: 'array' });
-        expect(result.success).toBe(false);
-        if (!result.success) {
-            const issue = result.error.issues.find((i) => i.path.join('.') === 'items');
-            expect(issue?.message).toBe(
-                'Array field requires an `items` schema describing each element',
-            );
-        }
+        expect(result.success).toBe(true);
     });
 
     it('accepts array fields with an `items` schema', () => {
