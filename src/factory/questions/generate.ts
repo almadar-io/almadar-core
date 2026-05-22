@@ -60,6 +60,17 @@ export function generateQuestions(
 // Config-key questions — derived from the source `config { }` declaration
 // ---------------------------------------------------------------------------
 
+const TIER_D_NAMED_PRIMITIVES = new Set([
+  'layoutMode',
+  'layoutPattern',
+  'viewPattern',
+  'detailPattern',
+  'detailSlot',
+  'contentTrait',
+]);
+
+const TIER_D_TYPES = new Set(['trait', 'slot', 'pattern']);
+
 function configKeyQuestions(
   call: FactoryCallSite,
   signature: FactorySignature,
@@ -68,6 +79,9 @@ function configKeyQuestions(
   for (const trait of signature.traits) {
     for (const param of trait.overridableConfigKeys) {
       if (param.tier === 'internal') continue;
+      if (TIER_D_TYPES.has(param.type)) continue;
+      if (param.key.endsWith('Event')) continue;
+      if (TIER_D_NAMED_PRIMITIVES.has(param.key)) continue;
       if (isAlreadyCustomized(call, trait.name, param.key)) continue;
       out.push(buildConfigKeyQuestion(call, trait, param));
     }
