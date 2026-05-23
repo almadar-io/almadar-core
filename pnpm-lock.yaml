@@ -39,8 +39,8 @@ importers:
 
 packages:
 
-  '@almadar/core@8.7.0':
-    resolution: {integrity: sha512-zn6tPecSDBJbtCtqpICM9Gg4E0tYJgPPkRISjCX/EVFj3uPOSMr9DM31Ry4EciWM+Jh49+Fg1g5q41ddab9acA==}
+  '@almadar/core@8.7.3':
+    resolution: {integrity: sha512-IzajuSDEddfjHi40qDoVNRfHHs2biHfG/hHCGWP483heF5AZtPaiaOXxRo4FWrl8TQXqAxD+kRmow3e6MiIHIw==}
 
   '@almadar/eslint-plugin@2.8.1':
     resolution: {integrity: sha512-DaWThhbtFMT/IrqEyc+XADrhAqTjc+jeSO9CeiSJKs0+UoBDuNLZNhLy1kiXT61XdHSxCNZD7jjjtHbXbe59+g==}
@@ -1055,8 +1055,8 @@ packages:
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
-  semver@7.8.0:
-    resolution: {integrity: sha512-AcM7dV/5ul4EekoQ29Agm5vri8JNqRyj39o0qpX6vDF2GZrtutZl5RwgD1XnZjiTAfncsJhMI48QQH3sN87YNA==}
+  semver@7.8.1:
+    resolution: {integrity: sha512-rkVq3IXh+4FDGch+KwzX3aV9W3kO54GyEgpvBzSyctDA6Xtd7RJQV1xmXbeQp5v7+VzLOfVqiutSE6GICgPFvg==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -1268,7 +1268,7 @@ packages:
 
 snapshots:
 
-  '@almadar/core@8.7.0':
+  '@almadar/core@8.7.3':
     dependencies:
       '@almadar/patterns': 2.30.5
       zod: 3.25.76
@@ -1280,7 +1280,7 @@ snapshots:
 
   '@almadar/patterns@2.30.5':
     dependencies:
-      '@almadar/core': 8.7.0
+      '@almadar/core': 8.7.3
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
@@ -1622,7 +1622,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.56.0
       debug: 4.4.3
       minimatch: 9.0.9
-      semver: 7.8.0
+      semver: 7.8.1
       tinyglobby: 0.2.16
       ts-api-utils: 2.5.0(typescript@5.9.3)
       typescript: 5.9.3
@@ -1957,7 +1957,7 @@ snapshots:
     dependencies:
       acorn: 8.16.0
       eslint-visitor-keys: 5.0.1
-      semver: 7.8.0
+      semver: 7.8.1
 
   keyv@4.5.4:
     dependencies:
@@ -2136,7 +2136,7 @@ snapshots:
       '@rollup/rollup-win32-x64-msvc': 4.60.4
       fsevents: 2.3.3
 
-  semver@7.8.0: {}
+  semver@7.8.1: {}
 
   shebang-command@2.0.0:
     dependencies:
