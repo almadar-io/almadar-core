@@ -75,19 +75,25 @@ describe('generateQuestions', () => {
     expect(ids).toContain('ProductOrbital.capability.audit');
   });
 
-  it('suppresses config-key questions when the override is already set', () => {
+  it('still emits the question when the call site pre-pinned a value, with the pin as defaultValue', () => {
     const call: FactoryCallSite = {
       ...makeCall(),
       params: {
         traitOverrides: {
-          ProductCatalog: { config: { navItems: [] } },
+          ProductCatalog: {
+            config: { navItems: [{ label: 'Home', href: '/' }] },
+          },
         },
       },
     };
     const result = generateQuestions([call], [ecommerceSignature]);
-    const ids = result.map((q) => q.id);
-    expect(ids).not.toContain('ProductOrbital.ProductCatalog.navItems');
-    expect(ids).toContain('ProductOrbital.ProductCatalog.ownerField');
+    const navQ = result.find(
+      (q) => q.id === 'ProductOrbital.ProductCatalog.navItems',
+    );
+    expect(navQ).toBeDefined();
+    // Call-site override becomes the question's defaultValue so the
+    // user sees the organism's pre-pin and can confirm or change it.
+    expect(navQ?.defaultValue).toEqual([{ label: 'Home', href: '/' }]);
   });
 
   it('suppresses capability questions covered by ruleOverlay', () => {

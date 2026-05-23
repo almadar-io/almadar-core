@@ -82,7 +82,6 @@ function configKeyQuestions(
       if (TIER_D_TYPES.has(param.type)) continue;
       if (param.key.endsWith('Event')) continue;
       if (TIER_D_NAMED_PRIMITIVES.has(param.key)) continue;
-      if (isAlreadyCustomized(call, trait.name, param.key)) continue;
       out.push(buildConfigKeyQuestion(call, trait, param));
     }
   }
@@ -96,11 +95,17 @@ function buildConfigKeyQuestion(
 ): DomainQuestion {
   const label = param.label ?? humanizeKey(param.key);
   const question = `${label}?`;
+  // Call-site override (organism pre-pinned this knob) takes precedence
+  // over the atom-author's default. The question still renders so the
+  // user can confirm or change the pre-pinned value.
+  const callSiteOverride = callSiteOverrideValue(call, trait.name, param.key);
+  const effectiveDefault =
+    callSiteOverride !== undefined ? callSiteOverride : param.default;
   const reason =
     param.description ??
     `Customizes "${param.key}" on the ${trait.name} trait. ` +
-      (param.default !== undefined
-        ? `Default: ${stringifyDefault(param.default)}.`
+      (effectiveDefault !== undefined
+        ? `Default: ${stringifyDefault(effectiveDefault)}.`
         : `No default — leave blank to inherit the factory's behavior.`);
 
   const out: DomainQuestion = {
@@ -116,8 +121,8 @@ function buildConfigKeyQuestion(
       configKey: param.key,
     },
   };
-  if (param.default !== undefined) {
-    out.defaultValue = param.default;
+  if (effectiveDefault !== undefined) {
+    out.defaultValue = effectiveDefault;
   }
   if (param.enumValues && param.enumValues.length > 0) {
     out.suggestedAnswers = param.enumValues;
@@ -134,14 +139,17 @@ function buildConfigKeyQuestion(
   return out;
 }
 
-function isAlreadyCustomized(
+function callSiteOverrideValue(
   call: FactoryCallSite,
   traitName: string,
   configKey: string,
-): boolean {
+): FactoryParamValue | undefined {
   const override = call.params.traitOverrides?.[traitName];
-  if (!override?.config) return false;
-  return Object.prototype.hasOwnProperty.call(override.config, configKey);
+  if (!override?.config) return undefined;
+  if (!Object.prototype.hasOwnProperty.call(override.config, configKey)) {
+    return undefined;
+  }
+  return override.config[configKey] as FactoryParamValue;
 }
 
 /**
