@@ -63,10 +63,10 @@ export interface DomainQuestion {
   /** Per-property schema for structured objects (`objectForm`).
    *  Propagated from `FactoryConfigParam.properties`. */
   objectSchema?: Readonly<Record<string, EntityField>>;
-  /** Visibility tier propagated from `FactoryConfigParam.tier`.
+  /** Decision-kind tier propagated from `FactoryConfigParam.tier`.
    *  Undefined when the source `.lolo` did not author an explicit
    *  `@tier` annotation — the studio treats undefined as
-   *  `'customization'`. */
+   *  `'presentation'`. */
   tier?: FactoryConfigTier;
 }
 

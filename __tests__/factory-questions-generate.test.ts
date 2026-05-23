@@ -6,7 +6,9 @@
  *      emit deterministically from the matched signature.
  *   2. RuleOverlay coverage — capability questions covered by
  *      `ruleOverlay.rules[].capability` are dropped.
- *   3. Tier filter — `tier: 'internal'` params are excluded.
+ *   3. Tier filter — `tier: 'internal'` params are excluded;
+ *      `domain` and `presentation` survive (axis swap landed in
+ *      Almadar_Studio_Questionnaire.md §3).
  *   4. Structural derivation — `deriveInputType` reads
  *      `items.properties`, `properties`, `enumValues` to pick the
  *      richer widget instead of collapsing everything to multiselect.
@@ -160,7 +162,7 @@ describe('generateQuestions', () => {
           ...ecommerceSignature.traits[0],
           overridableConfigKeys: [
             { key: 'auditPrefix', type: 'string', tier: 'internal' },
-            { key: 'appName', type: 'string', tier: 'essential' },
+            { key: 'currency', type: 'string', tier: 'domain' },
           ],
         },
       ],
@@ -168,7 +170,7 @@ describe('generateQuestions', () => {
     const result = generateQuestions([makeCall()], [sig]);
     const ids = result.map((q) => q.id);
     expect(ids).not.toContain('ProductOrbital.ProductCatalog.auditPrefix');
-    expect(ids).toContain('ProductOrbital.ProductCatalog.appName');
+    expect(ids).toContain('ProductOrbital.ProductCatalog.currency');
   });
 
   it('propagates tier onto the emitted DomainQuestion', () => {
@@ -178,17 +180,17 @@ describe('generateQuestions', () => {
         {
           ...ecommerceSignature.traits[0],
           overridableConfigKeys: [
-            { key: 'appName', type: 'string', tier: 'essential' },
-            { key: 'retryCount', type: 'number', tier: 'advanced' },
+            { key: 'currency', type: 'string', tier: 'domain' },
+            { key: 'placeholder', type: 'string', tier: 'presentation' },
           ],
         },
       ],
     };
     const result = generateQuestions([makeCall()], [sig]);
-    const appQ = result.find((q) => q.id.endsWith('.appName'));
-    const retryQ = result.find((q) => q.id.endsWith('.retryCount'));
-    expect(appQ?.tier).toBe('essential');
-    expect(retryQ?.tier).toBe('advanced');
+    const currencyQ = result.find((q) => q.id.endsWith('.currency'));
+    const placeholderQ = result.find((q) => q.id.endsWith('.placeholder'));
+    expect(currencyQ?.tier).toBe('domain');
+    expect(placeholderQ?.tier).toBe('presentation');
   });
 });
 

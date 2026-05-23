@@ -137,31 +137,34 @@ export interface FactoryConfigParam {
    *  Stays a single free-form string; consumers decide their own
    *  splitting/formatting policy. */
   synonyms?: string;
-  /** Visibility tier authored in `.lolo` as `@tier "..."` next to the
+  /** Decision-kind tier authored in `.lolo` as `@tier "..."` next to the
    *  knob declaration. Drives the studio Questionnaire's filter +
-   *  disclosure: `internal` knobs are hidden entirely, `advanced` knobs
-   *  collapse under a "Show advanced" toggle, `essential` /
-   *  `customization` knobs render inline. Untagged knobs are treated as
-   *  `customization` by the studio (current visible behavior). */
+   *  disclosure: `internal` knobs are hidden entirely, `presentation`
+   *  knobs collapse under the "Polish wording" panel, `domain` knobs
+   *  render inline. Untagged knobs are treated as `presentation` by the
+   *  studio (safe default — most un-audited knobs are presentation polish). */
   tier?: FactoryConfigTier;
 }
 
 /**
- * Audience tier for a `FactoryConfigParam`. Source-tagged via the
+ * Decision-kind tier for a `FactoryConfigParam`. Source-tagged via the
  * `@tier "..."` annotation in `.lolo` — no heuristic inference on the
  * consumer side. Missing tag = author did not tag = treat as
- * `customization` at render time.
+ * `presentation` at render time.
  *
- *  - `essential` — every project of this kind needs to answer (app
- *    name, entity fields, primary nav items).
- *  - `customization` — meaningful refinement most projects will tweak.
- *  - `advanced` — sensible defaults; only specialised projects override.
- *  - `internal` — platform-internal; the studio never surfaces these.
+ *  - `domain` — changes how the BUSINESS behaves (currency, retention
+ *    days, approver roles, SLA hours, lifecycle rules, recipient map,
+ *    GDPR erasure window). The user MUST own these decisions.
+ *  - `presentation` — changes how the same business meaning is RENDERED
+ *    (labels, placeholders, titles, copy, column lists, action lists,
+ *    layout fidelity like cols/gap/chartType). LLM picks defaults;
+ *    user can edit post-generation.
+ *  - `internal` — framework primitives (trait/slot/pattern types,
+ *    *Event keys, layoutMode); the studio never surfaces these.
  */
 export type FactoryConfigTier =
-  | 'essential'
-  | 'customization'
-  | 'advanced'
+  | 'domain'
+  | 'presentation'
   | 'internal';
 
 /**
