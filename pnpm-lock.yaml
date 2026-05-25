@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@almadar/patterns':
         specifier: '>=2.14.0'
-        version: 2.30.8
+        version: 2.30.10
       zod:
         specifier: ^3.22.0
         version: 3.25.76
@@ -39,16 +39,16 @@ importers:
 
 packages:
 
-  '@almadar/core@8.7.4':
-    resolution: {integrity: sha512-qhAfa+V4GV9HB62nV7X2QJBHAjlawtccxU4lpsl4Vw5b741OBZbuU6sXTY1mqeMHFDBd8xYkrCqbdkgTIWBcjg==}
+  '@almadar/core@8.8.2':
+    resolution: {integrity: sha512-vc9TbpCIdxzF3DgfS6MDGDNMhJUSEB5JbyDbn60hkuIYi8UbxK4brH8TEwF+2wKV9vaX5yHmPj2XJXaNS3bm2w==}
 
   '@almadar/eslint-plugin@2.8.1':
     resolution: {integrity: sha512-DaWThhbtFMT/IrqEyc+XADrhAqTjc+jeSO9CeiSJKs0+UoBDuNLZNhLy1kiXT61XdHSxCNZD7jjjtHbXbe59+g==}
     peerDependencies:
       eslint: '>=8.0.0'
 
-  '@almadar/patterns@2.30.8':
-    resolution: {integrity: sha512-Fna2EcQr/RBrKL8wVb8xqX3moM+bZ0kejR0G7N7zxdAwfDbtX5TITJEFEdN/1tumbbcggfYFgq/RFuzBxHlX+Q==}
+  '@almadar/patterns@2.30.10':
+    resolution: {integrity: sha512-VMHEkhxZzJM215584yQgOia7qwOWJ4tePobXEu2KGwVKwDNe8kpiKPaHQZmDtqRBM4dPt7bhGQMV/8VQthlA+A==}
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -1268,9 +1268,9 @@ packages:
 
 snapshots:
 
-  '@almadar/core@8.7.4':
+  '@almadar/core@8.8.2':
     dependencies:
-      '@almadar/patterns': 2.30.8
+      '@almadar/patterns': 2.30.10
       zod: 3.25.76
 
   '@almadar/eslint-plugin@2.8.1(eslint@10.0.0)':
@@ -1278,9 +1278,9 @@ snapshots:
       eslint: 10.0.0
       jsonc-eslint-parser: 3.1.0
 
-  '@almadar/patterns@2.30.8':
+  '@almadar/patterns@2.30.10':
     dependencies:
-      '@almadar/core': 8.7.4
+      '@almadar/core': 8.8.2
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true

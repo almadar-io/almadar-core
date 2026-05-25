@@ -400,11 +400,392 @@ export const DesignPreferencesSchema = z.object({
 });
 
 // ============================================================================
-// Theme Definition
+// Theme Definition — Skin axes (Layer 1 visual variation, see docs/Almadar_Std_Variations.md)
 // ============================================================================
+
+/** Spacing scale entry — each step pairs with a CSS `--space-N` variable */
+export interface SpacingScale {
+  space0?: string;
+  space1?: string;
+  space2?: string;
+  space3?: string;
+  space4?: string;
+  space5?: string;
+  space6?: string;
+  space7?: string;
+  space8?: string;
+  space9?: string;
+  space10?: string;
+  space11?: string;
+  space12?: string;
+}
+
+export const SpacingScaleSchema = z.object({
+  space0: z.string().optional(),
+  space1: z.string().optional(),
+  space2: z.string().optional(),
+  space3: z.string().optional(),
+  space4: z.string().optional(),
+  space5: z.string().optional(),
+  space6: z.string().optional(),
+  space7: z.string().optional(),
+  space8: z.string().optional(),
+  space9: z.string().optional(),
+  space10: z.string().optional(),
+  space11: z.string().optional(),
+  space12: z.string().optional(),
+});
+
+/**
+ * Density axis — spacing rhythm + per-element heights and paddings.
+ * Determines whether a UI feels compact (Linear), cozy (default), or spacious (Notion).
+ */
+export interface DensityTokens {
+  spacing?: SpacingScale;
+  buttonHeightSm?: string;
+  buttonHeightMd?: string;
+  buttonHeightLg?: string;
+  inputHeightSm?: string;
+  inputHeightMd?: string;
+  inputHeightLg?: string;
+  rowHeightCompact?: string;
+  rowHeightNormal?: string;
+  rowHeightSpacious?: string;
+  cardPaddingSm?: string;
+  cardPaddingMd?: string;
+  cardPaddingLg?: string;
+  dialogPadding?: string;
+  sectionGap?: string;
+}
+
+export const DensityTokensSchema = z.object({
+  spacing: SpacingScaleSchema.optional(),
+  buttonHeightSm: z.string().optional(),
+  buttonHeightMd: z.string().optional(),
+  buttonHeightLg: z.string().optional(),
+  inputHeightSm: z.string().optional(),
+  inputHeightMd: z.string().optional(),
+  inputHeightLg: z.string().optional(),
+  rowHeightCompact: z.string().optional(),
+  rowHeightNormal: z.string().optional(),
+  rowHeightSpacious: z.string().optional(),
+  cardPaddingSm: z.string().optional(),
+  cardPaddingMd: z.string().optional(),
+  cardPaddingLg: z.string().optional(),
+  dialogPadding: z.string().optional(),
+  sectionGap: z.string().optional(),
+});
+
+/** Single entry in the type scale — size + matching line-height */
+export interface TypeScaleEntry {
+  size: string;
+  lineHeight: string;
+}
+
+export const TypeScaleEntrySchema = z.object({
+  size: z.string(),
+  lineHeight: z.string(),
+});
+
+/** Type slot (which family the intent renders in) */
+export type TypeSlot = "display" | "body" | "mono";
+
+export const TypeSlotSchema = z.enum(["display", "body", "mono"]);
+
+/** Type size key from the scale */
+export type TypeSizeKey =
+  | "xs"
+  | "sm"
+  | "base"
+  | "lg"
+  | "xl"
+  | "2xl"
+  | "3xl"
+  | "4xl"
+  | "display-1"
+  | "display-2";
+
+export const TypeSizeKeySchema = z.enum([
+  "xs",
+  "sm",
+  "base",
+  "lg",
+  "xl",
+  "2xl",
+  "3xl",
+  "4xl",
+  "display-1",
+  "display-2",
+]);
+
+/** Type weight key */
+export type TypeWeight = "normal" | "medium" | "bold";
+
+export const TypeWeightSchema = z.enum(["normal", "medium", "bold"]);
+
+/** Intent → (slot, size, weight) mapping. Authors write intent in render-ui; skin resolves. */
+export interface TypeIntent {
+  slot: TypeSlot;
+  size: TypeSizeKey;
+  weight: TypeWeight;
+}
+
+export const TypeIntentSchema = z.object({
+  slot: TypeSlotSchema,
+  size: TypeSizeKeySchema,
+  weight: TypeWeightSchema,
+});
+
+export interface TypeScale {
+  xs?: TypeScaleEntry;
+  sm?: TypeScaleEntry;
+  base?: TypeScaleEntry;
+  lg?: TypeScaleEntry;
+  xl?: TypeScaleEntry;
+  "2xl"?: TypeScaleEntry;
+  "3xl"?: TypeScaleEntry;
+  "4xl"?: TypeScaleEntry;
+  "display-1"?: TypeScaleEntry;
+  "display-2"?: TypeScaleEntry;
+}
+
+export const TypeScaleSchema = z.object({
+  xs: TypeScaleEntrySchema.optional(),
+  sm: TypeScaleEntrySchema.optional(),
+  base: TypeScaleEntrySchema.optional(),
+  lg: TypeScaleEntrySchema.optional(),
+  xl: TypeScaleEntrySchema.optional(),
+  "2xl": TypeScaleEntrySchema.optional(),
+  "3xl": TypeScaleEntrySchema.optional(),
+  "4xl": TypeScaleEntrySchema.optional(),
+  "display-1": TypeScaleEntrySchema.optional(),
+  "display-2": TypeScaleEntrySchema.optional(),
+});
+
+export interface TypeIntentMap {
+  headingMajor?: TypeIntent;
+  headingMinor?: TypeIntent;
+  bodyEmphasis?: TypeIntent;
+  bodyDefault?: TypeIntent;
+  bodyQuiet?: TypeIntent;
+  caption?: TypeIntent;
+  numeric?: TypeIntent;
+}
+
+export const TypeIntentMapSchema = z.object({
+  headingMajor: TypeIntentSchema.optional(),
+  headingMinor: TypeIntentSchema.optional(),
+  bodyEmphasis: TypeIntentSchema.optional(),
+  bodyDefault: TypeIntentSchema.optional(),
+  bodyQuiet: TypeIntentSchema.optional(),
+  caption: TypeIntentSchema.optional(),
+  numeric: TypeIntentSchema.optional(),
+});
+
+/**
+ * Type axis — family triplet, size scale, and intent mapping.
+ * Determines whether a UI reads as editorial (serif display + sans body),
+ * tech (sans + mono numeric), or dense (mono everywhere, tight leading).
+ */
+export interface TypeScaleTokens {
+  displayFamily?: string;
+  bodyFamily?: string;
+  monoFamily?: string;
+  scale?: TypeScale;
+  intents?: TypeIntentMap;
+}
+
+export const TypeScaleTokensSchema = z.object({
+  displayFamily: z.string().optional(),
+  bodyFamily: z.string().optional(),
+  monoFamily: z.string().optional(),
+  scale: TypeScaleSchema.optional(),
+  intents: TypeIntentMapSchema.optional(),
+});
+
+/** Duration palette key */
+export type MotionDurationKey =
+  | "instant"
+  | "fast"
+  | "normal"
+  | "slow"
+  | "dramatic";
+
+export const MotionDurationKeySchema = z.enum([
+  "instant",
+  "fast",
+  "normal",
+  "slow",
+  "dramatic",
+]);
+
+/** Easing palette key */
+export type MotionEasingKey = "linear" | "standard" | "emphasized" | "spring";
+
+export const MotionEasingKeySchema = z.enum([
+  "linear",
+  "standard",
+  "emphasized",
+  "spring",
+]);
+
+/** Per-intent motion specification (duration + easing) */
+export interface MotionIntent {
+  duration: MotionDurationKey;
+  easing: MotionEasingKey;
+}
+
+export const MotionIntentSchema = z.object({
+  duration: MotionDurationKeySchema,
+  easing: MotionEasingKeySchema,
+});
+
+export interface MotionDurationPalette {
+  instant?: string;
+  fast?: string;
+  normal?: string;
+  slow?: string;
+  dramatic?: string;
+}
+
+export const MotionDurationPaletteSchema = z.object({
+  instant: z.string().optional(),
+  fast: z.string().optional(),
+  normal: z.string().optional(),
+  slow: z.string().optional(),
+  dramatic: z.string().optional(),
+});
+
+export interface MotionEasingPalette {
+  linear?: string;
+  standard?: string;
+  emphasized?: string;
+  spring?: string;
+}
+
+export const MotionEasingPaletteSchema = z.object({
+  linear: z.string().optional(),
+  standard: z.string().optional(),
+  emphasized: z.string().optional(),
+  spring: z.string().optional(),
+});
+
+export interface MotionIntentMap {
+  enter?: MotionIntent;
+  exit?: MotionIntent;
+  hover?: MotionIntent;
+  press?: MotionIntent;
+  expand?: MotionIntent;
+  transition?: MotionIntent;
+}
+
+export const MotionIntentMapSchema = z.object({
+  enter: MotionIntentSchema.optional(),
+  exit: MotionIntentSchema.optional(),
+  hover: MotionIntentSchema.optional(),
+  press: MotionIntentSchema.optional(),
+  expand: MotionIntentSchema.optional(),
+  transition: MotionIntentSchema.optional(),
+});
+
+/**
+ * Motion axis — duration palette + easing palette + per-intent mapping.
+ * Mechanical (linear, fast) vs organic (cubic-bezier, medium) vs dramatic (spring, slow).
+ */
+export interface MotionTokens {
+  durations?: MotionDurationPalette;
+  easings?: MotionEasingPalette;
+  intents?: MotionIntentMap;
+}
+
+export const MotionTokensSchema = z.object({
+  durations: MotionDurationPaletteSchema.optional(),
+  easings: MotionEasingPaletteSchema.optional(),
+  intents: MotionIntentMapSchema.optional(),
+});
+
+/** Icon family selector */
+export type IconFamily =
+  | "lucide"
+  | "phosphor-outline"
+  | "phosphor-fill"
+  | "phosphor-duotone"
+  | "tabler"
+  | "fa-solid";
+
+export const IconFamilySchema = z.enum([
+  "lucide",
+  "phosphor-outline",
+  "phosphor-fill",
+  "phosphor-duotone",
+  "tabler",
+  "fa-solid",
+]);
+
+/**
+ * Iconography axis — icon set + stroke + default size.
+ * Outline (Lucide) vs filled (Phosphor-fill) vs duotone (Phosphor-duotone).
+ */
+export interface IconographyTokens {
+  family?: IconFamily;
+  strokeWidth?: string;
+  defaultSize?: string;
+}
+
+export const IconographyTokensSchema = z.object({
+  family: IconFamilySchema.optional(),
+  strokeWidth: z.string().optional(),
+  defaultSize: z.string().optional(),
+});
+
+/**
+ * Elevation axis — per-layer shadow mapping.
+ * Each value references a `--shadow-*` token or a raw CSS shadow value.
+ */
+export interface ElevationTokens {
+  cardElevation?: string;
+  popoverElevation?: string;
+  dialogElevation?: string;
+  toastElevation?: string;
+}
+
+export const ElevationTokensSchema = z.object({
+  cardElevation: z.string().optional(),
+  popoverElevation: z.string().optional(),
+  dialogElevation: z.string().optional(),
+  toastElevation: z.string().optional(),
+});
+
+/**
+ * Geometry axis — radius rhythm + border-width rhythm with intent.
+ * Sharp (radius 0) vs soft (radius 8/12) vs pill (radius full on interactive).
+ */
+export interface GeometryTokens {
+  radiusContainer?: string;
+  radiusInteractive?: string;
+  radiusPill?: string;
+  borderHairline?: string;
+  borderStandard?: string;
+  borderHeavy?: string;
+}
+
+export const GeometryTokensSchema = z.object({
+  radiusContainer: z.string().optional(),
+  radiusInteractive: z.string().optional(),
+  radiusPill: z.string().optional(),
+  borderHairline: z.string().optional(),
+  borderStandard: z.string().optional(),
+  borderHeavy: z.string().optional(),
+});
 
 /**
  * Theme tokens - CSS custom properties for design system.
+ *
+ * Layer 1 visual variation (see docs/Almadar_Std_Variations.md): the original
+ * `colors`/`radii`/`spacing`/`typography`/`shadows` Record fields are kept for
+ * backward compatibility. The new typed axes (`density`, `typeScale`, `motion`,
+ * `iconography`, `elevation`, `geometry`) carry the structured token surface
+ * that lets two themes feel like different products, not just different paint.
  */
 export interface ThemeTokens {
   /** Color tokens (e.g., primary, background, foreground) */
@@ -417,6 +798,18 @@ export interface ThemeTokens {
   typography?: Record<string, string>;
   /** Shadow tokens */
   shadows?: Record<string, string>;
+  /** Density axis — spacing rhythm, per-element heights and paddings */
+  density?: DensityTokens;
+  /** Type axis — family triplet, scale, intent mapping */
+  typeScale?: TypeScaleTokens;
+  /** Motion axis — duration palette, easing palette, intent mapping */
+  motion?: MotionTokens;
+  /** Iconography axis — icon family, stroke, default size */
+  iconography?: IconographyTokens;
+  /** Elevation axis — per-layer shadow mapping */
+  elevation?: ElevationTokens;
+  /** Geometry axis — radius rhythm, border-width rhythm with intent */
+  geometry?: GeometryTokens;
 }
 
 export const ThemeTokensSchema = z.object({
@@ -425,10 +818,17 @@ export const ThemeTokensSchema = z.object({
   spacing: z.record(z.string(), z.string()).optional(),
   typography: z.record(z.string(), z.string()).optional(),
   shadows: z.record(z.string(), z.string()).optional(),
+  density: DensityTokensSchema.optional(),
+  typeScale: TypeScaleTokensSchema.optional(),
+  motion: MotionTokensSchema.optional(),
+  iconography: IconographyTokensSchema.optional(),
+  elevation: ElevationTokensSchema.optional(),
+  geometry: GeometryTokensSchema.optional(),
 });
 
 /**
  * Theme variant - overrides for a specific mode (e.g., dark mode).
+ * Mirrors ThemeTokens fields with the same backward-compat + new-axis structure.
  */
 export interface ThemeVariant {
   /** Color overrides */
@@ -441,6 +841,18 @@ export interface ThemeVariant {
   typography?: Record<string, string>;
   /** Shadow overrides */
   shadows?: Record<string, string>;
+  /** Density axis overrides */
+  density?: DensityTokens;
+  /** Type axis overrides */
+  typeScale?: TypeScaleTokens;
+  /** Motion axis overrides */
+  motion?: MotionTokens;
+  /** Iconography axis overrides */
+  iconography?: IconographyTokens;
+  /** Elevation axis overrides */
+  elevation?: ElevationTokens;
+  /** Geometry axis overrides */
+  geometry?: GeometryTokens;
 }
 
 export const ThemeVariantSchema = z.object({
@@ -449,6 +861,12 @@ export const ThemeVariantSchema = z.object({
   spacing: z.record(z.string(), z.string()).optional(),
   typography: z.record(z.string(), z.string()).optional(),
   shadows: z.record(z.string(), z.string()).optional(),
+  density: DensityTokensSchema.optional(),
+  typeScale: TypeScaleTokensSchema.optional(),
+  motion: MotionTokensSchema.optional(),
+  iconography: IconographyTokensSchema.optional(),
+  elevation: ElevationTokensSchema.optional(),
+  geometry: GeometryTokensSchema.optional(),
 });
 
 /**
