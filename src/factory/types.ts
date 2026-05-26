@@ -33,6 +33,21 @@ export interface JsonSchema {
   oneOf?: ReadonlyArray<JsonSchema>;
   anyOf?: ReadonlyArray<JsonSchema>;
   default?: JsonValue;
+  /**
+   * Reference to a shared definition under `$defs` at the schema root.
+   * Lets consumers DRY large repeated subschemas (e.g. a 300-entry enum
+   * of std-behavior paths reused across every orbital branch of a tool
+   * schema). Per JSON Schema 2020-12: absolute reference starting with
+   * `#`. Standard OpenAI / DeepSeek strict-mode tool calling resolves
+   * `$ref` against `$defs` defined on the tool's parameters root.
+   */
+  $ref?: string;
+  /**
+   * Inline subschema definitions referenced from elsewhere via `$ref`.
+   * Lives at the schema root so all `$ref` paths can resolve. Values are
+   * full `JsonSchema` (can be referenced recursively).
+   */
+  $defs?: Readonly<{ [key: string]: JsonSchema }>;
   /** Knob's `@synonyms` from the source `.lolo`. */
   'x-synonyms'?: string;
   /** Knob's `@label` from the source `.lolo`. */
