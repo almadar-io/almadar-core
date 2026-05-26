@@ -779,6 +779,136 @@ export const GeometryTokensSchema = z.object({
 });
 
 /**
+ * Color axis — semantic + surface + feedback color tokens as a typed bundle.
+ *
+ * Replaces the free-form `colors: Record<string, string>` on `ThemeTokens` for
+ * authors targeting the typed SkinSpec entrypoint. Every field maps 1:1 to a
+ * `--color-*` CSS custom property emitted by themes. All fields are optional
+ * so a partial slice can layer onto a default (light/dark mode pair, etc.).
+ */
+export interface ColorTokens {
+  /* Brand / accent */
+  primary?: string;
+  primaryHover?: string;
+  primaryForeground?: string;
+  secondary?: string;
+  secondaryHover?: string;
+  secondaryForeground?: string;
+  accent?: string;
+  accentForeground?: string;
+  muted?: string;
+  mutedForeground?: string;
+
+  /* Surface palette */
+  background?: string;
+  foreground?: string;
+  card?: string;
+  cardForeground?: string;
+  surface?: string;
+  border?: string;
+  input?: string;
+  ring?: string;
+
+  /* Feedback */
+  error?: string;
+  errorForeground?: string;
+  success?: string;
+  successForeground?: string;
+  warning?: string;
+  warningForeground?: string;
+  info?: string;
+  infoForeground?: string;
+
+  /* Optional table-specific (themes that ship them; default to neutrals) */
+  tableHeader?: string;
+  tableBorder?: string;
+  tableRowHover?: string;
+  surfaceHover?: string;
+  borderHover?: string;
+  placeholder?: string;
+}
+
+export const ColorTokensSchema = z.object({
+  primary: z.string().optional(),
+  primaryHover: z.string().optional(),
+  primaryForeground: z.string().optional(),
+  secondary: z.string().optional(),
+  secondaryHover: z.string().optional(),
+  secondaryForeground: z.string().optional(),
+  accent: z.string().optional(),
+  accentForeground: z.string().optional(),
+  muted: z.string().optional(),
+  mutedForeground: z.string().optional(),
+  background: z.string().optional(),
+  foreground: z.string().optional(),
+  card: z.string().optional(),
+  cardForeground: z.string().optional(),
+  surface: z.string().optional(),
+  border: z.string().optional(),
+  input: z.string().optional(),
+  ring: z.string().optional(),
+  error: z.string().optional(),
+  errorForeground: z.string().optional(),
+  success: z.string().optional(),
+  successForeground: z.string().optional(),
+  warning: z.string().optional(),
+  warningForeground: z.string().optional(),
+  info: z.string().optional(),
+  infoForeground: z.string().optional(),
+  tableHeader: z.string().optional(),
+  tableBorder: z.string().optional(),
+  tableRowHover: z.string().optional(),
+  surfaceHover: z.string().optional(),
+  borderHover: z.string().optional(),
+  placeholder: z.string().optional(),
+});
+
+/**
+ * Illustration style preset for empty/loading/error/onboarding states.
+ *
+ * - `minimal`: icon + short text, no imagery (current default)
+ * - `illustrated`: svg illustration library (undraw-style)
+ * - `photo`: stock photography
+ * - `text-only`: clean text, no imagery
+ * - `mascot`: branded character (Mailchimp-style)
+ */
+export type IllustrationStyle =
+  | "minimal"
+  | "illustrated"
+  | "photo"
+  | "text-only"
+  | "mascot";
+
+export const IllustrationStyleSchema = z.enum([
+  "minimal",
+  "illustrated",
+  "photo",
+  "text-only",
+  "mascot",
+]);
+
+/**
+ * Illustration axis — empty/loading/error/onboarding imagery style.
+ * `style` selects the preset; the per-state `*Asset` fields are optional
+ * overrides for skins that want to ship custom artwork.
+ */
+export interface IllustrationTokens {
+  style?: IllustrationStyle;
+  emptyAsset?: string;
+  loadingAsset?: string;
+  errorAsset?: string;
+  onboardingAsset?: string;
+}
+
+export const IllustrationTokensSchema = z.object({
+  style: IllustrationStyleSchema.optional(),
+  emptyAsset: z.string().optional(),
+  loadingAsset: z.string().optional(),
+  errorAsset: z.string().optional(),
+  onboardingAsset: z.string().optional(),
+});
+
+/**
  * Theme tokens - CSS custom properties for design system.
  *
  * Layer 1 visual variation (see docs/Almadar_Std_Variations.md): the original
@@ -788,16 +918,11 @@ export const GeometryTokensSchema = z.object({
  * that lets two themes feel like different products, not just different paint.
  */
 export interface ThemeTokens {
-  /** Color tokens (e.g., primary, background, foreground) */
-  colors?: Record<string, string>;
-  /** Border radius tokens */
-  radii?: Record<string, string>;
-  /** Spacing tokens */
-  spacing?: Record<string, string>;
-  /** Typography tokens */
-  typography?: Record<string, string>;
-  /** Shadow tokens */
-  shadows?: Record<string, string>;
+  /**
+   * Color axis — typed semantic + surface + feedback colors.
+   * Replaces the free-form `colors` Record below for new authors.
+   */
+  color?: ColorTokens;
   /** Density axis — spacing rhythm, per-element heights and paddings */
   density?: DensityTokens;
   /** Type axis — family triplet, scale, intent mapping */
@@ -810,20 +935,39 @@ export interface ThemeTokens {
   elevation?: ElevationTokens;
   /** Geometry axis — radius rhythm, border-width rhythm with intent */
   geometry?: GeometryTokens;
+  /** Illustration axis — empty/loading/error state imagery style */
+  illustration?: IllustrationTokens;
+
+  // ── Legacy free-form maps (pre-Layer-1). Kept for back-compat with
+  //    older callers that emit raw `--color-*` / `--radius-*` etc. as
+  //    string maps. New authors should use the typed axes above.
+  /** @deprecated Use `color` (typed). */
+  colors?: Record<string, string>;
+  /** @deprecated Use `geometry.radius*` and theme CSS for full radius scale. */
+  radii?: Record<string, string>;
+  /** @deprecated Use `density.spacing` (typed scale). */
+  spacing?: Record<string, string>;
+  /** @deprecated Use `typeScale` (typed family + scale + intents). */
+  typography?: Record<string, string>;
+  /** @deprecated Use `elevation` (typed per-layer mapping). */
+  shadows?: Record<string, string>;
 }
 
 export const ThemeTokensSchema = z.object({
-  colors: z.record(z.string(), z.string()).optional(),
-  radii: z.record(z.string(), z.string()).optional(),
-  spacing: z.record(z.string(), z.string()).optional(),
-  typography: z.record(z.string(), z.string()).optional(),
-  shadows: z.record(z.string(), z.string()).optional(),
+  color: ColorTokensSchema.optional(),
   density: DensityTokensSchema.optional(),
   typeScale: TypeScaleTokensSchema.optional(),
   motion: MotionTokensSchema.optional(),
   iconography: IconographyTokensSchema.optional(),
   elevation: ElevationTokensSchema.optional(),
   geometry: GeometryTokensSchema.optional(),
+  illustration: IllustrationTokensSchema.optional(),
+  // Legacy
+  colors: z.record(z.string(), z.string()).optional(),
+  radii: z.record(z.string(), z.string()).optional(),
+  spacing: z.record(z.string(), z.string()).optional(),
+  typography: z.record(z.string(), z.string()).optional(),
+  shadows: z.record(z.string(), z.string()).optional(),
 });
 
 /**
@@ -831,16 +975,8 @@ export const ThemeTokensSchema = z.object({
  * Mirrors ThemeTokens fields with the same backward-compat + new-axis structure.
  */
 export interface ThemeVariant {
-  /** Color overrides */
-  colors?: Record<string, string>;
-  /** Radius overrides */
-  radii?: Record<string, string>;
-  /** Spacing overrides */
-  spacing?: Record<string, string>;
-  /** Typography overrides */
-  typography?: Record<string, string>;
-  /** Shadow overrides */
-  shadows?: Record<string, string>;
+  /** Color axis overrides */
+  color?: ColorTokens;
   /** Density axis overrides */
   density?: DensityTokens;
   /** Type axis overrides */
@@ -853,20 +989,36 @@ export interface ThemeVariant {
   elevation?: ElevationTokens;
   /** Geometry axis overrides */
   geometry?: GeometryTokens;
+  /** Illustration axis overrides */
+  illustration?: IllustrationTokens;
+
+  // ── Legacy free-form maps (pre-Layer-1). See ThemeTokens for guidance.
+  /** @deprecated Use `color`. */
+  colors?: Record<string, string>;
+  /** @deprecated */
+  radii?: Record<string, string>;
+  /** @deprecated */
+  spacing?: Record<string, string>;
+  /** @deprecated */
+  typography?: Record<string, string>;
+  /** @deprecated */
+  shadows?: Record<string, string>;
 }
 
 export const ThemeVariantSchema = z.object({
-  colors: z.record(z.string(), z.string()).optional(),
-  radii: z.record(z.string(), z.string()).optional(),
-  spacing: z.record(z.string(), z.string()).optional(),
-  typography: z.record(z.string(), z.string()).optional(),
-  shadows: z.record(z.string(), z.string()).optional(),
+  color: ColorTokensSchema.optional(),
   density: DensityTokensSchema.optional(),
   typeScale: TypeScaleTokensSchema.optional(),
   motion: MotionTokensSchema.optional(),
   iconography: IconographyTokensSchema.optional(),
   elevation: ElevationTokensSchema.optional(),
   geometry: GeometryTokensSchema.optional(),
+  illustration: IllustrationTokensSchema.optional(),
+  colors: z.record(z.string(), z.string()).optional(),
+  radii: z.record(z.string(), z.string()).optional(),
+  spacing: z.record(z.string(), z.string()).optional(),
+  typography: z.record(z.string(), z.string()).optional(),
+  shadows: z.record(z.string(), z.string()).optional(),
 });
 
 /**
@@ -925,6 +1077,47 @@ export const ThemeRefSchema = z.union([
   ThemeDefinitionSchema,
   ThemeRefStringSchema,
 ]);
+
+// ============================================================================
+// SkinSpec — Layer 1 visual variation vocabulary (docs/Almadar_Std_Variations.md §2.3)
+// ============================================================================
+
+/**
+ * `SkinSpec` is an alias for `ThemeDefinition` — same object, doc-aligned
+ * name. The doc refers to a complete eight-axis visual identity as a
+ * "SkinSpec"; in the type system it's a `ThemeDefinition` whose `tokens`
+ * field carries the eight typed slices (`color`, `density`, `typeScale`,
+ * `geometry`, `elevation`, `motion`, `iconography`, `illustration`).
+ *
+ * There is no separate type — this alias prevents the two surfaces from
+ * drifting.
+ */
+export type SkinSpec = ThemeDefinition;
+export const SkinSpecSchema = ThemeDefinitionSchema;
+
+/**
+ * Slice-name aliases — the doc and `_contract.md` refer to each axis as
+ * `<Name>Slice`. The existing types use `<Name>Tokens`. These aliases let
+ * skin authors write the doc's vocabulary while pointing at the single
+ * canonical type definition. No forks.
+ */
+export type ColorSlice = ColorTokens;
+export type DensitySlice = DensityTokens;
+export type TypeSlice = TypeScaleTokens;
+export type GeometrySlice = GeometryTokens;
+export type ElevationSlice = ElevationTokens;
+export type MotionSlice = MotionTokens;
+export type IconographySlice = IconographyTokens;
+export type IllustrationSlice = IllustrationTokens;
+
+export const ColorSliceSchema = ColorTokensSchema;
+export const DensitySliceSchema = DensityTokensSchema;
+export const TypeSliceSchema = TypeScaleTokensSchema;
+export const GeometrySliceSchema = GeometryTokensSchema;
+export const ElevationSliceSchema = ElevationTokensSchema;
+export const MotionSliceSchema = MotionTokensSchema;
+export const IconographySliceSchema = IconographyTokensSchema;
+export const IllustrationSliceSchema = IllustrationTokensSchema;
 
 // ============================================================================
 // Design Tokens (Legacy)
