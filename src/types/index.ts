@@ -355,8 +355,11 @@ export {
   type TraitEventContract,
   // Backward compatibility
   type OrbitalTraitRef,
+  // Rebindable entity binding contract
+  type EntityFieldContract,
   // Schemas
   TraitSchema,
+  EntityFieldContractSchema,
   TraitRefSchema,
   TraitReferenceSchema,
   TraitCategorySchema,

@@ -626,11 +626,51 @@ export type TraitScope = 'instance' | 'collection';
 
 export const TraitScopeSchema = z.enum(['instance', 'collection']);
 
+/**
+ * Inferred field contract for a `@rebindable` trait binding. `requires` =
+ * entity fields the trait READS via `@entity.<field>`; `provides` = fields it
+ * WRITES via `(set @entity.<field> ...)`. A consumer that rebinds the trait
+ * (`linkedEntity`) must point at an entity whose fields ⊇ `requires`. Inferred
+ * by the lolo lowerer from the trait's own SExpr usage; the orbital-rust L2
+ * validator enforces it (`ORB_T_REBIND_MISSING_FIELDS`). Mirrors the Rust
+ * `EntityFieldContract` serde shape exactly.
+ */
+export interface EntityFieldContract {
+    requires: string[];
+    provides: string[];
+}
+
+export const EntityFieldContractSchema = z.object({
+    requires: z.array(z.string()),
+    provides: z.array(z.string()),
+});
+
 export interface Trait {
     name: string;
     description?: string;
     description_visual_prompt?: string;
     category?: TraitCategory;
+    /**
+     * Opt-in marker authored as `-> @rebindable Entity` in `.lolo`. When
+     * `true`, a consuming molecule/organism may rebind this trait's entity via
+     * `linkedEntity`; otherwise the binding is fixed and the validator rejects
+     * any rebind (`ORB_T_ENTITY_NOT_REBINDABLE`). Absent on traits that don't
+     * bind an entity.
+     */
+    entityRebindable?: boolean;
+    /**
+     * Inferred field contract a rebind target must satisfy. Emitted only
+     * alongside `entityRebindable: true`. See {@link EntityFieldContract}.
+     */
+    entityContract?: EntityFieldContract;
+    /**
+     * `@description "..."` authored on the `@rebindable` binding in `.lolo`.
+     * Surfaced to catalog prose + knob-embeddings so the LLM can reach for the
+     * binding from intent vocabulary (binding-discovery). Absent when unmarked.
+     */
+    entityBindingDescription?: string;
+    /** `@synonyms "..."` authored on the `@rebindable` binding in `.lolo`. */
+    entityBindingSynonyms?: string;
     /**
      * Author-supplied capability tags lifted from the `.lolo` trait header's
      * bracket list. Anything beyond the known scope tokens (`instance` /
@@ -723,6 +763,10 @@ export const TraitSchema = z.object({
     description: z.string().optional(),
     description_visual_prompt: z.string().optional(),
     category: TraitCategorySchema.optional(),
+    entityRebindable: z.boolean().optional(),
+    entityContract: EntityFieldContractSchema.optional(),
+    entityBindingDescription: z.string().optional(),
+    entityBindingSynonyms: z.string().optional(),
     capabilities: z.array(z.string()).optional(),
     scope: TraitScopeSchema,
     linkedEntity: z.string().optional(),

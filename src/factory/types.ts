@@ -209,6 +209,20 @@ export interface FactoryTraitSignature {
    *  header annotations. Free-form strings — the translator overlay
    *  matches rules to traits by exact set membership. */
   capabilities: ReadonlyArray<string>;
+  /** `true` when the source trait's entity binding was authored
+   *  `-> @rebindable Entity`. Only then may a consumer rebind it via
+   *  `traitOverrides.<name>.linkedEntity`; rabit enum-constrains that
+   *  override to the organism's entities and the validator enforces the
+   *  field contract. Absent/false = fixed binding. */
+  entityRebindable?: boolean;
+  /** Inferred field contract a rebind target must satisfy. `requires` =
+   *  fields the trait reads via `@entity.X`; `provides` = fields it writes.
+   *  Present only alongside `entityRebindable`. */
+  entityContract?: { requires: ReadonlyArray<string>; provides: ReadonlyArray<string> };
+  /** `@description` / `@synonyms` authored on the `@rebindable` binding —
+   *  fed to catalog prose + knob-embeddings for binding-discovery. */
+  entityBindingDescription?: string;
+  entityBindingSynonyms?: string;
 }
 
 /** One page the factory emits. The path is the factory default; the
