@@ -52,6 +52,8 @@ export interface JsonSchema {
   'x-synonyms'?: string;
   /** Knob's `@label` from the source `.lolo`. */
   'x-label'?: string;
+  /** Knob's `@tier` from the source `.lolo` (`domain`/`presentation`/`internal`). */
+  'x-tier'?: string;
 }
 
 export type JsonSchemaType =
