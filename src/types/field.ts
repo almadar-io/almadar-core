@@ -136,7 +136,21 @@ export type RelationConfigInput = z.input<typeof RelationConfigSchema>;
 /**
  * Field format validators for string fields.
  */
-export type FieldFormat = 'email' | 'url' | 'phone' | 'date' | 'datetime' | 'uuid';
+export type FieldFormat =
+    | 'email'
+    | 'url'
+    | 'phone'
+    | 'date'
+    | 'datetime'
+    | 'uuid'
+    /** Render hint: this string field stores an image URL. Mock adapters
+     *  generate a deterministic picsum.photos URL; UI patterns can branch
+     *  to an `<img>` instead of a `<typography>`. */
+    | 'image'
+    /** Render hint: avatar-shaped image (square, small). */
+    | 'avatar'
+    /** Render hint: thumbnail image (small landscape). */
+    | 'thumbnail';
 
 export const FieldFormatSchema = z.enum([
     'email',
@@ -145,6 +159,9 @@ export const FieldFormatSchema = z.enum([
     'date',
     'datetime',
     'uuid',
+    'image',
+    'avatar',
+    'thumbnail',
 ]);
 
 // ============================================================================
