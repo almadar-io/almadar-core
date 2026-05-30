@@ -10,14 +10,14 @@ importers:
     dependencies:
       '@almadar/patterns':
         specifier: '>=2.14.0'
-        version: 2.30.13
+        version: 2.32.1
       zod:
         specifier: ^3.22.0
         version: 3.25.76
     devDependencies:
       '@almadar/eslint-plugin':
         specifier: '>=2.8.0'
-        version: 2.8.1(eslint@10.0.0)
+        version: 2.8.2(eslint@10.0.0)
       '@types/node':
         specifier: ^22.0.0
         version: 22.19.19
@@ -39,16 +39,16 @@ importers:
 
 packages:
 
-  '@almadar/core@9.1.1':
-    resolution: {integrity: sha512-+yKxFEb3zY3+OSBfNKS2YualG15EVA1xlV0hyU8JCIqBqykm+4KQqzIsHoFT973dqSltTB40V7S1PxfapKUSMw==}
+  '@almadar/core@9.2.0':
+    resolution: {integrity: sha512-bwJuC9UEJCY0IXroPZ+A4F8P0tklPtr8O19PnUaZITGpehqkoEyYNxQHKfrw3ehNkWjhPBScGzyathiwJR+mpA==}
 
-  '@almadar/eslint-plugin@2.8.1':
-    resolution: {integrity: sha512-DaWThhbtFMT/IrqEyc+XADrhAqTjc+jeSO9CeiSJKs0+UoBDuNLZNhLy1kiXT61XdHSxCNZD7jjjtHbXbe59+g==}
+  '@almadar/eslint-plugin@2.8.2':
+    resolution: {integrity: sha512-iQGH5MdsfcEPGUeImgS3XBWLfBRc0uO9+0Kyy87WQf/nc4hUoAEPxov5C/JAYe1tLoL34dLBIyKDm/SFeYPBsA==}
     peerDependencies:
       eslint: '>=8.0.0'
 
-  '@almadar/patterns@2.30.13':
-    resolution: {integrity: sha512-BkrFgdnfGCSxVBHA/TSlc58cvfqSNN+Gowbhb0u9EtU98Cu5Zwqhn/CP0At9O+x+/Qkx4Q87LvJjgbf5jjnVcg==}
+  '@almadar/patterns@2.32.1':
+    resolution: {integrity: sha512-huwdmHLvtISqQGJo18vp5ySzY6iIIZTyZz+wbJoV7kaWU+aAVTiPURKYnkZcWsmqtGc2iZtag9JSO7NXLUjmAA==}
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -1268,19 +1268,19 @@ packages:
 
 snapshots:
 
-  '@almadar/core@9.1.1':
+  '@almadar/core@9.2.0':
     dependencies:
-      '@almadar/patterns': 2.30.13
+      '@almadar/patterns': 2.32.1
       zod: 3.25.76
 
-  '@almadar/eslint-plugin@2.8.1(eslint@10.0.0)':
+  '@almadar/eslint-plugin@2.8.2(eslint@10.0.0)':
     dependencies:
       eslint: 10.0.0
       jsonc-eslint-parser: 3.1.0
 
-  '@almadar/patterns@2.30.13':
+  '@almadar/patterns@2.32.1':
     dependencies:
-      '@almadar/core': 9.1.1
+      '@almadar/core': 9.2.0
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true

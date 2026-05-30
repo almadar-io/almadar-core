@@ -181,6 +181,12 @@ export interface MakeTraitRefOpts {
   /** Per-key rename map, e.g. `{ OPEN: "ADD_ITEM" }`. */
   events?: Record<string, string>;
   /**
+   * Entity-field remap, e.g. `{ name: "title", folder: "parentId" }`. Rewrites
+   * the inlined trait's canonical `@entity.X` / `@payload.row.X` references to
+   * the consumer entity's field names. Mirrors {@link TraitReference.fields}.
+   */
+  fields?: Record<string, string>;
+  /**
    * Per-event SExpression effect replacement. Keys are POST-rename event
    * names. See {@link TraitReference.effects} for the full contract.
    */
@@ -252,6 +258,7 @@ export function makeTraitRef(opts: MakeTraitRefOpts): TraitReference {
   if (opts.name !== undefined) ref.name = opts.name;
   if (opts.linkedEntity !== undefined) ref.linkedEntity = opts.linkedEntity;
   if (opts.events !== undefined) ref.events = opts.events;
+  if (opts.fields !== undefined) ref.fields = opts.fields;
   if (opts.effects !== undefined) ref.effects = opts.effects;
   if (opts.listens !== undefined) ref.listens = opts.listens;
   if (opts.emitsScope !== undefined) ref.emitsScope = opts.emitsScope;

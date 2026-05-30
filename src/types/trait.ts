@@ -455,6 +455,13 @@ export interface TraitReference {
     name?: string;
     /** Phase F: rename atom event keys at the call site, e.g. {OPEN: "ADD_ITEM"} */
     events?: Record<string, string>;
+    /**
+     * Entity-field remap: rewrite the inlined trait's canonical `@entity.X` /
+     * `@payload.row.X` field references to the consumer entity's field names,
+     * e.g. `{ name: "title", folder: "parentId" }`. Mirrors `events` for
+     * fields. Applied during inline substitution alongside `linkedEntity`.
+     */
+    fields?: Record<string, string>;
     config?: TraitConfig;
     appliesTo?: string[];
     /**
@@ -511,6 +518,12 @@ export const TraitReferenceSchema = z
             .record(
                 z.string().min(1, "events key (atom event name) must be non-empty"),
                 z.string().min(1, "events value (caller event name) must be non-empty"),
+            )
+            .optional(),
+        fields: z
+            .record(
+                z.string().min(1, "fields key (canonical field name) must be non-empty"),
+                z.string().min(1, "fields value (consumer field name) must be non-empty"),
             )
             .optional(),
         config: TraitConfigSchema.optional(),
