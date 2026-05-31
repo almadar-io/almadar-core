@@ -208,6 +208,9 @@ interface EntityFieldBase {
      *  config slot's type expression resolves to a struct shape
      *  (`TypeExpr::Object`), including named-type aliases like `[MetricSpec]`. */
     properties?: Record<string, EntityField>;
+    /** Runtime-managed widget state (authored `@intrinsic` in `.lolo`). Exempt
+     *  from the explicit-binding rule and never a domain-data bind target. */
+    intrinsic?: boolean;
 }
 
 /**
@@ -294,6 +297,7 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
         min: z.number().optional(),
         max: z.number().optional(),
         properties: z.record(EntityFieldSchema).optional(),
+        intrinsic: z.boolean().optional(),
     };
 
     /** Build a scalar variant schema. `values?` is permitted as a hint;

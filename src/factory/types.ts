@@ -86,6 +86,9 @@ export interface FactorySignatureEntityField {
   name: string;
   type: SchemaFieldType;
   required: boolean;
+  /** Runtime-managed widget state (`@intrinsic`). A composer must NOT remap an
+   *  intrinsic slot onto a domain field — it rides along via `extends`. */
+  intrinsic?: boolean;
 }
 
 /**
