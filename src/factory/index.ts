@@ -3,6 +3,7 @@ export type {
   FactoryConfigTier,
   FactorySignatureEntityField,
   FactoryEntitySignature,
+  FactoryEventSignature,
   FactoryTraitSignature,
   FactoryPageSignature,
   FactorySignature,
