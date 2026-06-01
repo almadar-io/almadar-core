@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@almadar/patterns':
         specifier: '>=2.14.0'
-        version: 2.33.1
+        version: 2.34.1
       zod:
         specifier: ^3.22.0
         version: 3.25.76
@@ -39,16 +39,16 @@ importers:
 
 packages:
 
-  '@almadar/core@9.2.0':
-    resolution: {integrity: sha512-bwJuC9UEJCY0IXroPZ+A4F8P0tklPtr8O19PnUaZITGpehqkoEyYNxQHKfrw3ehNkWjhPBScGzyathiwJR+mpA==}
+  '@almadar/core@9.4.0':
+    resolution: {integrity: sha512-3jBxDUsq3rPyofATYuEORN9LeGmZQRhPhpwoE4dn+oyLkKgfBrPrBbx8LpBfRqIO5V/6YGEh8g+HAClvM37nrg==}
 
   '@almadar/eslint-plugin@2.8.2':
     resolution: {integrity: sha512-iQGH5MdsfcEPGUeImgS3XBWLfBRc0uO9+0Kyy87WQf/nc4hUoAEPxov5C/JAYe1tLoL34dLBIyKDm/SFeYPBsA==}
     peerDependencies:
       eslint: '>=8.0.0'
 
-  '@almadar/patterns@2.33.1':
-    resolution: {integrity: sha512-CwCVJsvXf0wZ/mRLno8K+uXJeYiEtQNt98+oVs4sPEFAiTDKNT99DwfxFW5b8hojXh8NI4RAE0tv6YqObdSQlg==}
+  '@almadar/patterns@2.34.1':
+    resolution: {integrity: sha512-+yJ4e+PgHmu3i9p81JULpInR06HdMyOinTqD10LBos8hhiBUbpvKbKIrvokM2/fXGN7eHCCgpRr6qt07GxT6yA==}
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -1114,8 +1114,8 @@ packages:
   tinyexec@0.3.2:
     resolution: {integrity: sha512-KQQR9yN7R5+OSwaK0XQoj22pwHoTlgYqmUscPYoknOoWCWfj/5/ABTMRi69FrKU5ffPVh5QcFikpWJI/P1ocHA==}
 
-  tinyglobby@0.2.16:
-    resolution: {integrity: sha512-pn99VhoACYR8nFHhxqix+uvsbXineAasWm5ojXoN8xEwK5Kd3/TrhNn1wByuD52UxWRLy8pu+kRMniEi6Eq9Zg==}
+  tinyglobby@0.2.17:
+    resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
     engines: {node: '>=12.0.0'}
 
   tinypool@0.8.4:
@@ -1268,9 +1268,9 @@ packages:
 
 snapshots:
 
-  '@almadar/core@9.2.0':
+  '@almadar/core@9.4.0':
     dependencies:
-      '@almadar/patterns': 2.33.1
+      '@almadar/patterns': 2.34.1
       zod: 3.25.76
 
   '@almadar/eslint-plugin@2.8.2(eslint@10.0.0)':
@@ -1278,9 +1278,9 @@ snapshots:
       eslint: 10.0.0
       jsonc-eslint-parser: 3.1.0
 
-  '@almadar/patterns@2.33.1':
+  '@almadar/patterns@2.34.1':
     dependencies:
-      '@almadar/core': 9.2.0
+      '@almadar/core': 9.4.0
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
@@ -1623,7 +1623,7 @@ snapshots:
       debug: 4.4.3
       minimatch: 9.0.9
       semver: 7.8.1
-      tinyglobby: 0.2.16
+      tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@5.9.3)
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -2169,7 +2169,7 @@ snapshots:
       lines-and-columns: 1.2.4
       mz: 2.7.0
       pirates: 4.0.7
-      tinyglobby: 0.2.16
+      tinyglobby: 0.2.17
       ts-interface-checker: 0.1.13
 
   thenify-all@1.6.0:
@@ -2184,7 +2184,7 @@ snapshots:
 
   tinyexec@0.3.2: {}
 
-  tinyglobby@0.2.16:
+  tinyglobby@0.2.17:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.4)
       picomatch: 4.0.4
@@ -2218,7 +2218,7 @@ snapshots:
       source-map: 0.7.6
       sucrase: 3.35.1
       tinyexec: 0.3.2
-      tinyglobby: 0.2.16
+      tinyglobby: 0.2.17
       tree-kill: 1.2.2
     optionalDependencies:
       postcss: 8.5.15

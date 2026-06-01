@@ -89,6 +89,11 @@ export interface FactorySignatureEntityField {
   /** Runtime-managed widget state (`@intrinsic`). A composer must NOT remap an
    *  intrinsic slot onto a domain field — it rides along via `extends`. */
   intrinsic?: boolean;
+  /** Human/semantic description (`@description "..."`). Slot-side signal for the
+   *  curation field matcher + catalog search. */
+  description?: string;
+  /** User-vocabulary synonyms (`@synonyms "..."`). */
+  synonyms?: string;
 }
 
 /**

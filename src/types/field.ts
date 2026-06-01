@@ -211,6 +211,13 @@ interface EntityFieldBase {
     /** Runtime-managed widget state (authored `@intrinsic` in `.lolo`). Exempt
      *  from the explicit-binding rule and never a domain-data bind target. */
     intrinsic?: boolean;
+    /** Human/semantic description (authored `@description "..."` in `.lolo`).
+     *  Authoring/build-time metadata — factory-signature catalog, embeddings,
+     *  curation field-matching; the runtime ignores it. */
+    description?: string;
+    /** User-vocabulary synonyms (authored `@synonyms "..."` in `.lolo`).
+     *  Free text feeding catalog search / curation field-matching. */
+    synonyms?: string;
 }
 
 /**
@@ -298,6 +305,8 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
         max: z.number().optional(),
         properties: z.record(EntityFieldSchema).optional(),
         intrinsic: z.boolean().optional(),
+        description: z.string().optional(),
+        synonyms: z.string().optional(),
     };
 
     /** Build a scalar variant schema. `values?` is permitted as a hint;
