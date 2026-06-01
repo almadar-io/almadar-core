@@ -81,8 +81,13 @@ export interface Event {
   key: string;
   /** Human-readable name */
   name: string;
-  /** Description */
+  /** Description (authored `@description` on the emit/listen). */
   description?: string;
+  /** User-vocabulary synonyms (comma-separated) — per-event analogue of a
+   *  field/config `@synonyms`. Feeds the curation event matcher. */
+  synonyms?: string;
+  /** Authoring tier (`essential`/`customization`/`advanced`/`internal`). */
+  tier?: string;
   /** Expected payload structure */
   payloadSchema?: PayloadField[];
   /** Domain vs System classification (optional, for analysis) */
@@ -95,6 +100,8 @@ export const EventSchema = z.object({
   key: z.string().min(1, "Event key is required"),
   name: z.string().min(1, "Event name is required"),
   description: z.string().optional(),
+  synonyms: z.string().optional(),
+  tier: z.string().optional(),
   payloadSchema: z.array(PayloadFieldSchema).optional(),
   classification: z.enum(["domain", "system"]).optional(),
   semanticRole: z.string().optional(),

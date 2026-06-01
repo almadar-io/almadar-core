@@ -211,6 +211,10 @@ export interface FactoryTraitSignature {
   emittedEvents: ReadonlyArray<string>;
   /** Event keys this trait listens for. */
   listenedEvents: ReadonlyArray<string>;
+  /** Structured emit + listen events with their `@description`/`@synonyms`/`@tier`
+   *  annotations. Parallel to `emittedEvents`/`listenedEvents` (kept as bare-key
+   *  back-compat); the curation event matcher reads this. */
+  events?: ReadonlyArray<FactoryEventSignature>;
   /** Config knobs overridable via `traitOverrides.<name>.config.<key>`.
    *  Each entry carries the key name plus the typed declaration lifted
    *  from the source `.lolo` `config { }` block. */
@@ -233,6 +237,23 @@ export interface FactoryTraitSignature {
    *  fed to catalog prose + knob-embeddings for binding-discovery. */
   entityBindingDescription?: string;
   entityBindingSynonyms?: string;
+}
+
+/** One event a trait emits or listens for, with its authored annotations — the
+ *  per-event analogue of `FactorySignatureEntityField` / `FactoryConfigParam`.
+ *  Feeds the curation event matcher (embedding-wire a composed style atom's
+ *  actions to a domain lifecycle's events). */
+export interface FactoryEventSignature {
+  /** Event key (post-rename). */
+  name: string;
+  /** Whether the trait emits the event or listens for it. */
+  direction: 'emit' | 'listen';
+  /** Authored `@description` on the emit/listen. */
+  description?: string;
+  /** Authored `@synonyms` (comma-separated user vocabulary). */
+  synonyms?: string;
+  /** Authoring `@tier` (`essential`/`customization`/`advanced`/`internal`). */
+  tier?: string;
 }
 
 /** One page the factory emits. The path is the factory default; the

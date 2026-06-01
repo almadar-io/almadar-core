@@ -312,6 +312,11 @@ export interface TraitEventContract {
     event: string;
     /** Human-readable description */
     description?: string;
+    /** User-vocabulary synonyms (comma-separated) — the per-event analogue of a
+     *  field/config `@synonyms`. Feeds the curation event matcher. */
+    synonyms?: string;
+    /** Authoring tier (`essential`/`customization`/`advanced`/`internal`). */
+    tier?: string;
     /** Payload schema — declarative type info for the event's payload.
      *  Distinct from the runtime payload value (`@payload.X` bindings,
      *  `EventPayload`) which is a separate concept. */
@@ -337,6 +342,8 @@ export const TraitEventContractSchema = z.object({
         'Event name must start with a letter and contain only letters, digits, and underscores'
     ),
     description: z.string().optional(),
+    synonyms: z.string().optional(),
+    tier: z.string().optional(),
     payloadSchema: z.array(EventPayloadFieldSchema).optional(),
     scope: EventScopeSchema.optional(),
 });
@@ -383,6 +390,12 @@ export interface TraitEventListener {
     event: string;
     /** State machine event to trigger */
     triggers: string;
+    /** Human-readable description (authored `@description` on the listen). */
+    description?: string;
+    /** User-vocabulary synonyms (comma-separated). */
+    synonyms?: string;
+    /** Authoring tier (`essential`/`customization`/`advanced`/`internal`). */
+    tier?: string;
     /** Guard expression - string (legacy) or S-expression array */
     guard?: Expression;
     /**
@@ -403,6 +416,9 @@ export interface TraitEventListener {
 export const TraitEventListenerSchema = z.object({
     event: z.string().min(1),
     triggers: z.string().min(1),
+    description: z.string().optional(),
+    synonyms: z.string().optional(),
+    tier: z.string().optional(),
     guard: ExpressionSchema.optional(),
     scope: EventScopeSchema.optional(),
     payloadMapping: z.record(z.string()).optional(),
