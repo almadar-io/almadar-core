@@ -130,12 +130,27 @@ export interface CallServiceConfig {
 // ============================================================================
 
 /**
+ * A binding reference to a render tree stored elsewhere — a trait `config`
+ * knob or a payload field — e.g. `"@config.bodyContent"`. Resolved to a pattern
+ * node at render time. This is how an atom renders a tree that contains data
+ * bindings (`entity: "@payload.data"`, `fields: "@config.fields"`): the tree is
+ * a permissive `TraitConfigValue` stored in `config` (a binding string is not a
+ * valid `AnyPatternConfig` prop value), and the render-ui effect points at it.
+ * Worked example: `std-browse`'s loaded transition is `['render-ui', 'main',
+ * '@config.bodyContent']`. The Rust validator accepts this form; this variant
+ * lets the TS effect type express it.
+ */
+export type RenderBinding = `@${string}`;
+
+/**
  * Render UI effect - displays a pattern in a UI slot.
  * @example ['render-ui', 'main', { patternType: 'entity-table', columns: ['name'] }]
+ * @example ['render-ui', 'main', '@config.bodyContent']  // a {@link RenderBinding} target
  */
 export type RenderUIEffect =
     | ['render-ui', UISlot, AnyPatternConfig]
     | ['render-ui', UISlot, AnyPatternConfig, ResolvedPatternProps]
+    | ['render-ui', UISlot, RenderBinding]
     | ['render-ui', UISlot, null];
 
 /**

@@ -240,6 +240,7 @@ export {
   type CallServiceConfig,
   type EmitConfig,
   // Typed effect tuples (per-operator tuple shapes)
+  type RenderBinding,
   type RenderUIEffect,
   type NavigateEffect,
   type EmitEffect,
@@ -728,6 +729,9 @@ export {
   type EventKey,
   type EventEmit,
   type EventListen,
+  type EntityInlet,
+  type EntityRecord,
+  type EntityCollection,
   type BusEvent,
   type BusEventSource,
   type BusEventListener,

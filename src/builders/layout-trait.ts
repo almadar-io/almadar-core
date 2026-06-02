@@ -40,7 +40,7 @@
 
 import type { AnyPatternConfig } from '@almadar/patterns';
 import type { Trait } from '../types/trait.js';
-import type { Effect, FetchEffect, RenderUIEffect, UISlot } from '../types/effect.js';
+import type { Effect, FetchEffect, RenderBinding, RenderUIEffect, UISlot } from '../types/effect.js';
 
 /**
  * Build a `@trait.<name>` slot reference string. Used as a child entry in a
@@ -59,12 +59,19 @@ export function makeSlot(traitName: string): string {
  * three-element tuple form.
  *
  * @param slot - Canonical UI slot name (`'main'`, `'header'`, etc. — see UI_SLOTS).
- * @param root - The pattern config for this slot's content. Pass `null` to clear.
+ * @param root - The pattern config for this slot's content, OR a `@`-binding
+ *   string ({@link RenderBinding}) pointing at a render tree in `config` /
+ *   `payload` (e.g. `'@config.bodyContent'`). Pass `null` to clear.
  */
-export function makeRenderUI(slot: UISlot, root: AnyPatternConfig | null): RenderUIEffect {
-  // Branch the return so TS can narrow into the correct tuple variant of
-  // the RenderUIEffect union (the null arm is a separate tuple shape).
-  return root === null ? ['render-ui', slot, null] : ['render-ui', slot, root];
+export function makeRenderUI(
+  slot: UISlot,
+  root: AnyPatternConfig | RenderBinding | null,
+): RenderUIEffect {
+  // Branch the return so TS narrows into the correct tuple variant of the
+  // RenderUIEffect union (each arm is a distinct tuple shape).
+  if (root === null) return ['render-ui', slot, null];
+  if (typeof root === 'string') return ['render-ui', slot, root];
+  return ['render-ui', slot, root];
 }
 
 /**
