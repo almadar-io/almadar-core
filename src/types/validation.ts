@@ -48,6 +48,22 @@ export interface ValidationError {
 export type ValidationErrorCode = string;
 
 /**
+ * The result of a single validator pass: a boolean verdict plus the errors
+ * and warnings (the validator wire shape, `ValidationError`).
+ *
+ * Distinct from `ValidationResults` (app.ts): that is the Firestore-persisted
+ * app-document shape keyed on `ValidationIssue` (with `severity` + array path
+ * + `validatedAt`). This `ValidationResult` is the in-process pass result keyed
+ * on `ValidationError` (code + JSON-pointer string path + `suggestion`).
+ * `ok === true` iff there are zero errors AND zero warnings.
+ */
+export interface ValidationResult {
+  ok: boolean;
+  errors: ValidationError[];
+  warnings: ValidationError[];
+}
+
+/**
  * Closed set of validation codes the Rust validator + lolo lower
  * pipeline currently emit. Source-tagged: codes are extracted from
  * `orbital-rust/crates/orbital-compiler/src/phases/validation/**.rs`

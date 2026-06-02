@@ -772,10 +772,52 @@ export {
 export {
   type ValidationError,
   type ValidationErrorCode,
+  type ValidationResult,
   type KnownValidationErrorCode,
   KNOWN_VALIDATION_ERROR_CODES,
   isKnownValidationErrorCode,
 } from "./validation.js";
+
+// ============================================================================
+// Living Orbital Schema (Golden Data Structure — §VIII type system)
+// ============================================================================
+
+export {
+  // Semantic annotation
+  type AnnotationTier,
+  type SemanticAnnotation,
+  widenTier,
+  // ML scalars / vectors
+  type SemanticVector,
+  type Probability,
+  type GateState,
+  // Graph vertex / edge typing
+  type VertexType,
+  type VertexId,
+  type EdgeType,
+  type EffectPayload,
+  type KnobPayload,
+  type VertexPayload,
+  type LivingVertex,
+  type LivingOrbital,
+  type LivingEntity,
+  type LivingTrait,
+  type LivingState,
+  type LivingTransition,
+  type LivingPage,
+  type LivingField,
+  type LivingEvent,
+  type LivingEffect,
+  type LivingValue,
+  type LivingEdge,
+  // Evolution / lineage
+  type EvolutionDelta,
+  type LineageEntry,
+  // Effect simulation
+  type EffectResult,
+  // The living schema contract
+  type LivingOrbitalSchema,
+} from "./living.js";
 
 // ============================================================================
 // Parsed AST (LLM-emit relaxed views of the canonical orbital types)
