@@ -136,7 +136,39 @@ function buildConfigKeyQuestion(
   if (param.tier) {
     out.tier = param.tier;
   }
+  // @description is the knob's own caption, shown under the input; `reason`
+  // stays the synthesized "why we ask". (Both fall back to the same text
+  // when the synthesized reason used the description — the studio shows the
+  // caption once.)
+  if (param.description) {
+    out.helpText = param.description;
+  }
+  const weight = tierWeight(param.tier);
+  out.weight = weight;
+  out.priority = weight;
   return out;
+}
+
+/**
+ * Impact weight by decision kind — the spine of both the wizard's
+ * prescient-first ordering and its Confidence score. policy/domain are the
+ * decisions that change what the business does; infra is operational wiring;
+ * presentation is polish. Untagged defaults to presentation (1). `internal`
+ * never reaches here (filtered in `configKeyQuestions`).
+ */
+function tierWeight(tier: FactoryConfigParam['tier']): number {
+  switch (tier) {
+    case 'domain':
+    case 'policy':
+      return 3;
+    case 'infra':
+      return 2;
+    case 'internal':
+      return 0;
+    case 'presentation':
+    default:
+      return 1;
+  }
 }
 
 function callSiteOverrideValue(
@@ -264,6 +296,9 @@ function capabilityQuestions(
           appliesTo: [entityName],
         },
         suggestedAnswers: ['yes', 'skip'],
+        // Capabilities encode governance/policy decisions — high impact.
+        weight: 3,
+        priority: 3,
       });
     }
   }

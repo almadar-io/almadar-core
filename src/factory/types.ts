@@ -177,9 +177,14 @@ export interface FactoryConfigParam {
  * consumer side. Missing tag = author did not tag = treat as
  * `presentation` at render time.
  *
- *  - `domain` — changes how the BUSINESS behaves (currency, retention
- *    days, approver roles, SLA hours, lifecycle rules, recipient map,
- *    GDPR erasure window). The user MUST own these decisions.
+ *  - `domain` — configures THIS entity's business meaning (currency,
+ *    SLA hours, which fields matter). The user MUST own these.
+ *  - `policy` — turns on a cross-cutting GOVERNANCE behavior that changes
+ *    what gets generated (audit trail, row access, approval gate, GDPR
+ *    erasure, notification cadence). Shown by default alongside domain.
+ *  - `infra` — wires a cross-cutting OPERATIONAL/structural primitive
+ *    (lifecycle scans, deadline reminders, cascade-delete, N:M joins).
+ *    Shown by default; mostly wiring rather than business choices.
  *  - `presentation` — changes how the same business meaning is RENDERED
  *    (labels, placeholders, titles, copy, column lists, action lists,
  *    layout fidelity like cols/gap/chartType). LLM picks defaults;
@@ -189,6 +194,8 @@ export interface FactoryConfigParam {
  */
 export type FactoryConfigTier =
   | 'domain'
+  | 'policy'
+  | 'infra'
   | 'presentation'
   | 'internal';
 

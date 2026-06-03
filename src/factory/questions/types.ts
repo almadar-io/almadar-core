@@ -68,6 +68,14 @@ export interface DomainQuestion {
    *  `@tier` annotation — the studio treats undefined as
    *  `'presentation'`. */
   tier?: FactoryConfigTier;
+  /** Impact weight derived from `tier` (policy/domain high, infra medium,
+   *  presentation low). Drives the studio's Confidence score — answering a
+   *  high-weight question moves the needle more. */
+  weight?: number;
+  /** Ordering rank for the prescient-first wizard. Seeded from `weight`
+   *  (deterministic); the studio server may boost it by prompt relevance.
+   *  Higher = surfaced earlier. */
+  priority?: number;
 }
 
 /**

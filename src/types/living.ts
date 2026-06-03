@@ -39,15 +39,16 @@ import type { FactoryConfigTier } from "../factory/types.js";
 
 /**
  * Decision-kind tier for the annotation layer. SUPERSET of the validator-
- * enforced `FactoryConfigTier` (`domain`/`presentation`/`internal`), adding
- * `essential` and `customization` for non-knob vertices. `FactoryConfigTier`
- * is intentionally NOT widened — its 3-value set still governs knob validation
- * (`ORB_T_CONFIG_TIER_INVALID`). (Historically three tier vocabularies were in
- * flight; this is the reconciled annotation-layer set.)
+ * enforced `FactoryConfigTier` (`domain`/`policy`/`infra`/`presentation`/
+ * `internal`), adding `essential` and `customization` for non-knob (event)
+ * vertices that still carry the old vocabulary. Every `FactoryConfigTier`
+ * value must be a member so `widenTier` stays a valid identity widen.
  */
 export type AnnotationTier =
   | "essential"
   | "domain"
+  | "policy"
+  | "infra"
   | "presentation"
   | "customization"
   | "internal";
