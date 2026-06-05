@@ -10,6 +10,9 @@
 // Export all types
 export * from './src/types/index';
 
+// Render-UI structural editing (contextual edit: EditFocus, RenderUiPatch, util)
+export * from './src/render-ui-edit';
+
 // Export schema resolution functions
 export {
   schemaToIR,

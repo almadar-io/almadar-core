@@ -67,8 +67,12 @@ export {
   type OrbitalConfig,
   type OrbitalSchemaInput,
   type OrbitalConfigInput,
+  type SchemaMetadata,
+  type ConfigProvenanceRecord,
   OrbitalSchemaSchema,
   OrbitalConfigSchema,
+  SchemaMetadataSchema,
+  ConfigProvenanceRecordSchema,
   parseOrbitalSchema,
   safeParseOrbitalSchema,
 } from "./schema.js";

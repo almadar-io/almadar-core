@@ -80,6 +80,33 @@ export const OrbitalConfigSchema = z.object({
  * by orbitals via TraitRef. This allows LLMs to generate custom
  * traits that aren't in the trait library.
  */
+/**
+ * One `@config.<knob>` → render-ui prop substitution recorded by the inline
+ * phase. Lets a consumer trace a resolved render-ui literal back to the config
+ * knob it came from (the `@config.X` string is erased after substitution).
+ * Mirrors the Rust `ConfigProvenanceRecord`.
+ */
+export interface ConfigProvenanceRecord {
+  /** Resolved trait name (post call-site rename) owning the render-ui effect. */
+  trait: string;
+  /** Pattern path within the render-ui tree (e.g. `root.children.0`). */
+  patternPath?: string;
+  /** The pattern-node prop key whose value was a `@config.X` binding. */
+  prop: string;
+  /** The config knob name (`X` in `@config.X`). */
+  knob: string;
+}
+
+/** Compiler-emitted schema metadata — the resolved `.orb` `_metadata` block. */
+export interface SchemaMetadata {
+  version?: number;
+  createdAt?: number;
+  source?: string;
+  updatedAt?: number;
+  /** Config→knob provenance keyed by orbital name. See {@link ConfigProvenanceRecord}. */
+  configProvenance?: Record<string, ConfigProvenanceRecord[]>;
+}
+
 export interface OrbitalSchema {
   /** Application name */
   name: string;
@@ -125,7 +152,25 @@ export interface OrbitalSchema {
 
   /** Global config */
   config?: OrbitalConfig;
+
+  /** Compiler-emitted metadata (resolved `.orb` `_metadata`). */
+  _metadata?: SchemaMetadata;
 }
+
+export const ConfigProvenanceRecordSchema = z.object({
+  trait: z.string(),
+  patternPath: z.string().optional(),
+  prop: z.string(),
+  knob: z.string(),
+});
+
+export const SchemaMetadataSchema = z.object({
+  version: z.number().optional(),
+  createdAt: z.number().optional(),
+  source: z.string().optional(),
+  updatedAt: z.number().optional(),
+  configProvenance: z.record(z.array(ConfigProvenanceRecordSchema)).optional(),
+});
 
 export const OrbitalSchemaSchema = z.object({
   name: z.string().min(1, "Schema name is required"),
@@ -141,6 +186,7 @@ export const OrbitalSchemaSchema = z.object({
     .min(1, "At least one orbital is required"),
   services: z.array(ServiceDefinitionSchema).optional(),
   config: OrbitalConfigSchema.optional(),
+  _metadata: SchemaMetadataSchema.optional(),
 });
 
 // ============================================================================
