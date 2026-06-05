@@ -263,24 +263,31 @@ function asInlineTrait(ref: OrbitalDefinition['traits'][number]): Trait | null {
   return null;
 }
 
-/** Find the render-ui root node for a patch address. */
+/** Find the render-ui root node for a patch address. Prefers the exact
+ *  transition match; falls back to the first trait+slot render-ui when the
+ *  transition is unknown (canvas selections at INIT carry no data-orb-transition,
+ *  so `address.transition` is empty and no real transition can match). */
 function findRenderUiRoot(
   orbital: OrbitalDefinition,
   address: RenderUiPatchAddress,
 ): PatternNode | null {
+  const wantTransition = address.transition !== '';
+  const wantState = address.state !== undefined && address.state !== '';
+  let fallback: PatternNode | null = null;
   for (const ref of orbital.traits) {
     const trait = asInlineTrait(ref);
     if (!trait || trait.name !== address.trait) continue;
     for (const t of trait.stateMachine?.transitions ?? []) {
-      if (t.event !== address.transition) continue;
-      if (address.state !== undefined && t.from !== address.state) continue;
+      if (wantState && t.from !== address.state) continue;
       for (const eff of t.effects ?? []) {
         const ru = readRenderUi(eff);
-        if (ru && ru.slot === address.slot) return ru.node;
+        if (!ru || ru.slot !== address.slot) continue;
+        if (wantTransition && t.event === address.transition) return ru.node;
+        fallback ??= ru.node;
       }
     }
   }
-  return null;
+  return fallback;
 }
 
 /** Resolve the effective path for a patch, re-anchoring by fingerprint. */
