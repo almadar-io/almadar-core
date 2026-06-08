@@ -422,6 +422,20 @@ export function inferTsType(schemaType: string): string {
     return `${typeMap[baseType] || baseType}[]`;
   }
 
+  // Handle the typed-map form `Map<K,V>` (the orbital `Map K V` type) →
+  // `Record<K, V>`. Mirrors the Rust `parse_payload_field_type` map branch so
+  // TS-land type derivation agrees with codegen. Key is comma-free (split on
+  // the first comma; value may itself be `Map<…>`).
+  if (schemaType.startsWith('Map<') && schemaType.endsWith('>')) {
+    const inner = schemaType.slice(4, -1);
+    const comma = inner.indexOf(',');
+    if (comma !== -1) {
+      const key = inferTsType(inner.slice(0, comma).trim());
+      const value = inferTsType(inner.slice(comma + 1).trim());
+      return `Record<${key}, ${value}>`;
+    }
+  }
+
   return typeMap[schemaType] || schemaType;
 }
 

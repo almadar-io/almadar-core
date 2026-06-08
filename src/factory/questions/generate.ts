@@ -217,6 +217,10 @@ export function deriveInputType(
     }
     return 'tagList';
   }
+  // Typed map (`Map<K,V>`) — a dynamic-key dictionary; edited as an object.
+  if (param.type.startsWith('Map<')) {
+    return 'objectForm';
+  }
   if (param.type === 'object') {
     if (param.properties && Object.keys(param.properties).length > 0) {
       return 'objectForm';
