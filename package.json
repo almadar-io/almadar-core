@@ -1,6 +1,6 @@
 {
   "name": "@almadar/core",
-  "version": "9.10.1",
+  "version": "9.10.2",
   "description": "Core schema types and definitions for Almadar",
   "type": "module",
   "main": "./dist/index.js",
@@ -34,7 +34,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "src/types/bindings.ts"
   ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
