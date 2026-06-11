@@ -1,9 +1,13 @@
 /**
  * Edge-Covering Walk Algorithm
  *
- * Computes an ordered sequence of events (WalkStep[]) that covers every
- * transition (edge) in a state machine graph at least once. This guarantees
- * 100% transition coverage regardless of graph topology.
+ * Computes an ordered sequence of events (WalkStep[]) that attempts to cover
+ * every transition (edge) in a state machine graph. This is a greedy chained
+ * walk: it does NOT guarantee 100% coverage. With no reset concept it can
+ * strand on absorbing states (no outgoing edges and no path back to uncovered
+ * edges), and a guard-fail misprediction desyncs the chained walk so later
+ * steps fire from the wrong state. Superseded by the hermetic per-frame walk
+ * in @almadar-io/verify, which re-seeds each frame independently.
  *
  * Algorithm:
  * 1. Build adjacency list and edge universe (guarded transitions produce two edges)

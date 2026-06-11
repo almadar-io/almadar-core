@@ -137,11 +137,17 @@ export function buildGuardPayloads(guard: unknown): GuardPayload {
   }
 
   if (op === 'and') {
-    const subs = (guard.slice(1) as unknown[]).filter(Array.isArray);
+    // Accept BOTH array sub-guards and bare-binding string sub-guards
+    // (e.g. `(and "@payload.row" (not-nil "@payload.id"))`). Dropping the
+    // bare strings with filter(Array.isArray) lost their fields from the
+    // pass payload. AND passes iff every sub-guard passes, so merge all
+    // sub-guards' pass payloads; AND fails iff any sub-guard fails, so the
+    // first sub-guard's fail payload is a sufficient violation.
+    const subs = guard.slice(1) as unknown[];
     if (subs.length >= 2) {
-      const s1 = buildGuardPayloads(subs[0]);
-      const s2 = buildGuardPayloads(subs[1]);
-      return { pass: { ...s1.pass, ...s2.pass }, fail: s1.fail };
+      const built = subs.map(buildGuardPayloads);
+      const pass = built.reduce<GuardPayload['pass']>((acc, b) => ({ ...acc, ...b.pass }), {});
+      return { pass, fail: built[0].fail };
     }
     if (subs.length === 1) return buildGuardPayloads(subs[0]);
   }
