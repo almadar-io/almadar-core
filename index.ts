@@ -80,6 +80,7 @@ export {
   walkStatePairs,
   buildGuardPayloads,
   extractPayloadFieldRef,
+  constTruth,
   buildReplayPaths,
   type ReplayTransition,
   buildEdgeCoveringWalk,

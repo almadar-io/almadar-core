@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { buildGuardPayloads } from '../src/state-machine/guard-payloads.js';
+import { buildGuardPayloads, constTruth } from '../src/state-machine/guard-payloads.js';
 
 describe('buildGuardPayloads — and-handler bare-string sub-guards', () => {
   it('seeds pass for BOTH a bare-string and an array sub-guard', () => {
@@ -41,5 +41,23 @@ describe('buildGuardPayloads — and-handler bare-string sub-guards', () => {
     expect(pass.row).toBeDefined();
     expect(pass.id).toBe('mock-test-value');
     expect(pass.status).toBe('ready');
+  });
+
+  it('constTruth folds fully-literal guards and leaves binding guards null', () => {
+    // The create-mode modal OPEN guard, post-inline.
+    expect(constTruth(['or', ['=', 'create', 'create'], '@payload.row'])).toBe(true);
+    expect(constTruth(['=', 'edit', 'create'])).toBe(false);
+    expect(constTruth(['and', ['=', 'a', 'a'], ['!=', 'x', 'y']])).toBe(true);
+    expect(constTruth(['and', ['=', 'a', 'b'], '@payload.row'])).toBe(false); // short-circuit false
+    expect(constTruth('@payload.row')).toBeNull(); // binding remains
+    expect(constTruth(['=', '@entity.status', 'active'])).toBeNull();
+  });
+
+  it('synthesizes an empty payload for a constant (always-true) guard', () => {
+    // No field to satisfy — the literals decide it; a spurious row would put a
+    // create-mode modal into a failing edit-load (the std-cart divergence).
+    const { pass, fail } = buildGuardPayloads(['or', ['=', 'create', 'create'], '@payload.row']);
+    expect(pass).toEqual({});
+    expect(fail).toEqual({});
   });
 });

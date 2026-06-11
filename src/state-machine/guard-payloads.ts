@@ -59,7 +59,61 @@ export function extractPayloadFieldRef(ref: unknown): string | null {
  * buildGuardPayloads(['and', ['not-nil', '@payload.id'], ['eq', '@payload.status', 'ready']]);
  * // Returns: { pass: { id: 'mock-test-value', status: 'ready' }, fail: { id: null } }
  */
+/**
+ * Evaluate a guard that is fully constant (no `@payload`/`@entity`/`@config`
+ * bindings — e.g. after molecule/organism inlining folds `@config.mode` to a
+ * literal). Returns the constant truth value, or `null` when the guard depends
+ * on a binding (so a payload must be synthesized). This lets callers (a) emit
+ * an empty payload for a constant guard (no field to satisfy) and (b) skip the
+ * meaningless variant: an always-true guard has no fail case, an always-false
+ * guard has no pass case. Without it, `(or (= "create" "create") @payload.row)`
+ * (create-mode modal OPEN) was synthesized with a spurious `row`, which the
+ * runtime read as edit-mode and rejected.
+ */
+export function constTruth(guard: unknown): boolean | null {
+  if (typeof guard === 'boolean') return guard;
+  if (typeof guard === 'string') {
+    if (guard.startsWith('@')) return null; // a binding — not constant
+    return guard.length > 0; // bare non-binding literal: truthy iff non-empty
+  }
+  if (!Array.isArray(guard) || guard.length === 0) return null;
+  const op = String(guard[0]);
+  const isLiteral = (x: unknown): boolean =>
+    x === null ||
+    typeof x === 'number' ||
+    typeof x === 'boolean' ||
+    (typeof x === 'string' && !x.startsWith('@'));
+  if (op === '=' || op === '==' || op === 'eq') {
+    return isLiteral(guard[1]) && isLiteral(guard[2]) ? guard[1] === guard[2] : null;
+  }
+  if (op === '!=' || op === 'ne' || op === 'not-eq' || op === 'neq') {
+    return isLiteral(guard[1]) && isLiteral(guard[2]) ? guard[1] !== guard[2] : null;
+  }
+  if (op === 'not') {
+    const inner = constTruth(guard[1]);
+    return inner === null ? null : !inner;
+  }
+  if (op === 'or') {
+    const subs = (guard.slice(1) as unknown[]).map(constTruth);
+    if (subs.some((s) => s === true)) return true; // short-circuit
+    if (subs.every((s) => s === false)) return false;
+    return null;
+  }
+  if (op === 'and') {
+    const subs = (guard.slice(1) as unknown[]).map(constTruth);
+    if (subs.some((s) => s === false)) return false; // short-circuit
+    if (subs.every((s) => s === true)) return true;
+    return null;
+  }
+  return null;
+}
+
 export function buildGuardPayloads(guard: unknown): GuardPayload {
+  // A fully-constant guard (post-inline literal fold) is decided by its
+  // literals, not by the payload — synthesize nothing for either case.
+  if (constTruth(guard) !== null) {
+    return { pass: {}, fail: {} };
+  }
   // Bare-binding existence guard: e.g. `when @payload.row` lowers to
   // the string `"@payload.row"`. The transition fires iff that field is
   // truthy. Synthesize pass with a truthy mock and fail with null so
