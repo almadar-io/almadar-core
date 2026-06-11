@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@almadar/patterns':
         specifier: '>=2.14.0'
-        version: 2.38.2
+        version: 2.38.4
       zod:
         specifier: ^3.22.0
         version: 3.25.76
@@ -39,16 +39,16 @@ importers:
 
 packages:
 
-  '@almadar/core@9.10.1':
-    resolution: {integrity: sha512-TrD3/igGTM1tTH7kNzWpcB9SCFmiz0uyDCqyg7HZcSHhJa6sbVPhinyqCsswM0hK6pO/IKaE/uBXqHErzPe/BA==}
+  '@almadar/core@9.10.3':
+    resolution: {integrity: sha512-DAvWHt4wGV0kbbOEWWHAshCMxxE9ri3KrpgtywpARliSSId6ZMlUmXOqj38ztGknjkf9MbnGoi1f7q+FskhGJw==}
 
   '@almadar/eslint-plugin@2.8.2':
     resolution: {integrity: sha512-iQGH5MdsfcEPGUeImgS3XBWLfBRc0uO9+0Kyy87WQf/nc4hUoAEPxov5C/JAYe1tLoL34dLBIyKDm/SFeYPBsA==}
     peerDependencies:
       eslint: '>=8.0.0'
 
-  '@almadar/patterns@2.38.2':
-    resolution: {integrity: sha512-DrxBag7x/BVehL8XuHT+9cPbTeP323hvJdSTf2KovzoP8tMICLo0wQbIPQkQAVA+6WoTJwfn8Za+Z+drxkz8Zg==}
+  '@almadar/patterns@2.38.4':
+    resolution: {integrity: sha512-bH6+FSZJjLkDysXihrXNN7ZKHVqYV2WMtzWUeotmauMQDSOgbwbgOPRVTlTD5gH5+0eSzlfyDEaZ6cWoW67rTQ==}
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -1052,8 +1052,8 @@ packages:
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
-  semver@7.8.2:
-    resolution: {integrity: sha512-c8jsqUZm3omBOI66G90z1Dyw5z622G8oLG+omfsHBJf3CWQTlOcwOjvOG6wtiNfW6anKm/eA39LMwMtMez2TiQ==}
+  semver@7.8.4:
+    resolution: {integrity: sha512-rUCObTnP32Q08R2uuIrt7r9PlEonuTmtuXYcW6s5kjdlj3xbnwe+21yXptAUYcMAABLkYYTtnmzb3w3EDZfueA==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -1265,9 +1265,9 @@ packages:
 
 snapshots:
 
-  '@almadar/core@9.10.1':
+  '@almadar/core@9.10.3':
     dependencies:
-      '@almadar/patterns': 2.38.2
+      '@almadar/patterns': 2.38.4
       zod: 3.25.76
 
   '@almadar/eslint-plugin@2.8.2(eslint@10.0.0)':
@@ -1275,9 +1275,9 @@ snapshots:
       eslint: 10.0.0
       jsonc-eslint-parser: 3.1.0
 
-  '@almadar/patterns@2.38.2':
+  '@almadar/patterns@2.38.4':
     dependencies:
-      '@almadar/core': 9.10.1
+      '@almadar/core': 9.10.3
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
@@ -1617,7 +1617,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.56.0
       debug: 4.4.3
       minimatch: 9.0.9
-      semver: 7.8.2
+      semver: 7.8.4
       tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@5.9.3)
       typescript: 5.9.3
@@ -1952,7 +1952,7 @@ snapshots:
     dependencies:
       acorn: 8.16.0
       eslint-visitor-keys: 5.0.1
-      semver: 7.8.2
+      semver: 7.8.4
 
   keyv@4.5.4:
     dependencies:
@@ -2131,7 +2131,7 @@ snapshots:
       '@rollup/rollup-win32-x64-msvc': 4.61.1
       fsevents: 2.3.3
 
-  semver@7.8.2: {}
+  semver@7.8.4: {}
 
   shebang-command@2.0.0:
     dependencies:
