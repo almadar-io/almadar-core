@@ -94,6 +94,7 @@ export {
   isSingletonEntity,
   type FieldValue,
   type EntityRow,
+  type EntityWith,
   type EntityData,
 } from "./entity.js";
 

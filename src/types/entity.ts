@@ -185,6 +185,32 @@ export type FieldValue = string | number | boolean | Date | null | string[] | Fi
 export type EntityRow = { id?: string } & Record<string, FieldValue | undefined>;
 
 /**
+ * A field-refined `EntityRow` — the SINGLE entity type, narrowed so a set of
+ * named fields are REQUIRED (present, non-`undefined`). This is how an entity-
+ * interacting component declares the fields it needs to function WITHOUT
+ * introducing a separate per-component entity type: it stays structurally an
+ * `EntityRow` (index signature intact, every other field still field-open), so
+ * any domain entity that provides those fields satisfies it.
+ *
+ * One declaration, two jobs: (1) TypeScript enforces that the bound entity has
+ * the fields (a behavior binding a thinner entity fails to typecheck); and
+ * (2) pattern-sync reads the same type and writes `requiredFields` onto the
+ * registry's entity prop, so the `ORB_X_ENTITY_PROP_CONTRACT` validator rule
+ * rejects an incompatible bind at `orbital validate` (accounting for `.lolo`
+ * field-remaps). Use a raw `EntityRow & { rating: number }` intersection when a
+ * field needs a specific scalar type rather than mere presence.
+ *
+ * @example
+ * // HeroOrganism renders entity.title / entity.subtitle:
+ * entity?: EntityWith<'title' | 'subtitle'>;
+ * //   entity.title  → FieldValue              (required)
+ * //   entity.other  → FieldValue | undefined  (still field-open)
+ */
+export type EntityWith<K extends string> = EntityRow & {
+  readonly [P in K]: FieldValue;
+};
+
+/**
  * Collection of entity instances keyed by entity name.
  * Used by OrbPreview mockData, OrbitalServerRuntime state, data grids, etc.
  *
