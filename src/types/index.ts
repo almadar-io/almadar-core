@@ -94,6 +94,7 @@ export {
   isSingletonEntity,
   type FieldValue,
   type EntityRow,
+  type EntityWith,
   type EntityData,
 } from "./entity.js";
 
@@ -733,9 +734,6 @@ export {
   type EventKey,
   type EventEmit,
   type EventListen,
-  type EntityInlet,
-  type EntityRecord,
-  type EntityCollection,
   type BusEvent,
   type BusEventSource,
   type BusEventListener,

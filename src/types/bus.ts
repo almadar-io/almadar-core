@@ -91,73 +91,12 @@ export type EventEmit<P> = string & { readonly __emitPayload?: P };
  */
 export type EventListen<P> = string & { readonly __listenPayload?: P };
 
-/**
- * Phantom-typed brand for a component's data INLET, cardinality-neutral. The
- * shared base of `EntityRecord<T>` / `EntityCollection<T>`: it declares "this
- * prop is the bound-entity inlet" (the role) WITHOUT committing to record vs
- * collection. Structurally `(T | readonly T[])`.
- *
- * Use it on a SHARED base interface (e.g. `EntityDisplayProps<T>.entity`) whose
- * concrete extenders render either one record or a list — each extender narrows
- * to `EntityRecord<T>` / `EntityCollection<T>` in its own Props, and both are
- * assignable back to `EntityInlet<T>` (they intersect it), so the `extends`
- * stays sound. A prop left as `EntityInlet<T>` gets `kind: "entity"` with the
- * cardinality supplied by pattern-sync's base-prop default.
- */
-export type EntityInlet<T> = (T | readonly T[]) & { readonly __entityInlet?: true };
-
-/**
- * Phantom-typed brand for a component's data INLET binding a SINGLE entity
- * record. The inlet half of a pattern's circuit, symmetric with the event
- * OUTLET brands above: just as `EventEmit<P>` declares "this prop is a bus
- * outlet" by type identity, `EntityRecord<T>` declares "this prop is the
- * bound-entity inlet, cardinality = one record."
- *
- * Structurally `(T | readonly T[])` — the SAME permissive shape as
- * `EntityCollection<T>` — because record renderers routinely accept an array
- * and collapse to its first element (e.g. DetailPanel's
- * `Array.isArray(entity) ? entity[0] : entity`). The `cardinality: "record"` is
- * therefore a DECLARED intent carried by the brand, not a structural
- * constraint, so annotating an existing `entity: T | readonly T[]` prop is a
- * pure type swap with no body change. The two inlet brands differ ONLY in the
- * declared cardinality — that is the whole point: the shape is declared.
- *
- * Pattern-sync (`tools/almadar-pattern-sync/parser.ts`) detects this brand by
- * type identity — imported from `@almadar/core`, exactly like `EventKey` /
- * `EventEmit<P>` — and writes into the patterns registry:
- * - `kind: "entity"` — the discriminant declaring this prop is the data inlet.
- * - `cardinality: "record"` — one record (vs a collection).
- * - the element's fixed sub-slots (via `items.properties`) when `T` is a
- *   concrete interface; a generic `T` stays field-open (the domain entity
- *   supplies the fields at compose time).
- *
- * Consumers read the inlet descriptor to bind the domain entity WITHOUT
- * name-matching the prop, closing the pattern's circuit deterministically.
- *
- *     // DetailPanel.tsx
- *     entity: EntityRecord<T>;   // -> kind:"entity", cardinality:"record"
- */
-export type EntityRecord<T> = EntityInlet<T> & {
-  readonly __entityCardinality?: "record";
-};
-
-/**
- * Phantom-typed brand for a component's data INLET binding a COLLECTION of
- * entity records. Mirror of `EntityRecord<T>` with `cardinality: "collection"`.
- *
- * The structural type is `T | readonly T[]` — matching the real, permissive
- * contract of collection renderers (they accept a single record and normalize
- * it to a one-element list, e.g. DataGrid's `Array.isArray(entity) ? entity :
- * [entity]`). The `cardinality: "collection"` is therefore a DECLARED intent
- * carried by the brand, not a structural constraint — so annotating an existing
- * `entity: T | readonly T[]` prop is a pure type swap with no body change.
- *
- *     // DataGrid.tsx
- *     entity: EntityCollection<T>;  // -> kind:"entity", cardinality:"collection"
- */
-export type EntityCollection<T> = EntityInlet<T> & {
-  readonly __entityCardinality?: "collection";
-};
+// NOTE: The phantom entity-inlet brands `EntityInlet`/`EntityRecord`/
+// `EntityCollection` were removed in the entity-row clean slate. There is now
+// ONE entity type — `EntityRow` (`./entity`), used directly: a single record is
+// `EntityRow`, a collection is `readonly EntityRow[]`. pattern-sync detects an
+// entity prop by the `EntityRow` type identity and derives record-vs-collection
+// from array-vs-not, so no brand is needed.
 
 /**
  * Identifies the origin of a bus event. Used by cross-trait listeners to
