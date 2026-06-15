@@ -23,6 +23,7 @@ import type { TraitEventContract, TraitEventListener, Trait, TraitRef, TraitRefe
 import type { SExpr } from './types/expression.js';
 
 // Re-export compose-behaviors module
+export { applyTraitConfigOverrides } from './builders/apply-config-overrides.js';
 export { type LayoutStrategy, detectLayoutStrategy } from './builders/layout-strategy.js';
 export { type EventWiringEntry, applyEventWiring } from './builders/event-wiring.js';
 export {

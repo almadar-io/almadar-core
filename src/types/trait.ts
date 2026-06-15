@@ -65,16 +65,35 @@ export const TraitConfigSchema: z.ZodType<TraitConfig> = z.record(TraitConfigVal
  * `@config.X` binding context when no call-site override is supplied.
  *
  * Authored as `config { foo : string = "bar" }` in `.lolo`; lowered to
- * `{ foo: { type: "string", default: "bar" } }` in `.orb`.
+ * `{ foo: { type: "string", default: "bar" } }` in `.orb`. The optional
+ * metadata fields below (`label`/`description`/`tier`/`values`/`synonyms`)
+ * carry the `.lolo` `@label`/`@description`/`@tier`/`@synonyms` annotations and
+ * the enum member list through lowering — consumed by config-driven UI
+ * (e.g. the playground property inspector) to render typed controls.
  */
 export interface ConfigFieldDeclaration {
     readonly type: string;
     readonly default?: TraitConfigValue;
+    /** `@label` — human-readable control label. */
+    readonly label?: string;
+    /** `@description` — help/tooltip text for the field. */
+    readonly description?: string;
+    /** `@tier` — disclosure tier: `presentation`|`domain`|`policy`|`infra`|`internal`. */
+    readonly tier?: string;
+    /** Enum members when the field's type is a string union — drives a select control. */
+    readonly values?: ReadonlyArray<string>;
+    /** `@synonyms` — comma-separated vocabulary synonyms (metadata). */
+    readonly synonyms?: string;
 }
 
 export const ConfigFieldDeclarationSchema: z.ZodType<ConfigFieldDeclaration> = z.object({
     type: z.string(),
     default: TraitConfigValueSchema.optional(),
+    label: z.string().optional(),
+    description: z.string().optional(),
+    tier: z.string().optional(),
+    values: z.array(z.string()).optional(),
+    synonyms: z.string().optional(),
 });
 
 /**
