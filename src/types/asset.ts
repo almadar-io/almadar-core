@@ -212,7 +212,7 @@ export const AssetMapSchema = z.object({
 /**
  * Single browsable asset in the inspector picker catalog.
  * Backs the asset/icon pickers — a flat list the inspector renders for
- * the user to choose from when a config field's control is `'asset'`.
+ * the user to choose from when a config field's type is `'asset'`.
  */
 export interface AssetCatalogEntry {
     /** Resolvable URL to the asset. */
@@ -241,6 +241,19 @@ export const AssetCatalogEntrySchema = z.object({
 export type AssetCatalog = AssetCatalogEntry[];
 
 export const AssetCatalogSchema = z.array(AssetCatalogEntrySchema);
+
+/**
+ * Asset-reference URL marker. A plain alias over `string` — the value is a
+ * resolvable asset URL — but the named type lets the pattern-sync tool
+ * (`tools/almadar-pattern-sync/parser.ts`) detect a component prop as an asset
+ * field (tagged `asset`) the same way `EventKey`/`LucideIcon` are detected by
+ * type identity. Components annotate image/url props as `AssetUrl` (`src`,
+ * `backgroundImage`, `avatar`, …); the generator emits a `string` config knob
+ * declared as the `asset` config type, which the property inspector dispatches
+ * an AssetPicker on. Not branded — asset urls originate from user data, so cast
+ * friction would buy nothing; the value is the marker the tool finds.
+ */
+export type AssetUrl = string;
 
 // ============================================================================
 // Type Exports

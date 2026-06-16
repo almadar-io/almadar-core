@@ -608,6 +608,7 @@ export {
   type AssetMap,
   type AssetCatalogEntry,
   type AssetCatalog,
+  type AssetUrl,
   type SemanticAssetRefInput,
   type ResolvedAssetInput,
   type AssetMappingInput,
