@@ -206,6 +206,43 @@ export const AssetMapSchema = z.object({
 });
 
 // ============================================================================
+// Asset Catalog
+// ============================================================================
+
+/**
+ * Single browsable asset in the inspector picker catalog.
+ * Backs the asset/icon pickers — a flat list the inspector renders for
+ * the user to choose from when a config field's control is `'asset'`.
+ */
+export interface AssetCatalogEntry {
+    /** Resolvable URL to the asset. */
+    url: string;
+    /** Display name for the asset. */
+    name: string;
+    /** Grouping category within the catalog. */
+    category: string;
+    /** Asset kind the picker dispatches on. */
+    kind: 'image' | 'spritesheet' | 'audio' | 'scene' | 'portrait' | 'model' | 'other';
+    /** Optional thumbnail URL for grid previews. */
+    thumbnailUrl?: string;
+}
+
+export const AssetCatalogEntrySchema = z.object({
+    url: z.string(),
+    name: z.string(),
+    category: z.string(),
+    kind: z.enum(['image', 'spritesheet', 'audio', 'scene', 'portrait', 'model', 'other']),
+    thumbnailUrl: z.string().optional(),
+});
+
+/**
+ * Flat list of browsable assets surfaced by the inspector pickers.
+ */
+export type AssetCatalog = AssetCatalogEntry[];
+
+export const AssetCatalogSchema = z.array(AssetCatalogEntrySchema);
+
+// ============================================================================
 // Type Exports
 // ============================================================================
 
@@ -214,6 +251,7 @@ export type ResolvedAssetInput = z.input<typeof ResolvedAssetSchema>;
 export type AssetMappingInput = z.input<typeof AssetMappingSchema>;
 export type AssetMapInput = z.input<typeof AssetMapSchema>;
 export type AnimationDefInput = z.input<typeof AnimationDefSchema>;
+export type AssetCatalogEntryInput = z.input<typeof AssetCatalogEntrySchema>;
 
 // ============================================================================
 // Helper Functions

@@ -84,6 +84,8 @@ export interface ConfigFieldDeclaration {
     readonly values?: ReadonlyArray<string>;
     /** `@synonyms` — comma-separated vocabulary synonyms (metadata). */
     readonly synonyms?: string;
+    /** Deterministic control-type tag the inspector dispatches on to pick its editor. */
+    readonly control?: 'icon' | 'asset' | 'color' | 'text' | 'number' | 'boolean' | 'select';
 }
 
 export const ConfigFieldDeclarationSchema: z.ZodType<ConfigFieldDeclaration> = z.object({
@@ -94,6 +96,7 @@ export const ConfigFieldDeclarationSchema: z.ZodType<ConfigFieldDeclaration> = z
     tier: z.string().optional(),
     values: z.array(z.string()).optional(),
     synonyms: z.string().optional(),
+    control: z.enum(['icon', 'asset', 'color', 'text', 'number', 'boolean', 'select']).optional(),
 });
 
 /**

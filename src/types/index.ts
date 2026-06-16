@@ -606,11 +606,14 @@ export {
   type ResolvedAsset,
   type AssetMapping,
   type AssetMap,
+  type AssetCatalogEntry,
+  type AssetCatalog,
   type SemanticAssetRefInput,
   type ResolvedAssetInput,
   type AssetMappingInput,
   type AssetMapInput,
   type AnimationDefInput,
+  type AssetCatalogEntryInput,
   // Schemas
   EntityRoleSchema,
   VisualStyleSchema,
@@ -620,6 +623,8 @@ export {
   ResolvedAssetSchema,
   AssetMappingSchema,
   AssetMapSchema,
+  AssetCatalogEntrySchema,
+  AssetCatalogSchema,
   // Helpers
   createAssetKey,
   parseAssetKey,
