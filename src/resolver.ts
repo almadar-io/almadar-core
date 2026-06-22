@@ -9,11 +9,11 @@
 
 import type { OrbitalSchema } from './types/schema.js';
 import type { Orbital, Trait, Page, PageTraitRef, Entity } from './types/index.js';
-import type { ResolvedIR, ResolvedPage, ResolvedEntity, ResolvedTrait, ResolvedTraitEvent, ResolvedTraitTransition } from './types/ir.js';
+import type { ResolvedIR, ResolvedPage, ResolvedEntity, ResolvedTrait, ResolvedTraitEvent, ResolvedTraitTransition, ResolvedTraitTick } from './types/ir.js';
 import type { EntityField } from './types/field.js';
 import type { FieldValue } from './types/entity.js';
 import type { State, Event, Transition } from './types/state-machine.js';
-import type { TraitEventListener } from './types/trait.js';
+import type { TraitEventListener, TraitTick } from './types/trait.js';
 
 /**
  * Extended entity shape for schema data that may carry `defaults`.
@@ -188,7 +188,14 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
           effects: t.effects || [],
         })) as ResolvedTraitTransition[],
         guards: [],
-        ticks: [],
+        ticks: (trait.ticks || []).map((tk: TraitTick) => ({
+          name: tk.name,
+          interval: tk.interval,
+          guard: tk.guard,
+          effects: tk.effects,
+          priority: tk.priority ?? 0,
+          appliesTo: tk.appliesTo ?? [],
+        })) as ResolvedTraitTick[],
         listens: (trait.listens || []).map((l: TraitEventListener) => ({
           event: l.event,
           triggers: l.triggers,
