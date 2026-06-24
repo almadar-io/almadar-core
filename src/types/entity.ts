@@ -185,30 +185,34 @@ export type FieldValue = string | number | boolean | Date | null | string[] | Fi
 export type EntityRow = { id?: string } & Record<string, FieldValue | undefined>;
 
 /**
- * A field-refined `EntityRow` — the SINGLE entity type, narrowed so a set of
- * named fields are REQUIRED (present, non-`undefined`). This is how an entity-
- * interacting component declares the fields it needs to function WITHOUT
- * introducing a separate per-component entity type: it stays structurally an
- * `EntityRow` (index signature intact, every other field still field-open), so
- * any domain entity that provides those fields satisfies it.
+ * A field-TYPED `EntityRow` — the SINGLE entity type, refined with a concrete
+ * field SHAPE `S`. Non-optional members of `S` are REQUIRED, each with its real
+ * type; the result stays `& EntityRow`, so the index signature is intact and
+ * every other field is still field-open — any domain entity that provides those
+ * fields satisfies it.
  *
- * One declaration, two jobs: (1) TypeScript enforces that the bound entity has
- * the fields (a behavior binding a thinner entity fails to typecheck); and
- * (2) pattern-sync reads the same type and writes `requiredFields` onto the
- * registry's entity prop, so the `ORB_X_ENTITY_PROP_CONTRACT` validator rule
- * rejects an incompatible bind at `orbital validate` (accounting for `.lolo`
- * field-remaps). Use a raw `EntityRow & { rating: number }` intersection when a
- * field needs a specific scalar type rather than mere presence.
+ * One declaration, two jobs: (1) TypeScript enforces the bound entity has the
+ * fields WITH their types (a behavior binding a thinner/mistyped entity fails to
+ * typecheck); and (2) pattern-sync reads the same type and writes the entity
+ * prop's field shape (`properties` + `requiredFields`) onto the registry, so
+ * lolo-ui emits a COMPLETE `entity { … }` (every field, typed + demo-seeded) and
+ * the `ORB_X_ENTITY_PROP_CONTRACT` validator rejects an incompatible bind at
+ * `orbital validate`. (A raw `EntityRow & { rating: number }` intersection is
+ * equivalent for one-off shapes.)
  *
  * @example
  * // HeroOrganism renders entity.title / entity.subtitle:
- * entity?: EntityWith<'title' | 'subtitle'>;
- * //   entity.title  → FieldValue              (required)
- * //   entity.other  → FieldValue | undefined  (still field-open)
+ * entity?: EntityWith<{ title: string; subtitle?: string }>;
+ * //   entity.title    → string                  (required)
+ * //   entity.subtitle → string | undefined      (optional)
+ * //   entity.other    → FieldValue | undefined  (still field-open)
  */
-export type EntityWith<K extends string> = EntityRow & {
-  readonly [P in K]: FieldValue;
-};
+// `S extends object` (not `Record<string, FieldValue>`) so a plain `interface`
+// row shape satisfies it — interfaces lack the implicit index signature `Record`
+// requires. FieldValue-compatibility is still enforced structurally: `& EntityRow`
+// intersects every field with the `FieldValue | undefined` index signature, so a
+// non-FieldValue field (e.g. a React `LucideIcon`) collapses to `never` at use.
+export type EntityWith<S extends object> = EntityRow & S;
 
 /**
  * Collection of entity instances keyed by entity name.
