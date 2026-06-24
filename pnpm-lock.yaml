@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@almadar/patterns':
         specifier: '>=2.14.0'
-        version: 2.54.0
+        version: 2.63.0
       zod:
         specifier: ^3.22.0
         version: 3.25.76
@@ -39,16 +39,16 @@ importers:
 
 packages:
 
-  '@almadar/core@10.3.0':
-    resolution: {integrity: sha512-UYaTXL3VLDjLso9sfkJgT8GHYz+ylON0UZ8xwp1+hIIpLyA3Jc2FIhVpF6MBAI3/FczeY8FeV0z9mTHo/6Pafg==}
+  '@almadar/core@10.4.0':
+    resolution: {integrity: sha512-b0DiGNrDPoNJ+OnaRU14KY4RFabcbOClc80MX+ylTBXBZtelV03AQsuc27stpmahB7+kBp9n6VOkXLi9qVbL9w==}
 
   '@almadar/eslint-plugin@2.8.2':
     resolution: {integrity: sha512-iQGH5MdsfcEPGUeImgS3XBWLfBRc0uO9+0Kyy87WQf/nc4hUoAEPxov5C/JAYe1tLoL34dLBIyKDm/SFeYPBsA==}
     peerDependencies:
       eslint: '>=8.0.0'
 
-  '@almadar/patterns@2.54.0':
-    resolution: {integrity: sha512-5iWXPsUFozb8UGrUDxFomKzF0bMU+E7lbSep2aDfnInadIYkWI4Q2myDTJpCrLxP4diUwlqOyDsd1S/yZD4xFw==}
+  '@almadar/patterns@2.63.0':
+    resolution: {integrity: sha512-FCnSblgMam44iIid4lOn+L7eJIDUEnmSe68l1CtC7YvXqxOFDTYEouR7xaOXyWO4bA6wI5HPcX7Wx127vV0nmA==}
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -931,8 +931,8 @@ packages:
   mz@2.7.0:
     resolution: {integrity: sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q==}
 
-  nanoid@3.3.14:
-    resolution: {integrity: sha512-U9kYi5bpVMEI31yC8iw4bJJp0avcHXA0W8/wNfLfnvJYzihQo2ZRPYPvpAAd570HAcCBjCTN7vnr+v4StKl1IQ==}
+  nanoid@3.3.15:
+    resolution: {integrity: sha512-y7Wygv/7mEOvxTuEQDB8StXdMRBWf1kR/tlhAzBRUFkB2jfcLOAxO/SHmOO2zgz1pVgK29/kyupn059/bCHdjA==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
@@ -1265,9 +1265,9 @@ packages:
 
 snapshots:
 
-  '@almadar/core@10.3.0':
+  '@almadar/core@10.4.0':
     dependencies:
-      '@almadar/patterns': 2.54.0
+      '@almadar/patterns': 2.63.0
       zod: 3.25.76
 
   '@almadar/eslint-plugin@2.8.2(eslint@10.0.0)':
@@ -1275,9 +1275,9 @@ snapshots:
       eslint: 10.0.0
       jsonc-eslint-parser: 3.1.0
 
-  '@almadar/patterns@2.54.0':
+  '@almadar/patterns@2.63.0':
     dependencies:
-      '@almadar/core': 10.3.0
+      '@almadar/core': 10.4.0
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
@@ -2013,7 +2013,7 @@ snapshots:
       object-assign: 4.1.1
       thenify-all: 1.6.0
 
-  nanoid@3.3.14: {}
+  nanoid@3.3.15: {}
 
   natural-compare@1.4.0: {}
 
@@ -2080,7 +2080,7 @@ snapshots:
 
   postcss@8.5.15:
     dependencies:
-      nanoid: 3.3.14
+      nanoid: 3.3.15
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
