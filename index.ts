@@ -13,6 +13,9 @@ export * from './src/types/index';
 // Render-UI structural editing (contextual edit: EditFocus, RenderUiPatch, util)
 export * from './src/render-ui-edit';
 
+// Agent-trace view-model (Trace* render shapes for the studio trace UI)
+export * from './src/agent-trace-view';
+
 // Export schema resolution functions
 export {
   schemaToIR,
