@@ -47,6 +47,31 @@ export type VisualStyle = (typeof VISUAL_STYLES)[number];
 export const VisualStyleSchema = z.enum(VISUAL_STYLES);
 
 // ============================================================================
+// Asset Dimension + Aspect (render metadata carried with the asset / the need)
+// ============================================================================
+
+/**
+ * Whether the asset is a 2D sprite/image or a 3D model. Set by the consuming
+ * canvas: the same entity role is a 2D sprite-sheet on a tile board and a 3D
+ * rigged model on a 3D board.
+ */
+export const ASSET_DIMENSIONS = ['2d', '3d'] as const;
+
+export type AssetDimension = (typeof ASSET_DIMENSIONS)[number];
+
+export const AssetDimensionSchema = z.enum(ASSET_DIMENSIONS);
+
+/**
+ * Rendering aspect ratio of an asset: square (tiles/sprites/portraits/icons),
+ * 16:9 (scene backdrops), 5:7 (cards), 8:1 (effect frame strips).
+ */
+export const ASSET_ASPECTS = ['1:1', '16:9', '5:7', '8:1'] as const;
+
+export type AssetAspect = (typeof ASSET_ASPECTS)[number];
+
+export const AssetAspectSchema = z.enum(ASSET_ASPECTS);
+
+// ============================================================================
 // Game Types
 // ============================================================================
 
@@ -110,6 +135,10 @@ export interface SemanticAssetRef {
     style?: VisualStyle;
     /** Variant identifier (for multiple versions) */
     variant?: string;
+    /** 2D sprite vs 3D model — the rendering dimension the consuming canvas needs. */
+    dimension?: AssetDimension;
+    /** Rendering aspect ratio (square sprite/portrait/tile, 16:9 backdrop, 5:7 card, 8:1 fx-strip). */
+    aspect?: AssetAspect;
 }
 
 export const SemanticAssetRefSchema = z.object({
@@ -118,6 +147,8 @@ export const SemanticAssetRefSchema = z.object({
     animations: z.array(z.string()).optional(),
     style: VisualStyleSchema.optional(),
     variant: z.string().optional(),
+    dimension: AssetDimensionSchema.optional(),
+    aspect: AssetAspectSchema.optional(),
 });
 
 // ============================================================================
@@ -225,6 +256,10 @@ export interface AssetCatalogEntry {
     kind: 'image' | 'spritesheet' | 'audio' | 'scene' | 'portrait' | 'model' | 'other';
     /** Optional thumbnail URL for grid previews. */
     thumbnailUrl?: string;
+    /** 2D sprite vs 3D model — the asset's actual rendering dimension. */
+    dimension?: AssetDimension;
+    /** The asset's actual rendering aspect ratio. */
+    aspect?: AssetAspect;
 }
 
 export const AssetCatalogEntrySchema = z.object({
@@ -233,6 +268,8 @@ export const AssetCatalogEntrySchema = z.object({
     category: z.string(),
     kind: z.enum(['image', 'spritesheet', 'audio', 'scene', 'portrait', 'model', 'other']),
     thumbnailUrl: z.string().optional(),
+    dimension: AssetDimensionSchema.optional(),
+    aspect: AssetAspectSchema.optional(),
 });
 
 /**

@@ -179,7 +179,6 @@ type ScalarFieldType =
     | 'date'
     | 'timestamp'
     | 'datetime'
-    | 'object'
     | 'trait'
     | 'slot'
     | 'pattern';
@@ -258,6 +257,18 @@ export interface ArrayEntityField extends EntityFieldBase {
 }
 
 /**
+ * `type: 'object'` — a fixed-key struct (fields in `properties`) OR a
+ * dynamic-key map (`Map K V` in `.lolo`; the uniform value schema lives in
+ * `items`, mirroring an array's element schema). A distinct variant so `items`
+ * is statically allowed only on object/array fields, never on scalars.
+ */
+export interface ObjectEntityField extends EntityFieldBase {
+    type: 'object';
+    /** Uniform value schema for a dynamic-key map (`Map K V`). */
+    items?: EntityField;
+}
+
+/**
  * Entity field definition — discriminated union by `type`. Each variant
  * statically enforces its dependent payload (`values` for enum,
  * `relation` for relation, `items` for array) so TS / Zod / JSON Schema
@@ -272,7 +283,8 @@ export type EntityField =
     | ScalarEntityField
     | EnumEntityField
     | RelationEntityField
-    | ArrayEntityField;
+    | ArrayEntityField
+    | ObjectEntityField;
 
 /**
  * Alias map for legacy/loose field-type spellings. Preprocessed into the
@@ -347,7 +359,6 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
             scalarVariant('date'),
             scalarVariant('timestamp'),
             scalarVariant('datetime'),
-            scalarVariant('object'),
             scalarVariant('trait'),
             scalarVariant('slot'),
             scalarVariant('pattern'),
@@ -368,6 +379,14 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
                 ...baseFieldShape,
                 type: z.literal('array'),
                 items: EntityFieldSchema.optional(),
+            }),
+            // Object variant — fixed-key struct (`properties`) or dynamic-key
+            // map (`Map K V`, uniform value schema in `items`).
+            z.object({
+                ...baseFieldShape,
+                type: z.literal('object'),
+                items: EntityFieldSchema.optional(),
+                values: z.array(z.string()).optional(),
             }),
         ]),
     );
