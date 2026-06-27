@@ -285,12 +285,10 @@ function stringifyDefault(v: FactoryParamValue): string {
  * canonical fields so the user sees the baseline and can extend it.
  *
  * Type note: `FactorySignatureEntityField.type` is `SchemaFieldType` while
- * `EntityField` is a discriminated union with extra required fields for
- * `enum` (needs `values`) and `relation` (needs `relation`). Both are mapped
- * to scalar `string` fields via `signatureFieldToEntityField` to avoid a
- * cast; the data shape seen in `apply-params-to-orb.ts` (the buildEntity
- * consumer) only uses `name`+`type` for the caller-wins merge, so the
- * simplification is safe for this surface.
+ * `EntityField` is a discriminated union. `signatureFieldToEntityField` maps
+ * each variant faithfully: enum fields carry `values`, relation fields carry
+ * `relation`. When the payload is absent the field degrades to `string` rather
+ * than producing an invalid variant.
  */
 function entityFieldQuestions(
   call: FactoryCallSite,
@@ -325,10 +323,10 @@ function entityFieldQuestions(
 /**
  * Map a `FactorySignatureEntityField` to an `EntityField` without unsafe casts.
  * Scalar types translate directly to `ScalarEntityField`. `array` and `object`
- * translate to their variants (no extra required fields). `enum` and `relation`
- * cannot be faithfully represented without their required payloads
- * (`values`/`relation`), so they fall back to `type: 'string'` — the name and
- * metadata are preserved; only the structural constraint is loosened.
+ * translate to their variants (no extra required fields). `enum` produces an
+ * `EnumEntityField` when `values` is present, otherwise falls back to `string`.
+ * `relation` produces a `RelationEntityField` when `relation` is present, otherwise
+ * falls back to `string`.
  */
 function signatureFieldToEntityField(f: FactorySignatureEntityField): EntityField {
   const base = {
@@ -351,11 +349,16 @@ function signatureFieldToEntityField(f: FactorySignatureEntityField): EntityFiel
     case 'object':
       return { ...base, type: 'object' };
     case 'enum':
-      // FactorySignatureEntityField carries no `values` array; fall back to
-      // string to satisfy EntityField's discriminated union without casting.
+      if (Array.isArray(f.values) && f.values.length > 0) {
+        return { ...base, type: 'enum', values: f.values };
+      }
+      // No values present — safe fallback; payload would be invalid without them.
       return { ...base, type: 'string' };
     case 'relation':
-      // FactorySignatureEntityField carries no `relation` config; fall back.
+      if (f.relation !== undefined) {
+        return { ...base, type: 'relation', relation: f.relation };
+      }
+      // No relation config present — safe fallback.
       return { ...base, type: 'string' };
     default: {
       const _exhaustive: never = f.type;

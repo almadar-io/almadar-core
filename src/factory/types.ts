@@ -1,5 +1,5 @@
 import type { EntityPersistence } from '../types/entity.js';
-import type { EntityField } from '../types/field.js';
+import type { EntityField, RelationConfig } from '../types/field.js';
 import type { TraitReference } from '../types/trait.js';
 import type { TraitOverlayEntry } from './overlays.js';
 import type { JsonValue } from '../types/json.js';
@@ -94,6 +94,10 @@ export interface FactorySignatureEntityField {
   description?: string;
   /** User-vocabulary synonyms (`@synonyms "..."`). */
   synonyms?: string;
+  /** Closed string vocabulary for `type: 'enum'` fields. Matches `EnumEntityField.values`. */
+  values?: string[];
+  /** Relation target binding for `type: 'relation'` fields. Matches `RelationEntityField.relation`. */
+  relation?: RelationConfig;
 }
 
 /**
