@@ -152,6 +152,33 @@ export const SemanticAssetRefSchema = z.object({
 });
 
 // ============================================================================
+// Asset — the UNIFIED asset type
+// ============================================================================
+
+/**
+ * The single asset type: a `SemanticAssetRef` (role/dimension/animations/aspect/style)
+ * WITH its resolved URL folded in. Used everywhere an asset is referenced — a lolo
+ * board `assetManifest` (`Map string Asset`), every `@almadar/ui` game prop, the
+ * asset-workflow's resolved/pool assets, and the inspector picker. Replaces the bare
+ * `AssetUrl`-string asset field so the render metadata travels WITH the asset (no
+ * pixel-dimension or filename heuristics needed to know sheet-vs-frame / 2d-vs-3d).
+ */
+export interface Asset extends SemanticAssetRef {
+    /** The resolved asset URL. */
+    url: AssetUrl;
+    /** Optional display name (inspector picker). */
+    name?: string;
+    /** Optional thumbnail URL (inspector picker grid). */
+    thumbnailUrl?: string;
+}
+
+export const AssetSchema = SemanticAssetRefSchema.extend({
+    url: z.string(),
+    name: z.string().optional(),
+    thumbnailUrl: z.string().optional(),
+});
+
+// ============================================================================
 // Resolved Asset
 // ============================================================================
 
