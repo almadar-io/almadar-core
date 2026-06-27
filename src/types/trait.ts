@@ -58,6 +58,40 @@ export const TraitConfigValueSchema: z.ZodType<TraitConfigValue> = z.lazy(() =>
 export const TraitConfigSchema: z.ZodType<TraitConfig> = z.record(TraitConfigValueSchema);
 
 /**
+ * A single entry in a call-site `config { }` override block. Either a plain
+ * wiring value (`TraitConfigValue` — string, number, bool, array, object) or
+ * a fully-annotated re-declaration (`ConfigFieldDeclaration` — carries `type`,
+ * optional `label`/`description`/`synonyms`/`tier`). Disambiguated at runtime
+ * by `isCallSiteConfigDeclaration`: the presence of a `"type"` string key
+ * marks the annotated form.
+ *
+ * The `.orb` compiler emits plain values for wiring entries and
+ * `{ type, default, ... }` objects for annotated entries. Consumers that only
+ * need the value (e.g. `apply-params-to-orb.ts`) read `entry` directly for
+ * primitives or `entry.default` for the declaration form.
+ */
+export type CallSiteConfigEntry = TraitConfigValue | ConfigFieldDeclaration;
+
+/** Typed map of call-site config entries (one per knob). */
+export type CallSiteConfig = Readonly<Record<string, CallSiteConfigEntry>>;
+
+/**
+ * Type guard: returns `true` when `entry` is an annotated `ConfigFieldDeclaration`
+ * (has a `"type"` string key) rather than a plain wiring value.
+ */
+export function isCallSiteConfigDeclaration(
+    entry: CallSiteConfigEntry,
+): entry is ConfigFieldDeclaration {
+    return (
+        typeof entry === 'object' &&
+        entry !== null &&
+        !Array.isArray(entry) &&
+        'type' in entry &&
+        typeof entry.type === 'string'
+    );
+}
+
+/**
  * Per-field entry in a trait's DECLARED `config { }` schema as it lives
  * on the `.orb` JSON: `{ type: "string" | "[string]" | "object" | ...,
  * default?: <value> }`. Distinct from `TraitConfigValue` (which is the
@@ -497,7 +531,17 @@ export interface TraitReference {
      * fields. Applied during inline substitution alongside `linkedEntity`.
      */
     fields?: Record<string, string>;
-    config?: TraitConfig;
+    /**
+     * Call-site config overrides. Each entry is either a plain wiring value
+     * (`TraitConfigValue`) or a fully-annotated re-declaration
+     * (`ConfigFieldDeclaration` with `type`, optional `label`/`description`/
+     * `synonyms`/`tier`). Use `isCallSiteConfigDeclaration` to discriminate.
+     *
+     * Plain wiring (existing callers): `config: { icon: "star", count: 5 }`.
+     * Annotated (new): `config: { icon: { type: "string", default: "star",
+     *   label: "Icon", tier: "presentation" } }`.
+     */
+    config?: CallSiteConfig;
     appliesTo?: string[];
     /**
      * Phase F.7: replace the imported trait's `listens` array with the
@@ -561,7 +605,11 @@ export const TraitReferenceSchema = z
                 z.string().min(1, "fields value (consumer field name) must be non-empty"),
             )
             .optional(),
-        config: TraitConfigSchema.optional(),
+        // Each value is either a plain wiring value (TraitConfigValue) or an
+        // annotated ConfigFieldDeclaration. Declaration form is tried first
+        // (it's more specific — has a `"type"` string key); plain values fall
+        // through to the recursive TraitConfigValue union.
+        config: z.record(z.union([ConfigFieldDeclarationSchema, TraitConfigValueSchema])).optional(),
         appliesTo: z.array(z.string()).optional(),
         // Phase F.7: zod accepts an array (the inliner validates element
         // shape). The full ListenDefinition shape isn't recursively encoded
@@ -615,7 +663,7 @@ export type TraitRef =
     | string
     | {
         ref: string;
-        config?: TraitConfig;
+        config?: CallSiteConfig;
         linkedEntity?: string;
         name?: string;
         events?: Record<string, string>;
@@ -916,7 +964,7 @@ export function getTraitName(traitRef: TraitRef): string {
  * getTraitConfig({ name: 'MyTrait' }); // returns undefined
  * getTraitConfig({ ref: 'MyTrait', config: { option: 'value' } }); // returns config object
  */
-export function getTraitConfig(traitRef: TraitRef): TraitConfig | undefined {
+export function getTraitConfig(traitRef: TraitRef): CallSiteConfig | undefined {
     if (typeof traitRef === 'string') {
         return undefined;
     }
@@ -940,7 +988,7 @@ export function getTraitConfig(traitRef: TraitRef): TraitConfig | undefined {
  * normalizeTraitRef({ name: 'MyTrait' }); // returns { ref: 'MyTrait' }
  * normalizeTraitRef({ ref: 'MyTrait', config: {...} }); // returns original
  */
-export function normalizeTraitRef(traitRef: TraitRef): { ref: string; config?: TraitConfig } {
+export function normalizeTraitRef(traitRef: TraitRef): { ref: string; config?: CallSiteConfig } {
     if (typeof traitRef === 'string') {
         return { ref: traitRef };
     }

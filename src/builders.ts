@@ -19,7 +19,7 @@ import type { Page } from './types/page.js';
 import type { EntityRef, OrbitalDefinition, PageRef, PageRefObject, UseDeclaration } from './types/orbital.js';
 import { isEntityCall, isEntityReference, parseEntityRef } from './types/orbital.js';
 import type { OrbitalSchema } from './types/schema.js';
-import type { TraitEventContract, TraitEventListener, Trait, TraitRef, TraitReference, TraitConfig } from './types/trait.js';
+import type { TraitEventContract, TraitEventListener, Trait, TraitRef, TraitReference, TraitConfig, CallSiteConfig } from './types/trait.js';
 import type { SExpr } from './types/expression.js';
 
 // Re-export compose-behaviors module
@@ -196,8 +196,12 @@ export interface MakeTraitRefOpts {
   listens?: TraitEventListener[];
   /** Set every emit's scope. */
   emitsScope?: 'internal' | 'external';
-  /** Call-site config overrides. Matches {@link TraitReference.config}. */
-  config?: TraitConfig;
+  /**
+   * Call-site config overrides. Each entry is either a plain wiring value
+   * (`TraitConfigValue`) or a fully-annotated re-declaration
+   * (`ConfigFieldDeclaration`). Matches {@link TraitReference.config}.
+   */
+  config?: CallSiteConfig;
 }
 
 /**
@@ -213,6 +217,9 @@ export interface MakeTraitRefOpts {
  *   `events` rename map's keys to legal originals only.
  * - `ConfigShape` — typed shape of the trait's `config { ... }` block (literal
  *   unions intact). Narrows the `config` override to the atom's actual fields.
+ *   Extends `CallSiteConfig` to allow both plain wiring values and annotated
+ *   declarations. Existing callers using plain `TraitConfig` shapes are
+ *   unaffected (TraitConfig ⊆ CallSiteConfig).
  * - `ListenKey`  — string union of the atom's listen-key contract. Narrows
  *   each listens entry's `event` against the atom's real subscription set.
  *
@@ -222,7 +229,7 @@ export interface MakeTraitRefOpts {
  */
 export interface MakeTraitRefOptsTyped<
   EventKey extends string = string,
-  ConfigShape extends TraitConfig = Record<string, never>,
+  ConfigShape extends CallSiteConfig = Record<string, never>,
   ListenKey extends string = string,
 > extends Omit<
     MakeTraitRefOpts,
@@ -364,7 +371,7 @@ export interface MakeAtomOrbitalTraitOverrides {
   effects?: Record<string, SExpr[]>;
   listens?: TraitEventListener[];
   emitsScope?: 'internal' | 'external';
-  config?: TraitConfig;
+  config?: CallSiteConfig;
 }
 
 /**

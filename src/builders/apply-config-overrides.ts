@@ -15,7 +15,7 @@
  */
 
 import type { OrbitalSchema } from '../types/schema.js';
-import type { TraitRef, TraitConfig, ConfigFieldDeclaration } from '../types/trait.js';
+import type { TraitRef, TraitConfig, CallSiteConfig, ConfigFieldDeclaration } from '../types/trait.js';
 
 function overrideTrait(trait: Exclude<TraitRef, string>, values: TraitConfig): Exclude<TraitRef, string> {
   // `scope` is required on a full `Trait`; the `{ ref, config }` reference has none.
@@ -33,9 +33,12 @@ function overrideTrait(trait: Exclude<TraitRef, string>, values: TraitConfig): E
     return { ...trait, config: next };
   }
 
-  // Trait reference with call-site value config (or none): merge override values.
-  const base: TraitConfig = trait.config !== undefined ? { ...trait.config } : {};
-  return { ...trait, config: { ...base, ...values } };
+  // Trait reference with call-site config (or none): merge override values.
+  // Existing entries may be plain values or ConfigFieldDeclarations; new
+  // override values are always plain (TraitConfig ⊆ CallSiteConfig).
+  const base: CallSiteConfig = trait.config !== undefined ? { ...trait.config } : {};
+  const merged: CallSiteConfig = { ...base, ...values };
+  return { ...trait, config: merged };
 }
 
 function traitIdentity(trait: Exclude<TraitRef, string>): string | undefined {

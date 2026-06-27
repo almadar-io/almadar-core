@@ -280,6 +280,59 @@ describe('deriveInputType', () => {
   });
 });
 
+describe('generateQuestions — entity-field question', () => {
+  it('emits exactly one fieldList question per call site with a canonical entity', () => {
+    const result = generateQuestions([makeCall()], [ecommerceSignature]);
+    const fieldListQs = result.filter((q) => q.inputType === 'fieldList');
+    expect(fieldListQs).toHaveLength(1);
+  });
+
+  it('gives the fieldList question the correct id', () => {
+    const result = generateQuestions([makeCall()], [ecommerceSignature]);
+    const q = result.find((q) => q.inputType === 'fieldList');
+    expect(q?.id).toBe('ProductOrbital.__entityFields');
+  });
+
+  it('sets mutationTemplate.kind to set-orbital-entity-fields', () => {
+    const result = generateQuestions([makeCall()], [ecommerceSignature]);
+    const q = result.find((q) => q.inputType === 'fieldList');
+    expect(q?.mutationTemplate.kind).toBe('set-orbital-entity-fields');
+  });
+
+  it('sets tier to domain', () => {
+    const result = generateQuestions([makeCall()], [ecommerceSignature]);
+    const q = result.find((q) => q.inputType === 'fieldList');
+    expect(q?.tier).toBe('domain');
+  });
+
+  it('defaultValue carries the canonical entity fields', () => {
+    const result = generateQuestions([makeCall()], [ecommerceSignature]);
+    const q = result.find((q) => q.inputType === 'fieldList');
+    const defaultFields = q?.defaultValue;
+    expect(Array.isArray(defaultFields)).toBe(true);
+    const fields = defaultFields as ReadonlyArray<{ name?: string; type: string }>;
+    expect(fields.find((f) => f.name === 'name')?.type).toBe('string');
+    expect(fields.find((f) => f.name === 'price')?.type).toBe('number');
+  });
+
+  it('emits no fieldList question when the signature has no entities', () => {
+    const sig: FactorySignature = { ...ecommerceSignature, entities: [] };
+    const result = generateQuestions([makeCall()], [sig]);
+    const fieldListQs = result.filter((q) => q.inputType === 'fieldList');
+    expect(fieldListQs).toHaveLength(0);
+  });
+
+  it('uses the call-site entityName override in the question text', () => {
+    const call: FactoryCallSite = {
+      ...makeCall(),
+      params: { entityName: 'Merchandise' },
+    };
+    const result = generateQuestions([call], [ecommerceSignature]);
+    const q = result.find((q) => q.inputType === 'fieldList');
+    expect(q?.question).toContain('Merchandise');
+  });
+});
+
 describe('generateQuestions — structural carriers', () => {
   it('sets itemSchema on listOfObjects questions', () => {
     const sig: FactorySignature = {

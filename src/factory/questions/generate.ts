@@ -31,9 +31,11 @@ import type {
   FactoryConfigParam,
   FactoryParamValue,
   FactorySignature,
+  FactorySignatureEntityField,
   FactoryTraitSignature,
 } from '../types.js';
 import type { RuleOverlay } from '../overlays.js';
+import type { EntityField } from '../../types/field.js';
 import type {
   DomainQuestion,
   DomainQuestionInputType,
@@ -51,6 +53,7 @@ export function generateQuestions(
     const signature = findSignature(catalog, call.organism, call.orbital);
     if (!signature) continue;
     out.push(...configKeyQuestions(call, signature));
+    out.push(...entityFieldQuestions(call, signature));
     out.push(...capabilityQuestions(call, signature, ruleCapabilities));
   }
   return out;
@@ -267,6 +270,98 @@ function stringifyDefault(v: FactoryParamValue): string {
   if (typeof v === 'number' || typeof v === 'boolean') return String(v);
   if (Array.isArray(v)) return `${v.length} item${v.length === 1 ? '' : 's'}`;
   return 'object';
+}
+
+// ---------------------------------------------------------------------------
+// Entity-field question — lets the user add or override data model fields
+// ---------------------------------------------------------------------------
+
+/**
+ * Emit one `fieldList` question per call site that has a canonical entity.
+ * The user's answer flows through `answersToMutations` →
+ * `set-orbital-entity-fields`, which maps to `applyEntityFields` in
+ * `translate.ts` — additive/override semantics (extras only; canonicals are
+ * never removed). The `defaultValue` pre-fills the widget with the entity's
+ * canonical fields so the user sees the baseline and can extend it.
+ *
+ * Type note: `FactorySignatureEntityField.type` is `SchemaFieldType` while
+ * `EntityField` is a discriminated union with extra required fields for
+ * `enum` (needs `values`) and `relation` (needs `relation`). Both are mapped
+ * to scalar `string` fields via `signatureFieldToEntityField` to avoid a
+ * cast; the data shape seen in `apply-params-to-orb.ts` (the buildEntity
+ * consumer) only uses `name`+`type` for the caller-wins merge, so the
+ * simplification is safe for this surface.
+ */
+function entityFieldQuestions(
+  call: FactoryCallSite,
+  signature: FactorySignature,
+): DomainQuestion[] {
+  if (signature.entities.length === 0) return [];
+  const entity = signature.entities[0];
+  const entityName = call.params.entityName ?? entity.name;
+  const defaultFields: ReadonlyArray<EntityField> = entity.fields.map(
+    signatureFieldToEntityField,
+  );
+  const weight = tierWeight('domain');
+  return [
+    {
+      id: `${call.orbital}.__entityFields`,
+      orbitalName: call.orbital,
+      question: `What fields should a ${entityName} have?`,
+      reason: `Defines the data model for ${entityName}. Add domain-specific fields or confirm the canonical defaults.`,
+      inputType: 'fieldList',
+      mutationTemplate: {
+        kind: 'set-orbital-entity-fields',
+        orbitalName: call.orbital,
+      },
+      defaultValue: defaultFields,
+      tier: 'domain',
+      weight,
+      priority: weight,
+    },
+  ];
+}
+
+/**
+ * Map a `FactorySignatureEntityField` to an `EntityField` without unsafe casts.
+ * Scalar types translate directly to `ScalarEntityField`. `array` and `object`
+ * translate to their variants (no extra required fields). `enum` and `relation`
+ * cannot be faithfully represented without their required payloads
+ * (`values`/`relation`), so they fall back to `type: 'string'` — the name and
+ * metadata are preserved; only the structural constraint is loosened.
+ */
+function signatureFieldToEntityField(f: FactorySignatureEntityField): EntityField {
+  const base = {
+    name: f.name,
+    required: f.required,
+    description: f.description,
+    synonyms: f.synonyms,
+    intrinsic: f.intrinsic,
+  } as const;
+  switch (f.type) {
+    case 'string':
+    case 'number':
+    case 'boolean':
+    case 'date':
+    case 'timestamp':
+    case 'datetime':
+      return { ...base, type: f.type };
+    case 'array':
+      return { ...base, type: 'array' };
+    case 'object':
+      return { ...base, type: 'object' };
+    case 'enum':
+      // FactorySignatureEntityField carries no `values` array; fall back to
+      // string to satisfy EntityField's discriminated union without casting.
+      return { ...base, type: 'string' };
+    case 'relation':
+      // FactorySignatureEntityField carries no `relation` config; fall back.
+      return { ...base, type: 'string' };
+    default: {
+      const _exhaustive: never = f.type;
+      return { ...base, type: 'string' };
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
