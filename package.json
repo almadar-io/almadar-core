@@ -22,6 +22,11 @@
       "import": "./dist/factory/index.js",
       "require": "./dist/factory/index.js"
     },
+    "./factory-runtime": {
+      "types": "./dist/factory-runtime/index.d.ts",
+      "import": "./dist/factory-runtime/index.js",
+      "require": "./dist/factory-runtime/index.js"
+    },
     "./state-machine": {
       "types": "./dist/state-machine/index.d.ts",
       "import": "./dist/state-machine/index.js",
