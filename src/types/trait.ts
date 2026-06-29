@@ -77,7 +77,17 @@ export type CallSiteConfig = Readonly<Record<string, CallSiteConfigEntry>>;
 
 /**
  * Type guard: returns `true` when `entry` is an annotated `ConfigFieldDeclaration`
- * (has a `"type"` string key) rather than a plain wiring value.
+ * (a config-field SCHEMA: a `"type"` string key AND a `"default"` value slot)
+ * rather than a plain wiring value or a render value object.
+ *
+ * The `"default"` requirement disambiguates a declaration from a `render-ui`
+ * VALUE object (e.g. `{ type: "tabs", items: "@entity.items", ... }`) that
+ * coincidentally carries a UI-component `type` key — such a value has no
+ * `default` slot and is a `TraitConfigValue`, not a schema declaration. Every
+ * annotated config field lowered from `.lolo` carries a `default`; misreading a
+ * render value as a declaration drops it straight into the `config` map where
+ * Rust's `serde` rejects its inner fields (e.g. `items` is a binding string,
+ * not a `FieldDefinition`).
  */
 export function isCallSiteConfigDeclaration(
     entry: CallSiteConfigEntry,
@@ -87,7 +97,8 @@ export function isCallSiteConfigDeclaration(
         entry !== null &&
         !Array.isArray(entry) &&
         'type' in entry &&
-        typeof entry.type === 'string'
+        typeof entry.type === 'string' &&
+        'default' in entry
     );
 }
 
