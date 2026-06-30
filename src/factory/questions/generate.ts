@@ -45,6 +45,13 @@ export function generateQuestions(
   plan: ReadonlyArray<FactoryCallSite>,
   catalog: ReadonlyArray<FactorySignature>,
   ruleOverlay?: RuleOverlay,
+  /**
+   * Optional user-authored prompt from the current session. Carried
+   * through so downstream consumers (route handlers, ranking passes)
+   * can re-order questions by relevance without re-generating. Does
+   * not affect the emitted set — only threading and ordering.
+   */
+  _userPrompt?: string,
 ): DomainQuestion[] {
   const out: DomainQuestion[] = [];
   const ruleCapabilities = collectRuleCapabilities(ruleOverlay);
@@ -104,18 +111,24 @@ function buildConfigKeyQuestion(
   const callSiteOverride = callSiteOverrideValue(call, trait.name, param.key);
   const effectiveDefault =
     callSiteOverride !== undefined ? callSiteOverride : param.default;
-  const reason =
-    param.description ??
+
+  // `helpText` carries the param's authored description (how to answer).
+  // `reason` is the distinct "why you're seeing this" — only set when it
+  // adds information beyond what helpText already says.
+  const helpText = param.description;
+  const syntheticReason =
     `Customizes "${param.key}" on the ${trait.name} trait. ` +
-      (effectiveDefault !== undefined
-        ? `Default: ${stringifyDefault(effectiveDefault)}.`
-        : `No default — leave blank to inherit the factory's behavior.`);
+    (effectiveDefault !== undefined
+      ? `Default: ${stringifyDefault(effectiveDefault)}.`
+      : `No default — leave blank to inherit the factory's behavior.`);
+  const reason = helpText !== undefined ? undefined : syntheticReason;
+
+  const isAdvanced = !isPrimaryTier(param.tier);
 
   const out: DomainQuestion = {
     id: `${call.orbital}.${trait.name}.${param.key}`,
     orbitalName: call.orbital,
     question,
-    reason,
     inputType: deriveInputType(param),
     mutationTemplate: {
       kind: 'set-trait-override-config',
@@ -124,6 +137,12 @@ function buildConfigKeyQuestion(
       configKey: param.key,
     },
   };
+  if (reason !== undefined) {
+    out.reason = reason;
+  }
+  if (helpText !== undefined) {
+    out.helpText = helpText;
+  }
   if (effectiveDefault !== undefined) {
     out.defaultValue = effectiveDefault;
   }
@@ -139,12 +158,8 @@ function buildConfigKeyQuestion(
   if (param.tier) {
     out.tier = param.tier;
   }
-  // @description is the knob's own caption, shown under the input; `reason`
-  // stays the synthesized "why we ask". (Both fall back to the same text
-  // when the synthesized reason used the description — the studio shows the
-  // caption once.)
-  if (param.description) {
-    out.helpText = param.description;
+  if (isAdvanced) {
+    out.advanced = true;
   }
   const weight = tierWeight(param.tier);
   out.weight = weight;
@@ -172,6 +187,11 @@ function tierWeight(tier: FactoryConfigParam['tier']): number {
     default:
       return 1;
   }
+}
+
+/** `true` only for the two tiers that render inline (not collapsed). */
+function isPrimaryTier(tier: FactoryConfigParam['tier']): boolean {
+  return tier === 'domain' || tier === 'policy';
 }
 
 function callSiteOverrideValue(
@@ -277,18 +297,22 @@ function stringifyDefault(v: FactoryParamValue): string {
 // ---------------------------------------------------------------------------
 
 /**
- * Emit one `fieldList` question per call site that has a canonical entity.
- * The user's answer flows through `answersToMutations` →
- * `set-orbital-entity-fields`, which maps to `applyEntityFields` in
- * `translate.ts` — additive/override semantics (extras only; canonicals are
- * never removed). The `defaultValue` pre-fills the widget with the entity's
- * canonical fields so the user sees the baseline and can extend it.
+ * Emit one multiselect question per call site that has a canonical entity.
+ *
+ * The widget shows the entity's canonical fields as labelled checkboxes;
+ * the user confirms or deselects them. The answer (selected field names)
+ * flows through the UI's name→EntityField lookup via `fieldCandidates`,
+ * then into `answersToMutations` → `set-orbital-entity-fields` → `applyEntityFields`
+ * in `translate.ts` (additive/override semantics).
+ *
+ * `suggestedAnswers`   = candidate field name strings (drives checkbox list).
+ * `defaultValue`       = the canonical field-name set pre-selected.
+ * `fieldCandidates`    = name → EntityField for the UI's resolution step.
+ * `fieldDescriptions`  = name → description for checkbox sub-labels.
  *
  * Type note: `FactorySignatureEntityField.type` is `SchemaFieldType` while
  * `EntityField` is a discriminated union. `signatureFieldToEntityField` maps
- * each variant faithfully: enum fields carry `values`, relation fields carry
- * `relation`. When the payload is absent the field degrades to `string` rather
- * than producing an invalid variant.
+ * each variant faithfully.
  */
 function entityFieldQuestions(
   call: FactoryCallSite,
@@ -297,27 +321,45 @@ function entityFieldQuestions(
   if (signature.entities.length === 0) return [];
   const entity = signature.entities[0];
   const entityName = call.params.entityName ?? entity.name;
-  const defaultFields: ReadonlyArray<EntityField> = entity.fields.map(
-    signatureFieldToEntityField,
-  );
+
+  const candidateFields = entity.fields.map(signatureFieldToEntityField);
+  const fieldCandidates: Record<string, EntityField> = {};
+  const fieldDescriptions: Record<string, string> = {};
+  const candidateNames: string[] = [];
+
+  for (let i = 0; i < entity.fields.length; i++) {
+    const sig = entity.fields[i];
+    const ef = candidateFields[i];
+    const name = sig.name;
+    candidateNames.push(name);
+    fieldCandidates[name] = ef;
+    if (sig.description) {
+      fieldDescriptions[name] = sig.description;
+    }
+  }
+
   const weight = tierWeight('domain');
-  return [
-    {
-      id: `${call.orbital}.__entityFields`,
+  const q: DomainQuestion = {
+    id: `${call.orbital}.__entityFields`,
+    orbitalName: call.orbital,
+    question: `Which fields should a ${entityName} have?`,
+    reason: `Defines the data model for ${entityName}. Pick the fields that matter for your use case.`,
+    inputType: 'multiselect',
+    mutationTemplate: {
+      kind: 'set-orbital-entity-fields',
       orbitalName: call.orbital,
-      question: `What fields should a ${entityName} have?`,
-      reason: `Defines the data model for ${entityName}. Add domain-specific fields or confirm the canonical defaults.`,
-      inputType: 'fieldList',
-      mutationTemplate: {
-        kind: 'set-orbital-entity-fields',
-        orbitalName: call.orbital,
-      },
-      defaultValue: defaultFields,
-      tier: 'domain',
-      weight,
-      priority: weight,
     },
-  ];
+    suggestedAnswers: candidateNames,
+    defaultValue: candidateNames,
+    fieldCandidates,
+    tier: 'domain',
+    weight,
+    priority: weight,
+  };
+  if (Object.keys(fieldDescriptions).length > 0) {
+    q.fieldDescriptions = fieldDescriptions;
+  }
+  return [q];
 }
 
 /**
@@ -371,6 +413,17 @@ function signatureFieldToEntityField(f: FactorySignatureEntityField): EntityFiel
 // Capability-driven questions
 // ---------------------------------------------------------------------------
 
+/**
+ * Emit one yes/no question per unique capability not already covered by
+ * the ruleOverlay. Capabilities whose name matches a `policy`-tier config
+ * knob on the same trait are skipped — that knob already gives the user
+ * a direct toggle for the governance behavior, so a second question adds
+ * noise. Only capabilities with no backing policy knob get a question.
+ *
+ * The emitted question uses `inputType: 'boolean'` (a plain yes/no toggle)
+ * with a plain-English prompt and `helpText` explaining what enabling it
+ * does. The `set-rule` mutation template remains unchanged.
+ */
 function capabilityQuestions(
   call: FactoryCallSite,
   signature: FactorySignature,
@@ -381,23 +434,29 @@ function capabilityQuestions(
   const seen = new Set<string>();
   const out: DomainQuestion[] = [];
   for (const trait of signature.traits) {
+    const policyKnobKeys = new Set(
+      trait.overridableConfigKeys
+        .filter((p) => p.tier === 'policy')
+        .map((p) => p.key),
+    );
     for (const cap of trait.capabilities) {
       if (seen.has(cap)) continue;
       seen.add(cap);
       if (ruleCapabilities.has(cap)) continue;
+      // Skip if a policy-tier knob on this trait already surfaces the toggle.
+      if (policyKnobKeys.has(cap)) continue;
       out.push({
         id: `${call.orbital}.capability.${cap}`,
         orbitalName: call.orbital,
         question: capabilityPrompt(cap, entityName),
-        reason: capabilityReason(cap, trait),
+        helpText: capabilityHelp(cap, trait),
         capability: cap,
-        inputType: 'capability',
+        inputType: 'boolean',
         mutationTemplate: {
           kind: 'set-rule',
           capability: cap,
           appliesTo: [entityName],
         },
-        suggestedAnswers: ['yes', 'skip'],
         // Capabilities encode governance/policy decisions — high impact.
         weight: 3,
         priority: 3,
@@ -407,15 +466,18 @@ function capabilityQuestions(
   return out;
 }
 
+/** Plain-English yes/no prompt for a capability toggle. */
 function capabilityPrompt(capability: string, entity: string): string {
-  return `Should "${capability}" apply to ${entity}?`;
+  const label = humanizeKey(capability);
+  return `Enable ${label} for ${entity}?`;
 }
 
-function capabilityReason(
+/** How-to-answer help text for a capability question. */
+function capabilityHelp(
   capability: string,
   trait: FactoryTraitSignature,
 ): string {
-  return `The "${trait.name}" trait advertises capability "${capability}". Answer "yes" to wire a matching rule into the schema.`;
+  return `Turns on the "${capability}" behavior from the ${trait.name} trait. Say yes to wire a governance rule into the schema.`;
 }
 
 // ---------------------------------------------------------------------------

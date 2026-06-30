@@ -25,14 +25,32 @@ import type { FactoryConfigTier, FactoryParamValue } from '../types.js';
  * + input widget keyed off `inputType` + `suggestedAnswers` (and, for
  * structured types, `itemSchema` / `objectSchema`); the answer fills
  * the matching `mutationTemplate`.
+ *
+ * ### Surfacing flag
+ * `advanced` is `true` for questions whose tier is NOT `domain` or
+ * `policy` (i.e. `infra`, `presentation`, untagged, or any non-canonical
+ * value). The UI collapses advanced questions under a disclosure panel;
+ * questions with `advanced` absent or `false` render inline.
+ *
+ * ### Entity-field multiselect
+ * When `inputType` is `'multiselect'` and `mutationTemplate.kind` is
+ * `'set-orbital-entity-fields'`, the answer is the subset of
+ * `suggestedAnswers` the user checked. The UI maps selected names back
+ * to `EntityField[]` via `fieldCandidates` (keyed by field name) before
+ * submitting to `answersToMutations`. `fieldDescriptions` carries each
+ * field's semantic description for the checkbox label.
  */
 export interface DomainQuestion {
   /** Unique within a session. Keys the answer record. */
   id: string;
   /** Natural-language prompt shown to the user. */
   question: string;
-  /** One short sentence — why this question matters. */
-  reason: string;
+  /**
+   * One short sentence explaining WHY this question is being asked —
+   * distinct from `helpText`. Never set to the same string as `helpText`.
+   * Undefined when no distinct rationale exists.
+   */
+  reason?: string;
   /** Orbital this question scopes to (matches
    *  `FactoryCallSite.orbital`). */
   orbitalName: string;
@@ -52,9 +70,14 @@ export interface DomainQuestion {
    *  pre-fills the input, the user can confirm or override. */
   defaultValue?: DomainQuestionAnswer;
   /** Closed-enum or curated suggestions. Empty when the input is
-   *  free-form. */
+   *  free-form. For entity-field multiselect this is the candidate
+   *  field name list (see `fieldCandidates`). */
   suggestedAnswers?: ReadonlyArray<string>;
-  /** Free-text help shown under the input. */
+  /**
+   * How-to-answer caption shown under the input widget. Set from
+   * `FactoryConfigParam.description` (the knob's own authored caption).
+   * Never set to the same text as `reason`.
+   */
   helpText?: string;
   /** Per-element schema for array-of-objects (`listOfObjects`) and
    *  free-form chip lists (`tagList`). Propagated from
@@ -68,6 +91,14 @@ export interface DomainQuestion {
    *  `@tier` annotation — the studio treats undefined as
    *  `'presentation'`. */
   tier?: FactoryConfigTier;
+  /**
+   * `true` when this question is NOT a primary domain/policy decision —
+   * i.e. `tier` is absent, `'infra'`, `'presentation'`, or any
+   * non-canonical value. The UI collapses advanced questions under a
+   * disclosure panel. Domain and policy questions always have
+   * `advanced` absent (falsy).
+   */
+  advanced?: boolean;
   /** Impact weight derived from `tier` (policy/domain high, infra medium,
    *  presentation low). Drives the studio's Confidence score — answering a
    *  high-weight question moves the needle more. */
@@ -76,6 +107,20 @@ export interface DomainQuestion {
    *  (deterministic); the studio server may boost it by prompt relevance.
    *  Higher = surfaced earlier. */
   priority?: number;
+  /**
+   * Full `EntityField` candidates keyed by field name. Present only on
+   * entity-field multiselect questions (`inputType: 'multiselect'`,
+   * `mutationTemplate.kind: 'set-orbital-entity-fields'`). The UI maps
+   * the user's selected field names back to `EntityField[]` via this
+   * record before calling `answersToMutations`.
+   */
+  fieldCandidates?: Readonly<Record<string, EntityField>>;
+  /**
+   * Human-readable description for each candidate field name. Keyed by
+   * field name (same keys as `fieldCandidates`). The UI shows this as
+   * the checkbox sublabel.
+   */
+  fieldDescriptions?: Readonly<Record<string, string>>;
 }
 
 /**

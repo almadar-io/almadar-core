@@ -281,45 +281,50 @@ describe('deriveInputType', () => {
 });
 
 describe('generateQuestions — entity-field question', () => {
-  it('emits exactly one fieldList question per call site with a canonical entity', () => {
+  it('emits exactly one multiselect question per call site with a canonical entity', () => {
     const result = generateQuestions([makeCall()], [ecommerceSignature]);
-    const fieldListQs = result.filter((q) => q.inputType === 'fieldList');
-    expect(fieldListQs).toHaveLength(1);
+    const entityQs = result.filter((q) => q.id.endsWith('.__entityFields'));
+    expect(entityQs).toHaveLength(1);
+    expect(entityQs[0].inputType).toBe('multiselect');
   });
 
-  it('gives the fieldList question the correct id', () => {
+  it('gives the entity-field question the correct id', () => {
     const result = generateQuestions([makeCall()], [ecommerceSignature]);
-    const q = result.find((q) => q.inputType === 'fieldList');
+    const q = result.find((q) => q.id.endsWith('.__entityFields'));
     expect(q?.id).toBe('ProductOrbital.__entityFields');
   });
 
   it('sets mutationTemplate.kind to set-orbital-entity-fields', () => {
     const result = generateQuestions([makeCall()], [ecommerceSignature]);
-    const q = result.find((q) => q.inputType === 'fieldList');
+    const q = result.find((q) => q.id.endsWith('.__entityFields'));
     expect(q?.mutationTemplate.kind).toBe('set-orbital-entity-fields');
   });
 
   it('sets tier to domain', () => {
     const result = generateQuestions([makeCall()], [ecommerceSignature]);
-    const q = result.find((q) => q.inputType === 'fieldList');
+    const q = result.find((q) => q.id.endsWith('.__entityFields'));
     expect(q?.tier).toBe('domain');
   });
 
-  it('defaultValue carries the canonical entity fields', () => {
+  it('suggestedAnswers lists canonical field names and defaultValue pre-selects all of them', () => {
     const result = generateQuestions([makeCall()], [ecommerceSignature]);
-    const q = result.find((q) => q.inputType === 'fieldList');
-    const defaultFields = q?.defaultValue;
-    expect(Array.isArray(defaultFields)).toBe(true);
-    const fields = defaultFields as ReadonlyArray<{ name?: string; type: string }>;
-    expect(fields.find((f) => f.name === 'name')?.type).toBe('string');
-    expect(fields.find((f) => f.name === 'price')?.type).toBe('number');
+    const q = result.find((q) => q.id.endsWith('.__entityFields'));
+    expect(q?.suggestedAnswers).toEqual(['name', 'price']);
+    expect(q?.defaultValue).toEqual(['name', 'price']);
   });
 
-  it('emits no fieldList question when the signature has no entities', () => {
+  it('fieldCandidates carries EntityField entries keyed by field name', () => {
+    const result = generateQuestions([makeCall()], [ecommerceSignature]);
+    const q = result.find((q) => q.id.endsWith('.__entityFields'));
+    expect(q?.fieldCandidates?.['name']).toMatchObject({ name: 'name', type: 'string' });
+    expect(q?.fieldCandidates?.['price']).toMatchObject({ name: 'price', type: 'number' });
+  });
+
+  it('emits no entity-field question when the signature has no entities', () => {
     const sig: FactorySignature = { ...ecommerceSignature, entities: [] };
     const result = generateQuestions([makeCall()], [sig]);
-    const fieldListQs = result.filter((q) => q.inputType === 'fieldList');
-    expect(fieldListQs).toHaveLength(0);
+    const entityQs = result.filter((q) => q.id.endsWith('.__entityFields'));
+    expect(entityQs).toHaveLength(0);
   });
 
   it('uses the call-site entityName override in the question text', () => {
@@ -328,7 +333,7 @@ describe('generateQuestions — entity-field question', () => {
       params: { entityName: 'Merchandise' },
     };
     const result = generateQuestions([call], [ecommerceSignature]);
-    const q = result.find((q) => q.inputType === 'fieldList');
+    const q = result.find((q) => q.id.endsWith('.__entityFields'));
     expect(q?.question).toContain('Merchandise');
   });
 });
