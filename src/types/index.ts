@@ -789,6 +789,48 @@ export {
 } from "./json.js";
 
 // ============================================================================
+// SSE Event Types (agent wire contract consumed by the public SDK)
+// ============================================================================
+
+export {
+  type SSEEvent,
+  type SSEEventType,
+  type SSEEventBase,
+  type StartEvent,
+  type MessageEvent,
+  type ToolCallEvent,
+  type ToolResultEvent,
+  type TodoUpdateEvent,
+  type TodoActivityType,
+  type TodoDetailEvent,
+  type FileOperationEvent,
+  type FileWrittenEvent,
+  type SchemaUpdateEvent,
+  type GenerationLogEvent,
+  type SubagentEvent,
+  type SubagentStartEvent,
+  type SubagentProgressEvent,
+  type SubagentCompleteEvent,
+  type InterruptEvent,
+  type ErrorEvent,
+  type CancelledEvent,
+  type CompleteEvent,
+  type AppCreatedEvent,
+  type SchemaPhaseValidatedEvent,
+  type SchemaPhaseUpdateEvent,
+  type OrbitalAddedEvent,
+  type OrbitalSchemaCompleteEvent,
+  type ProcessStartEvent,
+  type ProcessCompleteEvent,
+  type ProcessErrorEvent,
+  type ProcessRepairEvent,
+  type ProcessRepairCompleteEvent,
+  type ParamsRepairEmittedEvent,
+  type ChangesetRecordedEvent,
+  type SnapshotCreatedEvent,
+} from "./sse.js";
+
+// ============================================================================
 // Validation Errors
 // ============================================================================
 
