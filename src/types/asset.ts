@@ -95,25 +95,102 @@ export type GameType = (typeof GAME_TYPES)[number];
 export const GameTypeSchema = z.enum(GAME_TYPES);
 
 // ============================================================================
+// Animation Name + Sheet Direction
+// ============================================================================
+
+/**
+ * Animation names matching a sprite sheet's row layout. Canonical home for
+ * this vocabulary — `@almadar/ui`'s `spriteAnimationTypes.ts` re-exports it
+ * rather than redeclaring, so board `.lolo` config and the render library
+ * agree on one enum.
+ */
+export const ANIMATION_NAMES = ['idle', 'walk', 'attack', 'hit', 'death'] as const;
+
+export type AnimationName = (typeof ANIMATION_NAMES)[number];
+
+export const AnimationNameSchema = z.enum(ANIMATION_NAMES);
+
+/** Sheet file directions (physical PNG files a sprite sheet ships as). */
+export const SPRITE_DIRECTIONS = ['se', 'sw'] as const;
+
+export type SpriteDirection = (typeof SPRITE_DIRECTIONS)[number];
+
+export const SpriteDirectionSchema = z.enum(SPRITE_DIRECTIONS);
+
+// ============================================================================
 // Animation Definition
 // ============================================================================
 
 /**
- * Animation definition for sprites
+ * Definition for a single named animation within a sprite sheet: which row
+ * it occupies, how many frames it has, and its playback rate. This is the
+ * shape actually consumed by `@almadar/ui`'s sprite-sheet renderer
+ * (`spriteAnimation.ts`'s `frameRect`/`getCurrentFrameFromDef`) — moved here
+ * verbatim rather than reconciled with a differently-shaped guess, since
+ * `@almadar/ui`'s version is the one with real production consumers.
  */
 export interface AnimationDef {
-    /** Frame indices or file names */
-    frames: number[] | string[];
-    /** Frames per second */
-    fps: number;
-    /** Whether animation loops */
+    /** Row index in the sprite sheet (0-based; each animation occupies one row). */
+    row: number;
+    /** Number of frames in this animation. */
+    frames: number;
+    /** Frames per second. */
+    frameRate: number;
+    /** Whether the animation loops. */
     loop: boolean;
 }
 
 export const AnimationDefSchema = z.object({
-    frames: z.union([z.array(z.number()), z.array(z.string())]),
-    fps: z.number().positive(),
+    row: z.number().int().nonnegative(),
+    frames: z.number().int().positive(),
+    frameRate: z.number().positive(),
     loop: z.boolean(),
+});
+
+// ============================================================================
+// Sprite Sheet Atlas
+// ============================================================================
+
+/**
+ * Parsed sprite-sheet atlas JSON — the contract a `spriteSheet`-role `Asset.url`
+ * resolves to when fetched (see `Asset.url` usage in `@almadar/ui`'s
+ * `useUnitSpriteAtlas`). A unit's `sprite?: Asset` stays the static single-pose
+ * image; `spriteSheet?: Asset` is a SEPARATE reference whose URL points at a
+ * `SpriteSheetAtlas`-shaped JSON manifest (e.g. `.../guardian-sprite-sheet.json`),
+ * not a PNG. Frame-cutting geometry lives here, not inlined onto `Asset` — an
+ * `Asset` traveling through `render-ui` every tick stays small.
+ */
+export interface SpriteSheetAtlas {
+    /** Unit archetype key. */
+    unit?: string;
+    /** Visual type key. */
+    type?: string;
+    /** Width of a single frame in pixels. */
+    frameWidth: number;
+    /** Height of a single frame in pixels. */
+    frameHeight: number;
+    /** Number of columns (frames per row). */
+    columns: number;
+    /** Number of rows (animations). */
+    rows: number;
+    /** Directions present as physical PNG files. */
+    directions: SpriteDirection[];
+    /** Relative PNG sheet paths per direction. */
+    sheets: Partial<Record<SpriteDirection, string>>;
+    /** Animation row layout keyed by animation name. */
+    animations: Partial<Record<AnimationName, AnimationDef>>;
+}
+
+export const SpriteSheetAtlasSchema = z.object({
+    unit: z.string().optional(),
+    type: z.string().optional(),
+    frameWidth: z.number().positive(),
+    frameHeight: z.number().positive(),
+    columns: z.number().int().positive(),
+    rows: z.number().int().positive(),
+    directions: z.array(SpriteDirectionSchema),
+    sheets: z.record(SpriteDirectionSchema, z.string()),
+    animations: z.record(AnimationNameSchema, AnimationDefSchema),
 });
 
 // ============================================================================
@@ -329,6 +406,7 @@ export type AssetMappingInput = z.input<typeof AssetMappingSchema>;
 export type AssetMapInput = z.input<typeof AssetMapSchema>;
 export type AnimationDefInput = z.input<typeof AnimationDefSchema>;
 export type AssetCatalogEntryInput = z.input<typeof AssetCatalogEntrySchema>;
+export type SpriteSheetAtlasInput = z.input<typeof SpriteSheetAtlasSchema>;
 
 // ============================================================================
 // Helper Functions
