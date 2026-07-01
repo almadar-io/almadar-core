@@ -92,6 +92,7 @@ export {
   deriveCollection,
   isRuntimeEntity,
   isSingletonEntity,
+  persistenceModeAllowsOverrides,
   type FieldValue,
   type EntityRow,
   type EntityWith,

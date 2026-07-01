@@ -30,7 +30,7 @@ import type {
   TraitReference,
   TraitTick,
 } from '../types/index.js';
-import { isCallSiteConfigDeclaration } from '../types/index.js';
+import { isCallSiteConfigDeclaration, persistenceModeAllowsOverrides } from '../types/index.js';
 import type {
   MakePageRefOpts,
   MakeTraitRefOpts,
@@ -63,14 +63,7 @@ export function validateOrbitalFactoryParams(
     };
   }
 
-  const ALLOWED_KEYS = new Set<string>([
-    'fields',
-    'pagePath',
-    'persistence',
-    'entityName',
-    'collection',
-    'traitOverrides',
-  ]);
+  const ALLOWED_KEYS = new Set<string>(manifest.paramFields.map((f) => f.name));
   for (const key of Object.keys(raw)) {
     if (!ALLOWED_KEYS.has(key)) {
       return { ok: false, error: { kind: 'unknown-key', key } };
@@ -194,12 +187,18 @@ function buildEntity(
     ];
   }
 
+  const allowPersistenceOverride = persistenceModeAllowsOverrides(
+    ctx.canonicalEntity.persistence,
+  );
+
   const entity: Entity = {
     name: effectiveName,
-    persistence: params.persistence ?? ctx.canonicalEntity.persistence,
+    persistence: allowPersistenceOverride
+      ? (params.persistence ?? ctx.canonicalEntity.persistence)
+      : ctx.canonicalEntity.persistence,
     fields: [...mergedFields],
   };
-  if (effectiveCollection !== undefined) {
+  if (allowPersistenceOverride && effectiveCollection !== undefined) {
     entity.collection = effectiveCollection;
   }
   return entity;

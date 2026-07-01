@@ -7,7 +7,13 @@
  * @packageDocumentation
  */
 
-import type { OrbitalSchema, TraitReference } from '../types/index.js';
+import type {
+  EntityPersistence,
+  OrbitalEntity,
+  OrbitalSchema,
+  TraitReference,
+} from '../types/index.js';
+import { persistenceModeAllowsOverrides } from '../types/index.js';
 import type { OrbitalParamsManifest, ParamFieldDescriptor } from './manifest-types.js';
 
 const STATIC_PARAM_FIELDS: readonly ParamFieldDescriptor[] = [
@@ -51,6 +57,24 @@ interface SplitTraits {
   readonly inlineTraitNames: readonly string[];
 }
 
+function entityPersistence(
+  entity: OrbitalSchema['orbitals'][number]['entity'],
+): EntityPersistence | undefined {
+  if (entity && typeof entity === 'object' && !('extends' in entity)) {
+    return (entity as OrbitalEntity).persistence;
+  }
+  return undefined;
+}
+
+function paramFieldsForPersistence(
+  persistence: EntityPersistence | undefined,
+): readonly ParamFieldDescriptor[] {
+  if (persistenceModeAllowsOverrides(persistence)) {
+    return STATIC_PARAM_FIELDS;
+  }
+  return STATIC_PARAM_FIELDS.filter((f) => f.name !== 'persistence' && f.name !== 'collection');
+}
+
 function splitTraits(traits: OrbitalSchema['orbitals'][number]['traits']): SplitTraits {
   const refTraitNames: string[] = [];
   const inlineTraitNames: string[] = [];
@@ -76,7 +100,7 @@ export function extractManifest(orb: OrbitalSchema): readonly OrbitalParamsManif
     return {
       organism: behaviorName,
       orbitalName: orbital.name,
-      paramFields: STATIC_PARAM_FIELDS,
+      paramFields: paramFieldsForPersistence(entityPersistence(orbital.entity)),
       traitNames: refTraitNames,
       inlineTraitNames,
     };

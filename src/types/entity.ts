@@ -159,6 +159,28 @@ export function isSingletonEntity(entity: OrbitalEntity): boolean {
     return entity.persistence === 'singleton';
 }
 
+/**
+ * Checks whether an entity's persistence mode allows `persistence` /
+ * `collection` overrides at the factory call site.
+ *
+ * Only `persistent` entities (explicit or default) support these overrides.
+ * Runtime, singleton, instance, and local entities are fixed; callers must
+ * not expose `persistence` or `collection` params for them.
+ *
+ * @param persistence - The entity persistence mode (undefined = default persistent)
+ * @returns True when overrides are allowed, false otherwise
+ *
+ * @example
+ * persistenceModeAllowsOverrides('persistent'); // returns true
+ * persistenceModeAllowsOverrides('runtime');    // returns false
+ * persistenceModeAllowsOverrides(undefined);    // returns true (default persistent)
+ */
+export function persistenceModeAllowsOverrides(
+    persistence: EntityPersistence | undefined,
+): boolean {
+    return persistence === 'persistent' || persistence === undefined;
+}
+
 // ============================================================================
 // Entity Instance Data (Runtime)
 // ============================================================================
