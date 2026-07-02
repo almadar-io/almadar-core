@@ -194,6 +194,153 @@ export const SpriteSheetAtlasSchema = z.object({
 });
 
 // ============================================================================
+// Texture Atlas — named-subrect packed sheet (the industry standard)
+// ============================================================================
+
+/**
+ * One named sub-rectangle inside a packed sheet. Mirrors the ShoeBox /
+ * TexturePacker `<SubTexture>` element every Kenney `Spritesheet/*.xml` ships
+ * (`x`/`y`/`width`/`height` = the rect in the sheet PNG; `frameX`/`frameY`/
+ * `frameWidth`/`frameHeight` = the trim/pad offsets for sprites packed with
+ * transparent edges removed — optional, present only on trimmed atlases).
+ */
+export interface SubTexture {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    frameX?: number;
+    frameY?: number;
+    frameWidth?: number;
+    frameHeight?: number;
+}
+
+export const SubTextureSchema = z.object({
+    x: z.number().nonnegative(),
+    y: z.number().nonnegative(),
+    width: z.number().positive(),
+    height: z.number().positive(),
+    frameX: z.number().optional(),
+    frameY: z.number().optional(),
+    frameWidth: z.number().positive().optional(),
+    frameHeight: z.number().positive().optional(),
+});
+
+/**
+ * A packed sheet + its named sub-rectangles — the canonical parse target for a
+ * Kenney `Spritesheet/*.xml` atlas. A STATIC tile/prop/UI Asset references one
+ * of these: `{ url: <sheet.png>, atlas: <this.json>, sprite: "grass.png" }` →
+ * the renderer fetches the sheet + atlas ONCE and blits the named sub-rect,
+ * instead of loading N individual PNGs. (Animated actors use `SpriteSheetAtlas`
+ * instead; a uniform-grid tile page uses `Tilesheet`.)
+ */
+export interface TextureAtlas {
+    /** Relative path to the sheet PNG the sub-rects index into (the atlas's own `imagePath`). */
+    imagePath: string;
+    /** Sub-rectangles keyed by their atlas name (e.g. `"grass.png"`). */
+    subTextures: Record<string, SubTexture>;
+}
+
+export const TextureAtlasSchema = z.object({
+    imagePath: z.string(),
+    subTextures: z.record(z.string(), SubTextureSchema),
+});
+
+// ============================================================================
+// Tilesheet — uniform-grid packed page (cut by index)
+// ============================================================================
+
+/**
+ * A uniform-grid tile page — the shape a Kenney `Tilesheet/` sheet takes (e.g.
+ * Pirate Pack: "each tile is 64×64, no margin"). Tiles are cut by `(col,row)`
+ * index rather than by named rect. `names` is present only when a sibling
+ * `.xml`/`.txt` supplies an index→name list; otherwise a tile is addressed by
+ * its `"col,row"` (or flat index) via `Asset.sprite`.
+ */
+export interface Tilesheet {
+    /** Relative path to the tile sheet PNG. */
+    imagePath: string;
+    /** Width of one tile cell in pixels. */
+    tileWidth: number;
+    /** Height of one tile cell in pixels. */
+    tileHeight: number;
+    /** Number of columns in the grid. */
+    columns: number;
+    /** Number of rows in the grid. */
+    rows: number;
+    /** Outer margin before the first tile, in pixels (default 0). */
+    margin?: number;
+    /** Gap between adjacent tiles, in pixels (default 0). */
+    spacing?: number;
+    /** Optional index→name labels when a descriptor supplies them. */
+    names?: string[];
+}
+
+export const TilesheetSchema = z.object({
+    imagePath: z.string(),
+    tileWidth: z.number().positive(),
+    tileHeight: z.number().positive(),
+    columns: z.number().int().positive(),
+    rows: z.number().int().positive(),
+    margin: z.number().nonnegative().optional(),
+    spacing: z.number().nonnegative().optional(),
+    names: z.array(z.string()).optional(),
+});
+
+// ============================================================================
+// Pack classification — how a Kenney pack maps into the pipeline
+// ============================================================================
+
+/**
+ * The three roles a source pack plays, decided by the systematic per-folder
+ * scan (see `docs/Almadar_Std_Assets.md`):
+ *   - `board-tileset`     — a genre/canvas-matched terrain/level set, often ~1:1 with a board.
+ *   - `character-kit`     — modular layered character parts assembled into one figure.
+ *   - `shared-primitive`  — backgrounds / effects / UI / particles fanned out to many boards.
+ */
+export const PACK_CLASSES = ['board-tileset', 'character-kit', 'shared-primitive'] as const;
+
+export type PackClass = (typeof PACK_CLASSES)[number];
+
+export const PackClassSchema = z.enum(PACK_CLASSES);
+
+/**
+ * A modular character-kit layer: one selectable part (`head`/`hair`/`shirt`/…)
+ * resolved to a sub-texture ref. Recorded now so the analysis can RECOGNIZE
+ * modular packs; the layered compositor that stacks these is a later follow-up.
+ */
+export interface CharacterKitLayer {
+    /** Which body slot this layer fills. */
+    slot: 'body' | 'head' | 'face' | 'hair' | 'facialHair' | 'shirt' | 'pants' | 'shoes' | 'accessory';
+    /** Sheet PNG the part lives on. */
+    url: AssetUrl;
+    /** Atlas JSON next to the sheet. */
+    atlas?: AssetUrl;
+    /** Sub-texture name within the atlas. */
+    sprite?: string;
+}
+
+export const CharacterKitLayerSchema = z.object({
+    slot: z.enum(['body', 'head', 'face', 'hair', 'facialHair', 'shirt', 'pants', 'shoes', 'accessory']),
+    url: z.string(),
+    atlas: z.string().optional(),
+    sprite: z.string().optional(),
+});
+
+/** A recognized modular-character pack: an ordered, back-to-front layer stack. */
+export interface CharacterKit {
+    /** Source pack slug the kit came from. */
+    pack: string;
+    /** Layers in back-to-front draw order. */
+    layers: CharacterKitLayer[];
+}
+
+export const CharacterKitSchema = z.object({
+    pack: z.string(),
+    layers: z.array(CharacterKitLayerSchema),
+});
+
+// ============================================================================
 // Semantic Asset Reference
 // ============================================================================
 
@@ -241,8 +388,21 @@ export const SemanticAssetRefSchema = z.object({
  * pixel-dimension or filename heuristics needed to know sheet-vs-frame / 2d-vs-3d).
  */
 export interface Asset extends SemanticAssetRef {
-    /** The resolved asset URL. */
+    /** The resolved asset URL. When `atlas`/`sprite` are set this is the SHEET png; otherwise a standalone image. */
     url: AssetUrl;
+    /**
+     * Optional atlas JSON (a `TextureAtlas` or `Tilesheet`) that slices `url`.
+     * When present with `sprite`, the renderer fetches sheet + atlas once and
+     * blits one sub-rect instead of loading a standalone PNG. Absent → `url` is
+     * a plain whole-image asset (the existing, non-atlas path).
+     */
+    atlas?: AssetUrl;
+    /**
+     * The sub-texture selector within `atlas`: a `SubTexture` name for a
+     * `TextureAtlas` (e.g. `"grass.png"`), or a `"col,row"`/flat index for a
+     * `Tilesheet`. Only meaningful alongside `atlas`.
+     */
+    sprite?: string;
     /** Optional display name (inspector picker). */
     name?: string;
     /** Optional thumbnail URL (inspector picker grid). */
@@ -251,6 +411,8 @@ export interface Asset extends SemanticAssetRef {
 
 export const AssetSchema = SemanticAssetRefSchema.extend({
     url: z.string(),
+    atlas: z.string().optional(),
+    sprite: z.string().optional(),
     name: z.string().optional(),
     thumbnailUrl: z.string().optional(),
 });
