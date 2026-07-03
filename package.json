@@ -1,6 +1,6 @@
 {
   "name": "@almadar/core",
-  "version": "10.16.0",
+  "version": "10.17.0",
   "description": "Core schema types and definitions for Almadar",
   "type": "module",
   "main": "./dist/index.js",
@@ -65,7 +65,8 @@
     "eslint": "10.0.0",
     "tsup": "^8.0.0",
     "typescript": "^5.4.0",
-    "vitest": "^1.4.0"
+    "vitest": "^1.4.0",
+    "turbo": "^2.8.17"
   },
   "repository": {
     "type": "git",
@@ -79,5 +80,6 @@
     "schema",
     "types"
   ],
-  "homepage": "https://github.com/almadar-io/almadar#readme"
+  "homepage": "https://github.com/almadar-io/almadar#readme",
+  "packageManager": "pnpm@10.30.3"
 }
