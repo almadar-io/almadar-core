@@ -121,7 +121,16 @@ export interface ResolvedTraitGuard {
 
 export interface ResolvedTraitTick {
   name: string;
-  interval: number | 'frame';
+  /**
+   * `number` (ms), `'frame'`, a duration string (`'5s'`/`'1m'`/`'1h'`), or a
+   * 5-field cron expression (`'0 9 * * *'`) — `schema-to-ir.ts`'s
+   * `interval: tick.interval || 0` passes the source schema's raw
+   * `string | number` straight through with no normalization, so this must
+   * match that reality rather than the narrower `number | 'frame'` it used
+   * to declare (which made every non-'frame' string an unchecked cast at
+   * every consumer).
+   */
+  interval: number | string;
   guard?: SExpr;
   effects: SExpr[];
   priority: number;
