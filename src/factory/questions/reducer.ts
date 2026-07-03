@@ -24,9 +24,6 @@ import type {
 const PERSISTENCE_VALUES: ReadonlyArray<EntityPersistence> = [
   'persistent',
   'runtime',
-  'singleton',
-  'instance',
-  'local',
 ];
 
 export function answersToMutations(

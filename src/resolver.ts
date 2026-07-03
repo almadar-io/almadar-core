@@ -141,7 +141,7 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
           relation: field.type === 'relation' ? field.relation : undefined,
         })),
         runtime: entityDef.persistence === 'runtime',
-        singleton: entityDef.persistence === 'singleton',
+        shared: entityDef.shared,
         hasInstances: (entityDef.instances?.length ?? 0) > 0,
         instances: entityDef.instances,
         defaults: entityDef.defaults,

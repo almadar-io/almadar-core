@@ -19,17 +19,12 @@ import { SemanticAssetRefSchema, type SemanticAssetRef } from './asset.js';
  *
  * - persistent: Stored in database (has collection)
  * - runtime: Exists only at runtime (not persisted)
- * - singleton: Single global instance
- * - instance: Static data (read-only instances)
  */
-export type EntityPersistence = 'persistent' | 'runtime' | 'singleton' | 'instance' | 'local';
+export type EntityPersistence = 'persistent' | 'runtime';
 
 export const EntityPersistenceSchema = z.enum([
     'persistent',
     'runtime',
-    'singleton',
-    'instance',
-    'local',
 ]);
 
 // ============================================================================
@@ -48,6 +43,9 @@ export interface OrbitalEntity {
 
     /** Entity persistence type (defaults to 'persistent' if not specified) */
     persistence?: EntityPersistence;
+
+    /** Whether this entity's state is shared across all bound traits (vs per-trait copy). Orthogonal to persistence. */
+    shared?: boolean;
 
     /** Collection name (auto-derived if not provided for persistent entities) */
     collection?: string;
@@ -77,6 +75,7 @@ export interface OrbitalEntity {
 export const OrbitalEntitySchema = z.object({
     name: z.string().min(1, 'Entity name is required'),
     persistence: EntityPersistenceSchema.default('persistent'),
+    shared: z.boolean().optional(),
     collection: z.string().optional(),
     fields: z.array(EntityFieldSchema).min(1, 'At least one field is required'),
     instances: z.array(z.record(z.unknown())).optional(),
@@ -108,7 +107,7 @@ export const EntitySchema = OrbitalEntitySchema;
  * 
  * Generates the database collection name by converting the entity name
  * to lowercase and adding an 's' suffix (simple pluralization).
- * Returns undefined for non-persistent entities (runtime/singleton).
+ * Returns undefined for non-persistent (runtime) entities.
  * 
  * @param {OrbitalEntity} entity - Entity to derive collection name for
  * @returns {string | undefined} Collection name or undefined for non-persistent entities
@@ -143,29 +142,12 @@ export function isRuntimeEntity(entity: OrbitalEntity): boolean {
 }
 
 /**
- * Checks if an entity is a singleton.
- * 
- * Type guard to determine if an entity has a single global instance
- * rather than multiple records in a collection.
- * 
- * @param {OrbitalEntity} entity - Entity to check
- * @returns {boolean} True if entity is a singleton, false otherwise
- * 
- * @example
- * isSingletonEntity({ persistence: 'singleton' }); // returns true
- * isSingletonEntity({ persistence: 'persistent' }); // returns false
- */
-export function isSingletonEntity(entity: OrbitalEntity): boolean {
-    return entity.persistence === 'singleton';
-}
-
-/**
  * Checks whether an entity's persistence mode allows `persistence` /
  * `collection` overrides at the factory call site.
  *
  * Only `persistent` entities (explicit or default) support these overrides.
- * Runtime, singleton, instance, and local entities are fixed; callers must
- * not expose `persistence` or `collection` params for them.
+ * Runtime entities are fixed; callers must not expose `persistence` or
+ * `collection` params for them.
  *
  * @param persistence - The entity persistence mode (undefined = default persistent)
  * @returns True when overrides are allowed, false otherwise

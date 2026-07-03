@@ -90,3 +90,12 @@ export {
   type EdgeWalkTransition,
   type WalkStep,
 } from './src/state-machine/index';
+
+// Shared-entity frame merge (mechanics-as-traits DRY primitive: the JS
+// interpreter and the generated TypeScript codegen both fold mechanic
+// writes through this one function).
+export {
+  mergeEntityFrame,
+  type EntityFieldWrite,
+  type EntityFrameState,
+} from './src/shared-entity/merge';

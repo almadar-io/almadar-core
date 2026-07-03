@@ -718,7 +718,6 @@ export interface OrbitalDefinition {
    * Entity sharing depends on persistence type:
    * - persistent: Shared (same DB collection)
    * - runtime: Isolated (each orbital gets own instances)
-   * - singleton: Shared (single global instance)
    */
   entity: EntityRef;
 

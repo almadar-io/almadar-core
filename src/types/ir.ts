@@ -61,8 +61,8 @@ export interface ResolvedEntity {
   /** Whether this entity only exists in runtime (not persisted to Firestore) */
   runtime?: boolean;
 
-  /** Whether this is a singleton entity (only one instance exists) */
-  singleton?: boolean;
+  /** Whether this entity's state is shared across every bound trait (vs a per-trait copy). Orthogonal to `runtime`. */
+  shared?: boolean;
 
   /** Whether this entity has pre-authored instances in the schema */
   hasInstances?: boolean;

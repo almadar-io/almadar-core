@@ -91,7 +91,6 @@ export {
   EntityPersistenceSchema,
   deriveCollection,
   isRuntimeEntity,
-  isSingletonEntity,
   persistenceModeAllowsOverrides,
   type FieldValue,
   type EntityRow,

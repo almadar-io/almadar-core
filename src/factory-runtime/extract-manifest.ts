@@ -29,7 +29,7 @@ const STATIC_PARAM_FIELDS: readonly ParamFieldDescriptor[] = [
   },
   {
     name: 'persistence',
-    type: "'persistent' | 'runtime' | 'singleton' | 'instance' | 'local'",
+    type: "'persistent' | 'runtime'",
     description: 'Override the canonical entity persistence mode.',
   },
   {
