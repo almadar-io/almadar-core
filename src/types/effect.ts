@@ -91,23 +91,6 @@ export type {
     AnyPatternConfig,
 };
 
-/**
- * Configuration for render-ui effect.
- * Used in runtime to specify which slot and pattern to render.
- */
-export interface RenderUIConfig {
-    /** Target UI slot */
-    slot: UISlot;
-    /** Pattern configuration (null clears the slot) */
-    pattern: AnyPatternConfig | null;
-    /** Target element (trait name or entity ID) */
-    target?: string;
-    /** Additional props for the pattern */
-    props?: ResolvedPatternProps;
-    /** Optional priority for slot ordering */
-    priority?: number;
-}
-
 // ============================================================================
 // Service Config (for call-service effects)
 // ============================================================================
@@ -163,8 +146,9 @@ export type RenderUIEffect =
 export type RenderItemLambda = ['fn', string, AnyPatternConfig];
 
 /**
- * Navigate effect - navigates to a path.
+ * Navigate effect - navigates to an internal page path or an external URL.
  * @example ['navigate', '/tasks'] or ['navigate', '/tasks/:id', { id: '123' }]
+ * @example ['navigate', 'https://example.com']
  */
 export type NavigateEffect = ['navigate', string] | ['navigate', string, Record<string, string>];
 
