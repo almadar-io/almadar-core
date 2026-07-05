@@ -72,29 +72,6 @@ export type AssetAspect = (typeof ASSET_ASPECTS)[number];
 export const AssetAspectSchema = z.enum(ASSET_ASPECTS);
 
 // ============================================================================
-// Game Types
-// ============================================================================
-
-/**
- * Game type classifications
- */
-export const GAME_TYPES = [
-    'platformer',
-    'roguelike',
-    'top-down',
-    'puzzle',
-    'racing',
-    'card',
-    'board',
-    'shooter',
-    'rpg',
-] as const;
-
-export type GameType = (typeof GAME_TYPES)[number];
-
-export const GameTypeSchema = z.enum(GAME_TYPES);
-
-// ============================================================================
 // Animation Name + Sheet Direction
 // ============================================================================
 
@@ -288,59 +265,6 @@ export const TilesheetSchema = z.object({
 });
 
 // ============================================================================
-// Pack classification — how a Kenney pack maps into the pipeline
-// ============================================================================
-
-/**
- * The three roles a source pack plays, decided by the systematic per-folder
- * scan (see `docs/Almadar_Std_Assets.md`):
- *   - `board-tileset`     — a genre/canvas-matched terrain/level set, often ~1:1 with a board.
- *   - `character-kit`     — modular layered character parts assembled into one figure.
- *   - `shared-primitive`  — backgrounds / effects / UI / particles fanned out to many boards.
- */
-export const PACK_CLASSES = ['board-tileset', 'character-kit', 'shared-primitive'] as const;
-
-export type PackClass = (typeof PACK_CLASSES)[number];
-
-export const PackClassSchema = z.enum(PACK_CLASSES);
-
-/**
- * A modular character-kit layer: one selectable part (`head`/`hair`/`shirt`/…)
- * resolved to a sub-texture ref. Recorded now so the analysis can RECOGNIZE
- * modular packs; the layered compositor that stacks these is a later follow-up.
- */
-export interface CharacterKitLayer {
-    /** Which body slot this layer fills. */
-    slot: 'body' | 'head' | 'face' | 'hair' | 'facialHair' | 'shirt' | 'pants' | 'shoes' | 'accessory';
-    /** Sheet PNG the part lives on. */
-    url: AssetUrl;
-    /** Atlas JSON next to the sheet. */
-    atlas?: AssetUrl;
-    /** Sub-texture name within the atlas. */
-    sprite?: string;
-}
-
-export const CharacterKitLayerSchema = z.object({
-    slot: z.enum(['body', 'head', 'face', 'hair', 'facialHair', 'shirt', 'pants', 'shoes', 'accessory']),
-    url: z.string(),
-    atlas: z.string().optional(),
-    sprite: z.string().optional(),
-});
-
-/** A recognized modular-character pack: an ordered, back-to-front layer stack. */
-export interface CharacterKit {
-    /** Source pack slug the kit came from. */
-    pack: string;
-    /** Layers in back-to-front draw order. */
-    layers: CharacterKitLayer[];
-}
-
-export const CharacterKitSchema = z.object({
-    pack: z.string(),
-    layers: z.array(CharacterKitLayerSchema),
-});
-
-// ============================================================================
 // Semantic Asset Reference
 // ============================================================================
 
@@ -349,8 +273,12 @@ export const CharacterKitSchema = z.object({
  * Resolved to actual paths at compile time via asset maps.
  */
 export interface SemanticAssetRef {
-    /** Entity role (player, enemy, item, etc.) */
-    role: EntityRole;
+    /**
+     * Entity role — a free string. Core no longer constrains the vocabulary to
+     * `EntityRole` (that enum stays an exported shared reference for the asset
+     * tool + renderer); genre boards may use their own roles (`boss`, `tower`, …).
+     */
+    role: string;
     /** Sub-category within role (hero, slime, coin, etc.) */
     category: string;
     /** Required animations for this entity */
@@ -366,7 +294,7 @@ export interface SemanticAssetRef {
 }
 
 export const SemanticAssetRefSchema = z.object({
-    role: EntityRoleSchema,
+    role: z.string().min(1),
     category: z.string().min(1),
     animations: z.array(z.string()).optional(),
     style: VisualStyleSchema.optional(),
@@ -415,91 +343,6 @@ export const AssetSchema = SemanticAssetRefSchema.extend({
     sprite: z.string().optional(),
     name: z.string().optional(),
     thumbnailUrl: z.string().optional(),
-});
-
-// ============================================================================
-// Resolved Asset
-// ============================================================================
-
-/**
- * Result of resolving a SemanticAssetRef to actual asset paths
- */
-export interface ResolvedAsset {
-    /** Base path to the asset pack */
-    basePath: string;
-    /** Relative path within the pack */
-    path: string;
-    /** Tile indices for tilesheet-based assets */
-    tiles?: number[];
-    /** Size of each tile in pixels */
-    tileSize?: number;
-    /** List of individual files (for non-tilesheet assets) */
-    files?: string[];
-    /** Animation definitions by name */
-    animations?: Record<string, AnimationDef>;
-}
-
-export const ResolvedAssetSchema = z.object({
-    basePath: z.string(),
-    path: z.string(),
-    tiles: z.array(z.number()).optional(),
-    tileSize: z.number().positive().optional(),
-    files: z.array(z.string()).optional(),
-    animations: z.record(AnimationDefSchema).optional(),
-});
-
-// ============================================================================
-// Asset Mapping
-// ============================================================================
-
-/**
- * Single asset mapping entry in an asset map
- */
-export interface AssetMapping {
-    /** Relative path to the asset */
-    path: string;
-    /** Tile indices for tilesheets */
-    tiles?: number[];
-    /** Tile size in pixels */
-    tileSize?: number;
-    /** Individual file patterns */
-    files?: string[];
-    /** Animation definitions */
-    animations?: Record<string, AnimationDef>;
-}
-
-export const AssetMappingSchema = z.object({
-    path: z.string(),
-    tiles: z.array(z.number()).optional(),
-    tileSize: z.number().positive().optional(),
-    files: z.array(z.string()).optional(),
-    animations: z.record(AnimationDefSchema).optional(),
-});
-
-// ============================================================================
-// Asset Map
-// ============================================================================
-
-/**
- * Asset map for a specific game type and visual style.
- * Maps semantic keys (role:category) to asset paths.
- */
-export interface AssetMap {
-    /** Game type this map is for */
-    gameType: GameType;
-    /** Visual style this map is for */
-    style: VisualStyle;
-    /** Base path to the asset pack */
-    basePath: string;
-    /** Mappings from semantic keys to asset paths */
-    mappings: Record<string, AssetMapping>;
-}
-
-export const AssetMapSchema = z.object({
-    gameType: GameTypeSchema,
-    style: VisualStyleSchema,
-    basePath: z.string(),
-    mappings: z.record(AssetMappingSchema),
 });
 
 // ============================================================================
@@ -559,13 +402,71 @@ export const AssetCatalogSchema = z.array(AssetCatalogEntrySchema);
 export type AssetUrl = string;
 
 // ============================================================================
+// ScenePos — neutral scene coordinate
+// ============================================================================
+
+/**
+ * A neutral position in scene space: 2D (`x`,`y`) or optionally 3D (`x`,`y`,`z`).
+ * The single coordinate type shared by every drawable descriptor and camera pose
+ * across the 2D and 3D canvas hosts, so a scene composes from the same `{x,y,z?}`
+ * regardless of projection or painter. Logical, not pixel — the host's projector
+ * maps a `ScenePos` to screen space.
+ */
+export interface ScenePos {
+    x: number;
+    y: number;
+    z?: number;
+}
+
+export const ScenePosSchema = z.object({
+    x: z.number(),
+    y: z.number(),
+    z: z.number().optional(),
+});
+
+// ============================================================================
+// Camera — neutral camera pose shared by the 2D and 3D canvas hosts
+// ============================================================================
+
+/**
+ * Camera behaviors, unifying the former per-host vocab (2D `camera` string +
+ * 3D `cameraMode`). `isometric`/`top-down` are fixed framings; `follow`/`chase`
+ * track a target; `perspective` is the 3D dramatic framing.
+ */
+export const CAMERA_MODES = ['isometric', 'perspective', 'top-down', 'follow', 'chase'] as const;
+
+export type CameraMode = (typeof CAMERA_MODES)[number];
+
+export const CameraModeSchema = z.enum(CAMERA_MODES);
+
+/**
+ * A neutral camera pose shared by the 2D and 3D canvas hosts, so `type: canvas`
+ * carries one camera object regardless of painter. `pos`/`target` are `ScenePos`
+ * (logical scene space, not pixels); `zoom` scales the view (the former `scale`);
+ * `fov` is the 3D field of view; `mode` selects the framing/tracking behavior.
+ * Every field is optional — an omitted camera means the host's default framing.
+ */
+export interface Camera {
+    pos?: ScenePos;
+    target?: ScenePos;
+    zoom?: number;
+    fov?: number;
+    mode?: CameraMode;
+}
+
+export const CameraSchema = z.object({
+    pos: ScenePosSchema.optional(),
+    target: ScenePosSchema.optional(),
+    zoom: z.number().optional(),
+    fov: z.number().optional(),
+    mode: CameraModeSchema.optional(),
+});
+
+// ============================================================================
 // Type Exports
 // ============================================================================
 
 export type SemanticAssetRefInput = z.input<typeof SemanticAssetRefSchema>;
-export type ResolvedAssetInput = z.input<typeof ResolvedAssetSchema>;
-export type AssetMappingInput = z.input<typeof AssetMappingSchema>;
-export type AssetMapInput = z.input<typeof AssetMapSchema>;
 export type AnimationDefInput = z.input<typeof AnimationDefSchema>;
 export type AssetCatalogEntryInput = z.input<typeof AssetCatalogEntrySchema>;
 export type SpriteSheetAtlasInput = z.input<typeof SpriteSheetAtlasSchema>;
