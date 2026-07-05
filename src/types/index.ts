@@ -324,6 +324,21 @@ export {
   type AgentCompactResult,
   type AgentGenerateOptions,
   type AgentCodeSearchResult,
+  type LlmMessage,
+  type LlmToolCall,
+  type LlmToolDef,
+  type LlmCallToolsResult,
+  type LlmTokenUsage,
+  type BuilderResult,
+  type ValidateResult,
+  type ComposeAllResult,
+  type ComposeChildrenResult,
+  type RepairResult,
+  type LoloEmitResult,
+  type PlannerResult,
+  type ExecutePlanResult,
+  type DispatchUpdatesResult,
+  type ServiceCallResult,
 } from "./agent.js";
 
 // ============================================================================

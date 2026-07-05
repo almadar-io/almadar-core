@@ -9,6 +9,8 @@
 
 import type { ServiceParams } from './service.js';
 import type { EventPayloadValue } from './expression.js';
+import type { JsonSchema } from '../factory/types.js';
+import type { ValidationError } from './validation.js';
 
 // ============================================================================
 // Agent Memory Types
@@ -86,6 +88,68 @@ export interface AgentGenerateOptions {
 }
 
 // ============================================================================
+// LLM Tool-Calling Contract Types
+// ============================================================================
+//
+// These are the LANGUAGE-LEVEL contract types for the llm/* substrate
+// operators. @almadar/llm's ChatCompletion* types are the WIRE FORMAT; the
+// runtime handler maps between them. Defined here (not in @almadar/llm) so
+// the dependency direction stays core → nothing, llm → core.
+
+/**
+ * A message in an LLM tool-calling conversation.
+ */
+export interface LlmMessage {
+    role: 'system' | 'user' | 'assistant' | 'tool';
+    content: string;
+    /** Present on assistant messages that called tools. */
+    toolCalls?: ReadonlyArray<LlmToolCall>;
+    /** Present on tool-role messages — matches the preceding toolCall's id. */
+    toolCallId?: string;
+}
+
+/**
+ * A tool call requested by the assistant.
+ */
+export interface LlmToolCall {
+    id: string;
+    name: string;
+    /** JSON-encoded arguments string (as returned by the LLM). */
+    arguments: string;
+}
+
+/**
+ * A tool definition passed to llm/call-tools.
+ */
+export interface LlmToolDef {
+    name: string;
+    description: string;
+    /** JSON Schema describing the tool's parameters. */
+    parameters: JsonSchema;
+}
+
+/**
+ * Result of llm/call-tools.
+ */
+export interface LlmCallToolsResult {
+    /** The assistant's text response (may be empty when only tool_calls fired). */
+    content: string;
+    /** Tool calls the assistant requested, if any. */
+    toolCalls?: ReadonlyArray<LlmToolCall>;
+    /** Token usage from the call. */
+    usage: LlmTokenUsage;
+}
+
+/**
+ * Token usage from an LLM call.
+ */
+export interface LlmTokenUsage {
+    prompt: number;
+    completion: number;
+    total: number;
+}
+
+// ============================================================================
 // Agent Search Types
 // ============================================================================
 
@@ -100,6 +164,107 @@ export interface AgentCodeSearchResult {
     /** URL to the file */
     url: string;
 }
+
+// ============================================================================
+// Substrate Result Types
+// ============================================================================
+//
+// Language-level contracts for compose/behavior/validate operator returns.
+// Defined in @almadar/core (not @almadar-io/rabit) because the compiled path
+// also needs them — emitted TS code references these types without depending
+// on rabit. rabit's TS implementations produce/consume these shapes.
+
+/** Result of behavior/instantiate (factory path) or subagent build. */
+export interface BuilderResult {
+    method: string;
+    orbitalName: string;
+    success: boolean;
+    orbitalPath?: string;
+    traitCount?: number;
+    traitNames?: string[];
+    transitionCount?: number;
+    childCount?: number;
+    error?: string;
+}
+
+/** Result of validate/validate for a single orbital or the composed schema. */
+export interface ValidateResult {
+    valid: boolean;
+    errorCount: number;
+    errors: ValidationError[];
+    orbitalName?: string;
+}
+
+/** Result of compose/compose-all. */
+export interface ComposeAllResult {
+    orbitalCount: number;
+    composedPath: string;
+    success: boolean;
+    layout?: string;
+    wiringConnections?: number;
+}
+
+/** Result of compose/compose-children (recursive builds). */
+export interface ComposeChildrenResult {
+    parentName: string;
+    childCount: number;
+    orbitalName: string;
+    success: boolean;
+}
+
+/** Result of the repair service. */
+export interface RepairResult {
+    orbitalName: string;
+    success: boolean;
+    attempt: number;
+    paramsChanged: boolean;
+    error?: string;
+}
+
+/** Result of lolo/emit-body (free-lolo path). */
+export interface LoloEmitResult {
+    orbitalName: string;
+    success: boolean;
+    loloSource: string;
+    error?: string;
+}
+
+/** Result of the planner service. */
+export interface PlannerResult {
+    organism: string;
+    operationCount: number;
+    pendingQuestions: boolean;
+    cached: boolean;
+    success: boolean;
+    error?: string;
+}
+
+/** Result of the executor (spawn-subagents). */
+export interface ExecutePlanResult {
+    dispatchedOrbitals: string[];
+    noopForBuild: boolean;
+    success: boolean;
+    error?: string;
+}
+
+/** Result of dispatch-updates. */
+export interface DispatchUpdatesResult {
+    updatedOrbitals: string[];
+    updateCount: number;
+    success: boolean;
+}
+
+/** Discriminated union of all substrate service-call results. */
+export type ServiceCallResult =
+    | BuilderResult
+    | ValidateResult
+    | ComposeAllResult
+    | ComposeChildrenResult
+    | RepairResult
+    | LoloEmitResult
+    | PlannerResult
+    | ExecutePlanResult
+    | DispatchUpdatesResult;
 
 // ============================================================================
 // Agent Context Interface
