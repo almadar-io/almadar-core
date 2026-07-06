@@ -347,10 +347,13 @@ export interface FactorySignature {
    */
   provenance?: FactoryProvenance;
   /**
-   * The blessed pattern-signature hash (sha256 of family/tier +
-   * propsSchema) recorded at bless time for `authored`/`promoted`
-   * entries; drift against the current substrate flags the entry for
-   * review.
+   * Deterministic hash of the ui-substrate surface the behavior composes,
+   * stamped for `authored`/`promoted` (blessed) entries: sha256 (16 hex
+   * chars) over the sorted union of the registry .orb's `uses[].from`
+   * basenames and each trait `ref`'s imported trait name. A substrate
+   * change (what the entry composes) flips it — drift against the current
+   * substrate flags the entry for review. Stamped by pattern-sync std-ts
+   * (`computeSubstrateSignature`); recomputed every generation run.
    */
   substrateSignature?: string;
 }
