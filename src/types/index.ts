@@ -339,6 +339,7 @@ export {
   type ExecutePlanResult,
   type DispatchUpdatesResult,
   type ServiceCallResult,
+  type SessionHistoryEntry,
   type LlmContext,
   type WorkspaceContext,
   type SessionContext,

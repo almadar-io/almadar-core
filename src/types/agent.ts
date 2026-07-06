@@ -11,6 +11,9 @@ import type { ServiceParams } from './service.js';
 import type { EventPayloadValue } from './expression.js';
 import type { JsonSchema } from '../factory/types.js';
 import type { ValidationError } from './validation.js';
+import type { Orbital } from './orbital.js';
+import type { OrbitalSchema } from './schema.js';
+import type { JsonValue } from './json.js';
 
 // ============================================================================
 // Agent Memory Types
@@ -267,6 +270,20 @@ export type ServiceCallResult =
     | DispatchUpdatesResult;
 
 // ============================================================================
+// Session History
+// ============================================================================
+
+/** A single entry in an orbital's session history (build/conversation log). */
+export interface SessionHistoryEntry {
+    /** Role of the entry's author (e.g. 'user', 'assistant', 'system') */
+    role: string;
+    /** Entry content (natural language or structured description) */
+    content: string;
+    /** Epoch milliseconds when the entry was recorded */
+    timestamp: number;
+}
+
+// ============================================================================
 // Agent Context Interface
 // ============================================================================
 
@@ -348,30 +365,30 @@ export interface LlmContext {
 
 /** Backs the workspace/* operators (11 ops). */
 export interface WorkspaceContext {
-    readOrbital(name: string): Promise<unknown>;
-    writeOrbital(name: string, content: unknown): Promise<void>;
+    readOrbital(name: string): Promise<Orbital>;
+    writeOrbital(name: string, content: Orbital): Promise<void>;
     readFile(path: string): Promise<string>;
     writeFile(path: string, content: string): Promise<void>;
     exists(path: string): boolean;
     listOrbitals(): string[];
-    readSchema(): Promise<unknown>;
-    writeSchema(schema: unknown): Promise<void>;
-    readPlan(): Promise<unknown>;
-    writePlan(plan: unknown): Promise<void>;
+    readSchema(): Promise<OrbitalSchema>;
+    writeSchema(schema: OrbitalSchema): Promise<void>;
+    readPlan(): Promise<JsonValue>;
+    writePlan(plan: JsonValue): Promise<void>;
     archiveOrbital(name: string): Promise<void>;
 }
 
 /** Backs the session/* operators (9 ops). */
 export interface SessionContext {
-    readSpec(orbitalName: string): Promise<unknown>;
-    writeSpec(orbitalName: string, spec: unknown): Promise<void>;
+    readSpec(orbitalName: string): Promise<Orbital>;
+    writeSpec(orbitalName: string, spec: Orbital): Promise<void>;
     readMemory(orbitalName: string): Promise<AgentMemoryRecord[]>;
     writeMemory(orbitalName: string, memory: AgentMemoryRecord[]): Promise<void>;
-    readHistory(orbitalName: string): Promise<unknown[]>;
-    appendHistory(orbitalName: string, entry: unknown): Promise<void>;
+    readHistory(orbitalName: string): Promise<SessionHistoryEntry[]>;
+    appendHistory(orbitalName: string, entry: SessionHistoryEntry): Promise<void>;
     readErrors(orbitalName: string): Promise<string[]>;
     writeErrors(orbitalName: string, errors: string[]): Promise<void>;
-    readAnalysis(orbitalName: string): Promise<unknown>;
+    readAnalysis(orbitalName: string): Promise<JsonValue>;
 }
 
 /** Backs the memory/* operators (3 ops). */
@@ -383,13 +400,13 @@ export interface MemoryContext {
 
 /** Backs the trace/* operators (2 ops). */
 export interface TraceContext {
-    emit(event: string, payload?: unknown): void;
-    log(message: string, level?: 'log' | 'warn' | 'error', data?: unknown): void;
+    emit(event: string, payload?: JsonValue): void;
+    log(message: string, level?: 'log' | 'warn' | 'error', data?: JsonValue): void;
 }
 
 /** Backs the integration/* operators (3 ops). */
 export interface IntegrationContext {
-    http(method: string, url: string, body?: unknown, headers?: Record<string, string>): Promise<unknown>;
-    githubGetRepo(owner: string, repo: string): Promise<unknown>;
-    githubCreateIssue(owner: string, repo: string, title: string, body?: string): Promise<unknown>;
+    http(method: string, url: string, body?: JsonValue, headers?: Record<string, string>): Promise<JsonValue>;
+    githubGetRepo(owner: string, repo: string): Promise<JsonValue>;
+    githubCreateIssue(owner: string, repo: string, title: string, body?: string): Promise<JsonValue>;
 }
