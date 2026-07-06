@@ -9,11 +9,13 @@
 
 import type { ServiceParams } from './service.js';
 import type { EventPayloadValue } from './expression.js';
+import type { FieldValue } from './entity.js';
 import type { JsonSchema } from '../factory/types.js';
 import type { ValidationError } from './validation.js';
 import type { Orbital } from './orbital.js';
 import type { OrbitalSchema } from './schema.js';
 import type { JsonValue } from './json.js';
+import type { AnalysisResult, PlanSnapshot, GitHubRepo, GitHubIssue } from './plan.js';
 
 // ============================================================================
 // Agent Memory Types
@@ -373,8 +375,8 @@ export interface WorkspaceContext {
     listOrbitals(): string[];
     readSchema(): Promise<OrbitalSchema>;
     writeSchema(schema: OrbitalSchema): Promise<void>;
-    readPlan(): Promise<JsonValue>;
-    writePlan(plan: JsonValue): Promise<void>;
+    readPlan(): Promise<PlanSnapshot>;
+    writePlan(plan: PlanSnapshot): Promise<void>;
     archiveOrbital(name: string): Promise<void>;
 }
 
@@ -388,7 +390,7 @@ export interface SessionContext {
     appendHistory(orbitalName: string, entry: SessionHistoryEntry): Promise<void>;
     readErrors(orbitalName: string): Promise<string[]>;
     writeErrors(orbitalName: string, errors: string[]): Promise<void>;
-    readAnalysis(orbitalName: string): Promise<JsonValue>;
+    readAnalysis(orbitalName: string): Promise<AnalysisResult>;
 }
 
 /** Backs the memory/* operators (3 ops). */
@@ -400,13 +402,13 @@ export interface MemoryContext {
 
 /** Backs the trace/* operators (2 ops). */
 export interface TraceContext {
-    emit(event: string, payload?: JsonValue): void;
-    log(message: string, level?: 'log' | 'warn' | 'error', data?: JsonValue): void;
+    emit(event: string, payload?: EventPayloadValue): void;
+    log(message: string, level?: 'log' | 'warn' | 'error', data?: EventPayloadValue): void;
 }
 
 /** Backs the integration/* operators (3 ops). */
 export interface IntegrationContext {
-    http(method: string, url: string, body?: JsonValue, headers?: Record<string, string>): Promise<JsonValue>;
-    githubGetRepo(owner: string, repo: string): Promise<JsonValue>;
-    githubCreateIssue(owner: string, repo: string, title: string, body?: string): Promise<JsonValue>;
+    http(method: string, url: string, body?: FieldValue, headers?: Record<string, string>): Promise<JsonValue>;
+    githubGetRepo(owner: string, repo: string): Promise<GitHubRepo>;
+    githubCreateIssue(owner: string, repo: string, title: string, body?: string): Promise<GitHubIssue>;
 }

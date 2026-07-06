@@ -349,6 +349,29 @@ export {
 } from "./agent.js";
 
 // ============================================================================
+// Plan & Analysis Types (lifted from @almadar-io/rabit)
+// ============================================================================
+
+export {
+  type ClarificationLevel,
+  type ClarificationCandidate,
+  type Clarification,
+  type AnalysisPageOverride,
+  type ExtraTraitRef,
+  type AnalysisOrbitalParams,
+  type AnalysisOrbital,
+  type AnalysisRename,
+  type ComplexityAssessment,
+  type AnalysisResult,
+  type SpawnResult,
+  type PlanSnapshotStatus,
+  type PlanSnapshot,
+  type ComposeOptions,
+  type GitHubRepo,
+  type GitHubIssue,
+} from "./plan.js";
+
+// ============================================================================
 // Trait Types
 // ============================================================================
 
