@@ -339,6 +339,12 @@ export {
   type ExecutePlanResult,
   type DispatchUpdatesResult,
   type ServiceCallResult,
+  type LlmContext,
+  type WorkspaceContext,
+  type SessionContext,
+  type MemoryContext,
+  type TraceContext,
+  type IntegrationContext,
 } from "./agent.js";
 
 // ============================================================================

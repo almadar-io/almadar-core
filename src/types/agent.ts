@@ -325,3 +325,71 @@ export interface AgentContext {
     // Search (effects)
     searchCode(query: string, language?: string): Promise<AgentCodeSearchResult[]>;
 }
+
+// ============================================================================
+// Substrate Context Interfaces
+// ============================================================================
+//
+// Focused runtime contracts for the substrate operator namespaces. Each
+// interface backs one module of operators (llm/*, workspace/*, etc.). The
+// evaluator reads from ctx.<namespace>; the runtime (rabit) supplies
+// concrete implementations via contextExtensions. When a context is
+// undefined, operators return safe defaults (matching the agent/* pattern).
+
+/** Backs the llm/* operators (6 ops). */
+export interface LlmContext {
+    generate(prompt: string, options?: { json?: boolean; maxTokens?: number; provider?: string; model?: string }): Promise<string>;
+    callTools(messages: LlmMessage[], tools: LlmToolDef[]): Promise<LlmCallToolsResult>;
+    embed(texts: string[]): Promise<number[][]>;
+    tokenCount(): number;
+    switchProvider(provider: string, model?: string): void;
+    compact(strategy?: string): Promise<{ before: number; after: number }>;
+}
+
+/** Backs the workspace/* operators (11 ops). */
+export interface WorkspaceContext {
+    readOrbital(name: string): Promise<unknown>;
+    writeOrbital(name: string, content: unknown): Promise<void>;
+    readFile(path: string): Promise<string>;
+    writeFile(path: string, content: string): Promise<void>;
+    exists(path: string): boolean;
+    listOrbitals(): string[];
+    readSchema(): Promise<unknown>;
+    writeSchema(schema: unknown): Promise<void>;
+    readPlan(): Promise<unknown>;
+    writePlan(plan: unknown): Promise<void>;
+    archiveOrbital(name: string): Promise<void>;
+}
+
+/** Backs the session/* operators (9 ops). */
+export interface SessionContext {
+    readSpec(orbitalName: string): Promise<unknown>;
+    writeSpec(orbitalName: string, spec: unknown): Promise<void>;
+    readMemory(orbitalName: string): Promise<AgentMemoryRecord[]>;
+    writeMemory(orbitalName: string, memory: AgentMemoryRecord[]): Promise<void>;
+    readHistory(orbitalName: string): Promise<unknown[]>;
+    appendHistory(orbitalName: string, entry: unknown): Promise<void>;
+    readErrors(orbitalName: string): Promise<string[]>;
+    writeErrors(orbitalName: string, errors: string[]): Promise<void>;
+    readAnalysis(orbitalName: string): Promise<unknown>;
+}
+
+/** Backs the memory/* operators (3 ops). */
+export interface MemoryContext {
+    recall(query: string, limit?: number): AgentMemoryRecord[];
+    store(content: string, category?: string, strength?: number): Promise<string>;
+    list(category?: string): AgentMemoryRecord[];
+}
+
+/** Backs the trace/* operators (2 ops). */
+export interface TraceContext {
+    emit(event: string, payload?: unknown): void;
+    log(message: string, level?: 'log' | 'warn' | 'error', data?: unknown): void;
+}
+
+/** Backs the integration/* operators (3 ops). */
+export interface IntegrationContext {
+    http(method: string, url: string, body?: unknown, headers?: Record<string, string>): Promise<unknown>;
+    githubGetRepo(owner: string, repo: string): Promise<unknown>;
+    githubCreateIssue(owner: string, repo: string, title: string, body?: string): Promise<unknown>;
+}
