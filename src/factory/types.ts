@@ -275,6 +275,20 @@ export interface FactoryPageSignature {
   primaryEntity: string;
 }
 
+/**
+ * Which coordinator surface may see this entry: `'app'` = pickable factory
+ * organism catalog, `'palette'` = free-lolo compose palette, `'both'`,
+ * `'internal'` = neither.
+ */
+export type FactoryExposure = 'app' | 'palette' | 'both' | 'internal';
+
+/**
+ * `'generated'` = machine-emitted 1:1 wrapper (lolo-ui), `'authored'` =
+ * hand-authored (`.hand-authored.json` membership), `'promoted'` = landed
+ * through the cache-fill promotion pipeline.
+ */
+export type FactoryProvenance = 'generated' | 'authored' | 'promoted';
+
 export interface FactorySignature {
   /** Organism the factory belongs to (e.g. `"std-realtime-chat"`). */
   organism: string;
@@ -315,6 +329,30 @@ export interface FactorySignature {
    * back to a loose schema + post-hoc validation.
    */
   paramsSchema?: JsonSchema;
+  /**
+   * Which coordinator surface may see this entry: `'app'` = pickable
+   * factory organism catalog, `'palette'` = free-lolo compose palette,
+   * `'both'`, `'internal'` = neither. Stamped at generation time by
+   * `tools/almadar-pattern-sync` (std-ts) from the `.lolo` `@exposure`
+   * header tag with per-topic defaults; consumers treat a missing field
+   * as "pre-V3 signature" and fall back to their legacy filters. An
+   * entry may carry `'app'`/`'both'` only if its factory is registered
+   * in the package's dispatch registry — enforced at generation time.
+   */
+  exposure?: FactoryExposure;
+  /**
+   * `'generated'` = machine-emitted 1:1 wrapper (lolo-ui), `'authored'` =
+   * hand-authored (`.hand-authored.json` membership), `'promoted'` =
+   * landed through the cache-fill promotion pipeline.
+   */
+  provenance?: FactoryProvenance;
+  /**
+   * The blessed pattern-signature hash (sha256 of family/tier +
+   * propsSchema) recorded at bless time for `authored`/`promoted`
+   * entries; drift against the current substrate flags the entry for
+   * review.
+   */
+  substrateSignature?: string;
 }
 
 /**

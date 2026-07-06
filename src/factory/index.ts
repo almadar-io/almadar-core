@@ -7,6 +7,8 @@ export type {
   FactoryTraitSignature,
   FactoryPageSignature,
   FactorySignature,
+  FactoryExposure,
+  FactoryProvenance,
   FactorySignatureCatalog,
   FactoryCallSite,
   FactoryCallSiteParams,
