@@ -92,6 +92,7 @@ export {
   deriveCollection,
   isRuntimeEntity,
   persistenceModeAllowsOverrides,
+  isFieldValue,
   type FieldValue,
   type EntityRow,
   type EntityWith,
@@ -171,6 +172,7 @@ export {
   type EvalContext,
   type EventPayload,
   type EventPayloadValue,
+  isEventPayloadValue,
   type LogMeta,
 } from "./expression.js";
 
@@ -340,6 +342,7 @@ export {
   type DispatchUpdatesResult,
   type ServiceCallResult,
   type SessionHistoryEntry,
+  isSessionHistoryEntry,
   type LlmContext,
   type WorkspaceContext,
   type SessionContext,
@@ -366,6 +369,7 @@ export {
   type SpawnResult,
   type PlanSnapshotStatus,
   type PlanSnapshot,
+  isPlanSnapshot,
   type ComposeOptions,
   type GitHubRepo,
   type GitHubIssue,
