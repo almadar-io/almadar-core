@@ -179,6 +179,22 @@ export function persistenceModeAllowsOverrides(
 export type FieldValue = string | number | boolean | Date | null | string[] | FieldValue[] | { [key: string]: FieldValue | undefined };
 
 /**
+ * Runtime guard for `FieldValue` — narrows interpreter-produced `unknown`
+ * values at typed substrate boundaries (e.g. `IntegrationContext.http` body).
+ */
+export function isFieldValue(value: unknown): value is FieldValue {
+  if (value === null) return true;
+  const kind = typeof value;
+  if (kind === 'string' || kind === 'number' || kind === 'boolean') return true;
+  if (value instanceof Date) return true;
+  if (Array.isArray(value)) return value.every((item: unknown) => isFieldValue(item));
+  if (kind === 'object' && value !== null && typeof value === 'object') {
+    return Object.values(value).every((item: unknown) => item === undefined || isFieldValue(item));
+  }
+  return false;
+}
+
+/**
  * One instance of an entity with actual field values.
  * The shape is determined by the Entity definition at schema time.
  *

@@ -161,6 +161,24 @@ export interface PlanSnapshot {
     paletteTopics?: string[];
 }
 
+/**
+ * Runtime guard for `PlanSnapshot` — narrows interpreter-produced `unknown`
+ * values at the `WorkspaceContext.writePlan` boundary. Discriminates on the
+ * snapshot envelope (schemaVersion, status, roster arrays), not deep contents.
+ */
+export function isPlanSnapshot(value: unknown): value is PlanSnapshot {
+    if (typeof value !== 'object' || value === null) return false;
+    const statuses: ReadonlyArray<PlanSnapshotStatus> = ['proposed', 'confirmed', 'built', 'failed'];
+    return (
+        'schemaVersion' in value && value.schemaVersion === 1 &&
+        'status' in value && statuses.some((s) => s === value.status) &&
+        'builtAt' in value && typeof value.builtAt === 'string' &&
+        'orbitals' in value && Array.isArray(value.orbitals) &&
+        'renames' in value && Array.isArray(value.renames) &&
+        'deletedOrbitals' in value && Array.isArray(value.deletedOrbitals)
+    );
+}
+
 // ============================================================================
 // Compose Options
 // ============================================================================

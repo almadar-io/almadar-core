@@ -382,6 +382,22 @@ export interface EventPayload {
 }
 
 /**
+ * Runtime guard for `EventPayloadValue` — narrows interpreter-produced
+ * `unknown` values at typed substrate boundaries (e.g. `TraceContext.emit`).
+ */
+export function isEventPayloadValue(value: unknown): value is EventPayloadValue {
+  if (value === null || value === undefined) return true;
+  const kind = typeof value;
+  if (kind === 'string' || kind === 'number' || kind === 'boolean') return true;
+  if (value instanceof Date) return true;
+  if (Array.isArray(value)) return value.every((item: unknown) => isEventPayloadValue(item));
+  if (kind === 'object' && value !== null && typeof value === 'object') {
+    return Object.values(value).every((item: unknown) => isEventPayloadValue(item));
+  }
+  return false;
+}
+
+/**
  * Allowed leaf value for `LogMeta`. Mirrors `EventPayloadValue` shape so
  * the same row/list data flows through logs without manual flattening,
  * with `Error` added since structured logs carry exception detail.

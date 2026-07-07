@@ -285,6 +285,19 @@ export interface SessionHistoryEntry {
     timestamp: number;
 }
 
+/**
+ * Runtime guard for `SessionHistoryEntry` — narrows interpreter-produced
+ * `unknown` values at the `SessionContext.appendHistory` boundary.
+ */
+export function isSessionHistoryEntry(value: unknown): value is SessionHistoryEntry {
+    if (typeof value !== 'object' || value === null) return false;
+    return (
+        'role' in value && typeof value.role === 'string' &&
+        'content' in value && typeof value.content === 'string' &&
+        'timestamp' in value && typeof value.timestamp === 'number'
+    );
+}
+
 // ============================================================================
 // Agent Context Interface
 // ============================================================================
