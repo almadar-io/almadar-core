@@ -225,6 +225,8 @@ export interface OrbitalVerificationAPI {
   getTraitSnapshots?: () => TraitStateSnapshot[];
   /** Canvas frame capture. Populated by game organisms on mount. */
   captureFrame?: () => string | null;
+  /** Last neutral drawables list received by the active canvas host. */
+  getLastDrawables?: () => unknown[] | null;
   /** Asset-url → load-status map. Populated by game organisms. */
   assetStatus?: Record<string, AssetLoadStatus>;
   /** Rolling event bus log. Populated by `bindEventBus`. */
