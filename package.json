@@ -1,6 +1,6 @@
 {
   "name": "@almadar/core",
-  "version": "10.25.1",
+  "version": "10.26.0",
   "description": "Core schema types and definitions for Almadar",
   "type": "module",
   "main": "./dist/index.js",
@@ -68,7 +68,7 @@
     "zod": "^3.22.0"
   },
   "devDependencies": {
-    "@almadar/eslint-plugin": ">=2.8.0",
+    "@almadar/eslint-plugin": "^2.14.0",
     "@types/node": "^22.0.0",
     "@typescript-eslint/parser": "8.56.0",
     "eslint": "10.0.0",
