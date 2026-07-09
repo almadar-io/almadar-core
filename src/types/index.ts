@@ -635,7 +635,6 @@ export {
   type PatternType,
   PATTERN_TYPES,
   PatternTypeSchema,
-  getAllPatternTypes,
   isValidPatternType,
 } from "./pattern.js";
 

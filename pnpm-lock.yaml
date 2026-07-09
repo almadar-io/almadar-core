@@ -17,15 +17,12 @@ overrides:
   '@types/three': 0.160.0
   '@almadar/std': ^16.103.2
   '@almadar/ui': ^5.93.0
-  '@almadar/core': ^10.24.0
+  '@almadar/core': ^10.25.0
 
 importers:
 
   .:
     dependencies:
-      '@almadar/patterns':
-        specifier: '>=2.14.0'
-        version: 2.71.0
       zod:
         specifier: ^3.22.0
         version: 3.25.76
@@ -57,16 +54,10 @@ importers:
 
 packages:
 
-  '@almadar/core@10.25.0':
-    resolution: {integrity: sha512-GkwgpunROGSjjO1N9UcTE9Zhy7dXggbrLddXVfWo9C0xbTPzEq4tjAL2PxJSMzkmcxK/R5lNchAqwHMer5fBNw==}
-
   '@almadar/eslint-plugin@2.8.2':
     resolution: {integrity: sha512-iQGH5MdsfcEPGUeImgS3XBWLfBRc0uO9+0Kyy87WQf/nc4hUoAEPxov5C/JAYe1tLoL34dLBIyKDm/SFeYPBsA==}
     peerDependencies:
       eslint: '>=8.0.0'
-
-  '@almadar/patterns@2.71.0':
-    resolution: {integrity: sha512-9xa06BP59vWKhOW35T2vkyiQgVcJMUIZL5oWDCSeTwo0/24QLJIOZBUxibSBJ0x0aWD2SUnnLdVCxGGtDo+OOg==}
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -1317,19 +1308,10 @@ packages:
 
 snapshots:
 
-  '@almadar/core@10.25.0':
-    dependencies:
-      '@almadar/patterns': 2.71.0
-      zod: 3.25.76
-
   '@almadar/eslint-plugin@2.8.2(eslint@10.0.0)':
     dependencies:
       eslint: 10.0.0
       jsonc-eslint-parser: 3.1.0
-
-  '@almadar/patterns@2.71.0':
-    dependencies:
-      '@almadar/core': 10.25.0
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true

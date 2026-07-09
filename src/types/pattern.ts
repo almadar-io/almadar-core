@@ -1,7 +1,7 @@
 /**
  * Pattern Type for Orbital Units
  *
- * Re-exports pattern type definitions from @almadar/patterns,
+ * Re-exports pattern type definitions from @almadar/core/patterns,
  * which is the single source of truth for all pattern types.
  *
  * @packageDocumentation
@@ -10,11 +10,11 @@
 import { z } from 'zod';
 
 // ============================================================================
-// Pattern Type - Re-exported from @almadar/patterns
+// Pattern Type - Re-exported from @almadar/core/patterns
 // ============================================================================
 
 /**
- * All valid pattern type names, imported from the almadar-patterns registry.
+ * All valid pattern type names, imported from the @almadar/core/patterns registry.
  * The authoritative list is auto-generated from patterns-registry.json.
  */
 export {
@@ -28,23 +28,3 @@ export type { PatternType } from '../patterns/index.js';
  * Accepts any string - validation against full registry happens at runtime.
  */
 export const PatternTypeSchema = z.string();
-
-// Re-export for backward compatibility
-import { PATTERN_TYPES as _PATTERN_TYPES } from '../patterns/index.js';
-
-/**
- * Get all valid pattern types from the registry.
- * 
- * Returns a complete list of pattern type names from the canonical
- * @almadar/patterns registry. Use this to iterate over or validate
- * pattern types programmatically.
- * 
- * @returns {string[]} Array of pattern type names
- * 
- * @example
- * const types = getAllPatternTypes();
- * // Returns: ['data-table', 'detail-view', 'form-section', ...]
- */
-export function getAllPatternTypes(): string[] {
-  return [..._PATTERN_TYPES];
-}
