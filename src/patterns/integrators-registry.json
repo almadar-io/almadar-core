@@ -1,0 +1,600 @@
+{
+  "version": "1.0.0",
+  "exportedAt": "2026-01-25T00:58:14.172Z",
+  "integrators": {
+    "youtube": {
+      "name": "youtube",
+      "description": "YouTube Data API - search videos, get video/channel details",
+      "category": "media",
+      "actions": [
+        {
+          "name": "search",
+          "description": "Search for videos",
+          "params": [
+            {
+              "name": "query",
+              "type": "string",
+              "required": true,
+              "description": "Search query"
+            },
+            {
+              "name": "maxResults",
+              "type": "number",
+              "required": false,
+              "description": "Max results (1-50)"
+            },
+            {
+              "name": "type",
+              "type": "string",
+              "required": false,
+              "description": "video, channel, or playlist"
+            }
+          ],
+          "responseShape": {
+            "videoId": "string",
+            "title": "string",
+            "thumbnail": "string",
+            "description": "string"
+          }
+        },
+        {
+          "name": "getVideo",
+          "description": "Get video details by ID",
+          "params": [
+            {
+              "name": "videoId",
+              "type": "string",
+              "required": true,
+              "description": "YouTube video ID"
+            }
+          ],
+          "responseShape": {
+            "title": "string",
+            "description": "string",
+            "viewCount": "number",
+            "likeCount": "number"
+          }
+        },
+        {
+          "name": "getChannel",
+          "description": "Get channel details by ID",
+          "params": [
+            {
+              "name": "channelId",
+              "type": "string",
+              "required": true,
+              "description": "YouTube channel ID"
+            }
+          ],
+          "responseShape": {
+            "name": "string",
+            "description": "string",
+            "subscriberCount": "number"
+          }
+        }
+      ]
+    },
+    "stripe": {
+      "name": "stripe",
+      "description": "Stripe payment processing - create intents, confirm payments, refunds",
+      "category": "payment",
+      "actions": [
+        {
+          "name": "createPaymentIntent",
+          "description": "Create a payment intent for collecting payment",
+          "params": [
+            {
+              "name": "amount",
+              "type": "number",
+              "required": true,
+              "description": "Amount in cents"
+            },
+            {
+              "name": "currency",
+              "type": "string",
+              "required": true,
+              "description": "ISO currency code (e.g., usd)"
+            },
+            {
+              "name": "metadata",
+              "type": "object",
+              "required": false,
+              "description": "Custom metadata"
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "clientSecret": "string",
+            "status": "string"
+          }
+        },
+        {
+          "name": "confirmPayment",
+          "description": "Confirm a payment intent",
+          "params": [
+            {
+              "name": "paymentIntentId",
+              "type": "string",
+              "required": true,
+              "description": "Payment intent ID"
+            }
+          ],
+          "responseShape": {
+            "status": "string",
+            "amount": "number"
+          }
+        },
+        {
+          "name": "refund",
+          "description": "Refund a payment",
+          "params": [
+            {
+              "name": "paymentIntentId",
+              "type": "string",
+              "required": true,
+              "description": "Payment intent ID"
+            },
+            {
+              "name": "amount",
+              "type": "number",
+              "required": false,
+              "description": "Amount to refund (partial)"
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "status": "string",
+            "amount": "number"
+          }
+        }
+      ]
+    },
+    "twilio": {
+      "name": "twilio",
+      "description": "Twilio messaging - send SMS, WhatsApp messages",
+      "category": "messaging",
+      "actions": [
+        {
+          "name": "sendSMS",
+          "description": "Send an SMS message",
+          "params": [
+            {
+              "name": "to",
+              "type": "string",
+              "required": true,
+              "description": "Recipient phone number"
+            },
+            {
+              "name": "body",
+              "type": "string",
+              "required": true,
+              "description": "Message body"
+            }
+          ],
+          "responseShape": {
+            "sid": "string",
+            "status": "string"
+          }
+        },
+        {
+          "name": "sendWhatsApp",
+          "description": "Send a WhatsApp message",
+          "params": [
+            {
+              "name": "to",
+              "type": "string",
+              "required": true,
+              "description": "Recipient phone number"
+            },
+            {
+              "name": "body",
+              "type": "string",
+              "required": true,
+              "description": "Message body"
+            }
+          ],
+          "responseShape": {
+            "sid": "string",
+            "status": "string"
+          }
+        }
+      ]
+    },
+    "email": {
+      "name": "email",
+      "description": "Transactional email via SendGrid/Resend",
+      "category": "messaging",
+      "actions": [
+        {
+          "name": "send",
+          "description": "Send a transactional email",
+          "params": [
+            {
+              "name": "to",
+              "type": "string",
+              "required": true,
+              "description": "Recipient email"
+            },
+            {
+              "name": "subject",
+              "type": "string",
+              "required": true,
+              "description": "Email subject"
+            },
+            {
+              "name": "body",
+              "type": "string",
+              "required": true,
+              "description": "Email body (HTML or text)"
+            },
+            {
+              "name": "from",
+              "type": "string",
+              "required": false,
+              "description": "Sender email (uses default if omitted)"
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "status": "string"
+          }
+        }
+      ]
+    },
+    "llm": {
+      "name": "llm",
+      "description": "LLM service for content generation, classification, and structured extraction",
+      "category": "ai",
+      "actions": [
+        {
+          "name": "generate",
+          "description": "Generate content from a prompt",
+          "params": [
+            {
+              "name": "systemPrompt",
+              "type": "string",
+              "required": false,
+              "description": "System instructions for the LLM"
+            },
+            {
+              "name": "userPrompt",
+              "type": "string",
+              "required": true,
+              "description": "User prompt/question"
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": "Model ID (default: claude-sonnet-4-5-20250929)"
+            },
+            {
+              "name": "temperature",
+              "type": "number",
+              "required": false,
+              "description": "Sampling temperature (0-1, default: 0.7)"
+            },
+            {
+              "name": "maxTokens",
+              "type": "number",
+              "required": false,
+              "description": "Max response tokens (default: 1024)"
+            }
+          ],
+          "responseShape": {
+            "content": "string",
+            "usage": "object"
+          }
+        },
+        {
+          "name": "classify",
+          "description": "Classify text into predefined categories",
+          "params": [
+            {
+              "name": "text",
+              "type": "string",
+              "required": true,
+              "description": "Text to classify"
+            },
+            {
+              "name": "categories",
+              "type": "array",
+              "required": true,
+              "description": "List of category labels"
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": "Model ID"
+            }
+          ],
+          "responseShape": {
+            "category": "string",
+            "confidence": "number",
+            "reasoning": "string"
+          }
+        },
+        {
+          "name": "extract",
+          "description": "Extract structured data from text using a schema",
+          "params": [
+            {
+              "name": "text",
+              "type": "string",
+              "required": true,
+              "description": "Text to extract from"
+            },
+            {
+              "name": "schema",
+              "type": "object",
+              "required": true,
+              "description": "JSON schema defining fields to extract"
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": "Model ID"
+            }
+          ],
+          "responseShape": {
+            "data": "object",
+            "confidence": "number"
+          }
+        },
+        {
+          "name": "summarize",
+          "description": "Summarize long text content",
+          "params": [
+            {
+              "name": "text",
+              "type": "string",
+              "required": true,
+              "description": "Text to summarize"
+            },
+            {
+              "name": "maxLength",
+              "type": "number",
+              "required": false,
+              "description": "Target summary length in words"
+            },
+            {
+              "name": "style",
+              "type": "string",
+              "required": false,
+              "description": "Summary style: brief, detailed, bullet"
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": "Model ID"
+            }
+          ],
+          "responseShape": {
+            "summary": "string",
+            "keyPoints": "array"
+          }
+        }
+      ]
+    },
+    "deepagent": {
+      "name": "deepagent",
+      "description": "AI code generation agent with tool use - generates schemas, code, and manages projects",
+      "category": "ai",
+      "actions": [
+        {
+          "name": "sendMessage",
+          "description": "Send a message to the AI agent and get a response with tool calls",
+          "params": [
+            {
+              "name": "message",
+              "type": "string",
+              "required": true,
+              "description": "User message to the agent"
+            },
+            {
+              "name": "threadId",
+              "type": "string",
+              "required": false,
+              "description": "Thread ID for conversation continuity"
+            },
+            {
+              "name": "skill",
+              "type": "string",
+              "required": false,
+              "description": "Skill to use: almadar-orbitals, almadar-fixing, etc."
+            },
+            {
+              "name": "context",
+              "type": "object",
+              "required": false,
+              "description": "Additional context (current schema, project info)"
+            }
+          ],
+          "responseShape": {
+            "response": "string",
+            "threadId": "string",
+            "toolCalls": "array",
+            "todos": "array",
+            "schemaDiffs": "array"
+          }
+        },
+        {
+          "name": "cancelGeneration",
+          "description": "Cancel an ongoing generation",
+          "params": [
+            {
+              "name": "threadId",
+              "type": "string",
+              "required": true,
+              "description": "Thread ID to cancel"
+            }
+          ],
+          "responseShape": {
+            "success": "boolean"
+          }
+        },
+        {
+          "name": "validateSchema",
+          "description": "Validate an orbital schema",
+          "params": [
+            {
+              "name": "schema",
+              "type": "string",
+              "required": true,
+              "description": "Schema content to validate"
+            }
+          ],
+          "responseShape": {
+            "valid": "boolean",
+            "errors": "array",
+            "warnings": "array"
+          }
+        },
+        {
+          "name": "compileSchema",
+          "description": "Compile an orbital schema to target shell",
+          "params": [
+            {
+              "name": "schema",
+              "type": "string",
+              "required": true,
+              "description": "Schema content to compile"
+            },
+            {
+              "name": "shell",
+              "type": "string",
+              "required": false,
+              "description": "Target shell: typescript, python (default: typescript)"
+            }
+          ],
+          "responseShape": {
+            "success": "boolean",
+            "outputPath": "string",
+            "errors": "array"
+          }
+        },
+        {
+          "name": "getThreadHistory",
+          "description": "Get conversation history for a thread",
+          "params": [
+            {
+              "name": "threadId",
+              "type": "string",
+              "required": true,
+              "description": "Thread ID to get history for"
+            }
+          ],
+          "responseShape": {
+            "messages": "array",
+            "todos": "array",
+            "schemaDiffs": "array"
+          }
+        }
+      ]
+    },
+    "github": {
+      "name": "github",
+      "description": "GitHub integration - Git operations and GitHub REST API",
+      "category": "devtools",
+      "actions": [
+        {
+          "name": "cloneRepo",
+          "description": "Clone a repository",
+          "params": [
+            { "name": "repo", "type": "string", "required": true, "description": "Repository URL or owner/repo" },
+            { "name": "branch", "type": "string", "required": false, "description": "Branch to clone" }
+          ],
+          "responseShape": { "path": "string", "branch": "string" }
+        },
+        {
+          "name": "createBranch",
+          "description": "Create a new branch",
+          "params": [
+            { "name": "repo", "type": "string", "required": true, "description": "Local repo path" },
+            { "name": "branch", "type": "string", "required": true, "description": "Branch name" }
+          ],
+          "responseShape": { "branch": "string" }
+        },
+        {
+          "name": "commit",
+          "description": "Commit changes",
+          "params": [
+            { "name": "repo", "type": "string", "required": true, "description": "Local repo path" },
+            { "name": "message", "type": "string", "required": true, "description": "Commit message" },
+            { "name": "files", "type": "array", "required": false, "description": "Files to stage" }
+          ],
+          "responseShape": { "hash": "string", "message": "string" }
+        },
+        {
+          "name": "push",
+          "description": "Push commits to remote",
+          "params": [
+            { "name": "repo", "type": "string", "required": true, "description": "Local repo path" },
+            { "name": "branch", "type": "string", "required": false, "description": "Branch to push" }
+          ],
+          "responseShape": { "success": "boolean" }
+        },
+        {
+          "name": "createPR",
+          "description": "Create a pull request",
+          "params": [
+            { "name": "title", "type": "string", "required": true, "description": "PR title" },
+            { "name": "body", "type": "string", "required": false, "description": "PR description" },
+            { "name": "head", "type": "string", "required": true, "description": "Head branch" },
+            { "name": "base", "type": "string", "required": false, "description": "Base branch (default: main)" }
+          ],
+          "responseShape": { "number": "number", "url": "string" }
+        },
+        {
+          "name": "getPRComments",
+          "description": "Fetch pull request comments",
+          "params": [
+            { "name": "prNumber", "type": "number", "required": true, "description": "PR number" }
+          ],
+          "responseShape": { "comments": "array" }
+        },
+        {
+          "name": "listIssues",
+          "description": "List issues with optional filters",
+          "params": [
+            { "name": "state", "type": "string", "required": false, "description": "Issue state: open, closed, all" },
+            { "name": "labels", "type": "string", "required": false, "description": "Comma-separated label names" }
+          ],
+          "responseShape": { "issues": "array" }
+        },
+        {
+          "name": "getIssue",
+          "description": "Get a single issue",
+          "params": [
+            { "name": "issueNumber", "type": "number", "required": true, "description": "Issue number" }
+          ],
+          "responseShape": { "title": "string", "body": "string", "state": "string" }
+        }
+      ]
+    },
+    "cli": {
+      "name": "cli",
+      "description": "Almadar CLI integration - schema validation and compilation",
+      "category": "devtools",
+      "actions": [
+        {
+          "name": "validate",
+          "description": "Validate an orbital schema",
+          "params": [
+            { "name": "schema", "type": "string", "required": true, "description": "Schema content to validate" }
+          ],
+          "responseShape": {
+            "valid": "boolean",
+            "errors": "array",
+            "warnings": "array",
+            "summary": "string"
+          }
+        }
+      ]
+    }
+  },
+  "categories": ["media", "payment", "messaging", "ai", "devtools"]
+}

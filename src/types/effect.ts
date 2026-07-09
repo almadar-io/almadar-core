@@ -62,7 +62,7 @@ import type {
     PatternProps,
     PatternPropsMap,
     AnyPatternConfig,
-} from '@almadar/patterns';
+} from '../patterns/index.js';
 
 /**
  * Type-safe pattern configuration for render-ui effects.

@@ -20,8 +20,8 @@ import { z } from 'zod';
 export {
   PATTERN_TYPES,
   isValidPatternType,
-} from '@almadar/patterns';
-export type { PatternType } from '@almadar/patterns';
+} from '../patterns/index.js';
+export type { PatternType } from '../patterns/index.js';
 
 /**
  * Zod schema for pattern types.
@@ -30,7 +30,7 @@ export type { PatternType } from '@almadar/patterns';
 export const PatternTypeSchema = z.string();
 
 // Re-export for backward compatibility
-import { PATTERN_TYPES as _PATTERN_TYPES } from '@almadar/patterns';
+import { PATTERN_TYPES as _PATTERN_TYPES } from '../patterns/index.js';
 
 /**
  * Get all valid pattern types from the registry.

@@ -14,7 +14,7 @@ import type { Effect } from './effect.js';
 import { EffectSchema } from './effect.js';
 import type { Entity } from './entity.js';
 import { EntitySchema } from './entity.js';
-import type { AnyPatternConfig } from '@almadar/patterns';
+import type { AnyPatternConfig } from '../patterns/index.js';
 import type { Expression } from './expression.js';
 import { ExpressionSchema } from './expression.js';
 

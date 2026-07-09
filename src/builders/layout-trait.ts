@@ -38,7 +38,7 @@
  * @packageDocumentation
  */
 
-import type { AnyPatternConfig } from '@almadar/patterns';
+import type { AnyPatternConfig } from '../patterns/index.js';
 import type { Trait } from '../types/trait.js';
 import type { Effect, FetchEffect, RenderBinding, RenderUIEffect, UISlot } from '../types/effect.js';
 

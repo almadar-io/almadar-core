@@ -9,7 +9,7 @@
 
 import type { SExpr } from './expression.js';
 import type { EntityRow, FieldValue } from './entity.js';
-import type { AnyPatternConfig } from '@almadar/patterns';
+import type { AnyPatternConfig } from '../patterns/index.js';
 
 // ============================================================================
 // Transition Types

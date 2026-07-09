@@ -99,3 +99,7 @@ export {
   type EntityFieldWrite,
   type EntityFrameState,
 } from './src/shared-entity/merge';
+
+// Pattern registry, component mappings, and pattern utilities (merged from
+// the former @almadar/patterns package to break the core ↔ patterns cycle).
+export * from './src/patterns/index';

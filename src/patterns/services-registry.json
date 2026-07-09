@@ -1,0 +1,2645 @@
+{
+  "version": "1.0.0",
+  "exportedAt": "2026-05-20T19:26:16.363Z",
+  "services": {
+    "llm": {
+      "name": "llm",
+      "description": "LLM service — text generation, classification, extraction, summarization",
+      "category": "ai",
+      "package": "@almadar/llm",
+      "actions": [
+        {
+          "name": "generate",
+          "description": "Generate text from a prompt.",
+          "params": [
+            {
+              "name": "systemPrompt",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "userPrompt",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "temperature",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "maxTokens",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "content": "string",
+            "usage": "object"
+          }
+        },
+        {
+          "name": "classify",
+          "description": "Classify text into one of the given categories.",
+          "params": [
+            {
+              "name": "text",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "categories",
+              "type": "string[]",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "category": "string",
+            "confidence": "number",
+            "reasoning": "string"
+          }
+        },
+        {
+          "name": "extract",
+          "description": "Extract structured data from text according to a JSON schema.",
+          "params": [
+            {
+              "name": "text",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "schema",
+              "type": "JsonSchemaDefinition",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "data": "ExtractedData",
+            "confidence": "number"
+          }
+        },
+        {
+          "name": "summarize",
+          "description": "Summarize text with optional length and style constraints.",
+          "params": [
+            {
+              "name": "text",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "maxLength",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "style",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "summary": "string",
+            "keyPoints": "string[]"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "ANTHROPIC_API_KEY",
+          "required": false,
+          "description": "Anthropic API key (use this OR OPENAI_API_KEY)"
+        },
+        {
+          "envVar": "OPENAI_API_KEY",
+          "required": false,
+          "description": "OpenAI API key (use this OR ANTHROPIC_API_KEY)"
+        }
+      ]
+    },
+    "data": {
+      "name": "data",
+      "description": "Data service — CRUD operations on entities",
+      "category": "infrastructure",
+      "package": "@almadar/server",
+      "actions": [
+        {
+          "name": "list",
+          "description": "",
+          "params": [
+            {
+              "name": "collection",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "items": "EntityRow[]"
+          }
+        },
+        {
+          "name": "getById",
+          "description": "",
+          "params": [
+            {
+              "name": "collection",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "item": "EntityRow | null"
+          }
+        },
+        {
+          "name": "create",
+          "description": "",
+          "params": [
+            {
+              "name": "collection",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "data",
+              "type": "ServiceParams",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "item": "EntityRow"
+          }
+        },
+        {
+          "name": "update",
+          "description": "",
+          "params": [
+            {
+              "name": "collection",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "data",
+              "type": "ServiceParams",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "item": "EntityRow | null"
+          }
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "params": [
+            {
+              "name": "collection",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "deleted": "boolean"
+          }
+        }
+      ],
+      "credentials": []
+    },
+    "eventbus": {
+      "name": "eventbus",
+      "description": "Event bus — cross-trait pub/sub messaging",
+      "category": "infrastructure",
+      "package": "@almadar/server",
+      "actions": [
+        {
+          "name": "emit",
+          "description": "",
+          "params": [
+            {
+              "name": "event",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "payload",
+              "type": "ServiceParams",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "delivered": "number"
+          }
+        },
+        {
+          "name": "getListenerCounts",
+          "description": "",
+          "params": [],
+          "responseShape": {
+            "counts": "object"
+          }
+        }
+      ],
+      "credentials": []
+    },
+    "discovery": {
+      "name": "discovery",
+      "description": "Service discovery — register and find services",
+      "category": "infrastructure",
+      "package": "@almadar/server",
+      "actions": [
+        {
+          "name": "register",
+          "description": "",
+          "params": [
+            {
+              "name": "name",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "instanceId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "host",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "port",
+              "type": "number",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "emits",
+              "type": "string[]",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "listens",
+              "type": "string[]",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "registered": "boolean"
+          }
+        },
+        {
+          "name": "findListeners",
+          "description": "",
+          "params": [
+            {
+              "name": "event",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "services": "DiscoveredService[]"
+          }
+        },
+        {
+          "name": "findEmitters",
+          "description": "",
+          "params": [
+            {
+              "name": "event",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "services": "DiscoveredService[]"
+          }
+        }
+      ],
+      "credentials": []
+    },
+    "session": {
+      "name": "session",
+      "description": "Session management — create, get, list, clear agent sessions",
+      "category": "ai",
+      "package": "@almadar/agent",
+      "actions": [
+        {
+          "name": "create",
+          "description": "",
+          "params": [
+            {
+              "name": "threadId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "userId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "threadId": "string",
+            "created": "boolean"
+          }
+        },
+        {
+          "name": "get",
+          "description": "",
+          "params": [
+            {
+              "name": "threadId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "session": "EventPayload | null"
+          }
+        },
+        {
+          "name": "list",
+          "description": "",
+          "params": [
+            {
+              "name": "userId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "sessions": "array"
+          }
+        },
+        {
+          "name": "clear",
+          "description": "",
+          "params": [
+            {
+              "name": "threadId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "cleared": "boolean"
+          }
+        }
+      ],
+      "credentials": []
+    },
+    "memory": {
+      "name": "memory",
+      "description": "Memory service — user preferences and generation history",
+      "category": "ai",
+      "package": "@almadar/agent",
+      "actions": [
+        {
+          "name": "getUserPreferences",
+          "description": "",
+          "params": [
+            {
+              "name": "userId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "preferences": "EventPayload | null"
+          }
+        },
+        {
+          "name": "updateUserPreferences",
+          "description": "",
+          "params": [
+            {
+              "name": "userId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "preferences",
+              "type": "ServiceParams",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "updated": "boolean"
+          }
+        },
+        {
+          "name": "recordGeneration",
+          "description": "",
+          "params": [
+            {
+              "name": "userId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "prompt",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "result",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "skill",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "sessionId": "string"
+          }
+        },
+        {
+          "name": "getGenerationHistory",
+          "description": "",
+          "params": [
+            {
+              "name": "userId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "limit",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "sessions": "array"
+          }
+        }
+      ],
+      "credentials": []
+    },
+    "agent": {
+      "name": "agent",
+      "description": "Agent service — send messages and manage generation",
+      "category": "ai",
+      "package": "@almadar/agent",
+      "actions": [
+        {
+          "name": "sendMessage",
+          "description": "",
+          "params": [
+            {
+              "name": "message",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "threadId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "skill",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "context",
+              "type": "ServiceParams",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "response": "string",
+            "threadId": "string",
+            "toolCalls": "readonly EventPayloadValue[]"
+          }
+        },
+        {
+          "name": "cancelGeneration",
+          "description": "",
+          "params": [
+            {
+              "name": "threadId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "cancelled": "boolean"
+          }
+        }
+      ],
+      "credentials": []
+    },
+    "skills": {
+      "name": "skills",
+      "description": "Skills service — AI-powered schema generation",
+      "category": "ai",
+      "package": "@almadar/skills",
+      "actions": [
+        {
+          "name": "generateOrbitals",
+          "description": "Generate Orbital schemas from a natural-language prompt.",
+          "params": [
+            {
+              "name": "prompt",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "compact",
+              "type": "boolean",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "skill": "object"
+          }
+        },
+        {
+          "name": "generateFix",
+          "description": "Generate a fix for an existing schema given validation errors.",
+          "params": [
+            {
+              "name": "schema",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "errors",
+              "type": "string[]",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "skill": "object"
+          }
+        },
+        {
+          "name": "generateDomainLanguage",
+          "description": "Generate a domain language definition from a description.",
+          "params": [
+            {
+              "name": "description",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "skill": "object"
+          }
+        },
+        {
+          "name": "generateAll",
+          "description": "Generate all available skills.",
+          "params": [],
+          "responseShape": {
+            "skills": "array"
+          }
+        }
+      ],
+      "credentials": []
+    },
+    "github": {
+      "name": "github",
+      "description": "GitHub integration — repos, issues, PRs",
+      "category": "devtools",
+      "package": "@almadar/integrations",
+      "actions": [
+        {
+          "name": "cloneRepo",
+          "description": "",
+          "params": [
+            {
+              "name": "repoUrl",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "targetDir",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "branch",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "message": "string"
+          }
+        },
+        {
+          "name": "createBranch",
+          "description": "",
+          "params": [
+            {
+              "name": "branchName",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "baseBranch",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "message": "string"
+          }
+        },
+        {
+          "name": "commit",
+          "description": "",
+          "params": [
+            {
+              "name": "message",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "files",
+              "type": "string[]",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "message": "string"
+          }
+        },
+        {
+          "name": "push",
+          "description": "",
+          "params": [
+            {
+              "name": "branchName",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "force",
+              "type": "boolean",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "message": "string"
+          }
+        },
+        {
+          "name": "createPR",
+          "description": "",
+          "params": [
+            {
+              "name": "title",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "body",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "head",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "base",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "number": "number",
+            "url": "string",
+            "title": "string"
+          }
+        },
+        {
+          "name": "getPRComments",
+          "description": "",
+          "params": [
+            {
+              "name": "prNumber",
+              "type": "number",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "comments": "array"
+          }
+        },
+        {
+          "name": "listIssues",
+          "description": "",
+          "params": [
+            {
+              "name": "state",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "labels",
+              "type": "string[]",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "per_page",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "issues": "array"
+          }
+        },
+        {
+          "name": "getIssue",
+          "description": "",
+          "params": [
+            {
+              "name": "issueNumber",
+              "type": "number",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "number": "number",
+            "title": "string",
+            "body": "string",
+            "state": "string"
+          }
+        },
+        {
+          "name": "getFile",
+          "description": "",
+          "params": [
+            {
+              "name": "owner",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "repo",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "path",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "ref",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "path": "string",
+            "content": "string",
+            "sha": "string",
+            "size": "number"
+          }
+        },
+        {
+          "name": "listCommits",
+          "description": "",
+          "params": [
+            {
+              "name": "owner",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "repo",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "path",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "ref",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "per_page",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "commits": "array"
+          }
+        },
+        {
+          "name": "createIssue",
+          "description": "",
+          "params": [
+            {
+              "name": "owner",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "repo",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "title",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "body",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "labels",
+              "type": "string[]",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "number": "number",
+            "title": "string",
+            "url": "string"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "GITHUB_TOKEN",
+          "required": true,
+          "description": "GitHub personal access token"
+        },
+        {
+          "envVar": "GITHUB_OWNER",
+          "required": false,
+          "description": "Default repository owner"
+        },
+        {
+          "envVar": "GITHUB_REPO",
+          "required": false,
+          "description": "Default repository name"
+        }
+      ]
+    },
+    "stripe": {
+      "name": "stripe",
+      "description": "Stripe integration — payments, subscriptions, invoices",
+      "category": "payment",
+      "package": "@almadar/integrations",
+      "actions": [
+        {
+          "name": "createPaymentIntent",
+          "description": "",
+          "params": [
+            {
+              "name": "amount",
+              "type": "number",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "currency",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "metadata",
+              "type": "object",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "clientSecret": "string",
+            "status": "string",
+            "amount": "number",
+            "currency": "string"
+          }
+        },
+        {
+          "name": "confirmPayment",
+          "description": "",
+          "params": [
+            {
+              "name": "paymentIntentId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "status": "string"
+          }
+        },
+        {
+          "name": "refund",
+          "description": "",
+          "params": [
+            {
+              "name": "paymentIntentId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "amount",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "status": "string",
+            "amount": "number"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "STRIPE_SECRET_KEY",
+          "required": true,
+          "description": "Stripe secret API key"
+        },
+        {
+          "envVar": "STRIPE_WEBHOOK_SECRET",
+          "required": false,
+          "description": "Webhook endpoint signing secret"
+        }
+      ]
+    },
+    "llm-integration": {
+      "name": "llm-integration",
+      "description": "LLM integration — generate, embed, classify via external providers",
+      "category": "ai",
+      "package": "@almadar/integrations",
+      "actions": [
+        {
+          "name": "generate",
+          "description": "",
+          "params": [
+            {
+              "name": "userPrompt",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "systemPrompt",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "temperature",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "maxTokens",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "content": "string",
+            "usage": "object"
+          }
+        },
+        {
+          "name": "classify",
+          "description": "",
+          "params": [
+            {
+              "name": "text",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "categories",
+              "type": "string[]",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "category": "string",
+            "confidence": "number",
+            "reasoning": "string"
+          }
+        },
+        {
+          "name": "extract",
+          "description": "",
+          "params": [
+            {
+              "name": "text",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "schema",
+              "type": "IntegrationParams",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {}
+        },
+        {
+          "name": "summarize",
+          "description": "",
+          "params": [
+            {
+              "name": "text",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "maxLength",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "style",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "summary": "string",
+            "keyPoints": "string[]"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "ANTHROPIC_API_KEY",
+          "required": false,
+          "description": "Anthropic API key"
+        },
+        {
+          "envVar": "OPENAI_API_KEY",
+          "required": false,
+          "description": "OpenAI API key"
+        }
+      ]
+    },
+    "youtube": {
+      "name": "youtube",
+      "description": "YouTube Data API — search videos, get video/channel details",
+      "category": "media",
+      "package": "@almadar/integrations",
+      "actions": [
+        {
+          "name": "search",
+          "description": "",
+          "params": [
+            {
+              "name": "query",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "maxResults",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "type",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {}
+        },
+        {
+          "name": "getVideo",
+          "description": "",
+          "params": [
+            {
+              "name": "videoId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "title": "string",
+            "description": "string",
+            "viewCount": "string",
+            "likeCount": "string"
+          }
+        },
+        {
+          "name": "getChannel",
+          "description": "",
+          "params": [
+            {
+              "name": "channelId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "name": "string",
+            "description": "string",
+            "subscriberCount": "string"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "YOUTUBE_API_KEY",
+          "required": true,
+          "description": "YouTube Data API key"
+        }
+      ]
+    },
+    "twilio": {
+      "name": "twilio",
+      "description": "Twilio — SMS, voice calls, verification",
+      "category": "messaging",
+      "package": "@almadar/integrations",
+      "actions": [
+        {
+          "name": "sendSMS",
+          "description": "",
+          "params": [
+            {
+              "name": "to",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "body",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "sid": "string",
+            "status": "string"
+          }
+        },
+        {
+          "name": "sendWhatsApp",
+          "description": "",
+          "params": [
+            {
+              "name": "to",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "body",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "sid": "string",
+            "status": "string"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "TWILIO_ACCOUNT_SID",
+          "required": true,
+          "description": "Twilio account SID"
+        },
+        {
+          "envVar": "TWILIO_AUTH_TOKEN",
+          "required": true,
+          "description": "Twilio auth token"
+        },
+        {
+          "envVar": "TWILIO_PHONE_NUMBER",
+          "required": false,
+          "description": "Default sender phone number"
+        }
+      ]
+    },
+    "email": {
+      "name": "email",
+      "description": "Email service — send, send with template",
+      "category": "messaging",
+      "package": "@almadar/integrations",
+      "actions": [
+        {
+          "name": "send",
+          "description": "",
+          "params": [
+            {
+              "name": "to",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "subject",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "body",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "from",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "status": "string"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "SENDGRID_API_KEY",
+          "required": false,
+          "description": "SendGrid API key (use this OR RESEND_API_KEY)"
+        },
+        {
+          "envVar": "RESEND_API_KEY",
+          "required": false,
+          "description": "Resend API key (use this OR SENDGRID_API_KEY)"
+        },
+        {
+          "envVar": "FROM_EMAIL",
+          "required": false,
+          "description": "Default sender email address"
+        }
+      ]
+    },
+    "docker": {
+      "name": "docker",
+      "description": "Docker — container and image management",
+      "category": "devtools",
+      "package": "@almadar/integrations",
+      "actions": [
+        {
+          "name": "build",
+          "description": "",
+          "params": [
+            {
+              "name": "tag",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "dockerfile",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "context",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "buildArgs",
+              "type": "object",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "imageId": "string",
+            "tag": "string",
+            "size": "number",
+            "buildTime": "number"
+          }
+        },
+        {
+          "name": "run",
+          "description": "",
+          "params": [
+            {
+              "name": "image",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "ports",
+              "type": "array",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "env",
+              "type": "object",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "volumes",
+              "type": "array",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "command",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "containerId": "string",
+            "name": "string",
+            "status": "string",
+            "ports": "array"
+          }
+        },
+        {
+          "name": "stop",
+          "description": "",
+          "params": [
+            {
+              "name": "containerId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "containerId": "string",
+            "status": "string",
+            "stoppedAt": "number"
+          }
+        },
+        {
+          "name": "remove",
+          "description": "",
+          "params": [
+            {
+              "name": "containerId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "force",
+              "type": "boolean",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "containerId": "string",
+            "removed": "boolean"
+          }
+        },
+        {
+          "name": "logs",
+          "description": "",
+          "params": [
+            {
+              "name": "containerId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "tail",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "since",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "containerId": "string",
+            "logs": "string[]",
+            "lineCount": "number"
+          }
+        },
+        {
+          "name": "status",
+          "description": "",
+          "params": [
+            {
+              "name": "containerId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "containerId": "string",
+            "name": "string",
+            "image": "string",
+            "status": "string",
+            "ports": "array",
+            "createdAt": "number",
+            "startedAt": "number | null",
+            "stoppedAt": "number | null"
+          }
+        },
+        {
+          "name": "list",
+          "description": "",
+          "params": [
+            {
+              "name": "all",
+              "type": "boolean",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "filterByLabel",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "containers": "array",
+            "total": "number"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "DOCKER_HOST",
+          "required": false,
+          "description": "Docker daemon host URL"
+        }
+      ]
+    },
+    "storage": {
+      "name": "storage",
+      "description": "Object storage — upload, download, delete, list files",
+      "category": "infrastructure",
+      "package": "@almadar/integrations",
+      "actions": [
+        {
+          "name": "upload",
+          "description": "",
+          "params": [
+            {
+              "name": "bucket",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "key",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "content",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "contentType",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "file",
+              "type": "IntegrationParams",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "acl",
+              "type": "'public' | 'private'",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "maxSize",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "metadata",
+              "type": "IntegrationParams",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "key": "string",
+            "bucket": "string",
+            "size": "number",
+            "etag": "string"
+          }
+        },
+        {
+          "name": "download",
+          "description": "",
+          "params": [
+            {
+              "name": "bucket",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "content": "string",
+            "contentType": "string",
+            "size": "number",
+            "metadata": "IntegrationParams"
+          }
+        },
+        {
+          "name": "list",
+          "description": "",
+          "params": [
+            {
+              "name": "bucket",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "prefix",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "maxKeys",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "keys": "array",
+            "truncated": "boolean"
+          }
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "params": [
+            {
+              "name": "bucket",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "deleted": "boolean"
+          }
+        },
+        {
+          "name": "getSignedUrl",
+          "description": "",
+          "params": [
+            {
+              "name": "bucket",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "expiresIn",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "operation",
+              "type": "'get' | 'put'",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "url": "string",
+            "expiresAt": "number"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "STORAGE_BUCKET",
+          "required": true,
+          "description": "Cloud storage bucket name"
+        },
+        {
+          "envVar": "STORAGE_REGION",
+          "required": false,
+          "description": "Storage region"
+        }
+      ]
+    },
+    "queue": {
+      "name": "queue",
+      "description": "Message queue — publish, subscribe, acknowledge messages",
+      "category": "infrastructure",
+      "package": "@almadar/integrations",
+      "actions": [
+        {
+          "name": "enqueue",
+          "description": "",
+          "params": [
+            {
+              "name": "queue",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "payload",
+              "type": "ServiceParams",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "delay",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "priority",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "jobId": "string",
+            "position": "number"
+          }
+        },
+        {
+          "name": "dequeue",
+          "description": "",
+          "params": [
+            {
+              "name": "queue",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "job": "object | null"
+          }
+        },
+        {
+          "name": "status",
+          "description": "",
+          "params": [
+            {
+              "name": "jobId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "status": "'pending' | 'processing' | 'completed' | 'failed'",
+            "job": "object | null"
+          }
+        },
+        {
+          "name": "complete",
+          "description": "",
+          "params": [
+            {
+              "name": "jobId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "result",
+              "type": "ServiceParams",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "completed": "boolean"
+          }
+        },
+        {
+          "name": "fail",
+          "description": "",
+          "params": [
+            {
+              "name": "jobId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "error",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "failed": "boolean"
+          }
+        },
+        {
+          "name": "cancel",
+          "description": "",
+          "params": [
+            {
+              "name": "jobId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "cancelled": "boolean"
+          }
+        },
+        {
+          "name": "size",
+          "description": "",
+          "params": [
+            {
+              "name": "queue",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "size": "number",
+            "pending": "number",
+            "processing": "number"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "QUEUE_URL",
+          "required": true,
+          "description": "Message queue connection URL"
+        }
+      ]
+    },
+    "redis": {
+      "name": "redis",
+      "description": "Redis — cache get/set/delete, pub/sub",
+      "category": "infrastructure",
+      "package": "@almadar/integrations",
+      "actions": [
+        {
+          "name": "get",
+          "description": "",
+          "params": [
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "value": "ServiceParams"
+          }
+        },
+        {
+          "name": "set",
+          "description": "",
+          "params": [
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "value",
+              "type": "ServiceParams",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "ttl",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "ok": "boolean"
+          }
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "params": [
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "deleted": "boolean"
+          }
+        },
+        {
+          "name": "lock",
+          "description": "",
+          "params": [
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "ttl",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "acquired": "boolean",
+            "lockId": "string"
+          }
+        },
+        {
+          "name": "unlock",
+          "description": "",
+          "params": [
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "lockId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "released": "boolean"
+          }
+        },
+        {
+          "name": "increment",
+          "description": "",
+          "params": [
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "by",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "value": "number"
+          }
+        },
+        {
+          "name": "expire",
+          "description": "",
+          "params": [
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "ttl",
+              "type": "number",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "set": "boolean"
+          }
+        },
+        {
+          "name": "publish",
+          "description": "",
+          "params": [
+            {
+              "name": "channel",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "message",
+              "type": "ServiceParams",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "receivers": "number"
+          }
+        },
+        {
+          "name": "subscribe",
+          "description": "",
+          "params": [
+            {
+              "name": "channel",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "subscribed": "boolean"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "REDIS_URL",
+          "required": true,
+          "description": "Redis connection URL"
+        }
+      ]
+    },
+    "oauth": {
+      "name": "oauth",
+      "description": "OAuth — authorization flow, token management",
+      "category": "auth",
+      "package": "@almadar/integrations",
+      "actions": [
+        {
+          "name": "authorize",
+          "description": "",
+          "params": [
+            {
+              "name": "provider",
+              "type": "'google' | 'github' | 'auth0'",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "scopes",
+              "type": "string[]",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "redirectUri",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "authUrl": "string",
+            "state": "string"
+          }
+        },
+        {
+          "name": "token",
+          "description": "",
+          "params": [
+            {
+              "name": "code",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "state",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "accessToken": "string",
+            "refreshToken": "string",
+            "expiresIn": "number",
+            "tokenType": "'bearer'"
+          }
+        },
+        {
+          "name": "refresh",
+          "description": "",
+          "params": [
+            {
+              "name": "refreshToken",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "accessToken": "string",
+            "expiresIn": "number"
+          }
+        },
+        {
+          "name": "revoke",
+          "description": "",
+          "params": [
+            {
+              "name": "token",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "revoked": "boolean"
+          }
+        },
+        {
+          "name": "userinfo",
+          "description": "",
+          "params": [
+            {
+              "name": "accessToken",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "sub": "string",
+            "email": "string",
+            "name": "string",
+            "picture": "string"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "OAUTH_CLIENT_ID",
+          "required": true,
+          "description": "OAuth2 client ID"
+        },
+        {
+          "envVar": "OAUTH_CLIENT_SECRET",
+          "required": true,
+          "description": "OAuth2 client secret"
+        },
+        {
+          "envVar": "OAUTH_REDIRECT_URI",
+          "required": false,
+          "description": "OAuth2 redirect URI"
+        }
+      ]
+    },
+    "otel": {
+      "name": "otel",
+      "description": "OpenTelemetry — spans, metrics, logs",
+      "category": "infrastructure",
+      "package": "@almadar/integrations",
+      "actions": [
+        {
+          "name": "startSpan",
+          "description": "",
+          "params": [
+            {
+              "name": "name",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "attributes",
+              "type": "IntegrationParams",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "traceId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "spanId": "string",
+            "traceId": "string"
+          }
+        },
+        {
+          "name": "endSpan",
+          "description": "",
+          "params": [
+            {
+              "name": "spanId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "status",
+              "type": "'ok' | 'error'",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "ended": "boolean"
+          }
+        },
+        {
+          "name": "addEvent",
+          "description": "",
+          "params": [
+            {
+              "name": "spanId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "attributes",
+              "type": "IntegrationParams",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "added": "boolean"
+          }
+        },
+        {
+          "name": "recordMetric",
+          "description": "",
+          "params": [
+            {
+              "name": "name",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "value",
+              "type": "number",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "type",
+              "type": "'counter' | 'gauge' | 'histogram'",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "labels",
+              "type": "IntegrationParams",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "recorded": "boolean"
+          }
+        },
+        {
+          "name": "getSpan",
+          "description": "",
+          "params": [
+            {
+              "name": "spanId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {}
+        },
+        {
+          "name": "getMetrics",
+          "description": "",
+          "params": [],
+          "responseShape": {}
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "OTEL_EXPORTER_OTLP_ENDPOINT",
+          "required": true,
+          "description": "OpenTelemetry collector endpoint"
+        },
+        {
+          "envVar": "OTEL_SERVICE_NAME",
+          "required": false,
+          "description": "Service name for traces"
+        }
+      ]
+    },
+    "cli": {
+      "name": "cli",
+      "description": "CLI tool execution — run commands, get output",
+      "category": "devtools",
+      "package": "@almadar/integrations",
+      "actions": [
+        {
+          "name": "validate",
+          "description": "",
+          "params": [
+            {
+              "name": "schema",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "valid": "boolean",
+            "errors": "string[]",
+            "warnings": "string[]",
+            "summary": "string"
+          }
+        }
+      ],
+      "credentials": []
+    },
+    "deepagent": {
+      "name": "deepagent",
+      "description": "DeepAgent — AI agent orchestration",
+      "category": "ai",
+      "package": "@almadar/integrations",
+      "actions": [
+        {
+          "name": "sendMessage",
+          "description": "",
+          "params": [
+            {
+              "name": "message",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "threadId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "skill",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "context",
+              "type": "IntegrationParams",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "response": "string",
+            "threadId": "string"
+          }
+        },
+        {
+          "name": "cancelGeneration",
+          "description": "",
+          "params": [
+            {
+              "name": "threadId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "cancelled": "boolean"
+          }
+        },
+        {
+          "name": "validateSchema",
+          "description": "",
+          "params": [
+            {
+              "name": "schema",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "valid": "boolean",
+            "errors": "string[]"
+          }
+        },
+        {
+          "name": "compileSchema",
+          "description": "",
+          "params": [
+            {
+              "name": "schema",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "shell",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "output": "string",
+            "files": "string[]"
+          }
+        },
+        {
+          "name": "getThreadHistory",
+          "description": "",
+          "params": [
+            {
+              "name": "threadId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "messages": "array"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "DEEPAGENT_API_URL",
+          "required": true,
+          "description": "DeepAgent server URL"
+        },
+        {
+          "envVar": "DEEPAGENT_API_KEY",
+          "required": false,
+          "description": "DeepAgent API key"
+        }
+      ]
+    }
+  },
+  "categories": [
+    "ai",
+    "auth",
+    "devtools",
+    "infrastructure",
+    "media",
+    "messaging",
+    "payment"
+  ]
+}

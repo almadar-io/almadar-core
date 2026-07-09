@@ -36,6 +36,16 @@
       "types": "./dist/builders.d.ts",
       "import": "./dist/builders.js",
       "require": "./dist/builders.js"
+    },
+    "./patterns": {
+      "types": "./dist/patterns/index.d.ts",
+      "import": "./dist/patterns/index.js",
+      "require": "./dist/patterns/index.js"
+    },
+    "./patterns/*": {
+      "types": "./dist/patterns/*",
+      "import": "./dist/patterns/*",
+      "require": "./dist/patterns/*"
     }
   },
   "files": [
@@ -55,7 +65,6 @@
     "prepare": "git config core.hooksPath .githooks"
   },
   "dependencies": {
-    "@almadar/patterns": ">=2.14.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {
