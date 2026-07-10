@@ -103,6 +103,38 @@ export function isCallSiteConfigDeclaration(
 }
 
 /**
+ * Convert a call-site config map into plain runtime values.
+ *
+ * A `CallSiteConfig` may contain either plain wiring values
+ * (`TraitConfigValue`) or annotated `ConfigFieldDeclaration` objects
+ * (`{ type, default, label, ... }`). Both the JS interpreter
+ * (`@almadar/runtime`) and the render substrate (`@almadar/ui`) need this
+ * extraction, so it lives here — the most-upstream package they share —
+ * rather than being duplicated in each.
+ */
+export function normalizeCallSiteConfigToValues(
+    config: CallSiteConfig | undefined,
+): TraitConfig | undefined {
+    if (config === undefined) {
+        return undefined;
+    }
+
+    const out: Record<string, TraitConfigValue> = {};
+    let hasAny = false;
+    for (const [key, entry] of Object.entries(config)) {
+        const value = isCallSiteConfigDeclaration(entry)
+            ? entry.default
+            : entry;
+        if (value !== undefined) {
+            out[key] = value;
+            hasAny = true;
+        }
+    }
+
+    return hasAny ? out : undefined;
+}
+
+/**
  * Per-field entry in a trait's DECLARED `config { }` schema as it lives
  * on the `.orb` JSON: `{ type: "string" | "[string]" | "object" | ...,
  * default?: <value> }`. Distinct from `TraitConfigValue` (which is the

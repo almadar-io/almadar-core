@@ -392,6 +392,7 @@ export {
   type CallSiteConfigEntry,
   type CallSiteConfig,
   isCallSiteConfigDeclaration,
+  normalizeCallSiteConfigToValues,
   TraitConfigSchema,
   TraitConfigValueSchema,
   ConfigFieldDeclarationSchema,

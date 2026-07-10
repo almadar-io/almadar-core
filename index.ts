@@ -27,6 +27,13 @@ export {
   getTrait,
 } from './src/resolver';
 
+// Embedded-trait `@config.X` forward resolution — shared by the JS
+// interpreter (`@almadar/runtime`) and the render substrate (`@almadar/ui`).
+export {
+  collectEmbeddedTraitReferrers,
+  buildResolvedTraitConfigs,
+} from './src/embedded-trait-config';
+
 // Export schema diffing & protection functions
 export {
   diffSchemas,
