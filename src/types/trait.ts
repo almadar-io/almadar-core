@@ -102,6 +102,27 @@ export function isCallSiteConfigDeclaration(
     );
 }
 
+/** Metadata keys that only ever appear on a declared config-field SCHEMA
+ *  (never on a render-value object that merely carries a UI `type` key). */
+const CONFIG_DECLARATION_META_KEYS = ['label', 'description', 'tier', 'synonyms', 'values'] as const;
+
+/**
+ * Type guard: `entry` is a declared config-field SCHEMA — a string `type` plus
+ * EITHER a `default` slot OR declaration metadata (`label`/`description`/
+ * `tier`/`synonyms`/`values`). Broader than `isCallSiteConfigDeclaration`,
+ * which requires a `default`: a field declared with no default (e.g.
+ * `leftIcon : icon` → `{ type: "icon", label, description, tier }`) is still a
+ * schema, and its runtime VALUE is its (absent → `undefined`) default, NOT the
+ * schema object itself. A render-value object that coincidentally has a `type`
+ * key (e.g. `{ type: "tabs", items: … }`) carries none of these metadata keys
+ * and is therefore left untouched as a plain value.
+ */
+function isConfigFieldSchema(entry: CallSiteConfigEntry): entry is ConfigFieldDeclaration {
+    if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) return false;
+    if (!('type' in entry) || typeof (entry as { type?: unknown }).type !== 'string') return false;
+    return 'default' in entry || CONFIG_DECLARATION_META_KEYS.some((k) => k in entry);
+}
+
 /**
  * Convert a call-site config map into plain runtime values.
  *
@@ -111,6 +132,12 @@ export function isCallSiteConfigDeclaration(
  * (`@almadar/runtime`) and the render substrate (`@almadar/ui`) need this
  * extraction, so it lives here — the most-upstream package they share —
  * rather than being duplicated in each.
+ *
+ * A declared field with no `default` yields no value (dropped) — mirroring
+ * `collectDeclaredConfigDefaults`. Leaking such a schema object through as a
+ * value made `@config.leftIcon` resolve to `{ type: "icon", … }`, which the
+ * render substrate then mounted as an element and passed to `Input`'s icon
+ * slot → "Element type is invalid: got <SlotContentRenderer />".
  */
 export function normalizeCallSiteConfigToValues(
     config: CallSiteConfig | undefined,
@@ -122,7 +149,7 @@ export function normalizeCallSiteConfigToValues(
     const out: Record<string, TraitConfigValue> = {};
     let hasAny = false;
     for (const [key, entry] of Object.entries(config)) {
-        const value = isCallSiteConfigDeclaration(entry)
+        const value = isConfigFieldSchema(entry)
             ? entry.default
             : entry;
         if (value !== undefined) {
