@@ -188,7 +188,27 @@ export interface ConfigFieldDeclaration {
     readonly values?: ReadonlyArray<string>;
     /** `@synonyms` — comma-separated vocabulary synonyms (metadata). */
     readonly synonyms?: string;
+    /** Structured per-item schema for array-of-object fields — `edges : [{from: string!, …}]` in `.lolo` lowers to `{ type: "object", properties: {…} }`. */
+    readonly items?: ConfigFieldItemsDeclaration;
+    /** Structured property schema for object-typed config fields (no items wrapper). */
+    readonly properties?: Readonly<Record<string, TraitEntityField>>;
 }
+
+export interface ConfigFieldItemsDeclaration {
+    readonly type?: string;
+    /** Absent for arrays of scalars (`items: { type: "string" }`). */
+    readonly properties?: Readonly<Record<string, TraitEntityField>>;
+    /** Nested per-item schema for arrays of arrays (recursive). */
+    readonly items?: ConfigFieldItemsDeclaration;
+}
+
+export const ConfigFieldItemsDeclarationSchema: z.ZodType<ConfigFieldItemsDeclaration> = z.lazy(() =>
+    z.object({
+        type: z.string().optional(),
+        properties: z.record(TraitEntityFieldSchema).optional(),
+        items: ConfigFieldItemsDeclarationSchema.optional(),
+    }),
+);
 
 export const ConfigFieldDeclarationSchema: z.ZodType<ConfigFieldDeclaration> = z.object({
     type: z.string(),
@@ -198,6 +218,8 @@ export const ConfigFieldDeclarationSchema: z.ZodType<ConfigFieldDeclaration> = z
     tier: z.string().optional(),
     values: z.array(z.string()).optional(),
     synonyms: z.string().optional(),
+    items: ConfigFieldItemsDeclarationSchema.optional(),
+    properties: z.lazy(() => z.record(TraitEntityFieldSchema)).optional(),
 });
 
 /**
@@ -271,9 +293,13 @@ export interface TraitEntityField {
     required?: boolean;
     default?: unknown;
     values?: string[];
+    /** Structured per-item schema for array-of-object fields (recursive). */
+    items?: ConfigFieldItemsDeclaration;
+    /** Structured property schema for object-typed entity fields. */
+    properties?: Readonly<Record<string, TraitEntityField>>;
 }
 
-export const TraitEntityFieldSchema = z.object({
+export const TraitEntityFieldSchema: z.ZodType<TraitEntityField> = z.object({
     name: z.string().min(1),
     type: z.enum([
         'string',
@@ -289,6 +315,8 @@ export const TraitEntityFieldSchema = z.object({
     required: z.boolean().optional(),
     default: z.unknown().optional(),
     values: z.array(z.string()).optional(),
+    items: ConfigFieldItemsDeclarationSchema.optional(),
+    properties: z.lazy(() => z.record(TraitEntityFieldSchema)).optional(),
 });
 
 // ============================================================================
@@ -402,9 +430,11 @@ export interface EventPayloadField {
     description?: string;
     /** For 'entity' type: the entity type name */
     entityType?: string;
+    /** Structured property schema for object-typed payload fields (recursive). */
+    properties?: ReadonlyArray<EventPayloadField>;
 }
 
-export const EventPayloadFieldSchema = z.object({
+export const EventPayloadFieldSchema: z.ZodType<EventPayloadField> = z.object({
     name: z.string().min(1),
     /**
      * Field type. Mirrors the Rust validator's acceptance: any non-empty
@@ -420,6 +450,7 @@ export const EventPayloadFieldSchema = z.object({
     required: z.boolean().optional(),
     description: z.string().optional(),
     entityType: z.string().optional(),
+    properties: z.lazy(() => z.array(EventPayloadFieldSchema)).optional(),
 });
 
 // ============================================================================

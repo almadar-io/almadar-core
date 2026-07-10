@@ -65,12 +65,15 @@ export interface PayloadField {
    */
   type: string;
   required?: boolean;
+  /** Structured property schema for object-typed payload fields (recursive). */
+  properties?: ReadonlyArray<PayloadField>;
 }
 
-export const PayloadFieldSchema = z.object({
+export const PayloadFieldSchema: z.ZodType<PayloadField> = z.object({
   name: z.string().min(1),
   type: z.string().min(1),
   required: z.boolean().optional(),
+  properties: z.lazy(() => z.array(PayloadFieldSchema)).optional(),
 });
 
 /**

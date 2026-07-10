@@ -150,7 +150,9 @@ export type RenderItemLambda = ['fn', string, AnyPatternConfig];
  * @example ['navigate', '/tasks'] or ['navigate', '/tasks/:id', { id: '123' }]
  * @example ['navigate', 'https://example.com']
  */
-export type NavigateEffect = ['navigate', string] | ['navigate', string, Record<string, string>];
+export type NavigateEffect =
+    | ['navigate', string | SExpr]
+    | ['navigate', string | SExpr, Record<string, string>];
 
 /**
  * Emit effect - emits an event, optionally with payload.
@@ -557,6 +559,38 @@ export type AgentEffect = [`agent/${string}`, ...SExpr[]];
  */
 export type OsEffect = [`os/${string}`, ...SExpr[]];
 
+/**
+ * LLM effect - invokes an llm/* operator (agent path).
+ * @example ['llm/generate', '@entity.request', { emit: { success: 'PLANNED', failure: 'PLAN_FAILED' } }]
+ */
+export type LlmEffect = [`llm/${string}`, ...SExpr[]];
+
+/**
+ * Behavior effect - invokes a behavior/* operator (agent path).
+ * @example ['behavior/instantiate', '@entity.plan', { emit: { failure: 'BUILD_FAILED' } }]
+ */
+export type BehaviorEffect = [`behavior/${string}`, ...SExpr[]];
+
+/**
+ * Validate effect - invokes a validate/* operator (agent path).
+ * @example ['validate/validate', '@entity.schema', { emit: { failure: 'INVALID' } }]
+ */
+export type ValidateEffect = [`validate/${string}`, ...SExpr[]];
+
+/**
+ * Remaining agent-path operator effects: session/* (workspace session ops),
+ * compose/* (schema composition), trace/* (trace emission), memory/*
+ * (agent memory), application/* (app lifecycle). Expression-only namespaces
+ * (array/, math/, object/, str/, …) are deliberately NOT effect heads.
+ * @example ['session/write-spec', '@entity.spec']
+ * @example ['compose/compose-all', { emit: { failure: 'COMPOSE_FAILED' } }]
+ */
+export type SessionEffect = [`session/${string}`, ...SExpr[]];
+export type ComposeEffect = [`compose/${string}`, ...SExpr[]];
+export type TraceEffect = [`trace/${string}`, ...SExpr[]];
+export type MemoryEffect = [`memory/${string}`, ...SExpr[]];
+export type ApplicationEffect = [`application/${string}`, ...SExpr[]];
+
 // ============================================================================
 // Async Effects (from almadar-std/modules/async)
 // ============================================================================
@@ -645,7 +679,15 @@ export type TypedEffect =
     | CheckpointSaveEffect
     | CheckpointLoadEffect
     | AgentEffect
-    | OsEffect;
+    | OsEffect
+    | LlmEffect
+    | BehaviorEffect
+    | ValidateEffect
+    | SessionEffect
+    | ComposeEffect
+    | TraceEffect
+    | MemoryEffect
+    | ApplicationEffect;
 
 // ============================================================================
 // Effect Type (Strictly Typed)

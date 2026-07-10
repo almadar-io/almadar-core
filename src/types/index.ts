@@ -285,6 +285,15 @@ export {
   type AgentEffect,
   // OS effect type
   type OsEffect,
+  // Agent-path operator effect types
+  type LlmEffect,
+  type BehaviorEffect,
+  type ValidateEffect,
+  type SessionEffect,
+  type ComposeEffect,
+  type TraceEffect,
+  type MemoryEffect,
+  type ApplicationEffect,
   // Schemas
   UI_SLOTS,
   EffectSchema,
@@ -388,6 +397,7 @@ export {
   type TraitConfigObject,
   type TraitConfigValue,
   type ConfigFieldDeclaration,
+  type ConfigFieldItemsDeclaration,
   type DeclaredTraitConfig,
   type CallSiteConfigEntry,
   type CallSiteConfig,
