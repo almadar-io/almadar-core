@@ -356,6 +356,28 @@ export interface FactorySignature {
    * (`computeSubstrateSignature`); recomputed every generation run.
    */
   substrateSignature?: string;
+  /**
+   * Organism-only dispatch smoke test. Stamped by pattern-sync gen-ts;
+   * `true` when the organism's factory dispatch with default params
+   * round-trips `orb resolve` clean. `false` = not factory ready (excluded
+   * from HIT retrieval; stays compose-palette if palette-exposed).
+   * Undefined = not yet swept (legacy catalogs).
+   */
+  factoryReady?: boolean;
+  /** Resolve/validate error strings when `factoryReady` is `false`. */
+  readinessErrors?: ReadonlyArray<string>;
+  /**
+   * Tier-agnostic (atoms/molecules/organisms alike). Stamped by
+   * pattern-sync gen-ts for every behavior entry: `true` when the
+   * registry `.orb` passes `orb validate` + `orb resolve` at bake time.
+   * `false` = source-broken (excluded from retrieval regardless of tier).
+   * Undefined = not yet swept (legacy catalogs). Distinct from
+   * `factoryReady`, which additionally requires an organism-level
+   * dispatch smoke test.
+   */
+  sourceValid?: boolean;
+  /** `orb validate`/`orb resolve` error strings when `sourceValid` is `false`. */
+  sourceErrors?: ReadonlyArray<string>;
 }
 
 /**
