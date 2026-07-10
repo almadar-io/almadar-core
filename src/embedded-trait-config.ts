@@ -78,9 +78,18 @@ export function collectEmbeddedTraitReferrers(
       if (!target) continue;
       const referrerName = target.name;
       if (typeof referrerName !== 'string' || referrerName.length === 0) continue;
-      if (!target.config) continue;
+      // Scan BOTH the trait's config (where a molecule like std-browse embeds
+      // `@trait.X` inside a `bodyContent`-style config default) AND its state
+      // machine (where an atom renders `@trait.X` directly in a transition's
+      // `render-ui` effect). Config-only scanning missed the latter, so an
+      // inline sub-trait embedded from a transition never chained its
+      // `@config.X` forwards to its embedder and reached the component as the
+      // literal string `"@config.X"`.
       const refs = new Set<string>();
-      collectTraitRefsFromValue(target.config, refs);
+      if (target.config) collectTraitRefsFromValue(target.config, refs);
+      const stateMachine = (target as { stateMachine?: SExpr }).stateMachine;
+      if (stateMachine) collectTraitRefsFromValue(stateMachine, refs);
+      if (refs.size === 0) continue;
       for (const child of refs) {
         if (child === referrerName) continue;
         if (!out.has(child)) out.set(child, referrerName);
