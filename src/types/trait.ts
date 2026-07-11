@@ -178,6 +178,8 @@ export function normalizeCallSiteConfigToValues(
 export interface ConfigFieldDeclaration {
     readonly type: string;
     readonly default?: TraitConfigValue;
+    /** Marks the knob as mandatory at every call site (own-page binding exempt). `required` + `default` may coexist — the default only serves the trait's own demo page. */
+    readonly required?: boolean;
     /** `@label` — human-readable control label. */
     readonly label?: string;
     /** `@description` — help/tooltip text for the field. */
@@ -213,6 +215,7 @@ export const ConfigFieldItemsDeclarationSchema: z.ZodType<ConfigFieldItemsDeclar
 export const ConfigFieldDeclarationSchema: z.ZodType<ConfigFieldDeclaration> = z.object({
     type: z.string(),
     default: TraitConfigValueSchema.optional(),
+    required: z.boolean().optional(),
     label: z.string().optional(),
     description: z.string().optional(),
     tier: z.string().optional(),
@@ -483,17 +486,60 @@ export interface TraitEventContract {
     scope?: EventScope;
 }
 
+/**
+ * `@config.<knob>` is the only legal reference form for an emit/listen
+ * event name (Option B — the declared event name resolves to a
+ * string-typed config knob's value at inline/resolve time). Matches the
+ * Rust lexer's dotted-sigil body (`config.<ident>`, no further dots).
+ */
+export const CONFIG_REF_EVENT_PATTERN = /^@config\.[A-Za-z_][A-Za-z0-9_]*$/;
+
+/** Returns the knob identifier when `event` is a `@config.<knob>` reference, else `undefined`. */
+export function configRefEventKnob(event: string): string | undefined {
+    return CONFIG_REF_EVENT_PATTERN.test(event) ? event.slice('@config.'.length) : undefined;
+}
+
+/** Why a `@config.<knob>` emit/listen event-name reference failed to resolve. */
+export type ConfigRefEventError = 'unknown-knob' | 'not-string' | 'no-default';
+
+/**
+ * Resolve a `@config.<knob>` emit/listen event-name reference to its
+ * concrete literal, given the trait's declared config schema and the
+ * effective config value map (call-site override folded over declared
+ * default — same precedence the Rust inline phase's `effective_config`
+ * uses). The single JS-side owner of this resolution rule; mirrors
+ * `resolve_config_ref_event_name` in `orbital-core::schema` (Rust).
+ * Returns the resolved literal, or the specific contract clause that failed.
+ */
+export function resolveConfigRefEventName(
+    event: string,
+    declaredConfig: DeclaredTraitConfig | undefined,
+    effectiveConfig: Readonly<Record<string, TraitConfigValue>>,
+): { readonly ok: true; readonly value: string } | { readonly ok: false; readonly error: ConfigRefEventError } {
+    const knob = configRefEventKnob(event);
+    if (knob === undefined) return { ok: false, error: 'unknown-knob' };
+    const field = declaredConfig?.[knob];
+    if (field === undefined) return { ok: false, error: 'unknown-knob' };
+    if (field.type !== 'string') return { ok: false, error: 'not-string' };
+    if (field.default === undefined) return { ok: false, error: 'no-default' };
+    const value = effectiveConfig[knob];
+    if (typeof value !== 'string') return { ok: false, error: 'not-string' };
+    return { ok: true, value };
+}
+
 export const TraitEventContractSchema = z.object({
     /**
      * Event name. Mirrors the Rust validator's `is_valid_event_identifier`:
      * starts with a letter, then any letters / digits / underscores. Both
      * UPPER_SNAKE_CASE and PascalCase shapes are valid identifiers in the
      * post-Phase 2.5 nominal-event type system (events declared via
-     * `type X = Event<T>`).
+     * `type X = Event<T>`). A pre-resolution `@config.<knob>` reference
+     * (Option B) is also legal — inline/resolve substitutes it with the
+     * knob's effective literal before codegen/runtime consume it.
      */
     event: z.string().min(1).regex(
-        /^[A-Za-z][A-Za-z0-9_]*$/,
-        'Event name must start with a letter and contain only letters, digits, and underscores'
+        /^([A-Za-z][A-Za-z0-9_]*|@config\.[A-Za-z_][A-Za-z0-9_]*)$/,
+        'Event name must start with a letter and contain only letters, digits, and underscores, or be a `@config.<knob>` reference'
     ),
     description: z.string().optional(),
     synonyms: z.string().optional(),
