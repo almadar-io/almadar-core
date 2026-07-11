@@ -560,6 +560,16 @@ export type AgentEffect = [`agent/${string}`, ...SExpr[]];
 export type OsEffect = [`os/${string}`, ...SExpr[]];
 
 /**
+ * Browser effect - invokes a browser/* device operator (client host path).
+ * User-initiated, async, resolves via the standard trailing emit envelope.
+ * Concrete operators (browser/open-file-picker, browser/clipboard-read,
+ * browser/clipboard-write, browser/geolocation-current) and their arity /
+ * payload shapes live in @almadar/std BROWSER_OPERATORS.
+ * @example ['browser/open-file-picker', { multiple: false }, { emit: { success: 'FILES_PICKED', failure: 'PICK_CANCELLED' } }]
+ */
+export type BrowserEffect = [`browser/${string}`, ...SExpr[]];
+
+/**
  * LLM effect - invokes an llm/* operator (agent path).
  * @example ['llm/generate', '@entity.request', { emit: { success: 'PLANNED', failure: 'PLAN_FAILED' } }]
  */
@@ -680,6 +690,7 @@ export type TypedEffect =
     | CheckpointLoadEffect
     | AgentEffect
     | OsEffect
+    | BrowserEffect
     | LlmEffect
     | BehaviorEffect
     | ValidateEffect
