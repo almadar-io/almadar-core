@@ -222,6 +222,19 @@ export interface FactoryTraitSignature {
   emittedEvents: ReadonlyArray<string>;
   /** Event keys this trait listens for. */
   listenedEvents: ReadonlyArray<string>;
+  /** Event keys the trait's own state machine transitions on
+   *  (`stateMachine.transitions[].event`, post-rename) — the only valid
+   *  `listens[].triggers` targets (ORB_X_LISTEN_TRIGGER_UNMATCHED
+   *  otherwise). Present when the source trait carries a state machine
+   *  (directly or inherited from its upstream atom); an EMPTY array means
+   *  the trait is render-only and cannot accept a listens entry at all.
+   *  Absent = topology unknown (legacy catalogs). */
+  transitionEvents?: ReadonlyArray<string>;
+  /** Call-site `events` rename map (old → new) authored on the trait ref.
+   *  Renames rewrite the upstream atom's transition triggers, so catalog
+   *  inheritance projects the atom's `transitionEvents` through this map
+   *  before stamping them on the call site. */
+  eventRenames?: Readonly<Record<string, string>>;
   /** Structured emit + listen events with their `@description`/`@synonyms`/`@tier`
    *  annotations. Parallel to `emittedEvents`/`listenedEvents` (kept as bare-key
    *  back-compat); the curation event matcher reads this. */
