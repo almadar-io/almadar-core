@@ -21,10 +21,12 @@ import type {
   OrbitalEntity,
   OrbitalSchema,
   PageRefObject,
+  PageTraitRef,
   SExpr,
   CallSiteConfig,
   CallSiteConfigEntry,
   Trait,
+  TraitConfigValue,
   TraitEventContract,
   TraitEventListener,
   TraitReference,
@@ -480,6 +482,85 @@ export function mergeCallSiteConfigOverrides(
 }
 
 /**
+ * Rewrite every reference to a renamed trait so a
+ * `traitOverrides.<T>.name` override keeps the orbital internally
+ * consistent. A rename changes ONLY the trait's local name; without this
+ * pass the factory output still carries the canonical name in:
+ *   - `pages[].traits[].ref` (→ ORB_P_INVALID_TRAIT_REF: "referenced on
+ *     page does not exist" — the exact demotion storm the dashboard
+ *     param-fill hit when the LLM renamed its chart traits), and
+ *   - `@trait.<canonical>` tokens inside sibling traits' config (layout
+ *     tile slots like `tile1Trait: "@trait.DefaultRevenueChart"`).
+ *
+ * Single canonical implementation shared by `applyParamsToOrb` (runtime
+ * factory overlay) and every generated factory body (via the packages'
+ * `factory-runtime` re-export shims). Pure — returns a new definition.
+ */
+export function applyTraitRenames(
+  orbital: OrbitalDefinition,
+  renames: ReadonlyMap<string, string>,
+): OrbitalDefinition {
+  if (renames.size === 0) return orbital;
+
+  const TRAIT_TOKEN = '@trait.';
+  const renameToken = (v: string): string => {
+    if (!v.startsWith(TRAIT_TOKEN)) return v;
+    const renamed = renames.get(v.slice(TRAIT_TOKEN.length));
+    return renamed !== undefined ? `${TRAIT_TOKEN}${renamed}` : v;
+  };
+  const rewriteValue = (v: TraitConfigValue): TraitConfigValue => {
+    if (typeof v === 'string') return renameToken(v);
+    if (Array.isArray(v)) return v.map(rewriteValue);
+    if (v !== null && typeof v === 'object') {
+      const out: Record<string, TraitConfigValue> = {};
+      for (const [k, x] of Object.entries(v)) out[k] = rewriteValue(x);
+      return out;
+    }
+    return v;
+  };
+  const rewriteEntry = (e: CallSiteConfigEntry): CallSiteConfigEntry => {
+    if (isCallSiteConfigDeclaration(e)) {
+      return e.default !== undefined ? { ...e, default: rewriteValue(e.default) } : e;
+    }
+    return rewriteValue(e);
+  };
+  const rewriteConfig = <C extends CallSiteConfig>(config: C): C => {
+    const out: Record<string, CallSiteConfigEntry> = {};
+    for (const [k, e] of Object.entries(config)) out[k] = rewriteEntry(e);
+    return out as C;
+  };
+
+  type TraitElem = OrbitalDefinition['traits'][number];
+  type PageElem = NonNullable<OrbitalDefinition['pages']>[number];
+
+  const traits = (orbital.traits ?? []).map((t): TraitElem => {
+    if (typeof t !== 'object' || t === null) return t;
+    if (t.config === undefined) return t;
+    if ('ref' in t) return { ...t, config: rewriteConfig(t.config) };
+    return { ...t, config: rewriteConfig(t.config) };
+  });
+
+  const renamePageTrait = (
+    entry: string | Trait | PageTraitRef | TraitReference,
+  ): string | Trait | PageTraitRef | TraitReference => {
+    if (typeof entry === 'string') return renames.get(entry) ?? entry;
+    if ('ref' in entry && typeof entry.ref === 'string') {
+      const renamed = renames.get(entry.ref);
+      return renamed !== undefined ? { ...entry, ref: renamed } : entry;
+    }
+    return entry;
+  };
+
+  const pages = (orbital.pages ?? []).map((p): PageElem => {
+    if (typeof p !== 'object' || p === null) return p;
+    if (!Array.isArray(p.traits)) return p;
+    return { ...p, traits: p.traits.map(renamePageTrait) } as PageElem;
+  });
+
+  return { ...orbital, traits, pages };
+}
+
+/**
  * The overlay. Resolves the effective entity name + collection, calls
  * `makeOrbitalWithUses` with the rewritten data, then applies the params'
  * trait/page overrides post-hoc.
@@ -512,11 +593,15 @@ export function applyParamsToOrb(
     pages: rebuildPages(ctx, effectiveEntityName, orbital.pages),
   });
 
+  const traitRenames = new Map<string, string>();
   if (built.traits && params.traitOverrides !== undefined) {
     built.traits = built.traits.map((t) => {
       if (!isTraitReferenceObject(t) || typeof t.name !== 'string') return t;
       const override: OrbitalTraitOverride | undefined = params.traitOverrides?.[t.name];
       if (!override) return t;
+      if (override.name !== undefined && override.name !== t.name) {
+        traitRenames.set(t.name, override.name);
+      }
       const merged: TraitReference = { ...t };
       if (override.config !== undefined) {
         merged.config = mergeCallSiteConfigOverrides(t.config ?? {}, override.config);
@@ -559,5 +644,5 @@ export function applyParamsToOrb(
     });
   }
 
-  return built;
+  return applyTraitRenames(built, traitRenames);
 }

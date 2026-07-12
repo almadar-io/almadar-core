@@ -15,6 +15,7 @@
 export { extractManifest } from './extract-manifest.js';
 export {
   applyParamsToOrb,
+  applyTraitRenames,
   rebindInlineTraitEntity,
   rewriteEntityInInlineTrait,
   mergeCallSiteConfigOverrides,
