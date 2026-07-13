@@ -188,8 +188,11 @@ export interface ParsedBinding {
  * `user` is the authenticated user / agent context (see binding.ts) and is
  * read-only in guards/effects/ticks — atoms reference `@user.id` and
  * `@user.role` for ownership / role-based gating.
+ * `callsitePayload` is the call-site-captured event payload emitted by the
+ * compiler's inline-trait hoisting; the runtime BindingResolver resolves it
+ * at the composing effect.
  */
-export const CORE_BINDINGS = ['entity', 'payload', 'state', 'now', 'config', 'computed', 'trait', 'user'] as const;
+export const CORE_BINDINGS = ['entity', 'payload', 'state', 'now', 'config', 'computed', 'trait', 'user', 'callsitePayload'] as const;
 export type CoreBinding = (typeof CORE_BINDINGS)[number];
 
 /**

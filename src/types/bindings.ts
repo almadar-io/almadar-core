@@ -98,6 +98,12 @@ export const BINDING_DOCS = {
     examples: ['@user.id', '@user.role'],
     requiresPath: true,
   },
+  callsitePayload: {
+    description:
+      'Call-site-captured event payload — emitted by the compiler\'s inline-trait hoisting when an extracted render block captured @payload; resolved at the composing effect by the runtime BindingResolver',
+    examples: ['@callsitePayload.error', '@callsitePayload.row'],
+    requiresPath: true,
+  },
 } as const;
 
 /**
@@ -110,9 +116,9 @@ export const BINDING_CONTEXT_RULES = {
       'Guards can access entity fields, event payload, current state, time, the call-site trait config (@config.X), and the authenticated user context (@user.id, @user.role) for ownership / role gates. Config access lets atoms write mode-aware guards — e.g. std-modal\'s OPEN can require @payload.row only when @config.mode equals "edit", letting create-mode legitimately fire OPEN with no row. Like effects, @config.X is substituted at molecule/organism inline time with the literal call-site value; at atom-scope validate, @config is allowed-but-unresolved.',
   },
   effect: {
-    allowed: ['entity', 'payload', 'state', 'now', 'trait', 'config', 'user'] as const,
+    allowed: ['entity', 'payload', 'state', 'now', 'trait', 'config', 'user', 'callsitePayload'] as const,
     description:
-      'Effects can access and modify entity fields, use payload data, embed another trait\'s live frame via @trait.X inside render-ui children, read trait config values (@config.X) for atoms parameterized by their call-site, and read the authenticated user context (@user.id, @user.role). At molecule/organism inline time, @config.X is substituted with the literal value from the call-site config block; at atom-scope validate, @config is allowed-but-unresolved.',
+      'Effects can access and modify entity fields, use payload data, embed another trait\'s live frame via @trait.X inside render-ui children, read trait config values (@config.X) for atoms parameterized by their call-site, and read the authenticated user context (@user.id, @user.role). At molecule/organism inline time, @config.X is substituted with the literal value from the call-site config block; at atom-scope validate, @config is allowed-but-unresolved. @callsitePayload.X is the call-site-captured event payload emitted by the compiler\'s inline-trait hoisting (a hoisted render block that captured @payload); it is resolved at the composing effect by the runtime BindingResolver.',
   },
   tick: {
     allowed: ['entity', 'state', 'now', 'config', 'user'] as const,
