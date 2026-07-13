@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-11T08:38:54.260Z",
+  "exportedAt": "2026-07-13T15:27:57.365Z",
   "patterns": {
     "entity-table": {
       "type": "entity-table",
@@ -38820,19 +38820,25 @@
           "types": [
             "number"
           ],
-          "description": "Draw width in px (2D) / world units (3D); omitted → resolved source width."
+          "description": "Draw width in world units (fractions of `projector.tileWidth`); omitted → resolved source width in px."
         },
         "height": {
           "types": [
             "number"
           ],
-          "description": "Draw height in px (2D) / world units (3D); omitted → resolved source height."
+          "description": "Draw height in world units (fractions of `projector.tileWidth`); omitted → resolved source height in px."
         },
         "frame": {
           "types": [
             "object"
           ],
           "description": "Explicit atlas sub-rect override (px); omitted → resolved from `asset.atlas`/`asset.sprite`."
+        },
+        "animation": {
+          "types": [
+            "string"
+          ],
+          "description": "Named GLB animation clip to play (3D backend only; the 2D painter animates via `frame`). Matched case-insensitively against the model's clips."
         },
         "flipX": {
           "types": [
@@ -39309,6 +39315,11 @@
               "frame": {
                 "types": [
                   "object"
+                ]
+              },
+              "animation": {
+                "types": [
+                  "string"
                 ]
               },
               "flipX": {
