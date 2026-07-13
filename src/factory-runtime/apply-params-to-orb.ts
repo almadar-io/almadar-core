@@ -533,11 +533,24 @@ export function applyTraitRenames(
   type TraitElem = OrbitalDefinition['traits'][number];
   type PageElem = NonNullable<OrbitalDefinition['pages']>[number];
 
+  // `@trait.<old>` tokens also live inside inline traits' stateMachine
+  // effect trees (render-ui embed children) — a sibling trait embedding a
+  // renamed render trait references it by token there, not in config. The
+  // reviver runs every string through the same `renameToken`.
+  const rewriteStateMachine = <SM>(sm: SM): SM =>
+    JSON.parse(JSON.stringify(sm), (_k, v: unknown) =>
+      typeof v === 'string' ? renameToken(v) : v,
+    ) as SM;
+
   const traits = (orbital.traits ?? []).map((t): TraitElem => {
     if (typeof t !== 'object' || t === null) return t;
-    if (t.config === undefined) return t;
-    if ('ref' in t) return { ...t, config: rewriteConfig(t.config) };
-    return { ...t, config: rewriteConfig(t.config) };
+    if ('ref' in t) {
+      return t.config !== undefined ? { ...t, config: rewriteConfig(t.config) } : t;
+    }
+    const withConfig = t.config !== undefined ? { ...t, config: rewriteConfig(t.config) } : t;
+    return withConfig.stateMachine !== undefined
+      ? { ...withConfig, stateMachine: rewriteStateMachine(withConfig.stateMachine) }
+      : withConfig;
   });
 
   const renamePageTrait = (
