@@ -129,6 +129,14 @@ export interface FactoryConfigParam {
   /** Key name as advertised by the trait. Matches the override path
    *  `traitOverrides.<traitName>.config.<key>`. */
   key: string;
+  /** True when the atom's own state machine consumes this config value in
+   *  an entity position (`['persist', op, '@config.<key>', …]` or
+   *  `['fetch', '@config.<key>', …]`) — the value IS an entity name.
+   *  Source-derived at signature extraction, never authored. Consumers
+   *  threading a `params.entityName` rename must rewrite every
+   *  entityRef-marked value equal to the renamed entity, or the baked
+   *  default dangles against an entity that no longer exists. */
+  entityRef?: boolean;
   /** Type tag lifted from the `.lolo` config declaration. Drives the
    *  question widget selection. Free-form to admit array/object
    *  brackets (`[object]`, `[string]`) and atom-defined custom tags. */
