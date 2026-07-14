@@ -21,6 +21,7 @@ import { isEntityCall, isEntityReference, parseEntityRef } from './types/orbital
 import type { OrbitalSchema } from './types/schema.js';
 import type { TraitEventContract, TraitEventListener, Trait, TraitRef, TraitReference, TraitConfig, CallSiteConfig } from './types/trait.js';
 import type { SExpr } from './types/expression.js';
+import type { EntityId } from './types/identity.js';
 
 // Re-export compose-behaviors module
 export { applyTraitConfigOverrides } from './builders/apply-config-overrides.js';
@@ -179,6 +180,8 @@ export interface MakeTraitRefOpts {
   name?: string;
   /** Rebind the trait to a different linkedEntity. */
   linkedEntity?: string;
+  /** Dual-carry id sibling of {@link linkedEntity} (V4 identity graph). */
+  linkedEntityId?: EntityId;
   /** Per-key rename map, e.g. `{ OPEN: "ADD_ITEM" }`. */
   events?: Record<string, string>;
   /**
@@ -265,6 +268,7 @@ export function makeTraitRef(opts: MakeTraitRefOpts): TraitReference {
   if (opts.from !== undefined) ref.from = opts.from;
   if (opts.name !== undefined) ref.name = opts.name;
   if (opts.linkedEntity !== undefined) ref.linkedEntity = opts.linkedEntity;
+  if (opts.linkedEntityId !== undefined) ref.linkedEntityId = opts.linkedEntityId;
   if (opts.events !== undefined) ref.events = opts.events;
   if (opts.fields !== undefined) ref.fields = opts.fields;
   if (opts.effects !== undefined) ref.effects = opts.effects;
