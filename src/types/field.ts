@@ -9,6 +9,7 @@
 
 import { z } from 'zod';
 import type { EntityId } from './identity.js';
+import { EntityIdSchema } from './identity.js';
 
 // ============================================================================
 // Field Types
@@ -112,6 +113,7 @@ export interface RelationConfig {
 
 export const RelationConfigSchema = z.object({
     entity: z.string().min(1, 'Target entity is required'),
+    entityId: EntityIdSchema.optional(),
     field: z.string().optional(),
     cardinality: RelationCardinalitySchema.optional(),
     onDelete: z.enum(['cascade', 'nullify', 'restrict']).optional(),
@@ -123,6 +125,7 @@ export const RelationConfigSchema = z.object({
     // Normalize legacy format to standard format
     const normalized: RelationConfig = {
         entity: data.entity || data.target || '',
+        entityId: data.entityId,
         cardinality: data.cardinality || data.type,
         field: data.field,
         onDelete: data.onDelete,

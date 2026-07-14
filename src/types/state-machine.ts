@@ -12,6 +12,8 @@ import type { Effect } from "./effect.js";
 import { EffectSchema } from "./effect.js";
 import type { Expression } from "./expression.js";
 import { ExpressionSchema } from "./expression.js";
+import type { EventId } from "./identity.js";
+import { EventIdSchema } from "./identity.js";
 
 // ============================================================================
 // State
@@ -82,6 +84,8 @@ export const PayloadFieldSchema: z.ZodType<PayloadField> = z.object({
 export interface Event {
   /** Event key (UPPER_SNAKE_CASE) */
   key: string;
+  /** V4 dual-carry id sibling of `key` — optional until the Phase-7 flip. */
+  id?: EventId;
   /** Human-readable name */
   name: string;
   /** Description (authored `@description` on the emit/listen). */
@@ -101,6 +105,7 @@ export interface Event {
 
 export const EventSchema = z.object({
   key: z.string().min(1, "Event key is required"),
+  id: EventIdSchema.optional(),
   name: z.string().min(1, "Event name is required"),
   description: z.string().optional(),
   synonyms: z.string().optional(),
@@ -165,6 +170,8 @@ export interface Transition {
   to: string;
   /** Event key that triggers this transition */
   event: string;
+  /** V4 dual-carry id sibling of `event` — optional until the Phase-7 flip. */
+  eventId?: EventId;
   /** Guard expression - S-expression array */
   guard?: Expression | null;
   /** Effects to execute - S-expression arrays */
@@ -177,6 +184,7 @@ export const TransitionSchema = z.object({
   from: z.string().min(1, "Transition source state is required"),
   to: z.string().min(1, "Transition target state is required"),
   event: z.string().min(1, "Transition event is required"),
+  eventId: EventIdSchema.optional(),
   guard: ExpressionSchema.nullish(),
   effects: z.array(EffectSchema).optional(),
   description: z.string().nullish(),
