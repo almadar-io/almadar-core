@@ -10,6 +10,7 @@
  */
 
 import { z } from 'zod';
+import type { PageId, TraitId, EntityId } from './identity.js';
 import { TraitConfigSchema, type TraitConfig } from './trait.js';
 
 // ============================================================================
@@ -41,8 +42,12 @@ export const ViewTypeSchema = z.enum([
 export interface PageTraitRef {
     /** Trait name from library */
     ref: string;
+    /** V4 dual-carry id sibling of `ref` — optional until the Phase-7 flip. */
+    refId?: TraitId;
     /** Entity this trait operates on */
     linkedEntity?: string;
+    /** V4 dual-carry id sibling of `linkedEntity` — optional until the Phase-7 flip. */
+    linkedEntityId?: EntityId;
     /** Additional trait configuration */
     config?: TraitConfig;
 }
@@ -63,6 +68,9 @@ export const PageTraitRefSchema = z.object({
  * TRAIT-DRIVEN: Pages must have traits array. Sections are NOT supported.
  */
 export interface OrbitalPage {
+    /** V4 dual-carry id sibling of `name` — optional until the Phase-7 flip. */
+    id?: PageId;
+
     /** Page name (PascalCase, e.g., "TasksPage") */
     name: string;
 

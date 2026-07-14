@@ -14,6 +14,7 @@
  */
 
 import { z } from "zod";
+import type { OrbitalId, EntityId, TraitId, PageId } from "./identity.js";
 import type { Entity, EntityPersistence } from "./entity.js";
 import { EntitySchema, EntityPersistenceSchema } from "./entity.js";
 import type { EntityField } from "./field.js";
@@ -124,6 +125,8 @@ export const UseDeclarationSchema = z.object({
 export interface EntityCall {
   /** Reference to the imported entity using the "extends" discriminator key */
   extends: string;
+  /** V4 dual-carry id sibling of `extends` — optional until the Phase-7 flip. */
+  extendsId?: EntityId;
   /** Optional rename for the resulting entity */
   name?: string;
   /** Additional fields appended to the inherited set (caller wins on name collision) */
@@ -286,6 +289,9 @@ export interface PageRefObject {
    */
   ref: string;
 
+  /** V4 dual-carry id sibling of `ref` — optional until the Phase-7 flip. */
+  refId?: PageId;
+
   /**
    * Phase 1.2: optional registry path disambiguator. Pairs with `ref` to
    * explicitly name which `uses` entry the alias was imported from
@@ -308,11 +314,17 @@ export interface PageRefObject {
    */
   linkedEntity?: string;
 
+  /** V4 dual-carry id sibling of `linkedEntity` — optional until the Phase-7 flip. */
+  linkedEntityId?: EntityId;
+
   /**
    * Phase F: override the page's trait set with the caller-supplied list.
    * Each entry may be a string trait reference or an inline trait reference object.
    */
   traits?: TraitRef[];
+
+  /** V4 dual-carry id sibling of `traits` — optional until the Phase-7 flip. */
+  traitRefIds?: TraitId[];
 }
 
 /**
@@ -639,6 +651,9 @@ export const ComputedEventListenerSchema = z.object({
 export type Orbital = OrbitalDefinition;
 
 export interface OrbitalDefinition {
+  /** V4 dual-carry id sibling of `name` — optional until the Phase-7 flip. */
+  id?: OrbitalId;
+
   /** Human-readable name */
   name: string;
 

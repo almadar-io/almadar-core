@@ -8,6 +8,7 @@
  */
 
 import { z } from 'zod';
+import type { TraitId, EntityId, EventId, PageId, OrbitalId } from './identity.js';
 import type { StateMachine } from './state-machine.js';
 import { StateMachineSchema } from './state-machine.js';
 import type { Effect } from './effect.js';
@@ -367,6 +368,8 @@ export interface TraitTick {
     interval: string | number;
     appliesTo?: string[];
     pages?: string[];
+    /** V4 dual-carry id sibling of `pages` — optional until the Phase-7 flip. */
+    pageIds?: PageId[];
     /** Guard expression - string (legacy) or S-expression array */
     guard?: Expression;
     /** Effects to execute (S-expressions) */
@@ -377,6 +380,8 @@ export interface TraitTick {
      * Used for validation and documentation.
      */
     emits?: string[];
+    /** V4 dual-carry id sibling of `emits` — optional until the Phase-7 flip. */
+    emitIds?: EventId[];
 }
 
 export const TraitTickSchema = z.object({
@@ -467,6 +472,8 @@ export const EventPayloadFieldSchema: z.ZodType<EventPayloadField> = z.object({
 export interface TraitEventContract {
     /** Event name (UPPER_SNAKE_CASE) */
     event: string;
+    /** V4 dual-carry id sibling of `event` — optional until the Phase-7 flip. */
+    eventId?: EventId;
     /** Human-readable description */
     description?: string;
     /** User-vocabulary synonyms (comma-separated) — the per-event analogue of a
@@ -572,8 +579,21 @@ export const TraitEventContractSchema = z.object({
  */
 export type ListenSource =
     | { kind: 'any' }
-    | { kind: 'trait'; trait: string }
-    | { kind: 'orbital'; orbital: string; trait: string };
+    | {
+        kind: 'trait';
+        trait: string;
+        /** V4 dual-carry id sibling of `trait` — optional until the Phase-7 flip. */
+        traitId?: TraitId;
+      }
+    | {
+        kind: 'orbital';
+        orbital: string;
+        trait: string;
+        /** V4 dual-carry id sibling of `orbital` — optional until the Phase-7 flip. */
+        orbitalId?: OrbitalId;
+        /** V4 dual-carry id sibling of `trait` — optional until the Phase-7 flip. */
+        traitId?: TraitId;
+      };
 
 export const ListenSourceSchema = z.union([
     z.object({ kind: z.literal('any') }),
@@ -588,8 +608,12 @@ export const ListenSourceSchema = z.union([
 export interface TraitEventListener {
     /** Event key to listen for (bare event name, no source prefix in the new shape) */
     event: string;
+    /** V4 dual-carry id sibling of `event` — optional until the Phase-7 flip. */
+    eventId?: EventId;
     /** State machine event to trigger */
     triggers: string;
+    /** V4 dual-carry id sibling of `triggers` — optional until the Phase-7 flip. */
+    triggersId?: EventId;
     /** Human-readable description (authored `@description` on the listen). */
     description?: string;
     /** User-vocabulary synonyms (comma-separated). */
@@ -658,6 +682,8 @@ export const RequiredFieldSchema = z.object({
  */
 export interface TraitReference {
     ref: string;
+    /** V4 dual-carry id sibling of `ref` — optional until the Phase-7 flip. */
+    refId?: TraitId;
     /**
      * Phase 1.2: optional registry path disambiguator. Pairs with `ref` to
      * explicitly name which `uses` entry the alias was imported from
@@ -667,10 +693,14 @@ export interface TraitReference {
      */
     from?: string;
     linkedEntity?: string;
+    /** V4 dual-carry id sibling of `linkedEntity` — optional until the Phase-7 flip. */
+    linkedEntityId?: EntityId;
     /** Phase F: rename the inlined trait at the call site */
     name?: string;
     /** Phase F: rename atom event keys at the call site, e.g. {OPEN: "ADD_ITEM"} */
     events?: Record<string, string>;
+    /** V4 dual-carry id sibling of `events` (keys = baked event names resolved to ids) — optional until the Phase-7 flip. */
+    eventIds?: Record<string, EventId>;
     /**
      * Entity-field remap: rewrite the inlined trait's canonical `@entity.X` /
      * `@payload.row.X` field references to the consumer entity's field names,
@@ -889,6 +919,8 @@ export const EntityFieldContractSchema = z.object({
 });
 
 export interface Trait {
+    /** V4 dual-carry id sibling of `name` — optional until the Phase-7 flip. */
+    id?: TraitId;
     name: string;
     description?: string;
     description_visual_prompt?: string;
@@ -937,6 +969,8 @@ export interface Trait {
      * Required for inline trait definitions within an orbital.
      */
     linkedEntity?: string;
+    /** V4 dual-carry id sibling of `linkedEntity` — optional until the Phase-7 flip. */
+    linkedEntityId?: EntityId;
     requiredFields?: RequiredField[];
     dataEntities?: TraitDataEntity[];
     stateMachine?: StateMachine;

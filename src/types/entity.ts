@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod';
+import type { EntityId } from './identity.js';
 import { EntityFieldSchema, type EntityField } from './field.js';
 import { SemanticAssetRefSchema, type SemanticAssetRef } from './asset.js';
 
@@ -38,6 +39,9 @@ export const EntityPersistenceSchema = z.enum([
  * Collection names are derived automatically from persistence type if not provided.
  */
 export interface OrbitalEntity {
+    /** V4 dual-carry id sibling of `name` — optional until the Phase-7 flip. */
+    id?: EntityId;
+
     /** Entity name (PascalCase, e.g., "Task", "User") */
     name: string;
 

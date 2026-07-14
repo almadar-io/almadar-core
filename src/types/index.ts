@@ -80,6 +80,43 @@ export {
 // Backward compatibility alias - FullOrbitalUnit is just Orbital
 export type { Orbital as FullOrbitalUnit } from "./orbital.js";
 
+// Identity model (V4) - branded node ids + name ledger
+export {
+  type OrbitalId,
+  type EntityId,
+  type TraitId,
+  type EventId,
+  type PageId,
+  type ServiceId,
+  type ThemeId,
+  type PaletteEntryId,
+  type IdKind,
+  type IdForKind,
+  type LedgerKind,
+  type LedgerEntry,
+  type IdentityLedger,
+  mintId,
+  isOrbitalId,
+  asOrbitalId,
+  isEntityId,
+  asEntityId,
+  isTraitId,
+  asTraitId,
+  isEventId,
+  asEventId,
+  isPageId,
+  asPageId,
+  isServiceId,
+  asServiceId,
+  isThemeId,
+  asThemeId,
+  isPaletteEntryId,
+  asPaletteEntryId,
+  ledgerResolveName,
+  ledgerRename,
+  ledgerCurName,
+} from "./identity.js";
+
 // Entity - data nucleus
 export {
   type Entity,

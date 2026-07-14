@@ -25,6 +25,7 @@ import {
 import type { ServiceDefinition } from "./service.js";
 import { ServiceDefinitionSchema } from "./service.js";
 import type { Trait } from "./trait.js";
+import type { IdentityLedger } from "./identity.js";
 
 // ============================================================================
 // Orbital Config
@@ -155,6 +156,18 @@ export interface OrbitalSchema {
 
   /** Compiler-emitted metadata (resolved `.orb` `_metadata`). */
   _metadata?: SchemaMetadata;
+
+  /**
+   * V4 IR schema version. Distinct from the semver `version` above; gates the
+   * identity-keyed reference semantics. Optional/unset for pre-V4 schemas.
+   */
+  schemaVersion?: number;
+
+  /**
+   * V4 identity ledger — the sole name↔id map for this schema's nodes. Optional
+   * until the Phase-7 flip; absent on pre-V4 schemas.
+   */
+  ledger?: IdentityLedger;
 }
 
 export const ConfigProvenanceRecordSchema = z.object({

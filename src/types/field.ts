@@ -8,6 +8,7 @@
  */
 
 import { z } from 'zod';
+import type { EntityId } from './identity.js';
 
 // ============================================================================
 // Field Types
@@ -81,6 +82,8 @@ export const RelationCardinalitySchema = z.enum([
 export interface RelationConfig {
     /** Target entity name (e.g., 'User', 'Task') - matches Rust's `entity` field */
     entity: string;
+    /** V4 dual-carry id sibling of `entity` — optional until the Phase-7 flip. */
+    entityId?: EntityId;
     /** Field on target entity (defaults to 'id') */
     field?: string;
     /** 
