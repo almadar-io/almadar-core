@@ -15,6 +15,7 @@
 
 import { z } from "zod";
 import type { OrbitalId, EntityId, TraitId, PageId } from "./identity.js";
+import { OrbitalIdSchema, EntityIdSchema, TraitIdSchema, PageIdSchema } from "./identity.js";
 import type { Entity, EntityPersistence } from "./entity.js";
 import { EntitySchema, EntityPersistenceSchema } from "./entity.js";
 import type { EntityField } from "./field.js";
@@ -422,11 +423,14 @@ export const PageRefStringSchema = z
 
 export const PageRefObjectSchema = z.object({
   ref: PageRefStringSchema,
+  refId: PageIdSchema.optional(),
   // Phase 1.2: optional registry path disambiguator, pairs with `ref`.
   from: z.string().optional(),
   path: z.string().startsWith("/").optional(),
   linkedEntity: z.string().optional(),
+  linkedEntityId: EntityIdSchema.optional(),
   traits: z.array(TraitRefSchema).optional(),
+  traitRefIds: z.array(TraitIdSchema).optional(),
 });
 
 export const PageRefSchema = z.union([
@@ -816,6 +820,7 @@ export interface OrbitalDefinition {
 }
 
 export const OrbitalDefinitionSchema = z.object({
+  id: OrbitalIdSchema.optional(),
   name: z.string().min(1, "Orbital name is required"),
   description: z.string().optional(),
   visual_prompt: z.string().optional(),

@@ -10,6 +10,7 @@
  */
 
 import type { EventPayload } from "./expression.js";
+import type { OrbitalId, TraitId, EventId } from "./identity.js";
 
 /**
  * Declared event key. A trait's event names (INIT, SAVE, CLOSE,
@@ -107,7 +108,13 @@ export type EventListen<P> = string & { readonly __listenPayload?: P };
  */
 export interface BusEventSource {
   orbital?: string;
+  /** V4 dual-carry id sibling of `orbital` — stable across an orbital rename. */
+  orbitalId?: OrbitalId;
   trait?: string;
+  /** V4 dual-carry id sibling of `trait` — stable across a trait rename. */
+  traitId?: TraitId;
+  /** V4 dual-carry id of the emitted event — stable across an event rename. */
+  eventId?: EventId;
   transition?: string;
   tick?: string;
   /**

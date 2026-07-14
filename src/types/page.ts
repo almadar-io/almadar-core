@@ -11,6 +11,7 @@
 
 import { z } from 'zod';
 import type { PageId, TraitId, EntityId } from './identity.js';
+import { PageIdSchema, TraitIdSchema, EntityIdSchema } from './identity.js';
 import { TraitConfigSchema, type TraitConfig } from './trait.js';
 
 // ============================================================================
@@ -54,7 +55,9 @@ export interface PageTraitRef {
 
 export const PageTraitRefSchema = z.object({
     ref: z.string().min(1, 'Trait ref is required'),
+    refId: TraitIdSchema.optional(),
     linkedEntity: z.string().optional(),
+    linkedEntityId: EntityIdSchema.optional(),
     config: TraitConfigSchema.optional(),
 });
 
@@ -101,6 +104,7 @@ export interface OrbitalPage {
  * Rejects unknown properties like 'sections'.
  */
 export const OrbitalPageStrictSchema = z.object({
+    id: PageIdSchema.optional(),
     name: z.string().min(1, 'Page name is required'),
     path: z.string().min(1, 'Page path is required').startsWith('/', 'Path must start with /'),
     primaryEntity: z.string().min(1, 'Primary entity is required'),
@@ -114,6 +118,7 @@ export const OrbitalPageStrictSchema = z.object({
  * Uses .strict() to reject unknown keys like 'sections'.
  */
 export const OrbitalPageSchema = z.object({
+    id: PageIdSchema.optional(),
     name: z.string().min(1, 'Page name is required'),
     path: z.string().min(1, 'Page path is required').startsWith('/', 'Path must start with /'),
     viewType: ViewTypeSchema.optional(),

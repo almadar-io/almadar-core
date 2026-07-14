@@ -9,6 +9,7 @@
 
 import { z } from 'zod';
 import type { TraitId, EntityId, EventId, PageId, OrbitalId } from './identity.js';
+import { TraitIdSchema, EntityIdSchema, EventIdSchema, PageIdSchema, OrbitalIdSchema } from './identity.js';
 import type { StateMachine } from './state-machine.js';
 import { StateMachineSchema } from './state-machine.js';
 import type { Effect } from './effect.js';
@@ -391,9 +392,11 @@ export const TraitTickSchema = z.object({
     interval: z.union([z.literal('frame'), z.number().positive()]),
     appliesTo: z.array(z.string()).optional(),
     pages: z.array(z.string()).optional(),
+    pageIds: z.array(PageIdSchema).optional(),
     guard: ExpressionSchema.optional(),
     effects: z.array(EffectSchema).min(1),
     emits: z.array(z.string()).optional(),
+    emitIds: z.array(EventIdSchema).optional(),
 });
 
 // ============================================================================
@@ -548,6 +551,7 @@ export const TraitEventContractSchema = z.object({
         /^([A-Za-z][A-Za-z0-9_]*|@config\.[A-Za-z_][A-Za-z0-9_]*)$/,
         'Event name must start with a letter and contain only letters, digits, and underscores, or be a `@config.<knob>` reference'
     ),
+    eventId: EventIdSchema.optional(),
     description: z.string().optional(),
     synonyms: z.string().optional(),
     tier: z.string().optional(),
@@ -597,11 +601,17 @@ export type ListenSource =
 
 export const ListenSourceSchema = z.union([
     z.object({ kind: z.literal('any') }),
-    z.object({ kind: z.literal('trait'), trait: z.string().min(1) }),
+    z.object({
+        kind: z.literal('trait'),
+        trait: z.string().min(1),
+        traitId: TraitIdSchema.optional(),
+    }),
     z.object({
         kind: z.literal('orbital'),
         orbital: z.string().min(1),
         trait: z.string().min(1),
+        orbitalId: OrbitalIdSchema.optional(),
+        traitId: TraitIdSchema.optional(),
     }),
 ]);
 
@@ -639,7 +649,9 @@ export interface TraitEventListener {
 
 export const TraitEventListenerSchema = z.object({
     event: z.string().min(1),
+    eventId: EventIdSchema.optional(),
     triggers: z.string().min(1),
+    triggersId: EventIdSchema.optional(),
     description: z.string().optional(),
     synonyms: z.string().optional(),
     tier: z.string().optional(),
@@ -766,9 +778,11 @@ export interface TraitReference {
 export const TraitReferenceSchema = z
     .object({
         ref: z.string().min(1),
+        refId: TraitIdSchema.optional(),
         // Phase 1.2: optional registry path disambiguator, pairs with `ref`.
         from: z.string().optional(),
         linkedEntity: z.string().optional(),
+        linkedEntityId: EntityIdSchema.optional(),
         name: z.string().optional(),
         events: z
             .record(
@@ -776,6 +790,7 @@ export const TraitReferenceSchema = z
                 z.string().min(1, "events value (caller event name) must be non-empty"),
             )
             .optional(),
+        eventIds: z.record(z.string().min(1), EventIdSchema).optional(),
         fields: z
             .record(
                 z.string().min(1, "fields key (canonical field name) must be non-empty"),
@@ -1036,6 +1051,7 @@ export const SourceBehaviorMetadataSchema = z.object({
 });
 
 export const TraitSchema = z.object({
+    id: TraitIdSchema.optional(),
     name: z.string().min(1),
     description: z.string().optional(),
     description_visual_prompt: z.string().optional(),
@@ -1047,6 +1063,7 @@ export const TraitSchema = z.object({
     capabilities: z.array(z.string()).optional(),
     scope: TraitScopeSchema,
     linkedEntity: z.string().optional(),
+    linkedEntityId: EntityIdSchema.optional(),
     requiredFields: z.array(RequiredFieldSchema).optional(),
     dataEntities: z.array(TraitDataEntitySchema).optional(),
     stateMachine: StateMachineSchema.optional(),

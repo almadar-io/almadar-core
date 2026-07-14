@@ -83,6 +83,8 @@ export interface ValidationResult {
  * - `ORB_SLOT_*` — UI-slot conflict / contention
  * - `ORB_SVC_*` / `ORB_UI_*` — service / UI primitives
  * - `ORB_X_*` — cross-orbital constraints (listens, emits, IDs)
+ * - `ORB_ID_*` — V4 dual-carry id integrity (unknown ref, name/kind
+ *   mismatch, ledger orphan)
  */
 export const KNOWN_VALIDATION_ERROR_CODES = {
   // Binding (`@entity.X`, `@payload.Y`, `@state.Z`, `@now`, ...)
@@ -261,6 +263,13 @@ export const KNOWN_VALIDATION_ERROR_CODES = {
   ORB_X_RENDER_UI_EVENT_LITERAL_STALE: 'ORB_X_RENDER_UI_EVENT_LITERAL_STALE',
   ORB_X_UNRESOLVED_PATTERN_FIELD_REF: 'ORB_X_UNRESOLVED_PATTERN_FIELD_REF',
   ORB_X_UNUSED_EMISSION: 'ORB_X_UNUSED_EMISSION',
+
+  // Identity — V4 dual-carry id integrity (`ORB_ID_*`). Mirrors
+  // `orbital-compiler/src/phases/validation/id_integrity.rs`.
+  ORB_ID_UNKNOWN_REF: 'ORB_ID_UNKNOWN_REF',
+  ORB_ID_NAME_MISMATCH: 'ORB_ID_NAME_MISMATCH',
+  ORB_ID_KIND_MISMATCH: 'ORB_ID_KIND_MISMATCH',
+  ORB_ID_LEDGER_ORPHAN: 'ORB_ID_LEDGER_ORPHAN',
 } as const;
 
 /**

@@ -115,6 +115,19 @@ export {
   ledgerResolveName,
   ledgerRename,
   ledgerCurName,
+  OrbitalIdSchema,
+  EntityIdSchema,
+  TraitIdSchema,
+  EventIdSchema,
+  PageIdSchema,
+  ServiceIdSchema,
+  ThemeIdSchema,
+  PaletteEntryIdSchema,
+  LedgerKindSchema,
+  LedgerEntrySchema,
+  IdentityLedgerSchema,
+  idPrefix,
+  idKindOf,
 } from "./identity.js";
 
 // Entity - data nucleus

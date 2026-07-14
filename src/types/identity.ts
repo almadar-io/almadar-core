@@ -10,6 +10,8 @@
  * @packageDocumentation
  */
 
+import { z } from 'zod';
+
 // ============================================================================
 // Branded id types
 // ============================================================================
@@ -109,6 +111,27 @@ export const isThemeId = themeKind.is;
 export const asThemeId = themeKind.as;
 export const isPaletteEntryId = paletteKind.is;
 export const asPaletteEntryId = paletteKind.as;
+
+/**
+ * The id-prefix for a node kind (`'entity' → 'ent_'`). The JS mirror of the
+ * Rust `IdKind::prefix`. Single source of truth is {@link ID_PREFIXES}.
+ */
+export function idPrefix(kind: IdKind): string {
+  return ID_PREFIXES[kind];
+}
+
+/**
+ * The node kind an id's prefix denotes, or `null` for an unrecognized /
+ * bare-prefix string. The JS mirror of the Rust `id_kind_of`. Prefixes are
+ * mutually non-overlapping, so match order is irrelevant.
+ */
+export function idKindOf(id: string): IdKind | null {
+  for (const kind of Object.keys(ID_PREFIXES) as IdKind[]) {
+    const prefix = ID_PREFIXES[kind];
+    if (id.startsWith(prefix) && id.length > prefix.length) return kind;
+  }
+  return null;
+}
 
 // ============================================================================
 // Minting — prefix + ULID
@@ -227,3 +250,66 @@ export function ledgerRename(
 export function ledgerCurName(ledger: IdentityLedger, id: string): string | null {
   return ledger.entries[id]?.curName ?? null;
 }
+
+// ============================================================================
+// Zod schemas — the `.orb` load-time activation surface (Rabit V4, Phase 4)
+// ============================================================================
+
+/**
+ * Prefix-checked, kind-tagged id schemas. Each narrows a validated string to
+ * its branded id type via the module's own kind guard, so a schema that reads
+ * `TraitIdSchema.optional()` yields `TraitId | undefined` with no cast. The
+ * guard is the single source of prefix truth (`ID_PREFIXES`); the schema is a
+ * thin zod wrapper over it.
+ */
+export const OrbitalIdSchema = z
+  .string()
+  .refine(isOrbitalId, { message: `Expected an orbital id (prefix "${ID_PREFIXES.orbital}")` });
+export const EntityIdSchema = z
+  .string()
+  .refine(isEntityId, { message: `Expected an entity id (prefix "${ID_PREFIXES.entity}")` });
+export const TraitIdSchema = z
+  .string()
+  .refine(isTraitId, { message: `Expected a trait id (prefix "${ID_PREFIXES.trait}")` });
+export const EventIdSchema = z
+  .string()
+  .refine(isEventId, { message: `Expected an event id (prefix "${ID_PREFIXES.event}")` });
+export const PageIdSchema = z
+  .string()
+  .refine(isPageId, { message: `Expected a page id (prefix "${ID_PREFIXES.page}")` });
+export const ServiceIdSchema = z
+  .string()
+  .refine(isServiceId, { message: `Expected a service id (prefix "${ID_PREFIXES.service}")` });
+export const ThemeIdSchema = z
+  .string()
+  .refine(isThemeId, { message: `Expected a theme id (prefix "${ID_PREFIXES.theme}")` });
+export const PaletteEntryIdSchema = z
+  .string()
+  .refine(isPaletteEntryId, { message: `Expected a palette-entry id (prefix "${ID_PREFIXES.palette}")` });
+
+export const LedgerKindSchema = z.enum([
+  'orbital',
+  'entity',
+  'trait',
+  'event',
+  'page',
+  'service',
+  'theme',
+]);
+
+export const LedgerEntrySchema = z.object({
+  id: z.string(),
+  kind: LedgerKindSchema,
+  bakedName: z.string(),
+  curName: z.string(),
+  renames: z.array(
+    z.object({ from: z.string(), to: z.string(), at: z.string() }),
+  ),
+  owner: z.enum(['std', 'io', 'workspace']),
+  parent: TraitIdSchema.optional(),
+});
+
+export const IdentityLedgerSchema = z.object({
+  schemaVersion: z.literal(1),
+  entries: z.record(LedgerEntrySchema),
+});

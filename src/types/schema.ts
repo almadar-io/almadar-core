@@ -26,6 +26,7 @@ import type { ServiceDefinition } from "./service.js";
 import { ServiceDefinitionSchema } from "./service.js";
 import type { Trait } from "./trait.js";
 import type { IdentityLedger } from "./identity.js";
+import { IdentityLedgerSchema } from "./identity.js";
 
 // ============================================================================
 // Orbital Config
@@ -200,6 +201,11 @@ export const OrbitalSchemaSchema = z.object({
   services: z.array(ServiceDefinitionSchema).optional(),
   config: OrbitalConfigSchema.optional(),
   _metadata: SchemaMetadataSchema.optional(),
+  // V4 identity — optional/dual-carry until the Phase-7 flip. Present on
+  // id-carrying `.orb` files so `parseOrbitalSchema` preserves them instead
+  // of stripping unknown keys.
+  schemaVersion: z.number().optional(),
+  ledger: IdentityLedgerSchema.optional(),
 });
 
 // ============================================================================
