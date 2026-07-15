@@ -32,7 +32,7 @@ import type {
   TraitReference,
   TraitTick,
 } from '../types/index.js';
-import { isCallSiteConfigDeclaration, persistenceModeAllowsOverrides } from '../types/index.js';
+import { isCallSiteConfigDeclaration, persistenceModeAllowsOverrides, ledgerRename } from '../types/index.js';
 import type {
   MakePageRefOpts,
   MakeTraitRefOpts,
@@ -490,25 +490,47 @@ export function mergeCallSiteConfigOverrides(
 export function applyDeclarationTraitRenames(
   schema: OrbitalSchema,
   renames: ReadonlyMap<string, string>,
+  /**
+   * Rename timestamp (ISO string) for the ledger `renames[]` audit row. Threaded
+   * from the persistence layer (which owns the clock). The stamp keyed each inline
+   * trait's ledger `curName` to its canonical name; without this update the renamed
+   * declaration disagrees with `curName` → `ORB_ID_NAME_MISMATCH` on the page ref.
+   */
+  at: string,
 ): OrbitalSchema {
   if (renames.size === 0) return schema;
 
   type TraitElem = OrbitalDefinition['traits'][number];
+  const renamedTraitIds: Array<{ id: string; to: string }> = [];
   const renameDeclaration = (t: TraitElem): TraitElem => {
     if (typeof t !== 'object' || t === null) return t;
     const named = t as { name?: string };
     if (typeof named.name !== 'string') return t;
     const renamed = renames.get(named.name);
-    return renamed !== undefined ? { ...t, name: renamed } : t;
+    if (renamed === undefined) return t;
+    const id = (t as { id?: string }).id;
+    if (typeof id === 'string') renamedTraitIds.push({ id, to: renamed });
+    return { ...t, name: renamed };
   };
 
-  return {
-    ...schema,
-    orbitals: schema.orbitals.map((orbital) => {
-      if (!('traits' in orbital) || !Array.isArray(orbital.traits)) return orbital;
-      return { ...orbital, traits: orbital.traits.map(renameDeclaration) };
-    }),
-  };
+  const orbitals = schema.orbitals.map((orbital) => {
+    if (!('traits' in orbital) || !Array.isArray(orbital.traits)) return orbital;
+    return { ...orbital, traits: orbital.traits.map(renameDeclaration) };
+  });
+
+  // Update the ledger `curName` for each renamed inline trait id so the
+  // declaration + ledger agree — clears `ORB_ID_NAME_MISMATCH`; the compiler's
+  // identity-normalization pass then rewrites the canonical page `ref` /
+  // `@trait.<canonical>` tokens by id. Reference (imported) trait aliases carry
+  // no local ledger entry, so only inline trait ids are updated here.
+  let ledger = schema.ledger;
+  if (ledger !== undefined) {
+    for (const { id, to } of renamedTraitIds) {
+      ledger = ledgerRename(ledger, id, to, at);
+    }
+  }
+
+  return { ...schema, orbitals, ...(ledger !== schema.ledger ? { ledger } : {}) };
 }
 
 /** A single entity display rename: `from` (canonical name at stamp) → `to`. */
@@ -538,39 +560,59 @@ export interface EntityDeclarationRename {
 export function applyDeclarationEntityRename(
   schema: OrbitalSchema,
   rename: EntityDeclarationRename,
+  /**
+   * Rename timestamp (ISO string) for the ledger `renames[]` audit row. Threaded
+   * from the persistence layer (which owns the clock). The stamp keyed the ledger
+   * `curName` to the canonical entity name; without this update the renamed
+   * declaration disagrees with `curName` → `ORB_ID_NAME_MISMATCH`.
+   */
+  at: string,
 ): OrbitalSchema {
   if (rename.from === rename.to) return schema;
 
   const linkedEntityIsFrom = (shape: object): boolean =>
     (shape as { linkedEntity?: string }).linkedEntity === rename.from;
 
-  return {
-    ...schema,
-    orbitals: schema.orbitals.map((orbital) => {
-      const entity = orbital.entity;
-      if (typeof entity !== 'object' || entity === null || entity.name !== rename.from) {
-        return orbital;
-      }
+  const renamedEntityIds: string[] = [];
+  const orbitals = schema.orbitals.map((orbital) => {
+    const entity = orbital.entity;
+    if (typeof entity !== 'object' || entity === null || entity.name !== rename.from) {
+      return orbital;
+    }
+    const entityId = (entity as { id?: string }).id;
+    if (typeof entityId === 'string') renamedEntityIds.push(entityId);
 
-      const traits = orbital.traits.map((t): TraitInput =>
-        typeof t === 'object' && t !== null && linkedEntityIsFrom(t)
-          ? { ...t, linkedEntity: rename.to }
-          : t,
-      );
-      const pages = orbital.pages?.map((p): PageInput =>
-        typeof p === 'object' && p !== null && linkedEntityIsFrom(p)
-          ? { ...p, linkedEntity: rename.to }
-          : p,
-      );
+    const traits = orbital.traits.map((t): TraitInput =>
+      typeof t === 'object' && t !== null && linkedEntityIsFrom(t)
+        ? { ...t, linkedEntity: rename.to }
+        : t,
+    );
+    const pages = orbital.pages?.map((p): PageInput =>
+      typeof p === 'object' && p !== null && linkedEntityIsFrom(p)
+        ? { ...p, linkedEntity: rename.to }
+        : p,
+    );
 
-      return {
-        ...orbital,
-        entity: { ...entity, name: rename.to },
-        traits,
-        ...(pages !== undefined ? { pages } : {}),
-      };
-    }),
-  };
+    return {
+      ...orbital,
+      entity: { ...entity, name: rename.to },
+      traits,
+      ...(pages !== undefined ? { pages } : {}),
+    };
+  });
+
+  // Update the ledger `curName` for each renamed entity id (route to the
+  // canonical owner) so the declaration + ledger agree — clears
+  // `ORB_ID_NAME_MISMATCH`; the compiler's identity-normalization pass then
+  // rewrites the canonical `@entity`/`fetch`/`persist` tokens by id.
+  let ledger = schema.ledger;
+  if (ledger !== undefined) {
+    for (const id of renamedEntityIds) {
+      ledger = ledgerRename(ledger, id, rename.to, at);
+    }
+  }
+
+  return { ...schema, orbitals, ...(ledger !== schema.ledger ? { ledger } : {}) };
 }
 
 /**
