@@ -31,6 +31,7 @@ export {
   type ComposeBehaviorsInput,
   type ComposeBehaviorsResult,
   composeBehaviors,
+  mergeLedgers,
 } from './builders/compose-behaviors.js';
 // LayoutTrait + slot-embedding helpers (Phase 7.6 — atom-composition recipe path).
 export {

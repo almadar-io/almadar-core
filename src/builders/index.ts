@@ -27,6 +27,7 @@ export {
   type ComposeBehaviorsInput,
   type ComposeBehaviorsResult,
   composeBehaviors,
+  mergeLedgers,
 } from './compose-behaviors.js';
 
 // Phase 4.2 reference-form builders (mirrored from ../builders.ts for the

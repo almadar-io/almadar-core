@@ -38,7 +38,7 @@ function asDefinitions(inputs: (OrbitalDefinition | OrbitalSchema)[]): OrbitalDe
  * across slices resolves deterministically to the earliest input's row. Output
  * entries are sorted by id for stable, order-independent composition.
  */
-function mergeLedgers(inputs: (OrbitalDefinition | OrbitalSchema)[]): IdentityLedger | undefined {
+export function mergeLedgers(inputs: (OrbitalDefinition | OrbitalSchema)[]): IdentityLedger | undefined {
   const merged = new Map<string, LedgerEntry>();
   let sawLedger = false;
   for (const input of inputs) {
