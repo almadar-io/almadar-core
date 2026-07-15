@@ -16,11 +16,13 @@ export { extractManifest } from './extract-manifest.js';
 export {
   applyParamsToOrb,
   applyDeclarationTraitRenames,
+  applyDeclarationEntityRename,
   rebindInlineTraitEntity,
   rewriteEntityInInlineTrait,
   mergeCallSiteConfigOverrides,
   validateOrbitalFactoryParams,
 } from './apply-params-to-orb.js';
+export type { EntityDeclarationRename } from './apply-params-to-orb.js';
 export { applyParamsToWholeOrb } from './apply-params-to-whole-orb.js';
 export type {
   OrbitalFactoryParams,

@@ -406,43 +406,27 @@ export function rewriteEntityInInlineTrait(trait: Trait, oldName: string, newNam
 type TraitInput = OrbitalSchema['orbitals'][number]['traits'][number];
 type PageInput = NonNullable<OrbitalSchema['orbitals'][number]['pages']>[number];
 
+// V4-W4 stamp-before-rename: traits/pages are emitted CANONICAL. Inline traits
+// (and string refs) pass through untouched — their `@entity.<canonical>` tokens
+// + `linkedEntity` stay canonical and resolve by stamped id. Reference objects
+// are still normalised through `makeTraitRef`/`makePageRef` (shape only, no
+// entity rewrite); their canonical `linkedEntity` is renamed post-stamp.
 function rebuildTraits(
-  ctx: OverlayContext,
-  effectiveEntityName: string,
   traits: OrbitalSchema['orbitals'][number]['traits'],
 ): OrbitalDefinition['traits'] {
   return traits.map((t): TraitInput => {
-    if (!isTraitReferenceObject(t)) {
-      if (typeof t === 'string') return t;
-      return rebindInlineTraitEntity(t, ctx.canonicalEntityName, effectiveEntityName);
-    }
-    const rewrittenLinkedEntity =
-      t.linkedEntity === ctx.canonicalEntityName ? effectiveEntityName : t.linkedEntity;
-    const opts: MakeTraitRefOpts = {
-      ...t,
-      linkedEntity: rewrittenLinkedEntity,
-    } as MakeTraitRefOpts;
-    return makeTraitRef(opts);
+    if (!isTraitReferenceObject(t)) return t;
+    return makeTraitRef({ ...t } as MakeTraitRefOpts);
   });
 }
 
 function rebuildPages(
-  ctx: OverlayContext,
-  effectiveEntityName: string,
   pages: OrbitalSchema['orbitals'][number]['pages'],
 ): NonNullable<OrbitalDefinition['pages']> {
   if (!pages) return [];
   return pages.map((p): PageInput => {
-    if (!isPageRefObject(p)) {
-      return p;
-    }
-    const rewrittenLinkedEntity =
-      p.linkedEntity === ctx.canonicalEntityName ? effectiveEntityName : p.linkedEntity;
-    const opts: MakePageRefOpts = {
-      ...p,
-      linkedEntity: rewrittenLinkedEntity,
-    } as MakePageRefOpts;
-    return makePageRef(opts);
+    if (!isPageRefObject(p)) return p;
+    return makePageRef({ ...p } as MakePageRefOpts);
   });
 }
 
@@ -527,6 +511,68 @@ export function applyDeclarationTraitRenames(
   };
 }
 
+/** A single entity display rename: `from` (canonical name at stamp) → `to`. */
+export interface EntityDeclarationRename {
+  readonly from: string;
+  readonly to: string;
+}
+
+/**
+ * Apply an entity rename to DECLARATIONS only, AFTER the schema has been
+ * stamped (V4-W4 stamp-before-rename). The entity, its `@entity.<from>` body
+ * tokens, and every trait/page `linkedEntity` were all emitted CANONICAL by
+ * the factory, so stamping keyed `entityRefIds`/`linkedEntityId` by `from`.
+ *
+ * This renames only the visible declaration surface — `entity.name` and every
+ * trait/page `linkedEntity` whose value is `from` — leaving the `@entity.<from>`
+ * body tokens and every stamped id untouched. Readers resolve those tokens by
+ * `entityRefIds` id and resolve `linkedEntity` by `linkedEntityId`, so the
+ * rename lands on the right declaration without any body rewrite (this is what
+ * lets the factory stop calling `rebindInlineTraitEntity`). Collection is not
+ * renamed here — its effective value was already baked at build time.
+ *
+ * Pure — returns a new schema. Applied to every orbital whose primary entity
+ * is named `from` (mirrors the former per-orbital `applyParamsToOrb` scope for
+ * a single-orbital write).
+ */
+export function applyDeclarationEntityRename(
+  schema: OrbitalSchema,
+  rename: EntityDeclarationRename,
+): OrbitalSchema {
+  if (rename.from === rename.to) return schema;
+
+  const linkedEntityIsFrom = (shape: object): boolean =>
+    (shape as { linkedEntity?: string }).linkedEntity === rename.from;
+
+  return {
+    ...schema,
+    orbitals: schema.orbitals.map((orbital) => {
+      const entity = orbital.entity;
+      if (typeof entity !== 'object' || entity === null || entity.name !== rename.from) {
+        return orbital;
+      }
+
+      const traits = orbital.traits.map((t): TraitInput =>
+        typeof t === 'object' && t !== null && linkedEntityIsFrom(t)
+          ? { ...t, linkedEntity: rename.to }
+          : t,
+      );
+      const pages = orbital.pages?.map((p): PageInput =>
+        typeof p === 'object' && p !== null && linkedEntityIsFrom(p)
+          ? { ...p, linkedEntity: rename.to }
+          : p,
+      );
+
+      return {
+        ...orbital,
+        entity: { ...entity, name: rename.to },
+        traits,
+        ...(pages !== undefined ? { pages } : {}),
+      };
+    }),
+  };
+}
+
 /**
  * The overlay. Resolves the effective entity name + collection, calls
  * `makeOrbitalWithUses` with the rewritten data, then applies the params'
@@ -541,7 +587,14 @@ export function applyParamsToOrb(
   const orbital = findOrbitalOrThrow(orb, orbitalName);
   const canonicalEntity = assertResolvedEntity(orbital.entity, orbitalName, orb.name);
   const canonicalEntityName = canonicalEntity.name;
-  const effectiveEntityName = params.entityName ?? canonicalEntityName;
+  // V4-W4 stamp-before-rename: emit the entity + every `@entity`/`linkedEntity`
+  // ref CANONICAL. The effective-name rename is a declaration-only concern
+  // applied post-stamp (see `applyDeclarationEntityRename`), so the stamped
+  // `entityRefIds`/`linkedEntityId` side-maps are keyed by the canonical name
+  // that still agrees with the un-rewritten `@entity.<canonical>` tokens.
+  // Readers resolve those tokens by stable id onto the renamed declaration.
+  // The collection is inert for stamping (not an identity key), so its
+  // effective value is baked at build time — only name + linkedEntity rename.
   const effectiveCollection =
     typeof canonicalEntity.collection === 'string'
       ? (params.collection ??
@@ -555,9 +608,9 @@ export function applyParamsToOrb(
   const built = makeOrbitalWithUses({
     name: orbital.name,
     uses: orbital.uses ?? [],
-    entity: buildEntity(ctx, effectiveEntityName, effectiveCollection, params),
-    traits: rebuildTraits(ctx, effectiveEntityName, orbital.traits),
-    pages: rebuildPages(ctx, effectiveEntityName, orbital.pages),
+    entity: buildEntity(ctx, canonicalEntityName, effectiveCollection, params),
+    traits: rebuildTraits(orbital.traits),
+    pages: rebuildPages(orbital.pages),
   });
 
   if (built.traits && params.traitOverrides !== undefined) {
