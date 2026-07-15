@@ -177,9 +177,33 @@ export function normalizeCallSiteConfigToValues(
  * the enum member list through lowering — consumed by config-driven UI
  * (e.g. the playground property inspector) to render typed controls.
  */
+/**
+ * The reference config-field types (V4-W5). A config knob typed `entity`,
+ * `trait`, or `event` holds a REFERENCE (an entity/trait/event name), not a
+ * plain value — so the stamp records the referenced node's id on the field
+ * (`ConfigFieldDeclaration.refId`) and both execution paths resolve the value to
+ * the node's CURRENT name by id, exactly like `entityRefIds`/`traitEmbedIds`.
+ * This is the deterministic, source-tagged contract that lets a declaration-only
+ * rename flow through a config value without any name-scanning heuristic.
+ */
+export const REFERENCE_CONFIG_TYPES = ['entity', 'trait', 'event'] as const;
+export type ReferenceConfigType = (typeof REFERENCE_CONFIG_TYPES)[number];
+
+/** True when a config field's `type` marks its value as an entity/trait/event reference. */
+export function isReferenceConfigType(type: string): type is ReferenceConfigType {
+    return (REFERENCE_CONFIG_TYPES as readonly string[]).includes(type);
+}
+
 export interface ConfigFieldDeclaration {
     readonly type: string;
     readonly default?: TraitConfigValue;
+    /**
+     * V4-W5 dual-carry id — set by the stamp when `type` is a reference config
+     * type (`entity`/`trait`/`event`): the stable id of the entity/trait/event
+     * the field's value names. Readers resolve the value to that node's current
+     * name by id (rename-proof); absent for non-reference fields.
+     */
+    readonly refId?: string;
     /** Marks the knob as mandatory at every call site (own-page binding exempt). `required` + `default` may coexist — the default only serves the trait's own demo page. */
     readonly required?: boolean;
     /** `@label` — human-readable control label. */
@@ -217,6 +241,7 @@ export const ConfigFieldItemsDeclarationSchema: z.ZodType<ConfigFieldItemsDeclar
 export const ConfigFieldDeclarationSchema: z.ZodType<ConfigFieldDeclaration> = z.object({
     type: z.string(),
     default: TraitConfigValueSchema.optional(),
+    refId: z.string().optional(),
     required: z.boolean().optional(),
     label: z.string().optional(),
     description: z.string().optional(),
