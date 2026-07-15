@@ -986,6 +986,21 @@ export interface Trait {
     linkedEntity?: string;
     /** V4 dual-carry id sibling of `linkedEntity` — optional until the Phase-7 flip. */
     linkedEntityId?: EntityId;
+    /**
+     * V4 leverage-ids — id side-map for `@entity.<Name>` binding tokens + positional
+     * entity args (`fetch`/`ref`/`persist`/`spawn`) in this trait's guards/effects/
+     * ticks/listens. Maps the referenced entity NAME → its stable id, so readers
+     * resolve these bare-string positions by id (else name) and an entity rename never
+     * strands them — the coverage that lets the entity name-rewriter be deleted.
+     */
+    entityRefIds?: Record<string, EntityId>;
+    /**
+     * V4 leverage-ids — id side-map for `@trait.<Name>` embed tokens (render-ui embeds /
+     * effect-tree sibling refs). Maps the embed token NAME → the embedded trait's stable
+     * id, so readers splice embeds by id (else name) — the coverage that lets the
+     * `@trait.` name-rewriter be deleted.
+     */
+    traitEmbedIds?: Record<string, TraitId>;
     requiredFields?: RequiredField[];
     dataEntities?: TraitDataEntity[];
     stateMachine?: StateMachine;
@@ -1064,6 +1079,8 @@ export const TraitSchema = z.object({
     scope: TraitScopeSchema,
     linkedEntity: z.string().optional(),
     linkedEntityId: EntityIdSchema.optional(),
+    entityRefIds: z.record(z.string().min(1), EntityIdSchema).optional(),
+    traitEmbedIds: z.record(z.string().min(1), TraitIdSchema).optional(),
     requiredFields: z.array(RequiredFieldSchema).optional(),
     dataEntities: z.array(TraitDataEntitySchema).optional(),
     stateMachine: StateMachineSchema.optional(),
