@@ -482,95 +482,49 @@ export function mergeCallSiteConfigOverrides(
 }
 
 /**
- * Rewrite every reference to a renamed trait so a
- * `traitOverrides.<T>.name` override keeps the orbital internally
- * consistent. A rename changes ONLY the trait's local name; without this
- * pass the factory output still carries the canonical name in:
- *   - `pages[].traits[].ref` (→ ORB_P_INVALID_TRAIT_REF: "referenced on
- *     page does not exist" — the exact demotion storm the dashboard
- *     param-fill hit when the LLM renamed its chart traits), and
- *   - `@trait.<canonical>` tokens inside sibling traits' config (layout
- *     tile slots like `tile1Trait: "@trait.DefaultRevenueChart"`).
+ * Apply `traitOverrides.<T>.name` renames to trait DECLARATIONS only,
+ * AFTER the schema has been stamped (V4-W4 stamp-before-rename).
  *
- * Single canonical implementation shared by `applyParamsToOrb` (runtime
- * factory overlay) and every generated factory body (via the packages'
- * `factory-runtime` re-export shims). Pure — returns a new definition.
+ * A trait rename is a pure display-name change: it renames the declaration
+ * (`traits[].name` for inline traits, the ref object's local `name` for
+ * reference traits) and nothing else. Every REFERENCE to the trait —
+ * `pages[].traits[].ref`, `@trait.<canonical>` tokens in sibling config /
+ * stateMachine effect trees — is left carrying its canonical name AND its
+ * stamped id (page ref `refId`, the referring trait's `traitEmbedIds`
+ * side-map). Readers resolve those references by stable id onto the renamed
+ * declaration, so no token/page-ref rewrite is needed (this replaced the
+ * deleted `applyTraitRenames`).
+ *
+ * The keys are canonical names because stamping ran while the declaration
+ * still carried its canonical name (the factory no longer renames — see
+ * `applyParamsToOrb`), so `trait.name === canonicalKey` at this point.
+ *
+ * Pure — returns a new schema. Applied per orbital; the same override key
+ * renames the matching declaration in every orbital that owns it (matches
+ * the former per-orbital `applyParamsToOrb` semantics).
  */
-export function applyTraitRenames(
-  orbital: OrbitalDefinition,
+export function applyDeclarationTraitRenames(
+  schema: OrbitalSchema,
   renames: ReadonlyMap<string, string>,
-): OrbitalDefinition {
-  if (renames.size === 0) return orbital;
-
-  const TRAIT_TOKEN = '@trait.';
-  const renameToken = (v: string): string => {
-    if (!v.startsWith(TRAIT_TOKEN)) return v;
-    const renamed = renames.get(v.slice(TRAIT_TOKEN.length));
-    return renamed !== undefined ? `${TRAIT_TOKEN}${renamed}` : v;
-  };
-  const rewriteValue = (v: TraitConfigValue): TraitConfigValue => {
-    if (typeof v === 'string') return renameToken(v);
-    if (Array.isArray(v)) return v.map(rewriteValue);
-    if (v !== null && typeof v === 'object') {
-      const out: Record<string, TraitConfigValue> = {};
-      for (const [k, x] of Object.entries(v)) out[k] = rewriteValue(x);
-      return out;
-    }
-    return v;
-  };
-  const rewriteEntry = (e: CallSiteConfigEntry): CallSiteConfigEntry => {
-    if (isCallSiteConfigDeclaration(e)) {
-      return e.default !== undefined ? { ...e, default: rewriteValue(e.default) } : e;
-    }
-    return rewriteValue(e);
-  };
-  const rewriteConfig = <C extends CallSiteConfig>(config: C): C => {
-    const out: Record<string, CallSiteConfigEntry> = {};
-    for (const [k, e] of Object.entries(config)) out[k] = rewriteEntry(e);
-    return out as C;
-  };
+): OrbitalSchema {
+  if (renames.size === 0) return schema;
 
   type TraitElem = OrbitalDefinition['traits'][number];
-  type PageElem = NonNullable<OrbitalDefinition['pages']>[number];
-
-  // `@trait.<old>` tokens also live inside inline traits' stateMachine
-  // effect trees (render-ui embed children) — a sibling trait embedding a
-  // renamed render trait references it by token there, not in config. The
-  // reviver runs every string through the same `renameToken`.
-  const rewriteStateMachine = <SM>(sm: SM): SM =>
-    JSON.parse(JSON.stringify(sm), (_k, v: unknown) =>
-      typeof v === 'string' ? renameToken(v) : v,
-    ) as SM;
-
-  const traits = (orbital.traits ?? []).map((t): TraitElem => {
+  const renameDeclaration = (t: TraitElem): TraitElem => {
     if (typeof t !== 'object' || t === null) return t;
-    if ('ref' in t) {
-      return t.config !== undefined ? { ...t, config: rewriteConfig(t.config) } : t;
-    }
-    const withConfig = t.config !== undefined ? { ...t, config: rewriteConfig(t.config) } : t;
-    return withConfig.stateMachine !== undefined
-      ? { ...withConfig, stateMachine: rewriteStateMachine(withConfig.stateMachine) }
-      : withConfig;
-  });
-
-  const renamePageTrait = (
-    entry: string | Trait | PageTraitRef | TraitReference,
-  ): string | Trait | PageTraitRef | TraitReference => {
-    if (typeof entry === 'string') return renames.get(entry) ?? entry;
-    if ('ref' in entry && typeof entry.ref === 'string') {
-      const renamed = renames.get(entry.ref);
-      return renamed !== undefined ? { ...entry, ref: renamed } : entry;
-    }
-    return entry;
+    const named = t as { name?: string };
+    if (typeof named.name !== 'string') return t;
+    const renamed = renames.get(named.name);
+    return renamed !== undefined ? { ...t, name: renamed } : t;
   };
 
-  const pages = (orbital.pages ?? []).map((p): PageElem => {
-    if (typeof p !== 'object' || p === null) return p;
-    if (!Array.isArray(p.traits)) return p;
-    return { ...p, traits: p.traits.map(renamePageTrait) } as PageElem;
-  });
-
-  return { ...orbital, traits, pages };
+  return {
+    ...schema,
+    orbitals: schema.orbitals.map((orbital) => {
+      if (!('traits' in orbital) || !Array.isArray(orbital.traits)) return orbital;
+      return { ...orbital, traits: orbital.traits.map(renameDeclaration) };
+    }),
+  };
 }
 
 /**
@@ -606,15 +560,11 @@ export function applyParamsToOrb(
     pages: rebuildPages(ctx, effectiveEntityName, orbital.pages),
   });
 
-  const traitRenames = new Map<string, string>();
   if (built.traits && params.traitOverrides !== undefined) {
     built.traits = built.traits.map((t) => {
       if (!isTraitReferenceObject(t) || typeof t.name !== 'string') return t;
       const override: OrbitalTraitOverride | undefined = params.traitOverrides?.[t.name];
       if (!override) return t;
-      if (override.name !== undefined && override.name !== t.name) {
-        traitRenames.set(t.name, override.name);
-      }
       const merged: TraitReference = { ...t };
       if (override.config !== undefined) {
         merged.config = mergeCallSiteConfigOverrides(t.config ?? {}, override.config);
@@ -643,7 +593,13 @@ export function applyParamsToOrb(
         }
         merged.events = { ...(t.events ?? {}), ...override.events };
       }
-      if (override.name !== undefined) merged.name = override.name;
+      // V4-W4: the trait NAME override is NOT applied here. Names are a
+      // display concern applied declaration-only AFTER stamping (see
+      // `applyDeclarationTraitRenames`), so the stamped ids/side-maps/page
+      // refIds are keyed by canonical names that still agree with the
+      // (un-rewritten) `@trait.<canonical>` tokens + page `ref`s. Readers
+      // then resolve those tokens by stable id onto the renamed declaration —
+      // no token rewrite (the deleted `applyTraitRenames`) required.
       if (override.emitsScope !== undefined) merged.emitsScope = override.emitsScope;
       if (override.listens !== undefined) merged.listens = override.listens;
       return merged;
@@ -657,5 +613,5 @@ export function applyParamsToOrb(
     });
   }
 
-  return applyTraitRenames(built, traitRenames);
+  return built;
 }
