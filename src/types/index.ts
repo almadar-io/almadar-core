@@ -310,6 +310,7 @@ export {
   type LogEffect,
   type DoEffect,
   type RenderItemLambda,
+  type RenderChildrenMap,
   // Resource effect types
   type RefEffect,
   type DerefEffect,

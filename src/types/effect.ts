@@ -146,6 +146,18 @@ export type RenderUIEffect =
 export type RenderItemLambda = ['fn', string, AnyPatternConfig];
 
 /**
+ * Dynamic-collection children entry: renders one child per item of a collection
+ * expression, authored inline in a `children:` position and kept verbatim as IR
+ * (no new node kind). The collection expression is an {@link SExpr} evaluated at
+ * render time; the {@link RenderItemLambda} body is instantiated per item with
+ * the lambda param bound as an `@item`-scope binding. Both execution paths lower
+ * onto the one lambda + `@item` + splice machinery.
+ *
+ * @example ["array/map", "@entity.tasks", ["fn", "item", { "type": "typography", "content": "@item.title" }]]
+ */
+export type RenderChildrenMap = ['array/map', SExpr, RenderItemLambda];
+
+/**
  * Navigate effect - navigates to an internal page path or an external URL.
  * @example ['navigate', '/tasks'] or ['navigate', '/tasks/:id', { id: '123' }]
  * @example ['navigate', 'https://example.com']
@@ -1046,7 +1058,10 @@ export interface ResolvedPatternProps {
 export interface RenderUINode {
   type: string;
   props?: ResolvedPatternProps;
-  children?: RenderUINode[];
+  /** Static child nodes and/or dynamic-collection map entries. A
+   *  {@link RenderChildrenMap} entry expands at render time into resolved
+   *  `RenderUINode`s, so components always receive a flat, fully-resolved list. */
+  children?: Array<RenderUINode | RenderChildrenMap>;
   content?: string;
   entity?: string;
   renderItem?: RenderUINode;
