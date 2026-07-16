@@ -165,21 +165,28 @@ const ORB_ALLOWED_ENTITY_PATTERNS = new Set([
   'search-input',
   'form-section',
   'meter',
+  'table-view',
+  'filter-group',
+  'timeline',
+  'media-gallery',
 ]);
 
 /**
- * Categories to exclude from .orb render-ui guidance (game-specific, debug, templates, 3D).
+ * Categories to exclude from .orb render-ui guidance (debug, templates).
+ * The `game` category is allowed so 2D game patterns compose in free mode;
+ * 3D game patterns are excluded by the `3-d`/`3d` name guard below.
  */
 const ORB_EXCLUDED_CATEGORIES = new Set([
-  'game', 'debug', 'template',
+  'debug', 'template',
 ]);
 
 /**
  * Get patterns allowed in .orb render-ui trees.
  *
  * Returns all non-entity patterns (atoms/molecules) plus the allowed
- * entity-aware exceptions (data-list, data-grid, search-input, form-section, meter).
- * Excludes game-specific, debug, and template patterns.
+ * entity-aware exceptions (data-list, data-grid, search-input, form-section,
+ * meter, table-view, filter-group, timeline, media-gallery).
+ * Excludes debug and template categories, plus any 3D-named patterns.
  *
  * Grouped by registry category with description and key props.
  */
