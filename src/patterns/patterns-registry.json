@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-16T10:40:00.390Z",
+  "exportedAt": "2026-07-16T19:33:37.203Z",
   "patterns": {
     "entity-table": {
       "type": "entity-table",
@@ -4222,7 +4222,7 @@
           "types": [
             "string"
           ],
-          "description": "Declarative step click event — emits UI:{stepClickEvent} with { stepIndex }",
+          "description": "Declarative step click event — emits UI:{stepClickEvent} with { stepIndex }. Setting it requires declaring that event (with a `{ stepIndex }` payload) and a transition handling it in the same trait; omit this prop for non-clickable progress indicators.",
           "kind": "event-ref",
           "emitPayloadSchema": [
             {
@@ -7671,7 +7671,7 @@
           "types": [
             "string"
           ],
-          "description": "Input type - supports 'select' and 'textarea' in addition to standard types",
+          "description": "Input type — selects the field's data mode. Use 'password' for masked credentials / secret / passphrase entry (there is no separate password pattern); 'email', 'tel', 'url', 'number', 'search', 'date', and 'time' for their respective values; and 'select' / 'textarea' for choice and multi-line entry in addition to the standard single-line types.",
           "enumValues": [
             "text",
             "email",
@@ -10385,7 +10385,7 @@
           "types": [
             "string"
           ],
-          "description": "Input type - supports 'select' and 'textarea' in addition to standard types",
+          "description": "Input type — selects the field's data mode. Use 'password' for masked credentials / secret / passphrase entry (there is no separate password pattern); 'email', 'tel', 'url', 'number', 'search', 'date', and 'time' for their respective values; and 'select' / 'textarea' for choice and multi-line entry in addition to the standard single-line types.",
           "enumValues": [
             "text",
             "email",
