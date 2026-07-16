@@ -374,6 +374,7 @@ export interface PatternPropsMap {
     duration?: number | string | SExpr;
     prefix?: string | SExpr;
     suffix?: string | SExpr;
+    format?: string | SExpr;
     className?: string | SExpr;
   };
   'animated-graphic': {
