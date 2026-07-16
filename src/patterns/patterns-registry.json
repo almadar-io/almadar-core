@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-13T15:27:57.365Z",
+  "exportedAt": "2026-07-16T10:40:00.390Z",
   "patterns": {
     "entity-table": {
       "type": "entity-table",
@@ -705,7 +705,7 @@
           "types": [
             "function"
           ],
-          "description": "renderItem prop",
+          "description": "Render function for each item. In .lolo: renderItem: (fn item <Component …={@item.field}/>), binding per-item fields via @item.field.",
           "kind": "callback",
           "callbackArgs": [
             {
@@ -875,15 +875,6 @@
       ],
       "typicalSize": "medium",
       "propsSchema": {
-        "entity": {
-          "types": [
-            "object",
-            "array"
-          ],
-          "description": "Entity record or array of records — pre-resolved by the trait via render-ui after a fetch emit",
-          "kind": "entity",
-          "cardinality": "collection"
-        },
         "className": {
           "types": [
             "string"
@@ -986,6 +977,15 @@
               "number"
             ]
           }
+        },
+        "entity": {
+          "types": [
+            "object",
+            "array"
+          ],
+          "description": "Entity data (single record or collection).",
+          "kind": "entity",
+          "cardinality": "collection"
         },
         "minCardWidth": {
           "types": [
@@ -8949,7 +8949,7 @@
           "types": [
             "function"
           ],
-          "description": "Render function for each item",
+          "description": "Render function for each item. In .lolo: renderItem: (fn item <Component …={@item.field}/>), binding per-item fields via @item.field.",
           "required": true,
           "kind": "callback",
           "callbackArgs": [
@@ -14488,6 +14488,11 @@
                   "number"
                 ]
               },
+              "badge": {
+                "types": [
+                  "number"
+                ]
+              },
               "x": {
                 "types": [
                   "number"
@@ -14508,7 +14513,7 @@
           "types": [
             "array"
           ],
-          "description": "Graph edges",
+          "description": "Graph edges (the only rendered links)",
           "items": {
             "types": [
               "object"
@@ -14543,6 +14548,39 @@
             "required": [
               "source",
               "target"
+            ]
+          }
+        },
+        "similarity": {
+          "types": [
+            "array"
+          ],
+          "description": "All-pairs similarity (cosine 0–1) used ONLY for layout, never drawn. It is the secondary macro-layout: non-connected pairs get a weak spring (higher cosine ⇒ closer) so clusters arrange relative to each other; drawn `edges` stay the primary tight structure. When omitted, edges alone drive the layout.",
+          "items": {
+            "types": [
+              "object"
+            ],
+            "properties": {
+              "source": {
+                "types": [
+                  "string"
+                ]
+              },
+              "target": {
+                "types": [
+                  "string"
+                ]
+              },
+              "weight": {
+                "types": [
+                  "number"
+                ]
+              }
+            },
+            "required": [
+              "source",
+              "target",
+              "weight"
             ]
           }
         },
@@ -14655,6 +14693,11 @@
                       "number"
                     ]
                   },
+                  "badge": {
+                    "types": [
+                      "number"
+                    ]
+                  },
                   "x": {
                     "types": [
                       "number"
@@ -14709,6 +14752,74 @@
                     ]
                   },
                   "size": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "badge": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "x": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "y": {
+                    "types": [
+                      "number"
+                    ]
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        "onBadgeClick": {
+          "types": [
+            "function"
+          ],
+          "description": "On node badge click (e.g. to expand a merged cluster).",
+          "kind": "callback",
+          "callbackArgs": [
+            {
+              "name": "node",
+              "type": "object",
+              "schema": {
+                "types": [
+                  "object"
+                ],
+                "properties": {
+                  "id": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "label": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "group": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "color": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "size": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "badge": {
                     "types": [
                       "number"
                     ]
@@ -16728,7 +16839,7 @@
           "types": [
             "array"
           ],
-          "description": "Field definitions for rendering each card. The pattern contract in `@almadar/patterns` documents `columns` as the wire-format alias the compiler emits — both names resolve to the same shape here. Pass either.",
+          "description": "Field definitions for rendering each card. The pattern contract in `@almadar/core/patterns` documents `columns` as the wire-format alias the compiler emits — both names resolve to the same shape here. Pass either.",
           "items": {
             "types": [
               "object"
@@ -17060,7 +17171,7 @@
           "types": [
             "function"
           ],
-          "description": "Per-item render function (schema-level alias for children render prop). In .orb schemas: [\"fn\", \"item\", { pattern tree with @item.field bindings }] The compiler converts this to the children render prop.",
+          "description": "Per-item render function (schema-level alias for children render prop). In .orb schemas: [\"fn\", \"item\", { pattern tree with @item.field bindings }] The compiler converts this to the children render prop. In .lolo, author the per-item renderer as renderItem: (fn item <Component …={@item.field}/>), binding per-item fields via @item.field.",
           "kind": "callback",
           "callbackArgs": [
             {
@@ -17173,7 +17284,7 @@
           "types": [
             "array"
           ],
-          "description": "Field definitions for rendering each row. The pattern contract in `@almadar/patterns` documents `columns` as the wire-format alias the compiler emits — both names resolve to the same shape here. Pass either.",
+          "description": "Field definitions for rendering each row. The pattern contract in `@almadar/core/patterns` documents `columns` as the wire-format alias the compiler emits — both names resolve to the same shape here. Pass either.",
           "items": {
             "types": [
               "object"
@@ -17577,7 +17688,7 @@
           "types": [
             "function"
           ],
-          "description": "Per-item render function (schema-level alias for children render prop). In .orb schemas: [\"fn\", \"item\", { pattern tree with @item.field bindings }] The compiler converts this to the children render prop.",
+          "description": "Per-item render function (schema-level alias for children render prop). In .orb schemas: [\"fn\", \"item\", { pattern tree with @item.field bindings }] The compiler converts this to the children render prop. In .lolo, author the per-item renderer as renderItem: (fn item <Component …={@item.field}/>), binding per-item fields via @item.field.",
           "kind": "callback",
           "callbackArgs": [
             {
@@ -18607,6 +18718,12 @@
           ],
           "description": "Text to display after the number"
         },
+        "format": {
+          "types": [
+            "string"
+          ],
+          "description": "Display format: \"number\" (locale grouping), \"currency\" ($x.xx), \"percent\" (rounded %). Unset preserves the value's own decimals."
+        },
         "className": {
           "types": [
             "string"
@@ -18793,7 +18910,7 @@
           "types": [
             "function"
           ],
-          "description": "Render function for each slide",
+          "description": "Render function for each slide. In .lolo: renderItem: (fn item <Component …={@item.field}/>), binding per-item fields via @item.field.",
           "kind": "callback",
           "callbackArgs": [
             {
@@ -18966,7 +19083,7 @@
           "types": [
             "function"
           ],
-          "description": "renderItem prop",
+          "description": "Render function for each item. In .lolo: renderItem: (fn item <Component …={@item.field}/>), binding per-item fields via @item.field.",
           "required": true,
           "kind": "callback",
           "callbackArgs": [
@@ -32988,7 +33105,7 @@
           "types": [
             "function"
           ],
-          "description": "Per-row render function (schema alias). In .orb: [\"fn\",\"item\",{...}]. The compiler converts this to the children render prop.",
+          "description": "Per-row render function (schema alias). In .orb: [\"fn\",\"item\",{...}]. The compiler converts this to the children render prop. In .lolo, author the per-row renderer as renderItem: (fn item <Component …={@item.field}/>), binding per-item fields via @item.field.",
           "kind": "callback",
           "callbackArgs": [
             {
@@ -38594,31 +38711,31 @@
           "types": [
             "number"
           ],
-          "description": "Rect width in px."
+          "description": "Rect width in world units (fractions of `projector.tileWidth`)."
         },
         "height": {
           "types": [
             "number"
           ],
-          "description": "Rect height in px."
+          "description": "Rect height in world units (fractions of `projector.tileWidth`)."
         },
         "radiusX": {
           "types": [
             "number"
           ],
-          "description": "Ellipse horizontal radius in px."
+          "description": "Ellipse horizontal radius in world units (fractions of `projector.tileWidth`)."
         },
         "radiusY": {
           "types": [
             "number"
           ],
-          "description": "Ellipse vertical radius in px; omitted → `radiusX` (a circle)."
+          "description": "Ellipse vertical radius in world units; omitted → `radiusX` (a circle)."
         },
         "offsetX": {
           "types": [
             "number"
           ],
-          "description": "Fine px nudge from the anchor point (e.g. a disc drawn at `groundY - 8*scale`)."
+          "description": "Fine nudge from the anchor point in world units."
         },
         "offsetY": {
           "types": [
@@ -38630,7 +38747,7 @@
           "types": [
             "array"
           ],
-          "description": "Poly vertices as px offsets relative to the cell's projected top-left.",
+          "description": "Poly vertices as world-unit offsets relative to the cell's projected top-left.",
           "items": {
             "types": [
               "object"
