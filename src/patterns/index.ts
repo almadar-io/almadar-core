@@ -240,6 +240,11 @@ export {
   getOrbAllowedPatternsFiltered,
 } from './helpers/prompt-helpers.js';
 
+export {
+  collectRenderUiPatternTypes,
+  renderUiPatternTypesOf,
+} from './helpers/render-ui-pattern-types.js';
+
 // Export pattern recommender for @almadar/agent design tool
 export {
   recommendPatterns,
