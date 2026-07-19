@@ -171,9 +171,10 @@ export interface VerificationSnapshot {
 export type AssetLoadStatus = "loaded" | "failed" | "pending";
 
 /**
- * Entry recorded on the verification event log. The registry clamps
- * the log size (see `verificationRegistry`'s internal `MAX_EVENT_LOG`)
- * so long runs don't grow unbounded.
+ * Entry recorded on the verification event log. The registry ring-buffers
+ * the log to the last `MAX_EVENT_LOG` entries (evicting the oldest, never
+ * the recent tail) so long runs don't grow unbounded — see
+ * `verificationRegistry` and `eventLogDropped`.
  */
 export interface EventLogEntry {
   type: string;
@@ -231,6 +232,22 @@ export interface OrbitalVerificationAPI {
   assetStatus?: Record<string, AssetLoadStatus>;
   /** Rolling event bus log. Populated by `bindEventBus`. */
   eventLog?: EventLogEntry[];
-  /** Clear the event log in place. */
+  /**
+   * Per-page-load nonce, set once when `bindEventBus` creates the log
+   * (and bumped by `clearEventLog`). A verifier reading the log across
+   * hermetic page reloads uses this — not the array length — to detect a
+   * reset: the length can coincidentally refill to the same count after a
+   * reload, which silently drops the post-reload delta. The epoch changing
+   * is the only reliable reset signal.
+   */
+  eventLogEpoch?: string;
+  /**
+   * Count of entries evicted from the FRONT of the ring-buffered log this
+   * page (see `MAX_EVENT_LOG`). The absolute index of `eventLog[i]` is
+   * `eventLogDropped + i`, so a verifier can cursor by absolute position
+   * even after eviction — the recent (driven) tail is never silently lost.
+   */
+  eventLogDropped?: number;
+  /** Clear the event log in place (also bumps `eventLogEpoch`). */
   clearEventLog?: () => void;
 }
