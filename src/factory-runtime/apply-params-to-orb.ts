@@ -518,11 +518,11 @@ export function applyDeclarationTraitRenames(
     return { ...orbital, traits: orbital.traits.map(renameDeclaration) };
   });
 
-  // Update the ledger `curName` for each renamed inline trait id so the
+  // Update the ledger `curName` for each renamed trait declaration id so the
   // declaration + ledger agree — clears `ORB_ID_NAME_MISMATCH`; the compiler's
   // identity-normalization pass then rewrites the canonical page `ref` /
-  // `@trait.<canonical>` tokens by id. Reference (imported) trait aliases carry
-  // no local ledger entry, so only inline trait ids are updated here.
+  // `@trait.<canonical>` tokens by id. Covers inline bodies AND Reference-form
+  // declarations (both carry a local `id` since the composed-surface backbone).
   let ledger = schema.ledger;
   if (ledger !== undefined) {
     for (const { id, to } of renamedTraitIds) {

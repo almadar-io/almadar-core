@@ -722,6 +722,14 @@ export interface TraitReference {
     /** V4 dual-carry id sibling of `ref` — optional until the Phase-7 flip. */
     refId?: TraitId;
     /**
+     * V4 LOCAL DECLARATION id — the identity of this trait AS DECLARED in its
+     * orbital (`trait X = Alias.traits.Y` declares node X; `refId` carries
+     * Y's id). Minted by the stamp so page trait refs and `@trait.X` embeds
+     * resolve by id across `name:` renames (the composed-organism surface was
+     * the one declaration class without an id).
+     */
+    id?: TraitId;
+    /**
      * Phase 1.2: optional registry path disambiguator. Pairs with `ref` to
      * explicitly name which `uses` entry the alias was imported from
      * (e.g. "std/behaviors/atoms/std-browse"). Helpful for programmatic
@@ -804,6 +812,9 @@ export const TraitReferenceSchema = z
     .object({
         ref: z.string().min(1),
         refId: TraitIdSchema.optional(),
+        // V4 local declaration id (see the interface doc) — declared so the
+        // strip-mode zod gate carries it through instead of dropping it.
+        id: TraitIdSchema.optional(),
         // Phase 1.2: optional registry path disambiguator, pairs with `ref`.
         from: z.string().optional(),
         linkedEntity: z.string().optional(),
