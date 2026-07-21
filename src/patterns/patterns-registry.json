@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-21T03:10:57.994Z",
+  "exportedAt": "2026-07-21T03:43:21.528Z",
   "patterns": {
     "entity-table": {
       "type": "entity-table",
@@ -12947,7 +12947,7 @@
           "types": [
             "object"
           ],
-          "description": "9-sliced panel skin for the HUD chips row + title chip.",
+          "description": "Per-call-site 9-sliced panel override. Chrome normally comes from the active theme; most callers leave this unset.",
           "properties": {
             "url": {
               "types": [
@@ -13039,6 +13039,12 @@
           ],
           "description": "Game font key (future | future-narrow | pixel | blocks | mini) or a CSS font-family.",
           "default": "future"
+        },
+        "data-theme": {
+          "types": [
+            "string"
+          ],
+          "description": "Scopes an `@almadar/ui` theme (e.g. \"game-sci-fi-dark\") to this shell's subtree."
         }
       }
     },
