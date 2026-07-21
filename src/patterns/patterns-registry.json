@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-16T19:33:37.203Z",
+  "exportedAt": "2026-07-21T03:10:57.994Z",
   "patterns": {
     "entity-table": {
       "type": "entity-table",
@@ -3520,7 +3520,8 @@
       "category": "filter",
       "tier": "molecules",
       "family": "core",
-      "description": "Multiple filter controls",
+      "description": "FilterGroup — a panel of filter controls that narrows a collection by field values.",
+      "capabilities": "search refinement panel, facet filters, admin list filters, records filter sidebar, filter chips panel",
       "suggestedFor": [
         "list pages with filterable data"
       ],
@@ -5384,6 +5385,13 @@
             "string"
           ],
           "description": "className prop"
+        },
+        "fullPage": {
+          "types": [
+            "boolean"
+          ],
+          "description": "Center over the whole viewport (fix: inset-0 overlay) instead of inline.",
+          "default": false
         }
       }
     },
@@ -8891,7 +8899,8 @@
       "category": "form",
       "tier": "molecules",
       "family": "core",
-      "description": "Repeatable form section for multiple entries",
+      "description": "RepeatableFormSection — a form section that repeats a fixed group of fields, letting the user add or remove entries.",
+      "capabilities": "dynamic line items, repeatable field group, add/remove entry rows, multi-entry form block",
       "suggestedFor": [
         "repeating fields",
         "dynamic forms",
@@ -14083,7 +14092,8 @@
       "category": "form",
       "tier": "molecules",
       "family": "core",
-      "description": "Canvas-based signature capture pad with draw, clear, and confirm actions",
+      "description": "SignaturePad — a draw-to-sign canvas that captures a handwritten signature or initials.",
+      "capabilities": "e-signature capture, sign-here field, consent signature, initial-here field, wet-signature substitute",
       "suggestedFor": [
         "form signing",
         "approval workflows",
@@ -15060,7 +15070,8 @@
       "category": "component",
       "tier": "molecules",
       "family": "core",
-      "description": "QuizBlock Molecule Component  A collapsible Q&A block for embedded quiz questions in content. Shows the question with a reveal button for the answer.  Event Contract: - No events emitted (self-contained interaction) - entityAware: false",
+      "description": "QuizBlock — a single quiz question with answer choices and submit/reveal feedback.",
+      "capabilities": "multiple-choice quiz, test question, exam item, assessment question, knowledge check, trivia question",
       "suggestedFor": [
         "quiz",
         "block",
@@ -16312,7 +16323,8 @@
       "category": "display",
       "tier": "molecules",
       "family": "core",
-      "description": "FlipCard component",
+      "description": "FlipCard — flip card that reveals a hidden back face on tap or click, toggling between a front and back content slot.",
+      "capabilities": "flashcard, study deck, spaced-repetition review card, memorization drill, quiz reveal card, question/answer card, before/after reveal, term-and-definition card",
       "suggestedFor": [
         "flip",
         "card",
@@ -16769,7 +16781,8 @@
       "category": "display",
       "tier": "molecules",
       "family": "core",
-      "description": "DataGrid component",
+      "description": "DataGrid — structured records grid rendering rows over configurable columns, with sort, select, and drag-reorder.",
+      "capabilities": "admin table, records grid, user list, CRUD list, manage-records view, spreadsheet-style data grid, sortable columns",
       "suggestedFor": [
         "data",
         "grid",
@@ -19061,7 +19074,8 @@
       "category": "display",
       "tier": "molecules",
       "family": "core",
-      "description": "SortableList component",
+      "description": "SortableList — a drag-and-drop reorderable list of items.",
+      "capabilities": "checklist, task list, to-do list, priority list, ranked list, drag-to-reorder queue",
       "suggestedFor": [
         "sortable",
         "list",
@@ -19668,7 +19682,8 @@
       "category": "display",
       "tier": "molecules",
       "family": "marketing",
-      "description": "CaseStudyCard component",
+      "description": "CaseStudyCard — a card summarizing a customer case study with logo, headline result, and link.",
+      "capabilities": "customer story, success story, client story card, results showcase, proof-point card",
       "suggestedFor": [
         "case",
         "study",
@@ -19827,7 +19842,8 @@
       "category": "display",
       "tier": "molecules",
       "family": "marketing",
-      "description": "FeatureCard component",
+      "description": "FeatureCard — an icon-led card pairing a title and description to call out a single product feature.",
+      "capabilities": "feature highlight, benefit callout, product capability card, feature-grid tile",
       "suggestedFor": [
         "feature",
         "card",
@@ -20235,7 +20251,8 @@
       "category": "display",
       "tier": "molecules",
       "family": "marketing",
-      "description": "PricingCard component",
+      "description": "PricingCard — a single pricing-tier card with price, billing period, feature list, and call-to-action.",
+      "capabilities": "pricing tier, plan card, subscription tier, plan comparison card, price plan",
       "suggestedFor": [
         "pricing",
         "card",
@@ -28569,7 +28586,8 @@
       "category": "display",
       "tier": "molecules",
       "family": "avl",
-      "description": "ModuleCard component",
+      "description": "ModuleCard — a card summarizing one course module or lesson with progress and entry point.",
+      "capabilities": "course module card, lesson card, curriculum unit card, learning-path step card",
       "suggestedFor": [
         "module",
         "card",
@@ -32416,7 +32434,8 @@
       "category": "component",
       "tier": "atoms",
       "family": "core",
-      "description": "Aside Atom Component  Semantic wrapper for the native `<aside>` landmark. Owns raw HTML so molecules (SidePanel, navigation rails, callouts) can compose the semantic-aside primitive without falling back to a raw element.",
+      "description": "Aside — a secondary side panel that hosts navigation links or supplementary content alongside a main content area.",
+      "capabilities": "settings navigation sidebar, preferences menu panel, account settings nav, secondary panel, side navigation rail",
       "suggestedFor": [
         "aside"
       ],
@@ -32673,7 +32692,8 @@
       "category": "display",
       "tier": "molecules",
       "family": "core",
-      "description": "TableView component",
+      "description": "TableView — sortable, selectable data table rendering rows over configurable columns, with inline row actions and grouping.",
+      "capabilities": "admin console table, records list, CRUD data table, user list, manage-users grid, sortable columns, row selection with bulk actions, grouped list view",
       "suggestedFor": [
         "table",
         "view",
@@ -37776,7 +37796,8 @@
       "category": "display",
       "tier": "atoms",
       "family": "marketing",
-      "description": "MarketingStatCard component",
+      "description": "MarketingStatCard — a single number-highlight card pairing a large value with a label and trend delta.",
+      "capabilities": "KPI card, metric tile, dashboard stat card, number card, big-number widget, stat highlight, key metric callout",
       "suggestedFor": [
         "marketing",
         "stat",

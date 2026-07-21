@@ -321,7 +321,8 @@ export interface TraitEntityField {
     name: string;
     type: TraitFieldType;
     required?: boolean;
-    default?: unknown;
+    /** Field default parsed from `.orb` — always a JSON-shaped value. */
+    default?: TraitConfigValue;
     values?: string[];
     /** Structured per-item schema for array-of-object fields (recursive). */
     items?: ConfigFieldItemsDeclaration;
@@ -343,7 +344,7 @@ export const TraitEntityFieldSchema: z.ZodType<TraitEntityField> = z.object({
         'enum',
     ]),
     required: z.boolean().optional(),
-    default: z.unknown().optional(),
+    default: TraitConfigValueSchema.optional(),
     values: z.array(z.string()).optional(),
     items: ConfigFieldItemsDeclarationSchema.optional(),
     properties: z.lazy(() => z.record(TraitEntityFieldSchema)).optional(),
