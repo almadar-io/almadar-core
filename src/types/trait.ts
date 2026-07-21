@@ -17,8 +17,8 @@ import { EffectSchema } from './effect.js';
 import type { Entity } from './entity.js';
 import { EntitySchema } from './entity.js';
 import type { AnyPatternConfig } from '../patterns/index.js';
-import type { Expression } from './expression.js';
-import { ExpressionSchema } from './expression.js';
+import type { Expression, SExpr } from './expression.js';
+import { ExpressionSchema, SExprSchema } from './expression.js';
 
 // ============================================================================
 // Trait Configuration
@@ -39,9 +39,9 @@ export type TraitConfigValue =
     | ReadonlyArray<TraitConfigValue>
     | TraitConfigObject;
 
-export interface TraitConfigObject {
+export type TraitConfigObject = {
     readonly [key: string]: TraitConfigValue;
-}
+};
 
 export type TraitConfig = TraitConfigObject;
 
@@ -194,7 +194,7 @@ export function isReferenceConfigType(type: string): type is ReferenceConfigType
     return (REFERENCE_CONFIG_TYPES as readonly string[]).includes(type);
 }
 
-export interface ConfigFieldDeclaration {
+export type ConfigFieldDeclaration = {
     readonly type: string;
     readonly default?: TraitConfigValue;
     /**
@@ -220,15 +220,15 @@ export interface ConfigFieldDeclaration {
     readonly items?: ConfigFieldItemsDeclaration;
     /** Structured property schema for object-typed config fields (no items wrapper). */
     readonly properties?: Readonly<Record<string, TraitEntityField>>;
-}
+};
 
-export interface ConfigFieldItemsDeclaration {
+export type ConfigFieldItemsDeclaration = {
     readonly type?: string;
     /** Absent for arrays of scalars (`items: { type: "string" }`). */
     readonly properties?: Readonly<Record<string, TraitEntityField>>;
     /** Nested per-item schema for arrays of arrays (recursive). */
     readonly items?: ConfigFieldItemsDeclaration;
-}
+};
 
 export const ConfigFieldItemsDeclarationSchema: z.ZodType<ConfigFieldItemsDeclaration> = z.lazy(() =>
     z.object({
@@ -317,7 +317,7 @@ export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' 
 /**
  * Simplified field for trait data entities
  */
-export interface TraitEntityField {
+export type TraitEntityField = {
     name: string;
     type: TraitFieldType;
     required?: boolean;
@@ -328,7 +328,7 @@ export interface TraitEntityField {
     items?: ConfigFieldItemsDeclaration;
     /** Structured property schema for object-typed entity fields. */
     properties?: Readonly<Record<string, TraitEntityField>>;
-}
+};
 
 export const TraitEntityFieldSchema: z.ZodType<TraitEntityField> = z.object({
     name: z.string().min(1),
@@ -357,7 +357,7 @@ export const TraitEntityFieldSchema: z.ZodType<TraitEntityField> = z.object({
 /**
  * Simplified data entity for traits
  */
-export interface TraitDataEntity {
+export type TraitDataEntity = {
     name: string;
     collection?: string;
     fields: TraitEntityField[];
@@ -366,7 +366,7 @@ export interface TraitDataEntity {
     runtime?: boolean;
     singleton?: boolean;
     pages?: string[];
-}
+};
 
 export const TraitDataEntitySchema = z.object({
     name: z.string().min(1),
@@ -388,7 +388,7 @@ export const TraitDataEntitySchema = z.object({
  * Guards can be legacy strings or S-expressions.
  * Effects can be typed Effect objects or S-expressions.
  */
-export interface TraitTick {
+export type TraitTick = {
     name: string;
     description?: string;
     priority?: number;
@@ -409,7 +409,7 @@ export interface TraitTick {
     emits?: string[];
     /** V4 dual-carry id sibling of `emits` — optional until the Phase-7 flip. */
     emitIds?: EventId[];
-}
+};
 
 export const TraitTickSchema = z.object({
     name: z.string().min(1),
@@ -446,7 +446,7 @@ export const EventScopeSchema = z.enum(['internal', 'external']);
  * Payload field definition for events.
  * Defines the structure of data carried by events.
  */
-export interface EventPayloadField {
+export type EventPayloadField = {
     /** Field name */
     name: string;
     /**
@@ -469,7 +469,7 @@ export interface EventPayloadField {
     entityType?: string;
     /** Structured property schema for object-typed payload fields (recursive). */
     properties?: ReadonlyArray<EventPayloadField>;
-}
+};
 
 export const EventPayloadFieldSchema: z.ZodType<EventPayloadField> = z.object({
     name: z.string().min(1),
@@ -498,7 +498,7 @@ export const EventPayloadFieldSchema: z.ZodType<EventPayloadField> = z.object({
  * Event contract for events a trait emits.
  * Declares the event name, scope, and payload schema.
  */
-export interface TraitEventContract {
+export type TraitEventContract = {
     /** Event name (UPPER_SNAKE_CASE) */
     event: string;
     /** V4 dual-carry id sibling of `event` — optional until the Phase-7 flip. */
@@ -520,7 +520,7 @@ export interface TraitEventContract {
      * - 'external': Exposed for cross-orbital communication
      */
     scope?: EventScope;
-}
+};
 
 /**
  * `@config.<knob>` is the only legal reference form for an emit/listen
@@ -641,7 +641,7 @@ export const ListenSourceSchema = z.union([
     }),
 ]);
 
-export interface TraitEventListener {
+export type TraitEventListener = {
     /** Event key to listen for (bare event name, no source prefix in the new shape) */
     event: string;
     /** V4 dual-carry id sibling of `event` — optional until the Phase-7 flip. */
@@ -671,7 +671,7 @@ export interface TraitEventListener {
      * a local payload declaration rather than a bus subscription.
      */
     source?: ListenSource;
-}
+};
 
 export const TraitEventListenerSchema = z.object({
     event: z.string().min(1),
@@ -694,11 +694,11 @@ export const TraitEventListenerSchema = z.object({
 /**
  * Field required by a trait from its linkedEntity
  */
-export interface RequiredField {
+export type RequiredField = {
     name: string;
     type: 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum';
     description?: string;
-}
+};
 
 export const RequiredFieldSchema = z.object({
     name: z.string().min(1),
@@ -718,7 +718,7 @@ export const RequiredFieldSchema = z.object({
  * identifier-substitution pass uses these arguments to rewrite the
  * inlined trait clone before lowering.
  */
-export interface TraitReference {
+export type TraitReference = {
     ref: string;
     /** V4 dual-carry id sibling of `ref` — optional until the Phase-7 flip. */
     refId?: TraitId;
@@ -806,8 +806,8 @@ export interface TraitReference {
      * }
      * ```
      */
-    effects?: Record<string, unknown[]>;
-}
+    effects?: Record<string, SExpr[]>;
+};
 
 export const TraitReferenceSchema = z
     .object({
@@ -848,13 +848,12 @@ export const TraitReferenceSchema = z
         listens: z.array(z.unknown()).optional(),
         emitsScope: z.enum(['internal', 'external']).optional(),
         // Phase F.8: per-transition effects override. The keys are event
-        // names (the transition triggers AFTER renames). Values are arrays
-        // of SExpression-shaped data; the inliner validates the SExpression
-        // shape during application, so the schema accepts loose `unknown[]`.
+        // names (the transition triggers AFTER renames); values are SExpr
+        // effect tuples.
         effects: z
             .record(
                 z.string().min(1, "effects override key (event name) must be non-empty"),
-                z.array(z.unknown()),
+                z.array(SExprSchema),
             )
             .optional(),
     })
@@ -907,7 +906,7 @@ export type TraitRef =
 
 export type PresentationType = 'modal' | 'drawer' | 'popover' | 'inline' | 'confirm-dialog';
 
-export interface TraitUIBinding {
+export type TraitUIBinding = {
     [stateName: string]: {
         presentation: PresentationType;
         content: AnyPatternConfig | AnyPatternConfig[];
@@ -922,7 +921,7 @@ export interface TraitUIBinding {
             totalSteps?: number;
         };
     };
-}
+};
 
 // ============================================================================
 // Trait Definition
@@ -960,17 +959,17 @@ export const TraitScopeSchema = z.enum(['instance', 'collection']);
  * validator enforces it (`ORB_T_REBIND_MISSING_FIELDS`). Mirrors the Rust
  * `EntityFieldContract` serde shape exactly.
  */
-export interface EntityFieldContract {
+export type EntityFieldContract = {
     requires: string[];
     provides: string[];
-}
+};
 
 export const EntityFieldContractSchema = z.object({
     requires: z.array(z.string()),
     provides: z.array(z.string()),
 });
 
-export interface Trait {
+export type Trait = {
     /** V4 dual-carry id sibling of `name` — optional until the Phase-7 flip. */
     id?: TraitId;
     name: string;
@@ -1077,7 +1076,7 @@ export interface Trait {
      * `linkedEntity` without re-walking the import graph at runtime.
      */
     sourceEntityDefinition?: Entity;
-}
+};
 
 /**
  * Provenance attached to a trait that was cloned from a `uses[]` import
@@ -1085,7 +1084,7 @@ export interface Trait {
  * can group L2 cards by source behavior and offer an L3 drill into the
  * import's own transitions.
  */
-export interface SourceBehaviorMetadata {
+export type SourceBehaviorMetadata = {
     /** Behavior name (e.g. "std-stat-card") — the resolved `from:` value. */
     behavior: string;
     /** Alias used at the import site (e.g. "Stat"). Multiple imports of
@@ -1094,7 +1093,7 @@ export interface SourceBehaviorMetadata {
     /** Original trait name inside the imported behavior, before any
      *  call-site `name:` rename. */
     originalName: string;
-}
+};
 
 export const SourceBehaviorMetadataSchema = z.object({
     behavior: z.string().min(1),

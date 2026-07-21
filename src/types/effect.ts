@@ -98,7 +98,7 @@ export type {
 /**
  * Configuration extracted from call-service effects
  */
-export interface CallServiceConfig {
+export type CallServiceConfig = {
     service: string;
     action: string;
     endpoint?: string;
@@ -106,7 +106,7 @@ export interface CallServiceConfig {
     params?: ServiceParams;
     onSuccess?: string;
     onError?: string;
-}
+};
 
 // ============================================================================
 // Typed Effect Tuples
@@ -236,9 +236,9 @@ export type SetEffect =
  * position. See `(persist create Entity @payload.data { emit: { success:
  * "Saved", failure: "SaveFailed" } })` in `.lolo` source.
  */
-export interface PersistEmitConfig {
+export type PersistEmitConfig = {
     emit?: { success?: string; failure?: string };
-}
+};
 
 /**
  * Persist effect data argument: either an entity row literal (field map)
@@ -328,7 +328,7 @@ export type NotifyEffect =
  * `limit`, `offset`, `include`, plus the trailing `emit:` map for
  * success/failure event names.
  */
-export interface FetchOptions {
+export type FetchOptions = {
     /** Fetch a single entity by ID */
     id?: string;
     /** Filter expression (S-expression) */
@@ -341,7 +341,7 @@ export interface FetchOptions {
     include?: string[];
     /** Lifecycle events to emit on resolve / reject */
     emit?: { success?: string; failure?: string };
-}
+};
 
 /**
  * Fetch effect - retrieves entity data (server-side).
@@ -433,12 +433,12 @@ export type SwapEffect = ['swap!', string, SExpr];
  * Options accepted by `watch` effects. Mirrors what the runtime reads when
  * registering the change callback: `debounce` and the trailing `emit:` map.
  */
-export interface WatchOptions {
+export type WatchOptions = {
     /** Debounce duration in milliseconds */
     debounce?: number;
     /** Lifecycle events to emit on update / failure */
     emit?: { on_message?: string; failure?: string };
-}
+};
 
 /**
  * Watch effect - registers a callback for entity changes.
@@ -467,52 +467,52 @@ export type AtomicEffect = ['atomic', ...SExpr[]];
  * lives in `almadar-std/modules/nn`; here we keep the wire shape generic
  * enough for the cross-package runtime + Python bridge to round-trip.
  */
-export interface NnLayer {
+export type NnLayer = {
     type: string;
     [key: string]: string | number | boolean | number[] | string[] | undefined;
-}
+};
 
 /**
  * Hyperparameters for `train` and `evaluate`. Recursive to allow nested
  * optimizer / scheduler config blocks without falling back to `unknown`.
  */
-export interface NnConfig {
+export type NnConfig = {
     [key: string]: string | number | boolean | string[] | number[] | NnConfig | undefined;
-}
+};
 
 /**
  * Forward-pass config: `input` is a binding string (`@payload.input`), and
  * `on-complete` names the event to fire when the prediction lands.
  */
-export interface ForwardConfig {
+export type ForwardConfig = {
     architecture: NnLayer[];
     input: string;
     'on-complete'?: string;
     config?: NnConfig;
-}
+};
 
 /**
  * Training-loop config. `dataset` is a binding string referencing the rows
  * to train on. Optimizer / loss / scheduler land inside `config`.
  */
-export interface TrainConfig {
+export type TrainConfig = {
     architecture: NnLayer[];
     dataset: string;
     config?: NnConfig;
     'on-complete'?: string;
-}
+};
 
 /**
  * Evaluation config. `metrics` lists named metrics the Python backend
  * computes (`accuracy`, `precision`, ...).
  */
-export interface EvaluateConfig {
+export type EvaluateConfig = {
     architecture: NnLayer[];
     dataset: string;
     metrics: string[];
     config?: NnConfig;
     'on-complete'?: string;
-}
+};
 
 /**
  * Forward effect - runs a neural network forward pass (Python backend).
@@ -1050,9 +1050,9 @@ export function atomic(...effects: SExpr[]): AtomicEffect {
 // ============================================================================
 
 /** Resolved pattern props for render-ui effects at runtime. Recursive for nested pattern configs. */
-export interface ResolvedPatternProps {
+export type ResolvedPatternProps = {
   [prop: string]: string | number | boolean | null | undefined | ResolvedPatternProps | ResolvedPatternProps[];
-}
+};
 
 /** A node in a render-ui effect tree. */
 export interface RenderUINode {

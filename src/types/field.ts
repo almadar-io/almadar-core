@@ -10,6 +10,8 @@
 import { z } from 'zod';
 import type { EntityId } from './identity.js';
 import { EntityIdSchema } from './identity.js';
+import type { JsonValue } from './json.js';
+import { JsonValueSchema } from './json.js';
 
 // ============================================================================
 // Field Types
@@ -80,7 +82,7 @@ export const RelationCardinalitySchema = z.enum([
  * Configuration for relation fields (foreign keys).
  * Matches Rust compiler's RelationDefinition format.
  */
-export interface RelationConfig {
+export type RelationConfig = {
     /** Target entity name (e.g., 'User', 'Task') - matches Rust's `entity` field */
     entity: string;
     /** V4 dual-carry id sibling of `entity` — optional until the Phase-7 flip. */
@@ -109,7 +111,7 @@ export interface RelationConfig {
      * @deprecated Use cardinality instead
      */
     type?: RelationCardinality;
-}
+};
 
 export const RelationConfigSchema = z.object({
     entity: z.string().min(1, 'Target entity is required'),
@@ -190,7 +192,7 @@ type ScalarFieldType =
     | 'pattern';
 
 /** Fields shared across every variant. */
-interface EntityFieldBase {
+type EntityFieldBase = {
     /**
      * Field name (camelCase). Optional for nested item/property descriptors
      * where the name is implied by the parent (`items`, `properties[k]`).
@@ -199,8 +201,8 @@ interface EntityFieldBase {
     name?: string;
     /** Whether the field is required */
     required?: boolean;
-    /** Default value */
-    default?: unknown;
+    /** Default value — parsed from `.orb`, always JSON-shaped. */
+    default?: JsonValue;
     /** Validation format */
     format?: FieldFormat;
     /** Minimum value (for number) or length (for string) */
@@ -223,7 +225,7 @@ interface EntityFieldBase {
     /** User-vocabulary synonyms (authored `@synonyms "..."` in `.lolo`).
      *  Free text feeding catalog search / curation field-matching. */
     synonyms?: string;
-}
+};
 
 /**
  * Scalar / structural fields — no type-dependent payload required.
@@ -231,36 +233,36 @@ interface EntityFieldBase {
  * `'a' | 'b' | 'c'` string-union sugar lowers to `type: 'string', values:
  * [...]`). Only `EnumEntityField` MANDATES values.
  */
-export interface ScalarEntityField extends EntityFieldBase {
+export type ScalarEntityField = EntityFieldBase & {
     type: ScalarFieldType;
     /** Optional vocabulary hint for scalar fields (e.g. string unions
      *  authored as `'a'|'b'|'c'` in lolo). Not required at this variant. */
     values?: string[];
-}
+};
 
 /** `type: 'enum'` REQUIRES the closed vocabulary in `values`. */
-export interface EnumEntityField extends EntityFieldBase {
+export type EnumEntityField = EntityFieldBase & {
     type: 'enum';
     /** Closed string vocabulary the field accepts. */
     values: string[];
-}
+};
 
 /** `type: 'relation'` REQUIRES the relation target binding. */
-export interface RelationEntityField extends EntityFieldBase {
+export type RelationEntityField = EntityFieldBase & {
     type: 'relation';
     /** Relation target binding (entity + cardinality). */
     relation: RelationConfig;
-}
+};
 
 /** `type: 'array'` — element schema in `items` strongly preferred but
  *  optional for legacy compatibility with codegen-emitted scalar-array
  *  fields (e.g. `{type: 'array', default: []}`). The lolo lowerer + Rust
  *  validator catch typed-element-required cases downstream. */
-export interface ArrayEntityField extends EntityFieldBase {
+export type ArrayEntityField = EntityFieldBase & {
     type: 'array';
     /** Element schema for the array. */
     items?: EntityField;
-}
+};
 
 /**
  * `type: 'object'` — a fixed-key struct (fields in `properties`) OR a
@@ -268,11 +270,11 @@ export interface ArrayEntityField extends EntityFieldBase {
  * `items`, mirroring an array's element schema). A distinct variant so `items`
  * is statically allowed only on object/array fields, never on scalars.
  */
-export interface ObjectEntityField extends EntityFieldBase {
+export type ObjectEntityField = EntityFieldBase & {
     type: 'object';
     /** Uniform value schema for a dynamic-key map (`Map K V`). */
     items?: EntityField;
-}
+};
 
 /**
  * Entity field definition — discriminated union by `type`. Each variant
@@ -317,7 +319,7 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
     const baseFieldShape = {
         name: z.string().min(1, 'Field name is required').optional(),
         required: z.boolean().optional(),
-        default: z.unknown().optional(),
+        default: JsonValueSchema.optional(),
         format: FieldFormatSchema.optional(),
         min: z.number().optional(),
         max: z.number().optional(),

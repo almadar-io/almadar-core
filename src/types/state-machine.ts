@@ -22,7 +22,7 @@ import { EventIdSchema } from "./identity.js";
 /**
  * Represents a state in the state machine
  */
-export interface State {
+export type State = {
   /** State name (unique identifier) */
   name: string;
   /** Whether this is the initial state */
@@ -37,7 +37,7 @@ export interface State {
   onEntry?: string[];
   /** Effect names to run on exit */
   onExit?: string[];
-}
+};
 
 export const StateSchema = z.object({
   name: z.string().min(1, "State name is required"),
@@ -56,7 +56,7 @@ export const StateSchema = z.object({
 /**
  * Payload field definition for events
  */
-export interface PayloadField {
+export type PayloadField = {
   name: string;
   /**
    * Field type. Mirrors the Rust validator's acceptance: any non-empty
@@ -69,7 +69,7 @@ export interface PayloadField {
   required?: boolean;
   /** Structured property schema for object-typed payload fields (recursive). */
   properties?: ReadonlyArray<PayloadField>;
-}
+};
 
 export const PayloadFieldSchema: z.ZodType<PayloadField> = z.object({
   name: z.string().min(1),
@@ -81,7 +81,7 @@ export const PayloadFieldSchema: z.ZodType<PayloadField> = z.object({
 /**
  * Represents an event that can trigger transitions
  */
-export interface Event {
+export type Event = {
   /** Event key (UPPER_SNAKE_CASE) */
   key: string;
   /** V4 dual-carry id sibling of `key` — optional until the Phase-7 flip. */
@@ -101,7 +101,7 @@ export interface Event {
   classification?: "domain" | "system";
   /** Semantic role of this event (optional, for analysis) */
   semanticRole?: string;
-}
+};
 
 export const EventSchema = z.object({
   key: z.string().min(1, "Event key is required"),
@@ -130,12 +130,12 @@ export const EventSchema = z.object({
  *   description: "Check if entity has health remaining"
  * }
  */
-export interface Guard {
+export type Guard = {
   name: string;
   /** Guard expression - S-expression array only */
   expression: Expression;
   description?: string;
-}
+};
 
 export const GuardSchema = z.object({
   name: z.string().min(1, "Guard name is required"),
@@ -163,7 +163,7 @@ export const GuardSchema = z.object({
  *   ]
  * }
  */
-export interface Transition {
+export type Transition = {
   /** Source state name */
   from: string;
   /** Target state name */
@@ -178,7 +178,7 @@ export interface Transition {
   effects?: Effect[];
   /** Description */
   description?: string | null;
-}
+};
 
 export const TransitionSchema = z.object({
   from: z.string().min(1, "Transition source state is required"),
@@ -197,7 +197,7 @@ export const TransitionSchema = z.object({
 /**
  * Complete state machine definition
  */
-export interface StateMachine {
+export type StateMachine = {
   /** All states in the machine */
   states: State[];
   /** All events that can be triggered */
@@ -206,7 +206,7 @@ export interface StateMachine {
   transitions: Transition[];
   /** Named guard definitions */
   guards?: Guard[];
-}
+};
 
 export const StateMachineSchema = z.object({
   states: z.array(StateSchema).min(1, "At least one state is required"),

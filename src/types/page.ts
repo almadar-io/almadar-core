@@ -40,7 +40,7 @@ export const ViewTypeSchema = z.enum([
 /**
  * Trait reference on a page.
  */
-export interface PageTraitRef {
+export type PageTraitRef = {
     /** Trait name from library */
     ref: string;
     /** V4 dual-carry id sibling of `ref` — optional until the Phase-7 flip. */
@@ -51,7 +51,7 @@ export interface PageTraitRef {
     linkedEntityId?: EntityId;
     /** Additional trait configuration */
     config?: TraitConfig;
-}
+};
 
 export const PageTraitRefSchema = z.object({
     ref: z.string().min(1, 'Trait ref is required'),
@@ -70,7 +70,7 @@ export const PageTraitRefSchema = z.object({
  *
  * TRAIT-DRIVEN: Pages must have traits array. Sections are NOT supported.
  */
-export interface OrbitalPage {
+export type OrbitalPage = {
     /** V4 dual-carry id sibling of `name` — optional until the Phase-7 flip. */
     id?: PageId;
 
@@ -97,7 +97,7 @@ export interface OrbitalPage {
 
     /** Is this the initial page for navigation? */
     isInitial?: boolean;
-}
+};
 
 /**
  * Strict Zod schema for trait-driven pages.

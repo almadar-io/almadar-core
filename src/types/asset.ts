@@ -272,7 +272,7 @@ export const TilesheetSchema = z.object({
  * Semantic reference to an asset (not a hardcoded path).
  * Resolved to actual paths at compile time via asset maps.
  */
-export interface SemanticAssetRef {
+export type SemanticAssetRef = {
     /**
      * Entity role — a free string. Core no longer constrains the vocabulary to
      * `EntityRole` (that enum stays an exported shared reference for the asset
@@ -291,7 +291,7 @@ export interface SemanticAssetRef {
     dimension?: AssetDimension;
     /** Rendering aspect ratio (square sprite/portrait/tile, 16:9 backdrop, 5:7 card, 8:1 fx-strip). */
     aspect?: AssetAspect;
-}
+};
 
 export const SemanticAssetRefSchema = z.object({
     role: z.string().min(1),

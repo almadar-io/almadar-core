@@ -38,7 +38,7 @@ export const EntityPersistenceSchema = z.enum([
  * This is a simplified entity definition optimized for orbital composition.
  * Collection names are derived automatically from persistence type if not provided.
  */
-export interface OrbitalEntity {
+export type OrbitalEntity = {
     /** V4 dual-carry id sibling of `name` — optional until the Phase-7 flip. */
     id?: EntityId;
 
@@ -74,7 +74,7 @@ export interface OrbitalEntity {
 
     /** Semantic asset reference for visual representation (games) */
     assetRef?: SemanticAssetRef;
-}
+};
 
 export const OrbitalEntitySchema = z.object({
     name: z.string().min(1, 'Entity name is required'),

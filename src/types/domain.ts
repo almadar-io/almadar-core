@@ -200,7 +200,7 @@ export const EntitySemanticRoleSchema = z.enum([
  * Domain-specific vocabulary for naming conventions.
  * Maps generic terms to domain-appropriate labels.
  */
-export interface DomainVocabulary {
+export type DomainVocabulary = {
   /** Label for items (e.g., "Task", "Cargo", "Patient") */
   item?: string;
   /** Label for collections (e.g., "Tasks", "Inventory", "Patients") */
@@ -213,7 +213,7 @@ export interface DomainVocabulary {
   container?: string;
   /** Additional custom vocabulary */
   [key: string]: string | undefined;
-}
+};
 
 export const DomainVocabularySchema = z
   .record(z.string(), z.string())
@@ -226,14 +226,14 @@ export const DomainVocabularySchema = z
 /**
  * User persona for UX decisions
  */
-export interface UserPersona {
+export type UserPersona = {
   /** Persona name */
   name: string;
   /** Role for RBAC */
   role?: string;
   /** Primary device */
   device?: "mobile" | "tablet" | "desktop";
-}
+};
 
 export const UserPersonaSchema = z.object({
   name: z.string().min(1),
@@ -244,7 +244,7 @@ export const UserPersonaSchema = z.object({
 /**
  * Domain context - user request + classification
  */
-export interface DomainContext {
+export type DomainContext = {
   /** Original user request - verbatim (typically at schema level) */
   request: string;
   /**
@@ -276,7 +276,7 @@ export interface DomainContext {
   personas?: UserPersona[];
   /** Domain-specific vocabulary for naming */
   vocabulary?: DomainVocabulary;
-}
+};
 
 export const DomainContextSchema = z.object({
   request: z.string().min(1, "Original request is required"),
@@ -303,7 +303,7 @@ export const DomainContextSchema = z.object({
  * including 'dashboard-grid', 'none', etc. The subagent generator interprets these
  * flexibly to produce appropriate render-ui effects.
  */
-export interface UXHints {
+export type UXHints = {
   /** Overall user flow pattern (e.g., 'hub-spoke', 'crud-cycle', 'linear') */
   flowPattern?: string;
   /** Pattern for displaying lists (e.g., 'entity-table', 'entity-cards', 'dashboard-grid', 'none') */
@@ -314,7 +314,7 @@ export interface UXHints {
   detailPattern?: string;
   /** Cross-orbital navigation links */
   relatedLinks?: RelatedLink[];
-}
+};
 
 // UX hints use flexible string types - they are guidance, not strict validation
 export const UXHintsSchema = z.object({
@@ -328,14 +328,14 @@ export const UXHintsSchema = z.object({
 /**
  * Related link for cross-orbital navigation.
  */
-export interface RelatedLink {
+export type RelatedLink = {
   /** Field name of the relation (e.g., "customerId") */
   relation: string;
   /** Button/link text (e.g., "View Customer") */
   label: string;
   /** Target view type */
   targetView?: "list" | "detail";
-}
+};
 
 export const RelatedLinkSchema = z.object({
   relation: z.string().min(1),
@@ -351,14 +351,14 @@ export const RelatedLinkSchema = z.object({
  * Suggested guard - natural language description for decomposition phase.
  * Generator converts these to S-expressions during generation.
  */
-export interface SuggestedGuard {
+export type SuggestedGuard = {
   /** Unique identifier */
   id: string;
   /** Natural language description (e.g., "Weight must be under 1000kg") */
   description: string;
   /** Events this guard applies to (e.g., ["Cargo.CREATE", "Cargo.UPDATE"]) */
   appliesTo: string[];
-}
+};
 
 export const SuggestedGuardSchema = z.object({
   id: z.string().min(1),
@@ -373,7 +373,7 @@ export const SuggestedGuardSchema = z.object({
 /**
  * Design preferences for visual styling
  */
-export interface DesignPreferences {
+export type DesignPreferences = {
   /** Design style */
   style?: "minimal" | "modern" | "playful" | "data-driven" | "immersive";
   /** Primary color (hex) */
@@ -384,7 +384,7 @@ export interface DesignPreferences {
   darkMode?: boolean;
   /** UX hints for pattern selection */
   uxHints?: UXHints;
-}
+};
 
 export const DesignPreferencesSchema = z.object({
   style: z
@@ -404,7 +404,7 @@ export const DesignPreferencesSchema = z.object({
 // ============================================================================
 
 /** Spacing scale entry — each step pairs with a CSS `--space-N` variable */
-export interface SpacingScale {
+export type SpacingScale = {
   space0?: string;
   space1?: string;
   space2?: string;
@@ -418,7 +418,7 @@ export interface SpacingScale {
   space10?: string;
   space11?: string;
   space12?: string;
-}
+};
 
 export const SpacingScaleSchema = z.object({
   space0: z.string().optional(),
@@ -440,7 +440,7 @@ export const SpacingScaleSchema = z.object({
  * Density axis — spacing rhythm + per-element heights and paddings.
  * Determines whether a UI feels compact (Linear), cozy (default), or spacious (Notion).
  */
-export interface DensityTokens {
+export type DensityTokens = {
   spacing?: SpacingScale;
   buttonHeightSm?: string;
   buttonHeightMd?: string;
@@ -456,7 +456,7 @@ export interface DensityTokens {
   cardPaddingLg?: string;
   dialogPadding?: string;
   sectionGap?: string;
-}
+};
 
 export const DensityTokensSchema = z.object({
   spacing: SpacingScaleSchema.optional(),
@@ -477,10 +477,10 @@ export const DensityTokensSchema = z.object({
 });
 
 /** Single entry in the type scale — size + matching line-height */
-export interface TypeScaleEntry {
+export type TypeScaleEntry = {
   size: string;
   lineHeight: string;
-}
+};
 
 export const TypeScaleEntrySchema = z.object({
   size: z.string(),
@@ -524,11 +524,11 @@ export type TypeWeight = "normal" | "medium" | "bold";
 export const TypeWeightSchema = z.enum(["normal", "medium", "bold"]);
 
 /** Intent → (slot, size, weight) mapping. Authors write intent in render-ui; skin resolves. */
-export interface TypeIntent {
+export type TypeIntent = {
   slot: TypeSlot;
   size: TypeSizeKey;
   weight: TypeWeight;
-}
+};
 
 export const TypeIntentSchema = z.object({
   slot: TypeSlotSchema,
@@ -536,7 +536,7 @@ export const TypeIntentSchema = z.object({
   weight: TypeWeightSchema,
 });
 
-export interface TypeScale {
+export type TypeScale = {
   xs?: TypeScaleEntry;
   sm?: TypeScaleEntry;
   base?: TypeScaleEntry;
@@ -547,7 +547,7 @@ export interface TypeScale {
   "4xl"?: TypeScaleEntry;
   "display-1"?: TypeScaleEntry;
   "display-2"?: TypeScaleEntry;
-}
+};
 
 export const TypeScaleSchema = z.object({
   xs: TypeScaleEntrySchema.optional(),
@@ -562,7 +562,7 @@ export const TypeScaleSchema = z.object({
   "display-2": TypeScaleEntrySchema.optional(),
 });
 
-export interface TypeIntentMap {
+export type TypeIntentMap = {
   headingMajor?: TypeIntent;
   headingMinor?: TypeIntent;
   bodyEmphasis?: TypeIntent;
@@ -570,7 +570,7 @@ export interface TypeIntentMap {
   bodyQuiet?: TypeIntent;
   caption?: TypeIntent;
   numeric?: TypeIntent;
-}
+};
 
 export const TypeIntentMapSchema = z.object({
   headingMajor: TypeIntentSchema.optional(),
@@ -587,13 +587,13 @@ export const TypeIntentMapSchema = z.object({
  * Determines whether a UI reads as editorial (serif display + sans body),
  * tech (sans + mono numeric), or dense (mono everywhere, tight leading).
  */
-export interface TypeScaleTokens {
+export type TypeScaleTokens = {
   displayFamily?: string;
   bodyFamily?: string;
   monoFamily?: string;
   scale?: TypeScale;
   intents?: TypeIntentMap;
-}
+};
 
 export const TypeScaleTokensSchema = z.object({
   displayFamily: z.string().optional(),
@@ -630,23 +630,23 @@ export const MotionEasingKeySchema = z.enum([
 ]);
 
 /** Per-intent motion specification (duration + easing) */
-export interface MotionIntent {
+export type MotionIntent = {
   duration: MotionDurationKey;
   easing: MotionEasingKey;
-}
+};
 
 export const MotionIntentSchema = z.object({
   duration: MotionDurationKeySchema,
   easing: MotionEasingKeySchema,
 });
 
-export interface MotionDurationPalette {
+export type MotionDurationPalette = {
   instant?: string;
   fast?: string;
   normal?: string;
   slow?: string;
   dramatic?: string;
-}
+};
 
 export const MotionDurationPaletteSchema = z.object({
   instant: z.string().optional(),
@@ -656,12 +656,12 @@ export const MotionDurationPaletteSchema = z.object({
   dramatic: z.string().optional(),
 });
 
-export interface MotionEasingPalette {
+export type MotionEasingPalette = {
   linear?: string;
   standard?: string;
   emphasized?: string;
   spring?: string;
-}
+};
 
 export const MotionEasingPaletteSchema = z.object({
   linear: z.string().optional(),
@@ -670,14 +670,14 @@ export const MotionEasingPaletteSchema = z.object({
   spring: z.string().optional(),
 });
 
-export interface MotionIntentMap {
+export type MotionIntentMap = {
   enter?: MotionIntent;
   exit?: MotionIntent;
   hover?: MotionIntent;
   press?: MotionIntent;
   expand?: MotionIntent;
   transition?: MotionIntent;
-}
+};
 
 export const MotionIntentMapSchema = z.object({
   enter: MotionIntentSchema.optional(),
@@ -692,11 +692,11 @@ export const MotionIntentMapSchema = z.object({
  * Motion axis — duration palette + easing palette + per-intent mapping.
  * Mechanical (linear, fast) vs organic (cubic-bezier, medium) vs dramatic (spring, slow).
  */
-export interface MotionTokens {
+export type MotionTokens = {
   durations?: MotionDurationPalette;
   easings?: MotionEasingPalette;
   intents?: MotionIntentMap;
-}
+};
 
 export const MotionTokensSchema = z.object({
   durations: MotionDurationPaletteSchema.optional(),
@@ -726,11 +726,11 @@ export const IconFamilySchema = z.enum([
  * Iconography axis — icon set + stroke + default size.
  * Outline (Lucide) vs filled (Phosphor-fill) vs duotone (Phosphor-duotone).
  */
-export interface IconographyTokens {
+export type IconographyTokens = {
   family?: IconFamily;
   strokeWidth?: string;
   defaultSize?: string;
-}
+};
 
 export const IconographyTokensSchema = z.object({
   family: IconFamilySchema.optional(),
@@ -742,12 +742,12 @@ export const IconographyTokensSchema = z.object({
  * Elevation axis — per-layer shadow mapping.
  * Each value references a `--shadow-*` token or a raw CSS shadow value.
  */
-export interface ElevationTokens {
+export type ElevationTokens = {
   cardElevation?: string;
   popoverElevation?: string;
   dialogElevation?: string;
   toastElevation?: string;
-}
+};
 
 export const ElevationTokensSchema = z.object({
   cardElevation: z.string().optional(),
@@ -760,14 +760,14 @@ export const ElevationTokensSchema = z.object({
  * Geometry axis — radius rhythm + border-width rhythm with intent.
  * Sharp (radius 0) vs soft (radius 8/12) vs pill (radius full on interactive).
  */
-export interface GeometryTokens {
+export type GeometryTokens = {
   radiusContainer?: string;
   radiusInteractive?: string;
   radiusPill?: string;
   borderHairline?: string;
   borderStandard?: string;
   borderHeavy?: string;
-}
+};
 
 export const GeometryTokensSchema = z.object({
   radiusContainer: z.string().optional(),
@@ -786,7 +786,7 @@ export const GeometryTokensSchema = z.object({
  * `--color-*` CSS custom property emitted by themes. All fields are optional
  * so a partial slice can layer onto a default (light/dark mode pair, etc.).
  */
-export interface ColorTokens {
+export type ColorTokens = {
   /* Brand / accent */
   primary?: string;
   primaryHover?: string;
@@ -826,7 +826,7 @@ export interface ColorTokens {
   surfaceHover?: string;
   borderHover?: string;
   placeholder?: string;
-}
+};
 
 export const ColorTokensSchema = z.object({
   primary: z.string().optional(),
@@ -892,13 +892,13 @@ export const IllustrationStyleSchema = z.enum([
  * `style` selects the preset; the per-state `*Asset` fields are optional
  * overrides for skins that want to ship custom artwork.
  */
-export interface IllustrationTokens {
+export type IllustrationTokens = {
   style?: IllustrationStyle;
   emptyAsset?: string;
   loadingAsset?: string;
   errorAsset?: string;
   onboardingAsset?: string;
-}
+};
 
 export const IllustrationTokensSchema = z.object({
   style: IllustrationStyleSchema.optional(),
@@ -917,7 +917,7 @@ export const IllustrationTokensSchema = z.object({
  * `iconography`, `elevation`, `geometry`) carry the structured token surface
  * that lets two themes feel like different products, not just different paint.
  */
-export interface ThemeTokens {
+export type ThemeTokens = {
   /**
    * Color axis — typed semantic + surface + feedback colors.
    * Replaces the free-form `colors` Record below for new authors.
@@ -951,7 +951,7 @@ export interface ThemeTokens {
   typography?: Record<string, string>;
   /** @deprecated Use `elevation` (typed per-layer mapping). */
   shadows?: Record<string, string>;
-}
+};
 
 export const ThemeTokensSchema = z.object({
   color: ColorTokensSchema.optional(),
@@ -974,7 +974,7 @@ export const ThemeTokensSchema = z.object({
  * Theme variant - overrides for a specific mode (e.g., dark mode).
  * Mirrors ThemeTokens fields with the same backward-compat + new-axis structure.
  */
-export interface ThemeVariant {
+export type ThemeVariant = {
   /** Color axis overrides */
   color?: ColorTokens;
   /** Density axis overrides */
@@ -1003,7 +1003,7 @@ export interface ThemeVariant {
   typography?: Record<string, string>;
   /** @deprecated */
   shadows?: Record<string, string>;
-}
+};
 
 export const ThemeVariantSchema = z.object({
   color: ColorTokensSchema.optional(),
@@ -1024,14 +1024,14 @@ export const ThemeVariantSchema = z.object({
 /**
  * Theme definition - design system for an orbital.
  */
-export interface ThemeDefinition {
+export type ThemeDefinition = {
   /** Theme name */
   name: string;
   /** Base tokens */
   tokens: ThemeTokens;
   /** Named variants (e.g., "dark", "high-contrast") */
   variants?: Record<string, ThemeVariant>;
-}
+};
 
 export const ThemeDefinitionSchema = z.object({
   name: z.string().min(1, "Theme name is required"),

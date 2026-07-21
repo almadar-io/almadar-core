@@ -20,6 +20,8 @@
  * @packageDocumentation
  */
 
+import { z } from 'zod';
+
 /**
  * Recursive JSON value union — every shape JSON can carry.
  */
@@ -37,6 +39,11 @@ export type JsonValue =
  * boundaries (LLM emits, file reads, HTTP bodies).
  */
 export type JsonObject = { [key: string]: JsonValue };
+
+/** Zod schema for JsonValue — the one boundary validator for parsed-JSON slots. */
+export const JsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
+  z.union([z.string(), z.number(), z.boolean(), z.null(), z.array(JsonValueSchema), z.record(JsonValueSchema)]),
+);
 
 /**
  * LLM tool-call arguments — same shape as `JsonObject`, named for the

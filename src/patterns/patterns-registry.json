@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-21T03:43:21.528Z",
+  "exportedAt": "2026-07-21T04:00:07.502Z",
   "patterns": {
     "entity-table": {
       "type": "entity-table",
@@ -9800,133 +9800,184 @@
       ],
       "typicalSize": "medium",
       "propsSchema": {
-        "className": {
+        "children": {
           "types": [
-            "string"
+            "node"
           ],
-          "description": "Additional CSS classes"
+          "description": "Button group content (Button components) - use this OR primary/secondary"
         },
-        "isLoading": {
-          "types": [
-            "boolean"
-          ],
-          "description": "Loading state indicator"
-        },
-        "error": {
+        "primary": {
           "types": [
             "object"
           ],
-          "description": "Error state (UiError)",
+          "description": "Primary action button config (for form-actions pattern) Accepts Readonly for compatibility with generated const objects",
           "properties": {
-            "message": {
+            "label": {
               "types": [
                 "string"
               ]
             },
-            "name": {
+            "actionType": {
               "types": [
                 "string"
               ]
             },
-            "code": {
+            "event": {
               "types": [
                 "string"
               ]
             },
-            "stack": {
+            "navigatesTo": {
+              "types": [
+                "string"
+              ]
+            },
+            "variant": {
               "types": [
                 "string"
               ]
             }
           },
           "propertyRequired": [
-            "message"
+            "label"
           ]
         },
-        "sortBy": {
-          "types": [
-            "string"
-          ],
-          "description": "Current sort field"
-        },
-        "sortDirection": {
-          "types": [
-            "string"
-          ],
-          "description": "Current sort direction",
-          "enumValues": [
-            "asc",
-            "desc"
-          ]
-        },
-        "searchValue": {
-          "types": [
-            "string"
-          ],
-          "description": "Current search query value"
-        },
-        "page": {
-          "types": [
-            "number"
-          ],
-          "description": "Current page number"
-        },
-        "pageSize": {
-          "types": [
-            "number"
-          ],
-          "description": "Number of items per page"
-        },
-        "totalCount": {
-          "types": [
-            "number"
-          ],
-          "description": "Total number of items"
-        },
-        "activeFilters": {
-          "types": [
-            "object"
-          ],
-          "description": "Active filters"
-        },
-        "selectedIds": {
+        "secondary": {
           "types": [
             "array"
           ],
-          "description": "Currently selected item IDs",
+          "description": "Secondary action buttons config (for form-actions pattern) Accepts readonly array for compatibility with generated const arrays",
           "items": {
             "types": [
-              "string",
-              "number"
+              "object"
+            ],
+            "properties": {
+              "label": {
+                "types": [
+                  "string"
+                ]
+              },
+              "actionType": {
+                "types": [
+                  "string"
+                ]
+              },
+              "event": {
+                "types": [
+                  "string"
+                ]
+              },
+              "navigatesTo": {
+                "types": [
+                  "string"
+                ]
+              },
+              "variant": {
+                "types": [
+                  "string"
+                ]
+              }
+            },
+            "required": [
+              "label"
             ]
           }
         },
-        "children": {
-          "types": [
-            "node"
-          ],
-          "description": "children prop",
-          "required": true
-        },
-        "sticky": {
-          "types": [
-            "boolean"
-          ],
-          "description": "Sticky at bottom",
-          "default": false
-        },
-        "align": {
+        "variant": {
           "types": [
             "string"
           ],
-          "description": "Alignment",
+          "description": "Visual variant",
           "enumValues": [
-            "left",
-            "right",
-            "between",
-            "center"
+            "default",
+            "segmented",
+            "toggle"
           ],
-          "default": "right"
+          "default": "default"
+        },
+        "orientation": {
+          "types": [
+            "string"
+          ],
+          "description": "Orientation",
+          "enumValues": [
+            "horizontal",
+            "vertical"
+          ],
+          "default": "horizontal"
+        },
+        "className": {
+          "types": [
+            "string"
+          ],
+          "description": "Additional CSS classes"
+        },
+        "entity": {
+          "types": [
+            "string"
+          ],
+          "description": "Entity type for filter-group pattern (schema metadata)"
+        },
+        "filters": {
+          "types": [
+            "array"
+          ],
+          "description": "Filter definitions for filter-group pattern",
+          "items": {
+            "types": [
+              "object"
+            ],
+            "properties": {
+              "field": {
+                "types": [
+                  "string"
+                ]
+              },
+              "label": {
+                "types": [
+                  "string"
+                ]
+              },
+              "type": {
+                "types": [
+                  "string"
+                ],
+                "enumValues": [
+                  "checkbox",
+                  "select",
+                  "toggle"
+                ]
+              },
+              "options": {
+                "types": [
+                  "array"
+                ],
+                "items": {
+                  "types": [
+                    "string"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "field",
+              "label"
+            ]
+          }
+        },
+        "look": {
+          "types": [
+            "string"
+          ],
+          "description": "Layer 2 visual treatment for the action-cluster (form-actions) pattern.",
+          "enumValues": [
+            "right-aligned-buttons",
+            "floating-bar",
+            "inline-row",
+            "dropdown-menu",
+            "command-palette-trigger"
+          ],
+          "default": "right-aligned-buttons"
         }
       }
     },

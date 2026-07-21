@@ -46,7 +46,7 @@ export const ServiceTypeSchema = z.enum(SERVICE_TYPES);
  * };
  * ```
  */
-export interface RestServiceDef {
+export type RestServiceDef = {
   /** Unique service name (used in call_service effect) */
   name: string;
 
@@ -67,12 +67,12 @@ export interface RestServiceDef {
 
   /** Timeout in milliseconds (default: 30000) */
   timeout?: number;
-}
+};
 
 /**
  * Authentication configuration for REST services.
  */
-export interface RestAuthConfig {
+export type RestAuthConfig = {
   /** Authentication type */
   type: "api-key" | "bearer" | "basic" | "oauth2";
 
@@ -84,7 +84,7 @@ export interface RestAuthConfig {
 
   /** Environment variable name containing the secret (for secure storage) */
   secretEnv?: string;
-}
+};
 
 export const RestAuthConfigSchema = z.object({
   type: z.enum(["api-key", "bearer", "basic", "oauth2"]),
@@ -123,7 +123,7 @@ export const RestServiceDefSchema = z.object({
  * };
  * ```
  */
-export interface SocketServiceDef {
+export type SocketServiceDef = {
   /** Unique service name */
   name: string;
 
@@ -148,18 +148,18 @@ export interface SocketServiceDef {
     /** Delay between attempts in ms */
     delayMs?: number;
   };
-}
+};
 
 /**
  * Socket event definitions.
  */
-export interface SocketEvents {
+export type SocketEvents = {
   /** Events received from server (maps to orbital events) */
   inbound: string[];
 
   /** Events sent to server (triggered by effects) */
   outbound: string[];
-}
+};
 
 export const SocketEventsSchema = z.object({
   inbound: z.array(z.string()),
@@ -198,7 +198,7 @@ export const SocketServiceDefSchema = z.object({
  * };
  * ```
  */
-export interface McpServiceDef {
+export type McpServiceDef = {
   /** Unique service name */
   name: string;
 
@@ -216,7 +216,7 @@ export interface McpServiceDef {
 
   /** Environment variables to pass to the MCP server */
   env?: Record<string, string>;
-}
+};
 
 export const McpServiceDefSchema = z.object({
   name: z.string().min(1, "Service name is required"),
@@ -277,7 +277,7 @@ export type ServiceRef = ServiceDefinition | ServiceRefObject | string;
  * };
  * ```
  */
-export interface ServiceRefObject {
+export type ServiceRefObject = {
   /** Reference to imported service: "Alias.services.ServiceName" */
   ref: string;
   /** Override the service description */
@@ -290,7 +290,7 @@ export interface ServiceRefObject {
   url?: string;
   /** Override the MCP server path */
   serverPath?: string;
-}
+};
 
 /**
  * Checks if a service reference is a bare string reference.
@@ -483,6 +483,6 @@ export type ServiceParamsValue =
   | readonly ServiceParamsValue[];
 
 /** Parameters passed to call-service effects. Recursive for nested request shapes. */
-export interface ServiceParams {
+export type ServiceParams = {
   [key: string]: ServiceParamsValue;
-}
+};

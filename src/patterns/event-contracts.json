@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-21T03:43:21.528Z",
+  "exportedAt": "2026-07-21T04:00:07.502Z",
   "contracts": {
     "form": {
       "emits": [
@@ -93,7 +93,14 @@
     "form-actions": {
       "emits": [
         {
-          "event": "TOGGLE_COLLAPSE",
+          "event": "DISPATCH",
+          "trigger": "action",
+          "payload": {
+            "type": "object"
+          }
+        },
+        {
+          "event": "NAVIGATE",
           "trigger": "action",
           "payload": {
             "type": "object"
@@ -101,7 +108,7 @@
         }
       ],
       "requires": [],
-      "entityAware": false,
+      "entityAware": true,
       "configDriven": true
     },
     "entity-table": {
