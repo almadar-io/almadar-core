@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-21T04:00:07.502Z",
+  "exportedAt": "2026-07-21T09:54:57.379Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -1348,6 +1348,16 @@
       "component": "Canvas",
       "importPath": "@/components/game/molecules/Canvas",
       "category": "game"
+    },
+    "presence": {
+      "component": "Presence",
+      "importPath": "@/components/core/atoms/Presence",
+      "category": "component"
+    },
+    "page-transition": {
+      "component": "PageTransition",
+      "importPath": "@/components/core/molecules/PageTransition",
+      "category": "component"
     }
   }
 }

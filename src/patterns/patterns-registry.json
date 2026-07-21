@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-21T04:00:07.502Z",
+  "exportedAt": "2026-07-21T09:54:57.379Z",
   "patterns": {
     "entity-table": {
       "type": "entity-table",
@@ -3722,18 +3722,6 @@
                   "role": {
                     "types": [
                       "string"
-                    ],
-                    "enumValues": [
-                      "player",
-                      "enemy",
-                      "npc",
-                      "item",
-                      "tile",
-                      "projectile",
-                      "effect",
-                      "ui",
-                      "decoration",
-                      "vehicle"
                     ]
                   },
                   "category": {
@@ -3763,6 +3751,11 @@
                       "isometric"
                     ]
                   },
+                  "variant": {
+                    "types": [
+                      "string"
+                    ]
+                  },
                   "dimension": {
                     "types": [
                       "string"
@@ -3783,6 +3776,16 @@
                       "8:1"
                     ]
                   },
+                  "atlas": {
+                    "types": [
+                      "asset"
+                    ]
+                  },
+                  "sprite": {
+                    "types": [
+                      "string"
+                    ]
+                  },
                   "name": {
                     "types": [
                       "string"
@@ -3795,7 +3798,9 @@
                   }
                 },
                 "required": [
-                  "url"
+                  "url",
+                  "role",
+                  "category"
                 ]
               },
               "badge": {
@@ -3874,18 +3879,6 @@
                   "role": {
                     "types": [
                       "string"
-                    ],
-                    "enumValues": [
-                      "player",
-                      "enemy",
-                      "npc",
-                      "item",
-                      "tile",
-                      "projectile",
-                      "effect",
-                      "ui",
-                      "decoration",
-                      "vehicle"
                     ]
                   },
                   "category": {
@@ -3915,6 +3908,11 @@
                       "isometric"
                     ]
                   },
+                  "variant": {
+                    "types": [
+                      "string"
+                    ]
+                  },
                   "dimension": {
                     "types": [
                       "string"
@@ -3935,6 +3933,16 @@
                       "8:1"
                     ]
                   },
+                  "atlas": {
+                    "types": [
+                      "asset"
+                    ]
+                  },
+                  "sprite": {
+                    "types": [
+                      "string"
+                    ]
+                  },
                   "name": {
                     "types": [
                       "string"
@@ -3947,7 +3955,9 @@
                   }
                 },
                 "required": [
-                  "url"
+                  "url",
+                  "role",
+                  "category"
                 ]
               },
               "badge": {
@@ -5583,6 +5593,14 @@
           "kind": "callback",
           "callbackArgs": []
         },
+        "onExited": {
+          "types": [
+            "function"
+          ],
+          "description": "Fires after the exit animation completes (the modal is about to unmount).",
+          "kind": "callback",
+          "callbackArgs": []
+        },
         "title": {
           "types": [
             "string"
@@ -6892,18 +6910,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -6933,6 +6939,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -6953,6 +6964,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -6965,7 +6986,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "action": {
@@ -7085,18 +7108,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -7126,6 +7137,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -7146,6 +7162,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -7158,7 +7184,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "onRemove": {
@@ -12918,18 +12946,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -12959,6 +12975,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -12979,6 +13000,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -12991,7 +13022,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "hudBackgroundAsset": {
@@ -13008,18 +13041,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -13049,6 +13070,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -13069,6 +13095,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -13081,7 +13117,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "fontFamily": {
@@ -26041,18 +26079,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -26082,6 +26108,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -26102,6 +26133,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -26114,7 +26155,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "icon": {
@@ -26201,18 +26244,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -26242,6 +26273,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -26262,6 +26298,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -26274,7 +26320,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "label": {
@@ -26419,18 +26467,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -26460,6 +26496,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -26480,6 +26521,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -26492,7 +26543,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "position": {
@@ -26633,18 +26686,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -26674,6 +26715,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -26694,6 +26740,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -26706,7 +26762,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "fillAsset": {
@@ -26723,18 +26781,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -26764,6 +26810,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -26784,6 +26835,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -26796,7 +26857,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         }
       }
@@ -26828,18 +26891,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -26869,6 +26920,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -26889,6 +26945,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -26901,7 +26967,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "value": {
@@ -27036,18 +27104,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -27077,6 +27133,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -27097,6 +27158,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -27109,7 +27180,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         }
       }
@@ -28786,18 +28859,6 @@
                   "role": {
                     "types": [
                       "string"
-                    ],
-                    "enumValues": [
-                      "player",
-                      "enemy",
-                      "npc",
-                      "item",
-                      "tile",
-                      "projectile",
-                      "effect",
-                      "ui",
-                      "decoration",
-                      "vehicle"
                     ]
                   },
                   "category": {
@@ -28827,6 +28888,11 @@
                       "isometric"
                     ]
                   },
+                  "variant": {
+                    "types": [
+                      "string"
+                    ]
+                  },
                   "dimension": {
                     "types": [
                       "string"
@@ -28847,6 +28913,16 @@
                       "8:1"
                     ]
                   },
+                  "atlas": {
+                    "types": [
+                      "asset"
+                    ]
+                  },
+                  "sprite": {
+                    "types": [
+                      "string"
+                    ]
+                  },
                   "name": {
                     "types": [
                       "string"
@@ -28859,7 +28935,9 @@
                   }
                 },
                 "required": [
-                  "url"
+                  "url",
+                  "role",
+                  "category"
                 ]
               },
               "format": {
@@ -29139,18 +29217,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -29180,6 +29246,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -29200,6 +29271,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -29212,7 +29293,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "className": {
@@ -29250,18 +29333,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -29291,6 +29362,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -29311,6 +29387,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -29323,7 +29409,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "iconUrl": {
@@ -29340,18 +29428,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -29381,6 +29457,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -29401,6 +29482,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -29413,7 +29504,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "label": {
@@ -30006,18 +30099,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -30047,6 +30128,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -30067,6 +30153,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -30079,7 +30175,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "offAsset": {
@@ -30096,18 +30194,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -30137,6 +30223,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -30157,6 +30248,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -30169,7 +30270,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         }
       }
@@ -30238,18 +30341,6 @@
                 "role": {
                   "types": [
                     "string"
-                  ],
-                  "enumValues": [
-                    "player",
-                    "enemy",
-                    "npc",
-                    "item",
-                    "tile",
-                    "projectile",
-                    "effect",
-                    "ui",
-                    "decoration",
-                    "vehicle"
                   ]
                 },
                 "category": {
@@ -30279,6 +30370,11 @@
                     "isometric"
                   ]
                 },
+                "variant": {
+                  "types": [
+                    "string"
+                  ]
+                },
                 "dimension": {
                   "types": [
                     "string"
@@ -30299,6 +30395,16 @@
                     "8:1"
                   ]
                 },
+                "atlas": {
+                  "types": [
+                    "asset"
+                  ]
+                },
+                "sprite": {
+                  "types": [
+                    "string"
+                  ]
+                },
                 "name": {
                   "types": [
                     "string"
@@ -30311,7 +30417,9 @@
                 }
               },
               "required": [
-                "url"
+                "url",
+                "role",
+                "category"
               ]
             },
             "stateMachine": {
@@ -30406,18 +30514,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -30447,6 +30543,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -30467,6 +30568,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -30479,7 +30590,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "className": {
@@ -30578,18 +30691,6 @@
                       "role": {
                         "types": [
                           "string"
-                        ],
-                        "enumValues": [
-                          "player",
-                          "enemy",
-                          "npc",
-                          "item",
-                          "tile",
-                          "projectile",
-                          "effect",
-                          "ui",
-                          "decoration",
-                          "vehicle"
                         ]
                       },
                       "category": {
@@ -30619,6 +30720,11 @@
                           "isometric"
                         ]
                       },
+                      "variant": {
+                        "types": [
+                          "string"
+                        ]
+                      },
                       "dimension": {
                         "types": [
                           "string"
@@ -30639,6 +30745,16 @@
                           "8:1"
                         ]
                       },
+                      "atlas": {
+                        "types": [
+                          "asset"
+                        ]
+                      },
+                      "sprite": {
+                        "types": [
+                          "string"
+                        ]
+                      },
                       "name": {
                         "types": [
                           "string"
@@ -30651,7 +30767,9 @@
                       }
                     },
                     "required": [
-                      "url"
+                      "url",
+                      "role",
+                      "category"
                     ]
                   },
                   "stateMachine": {
@@ -30729,18 +30847,6 @@
                       "role": {
                         "types": [
                           "string"
-                        ],
-                        "enumValues": [
-                          "player",
-                          "enemy",
-                          "npc",
-                          "item",
-                          "tile",
-                          "projectile",
-                          "effect",
-                          "ui",
-                          "decoration",
-                          "vehicle"
                         ]
                       },
                       "category": {
@@ -30770,6 +30876,11 @@
                           "isometric"
                         ]
                       },
+                      "variant": {
+                        "types": [
+                          "string"
+                        ]
+                      },
                       "dimension": {
                         "types": [
                           "string"
@@ -30790,6 +30901,16 @@
                           "8:1"
                         ]
                       },
+                      "atlas": {
+                        "types": [
+                          "asset"
+                        ]
+                      },
+                      "sprite": {
+                        "types": [
+                          "string"
+                        ]
+                      },
                       "name": {
                         "types": [
                           "string"
@@ -30802,7 +30923,9 @@
                       }
                     },
                     "required": [
-                      "url"
+                      "url",
+                      "role",
+                      "category"
                     ]
                   },
                   "stateMachine": {
@@ -30957,18 +31080,6 @@
                   "role": {
                     "types": [
                       "string"
-                    ],
-                    "enumValues": [
-                      "player",
-                      "enemy",
-                      "npc",
-                      "item",
-                      "tile",
-                      "projectile",
-                      "effect",
-                      "ui",
-                      "decoration",
-                      "vehicle"
                     ]
                   },
                   "category": {
@@ -30998,6 +31109,11 @@
                       "isometric"
                     ]
                   },
+                  "variant": {
+                    "types": [
+                      "string"
+                    ]
+                  },
                   "dimension": {
                     "types": [
                       "string"
@@ -31018,6 +31134,16 @@
                       "8:1"
                     ]
                   },
+                  "atlas": {
+                    "types": [
+                      "asset"
+                    ]
+                  },
+                  "sprite": {
+                    "types": [
+                      "string"
+                    ]
+                  },
                   "name": {
                     "types": [
                       "string"
@@ -31030,7 +31156,9 @@
                   }
                 },
                 "required": [
-                  "url"
+                  "url",
+                  "role",
+                  "category"
                 ]
               },
               "stateMachine": {
@@ -31277,18 +31405,6 @@
                 "role": {
                   "types": [
                     "string"
-                  ],
-                  "enumValues": [
-                    "player",
-                    "enemy",
-                    "npc",
-                    "item",
-                    "tile",
-                    "projectile",
-                    "effect",
-                    "ui",
-                    "decoration",
-                    "vehicle"
                   ]
                 },
                 "category": {
@@ -31318,6 +31434,11 @@
                     "isometric"
                   ]
                 },
+                "variant": {
+                  "types": [
+                    "string"
+                  ]
+                },
                 "dimension": {
                   "types": [
                     "string"
@@ -31338,6 +31459,16 @@
                     "8:1"
                   ]
                 },
+                "atlas": {
+                  "types": [
+                    "asset"
+                  ]
+                },
+                "sprite": {
+                  "types": [
+                    "string"
+                  ]
+                },
                 "name": {
                   "types": [
                     "string"
@@ -31350,7 +31481,9 @@
                 }
               },
               "required": [
-                "url"
+                "url",
+                "role",
+                "category"
               ]
             },
             "stateMachine": {
@@ -31475,18 +31608,6 @@
                   "role": {
                     "types": [
                       "string"
-                    ],
-                    "enumValues": [
-                      "player",
-                      "enemy",
-                      "npc",
-                      "item",
-                      "tile",
-                      "projectile",
-                      "effect",
-                      "ui",
-                      "decoration",
-                      "vehicle"
                     ]
                   },
                   "category": {
@@ -31516,6 +31637,11 @@
                       "isometric"
                     ]
                   },
+                  "variant": {
+                    "types": [
+                      "string"
+                    ]
+                  },
                   "dimension": {
                     "types": [
                       "string"
@@ -31536,6 +31662,16 @@
                       "8:1"
                     ]
                   },
+                  "atlas": {
+                    "types": [
+                      "asset"
+                    ]
+                  },
+                  "sprite": {
+                    "types": [
+                      "string"
+                    ]
+                  },
                   "name": {
                     "types": [
                       "string"
@@ -31548,7 +31684,9 @@
                   }
                 },
                 "required": [
-                  "url"
+                  "url",
+                  "role",
+                  "category"
                 ]
               },
               "stateMachine": {
@@ -31628,18 +31766,6 @@
                       "role": {
                         "types": [
                           "string"
-                        ],
-                        "enumValues": [
-                          "player",
-                          "enemy",
-                          "npc",
-                          "item",
-                          "tile",
-                          "projectile",
-                          "effect",
-                          "ui",
-                          "decoration",
-                          "vehicle"
                         ]
                       },
                       "category": {
@@ -31669,6 +31795,11 @@
                           "isometric"
                         ]
                       },
+                      "variant": {
+                        "types": [
+                          "string"
+                        ]
+                      },
                       "dimension": {
                         "types": [
                           "string"
@@ -31689,6 +31820,16 @@
                           "8:1"
                         ]
                       },
+                      "atlas": {
+                        "types": [
+                          "asset"
+                        ]
+                      },
+                      "sprite": {
+                        "types": [
+                          "string"
+                        ]
+                      },
                       "name": {
                         "types": [
                           "string"
@@ -31701,7 +31842,9 @@
                       }
                     },
                     "required": [
-                      "url"
+                      "url",
+                      "role",
+                      "category"
                     ]
                   },
                   "stateMachine": {
@@ -34430,18 +34573,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -34471,6 +34602,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -34491,6 +34627,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -34503,7 +34649,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "tileClickEvent": {
@@ -34743,18 +34891,6 @@
                   "role": {
                     "types": [
                       "string"
-                    ],
-                    "enumValues": [
-                      "player",
-                      "enemy",
-                      "npc",
-                      "item",
-                      "tile",
-                      "projectile",
-                      "effect",
-                      "ui",
-                      "decoration",
-                      "vehicle"
                     ]
                   },
                   "category": {
@@ -34784,6 +34920,11 @@
                       "isometric"
                     ]
                   },
+                  "variant": {
+                    "types": [
+                      "string"
+                    ]
+                  },
                   "dimension": {
                     "types": [
                       "string"
@@ -34804,6 +34945,16 @@
                       "8:1"
                     ]
                   },
+                  "atlas": {
+                    "types": [
+                      "asset"
+                    ]
+                  },
+                  "sprite": {
+                    "types": [
+                      "string"
+                    ]
+                  },
                   "name": {
                     "types": [
                       "string"
@@ -34816,7 +34967,9 @@
                   }
                 },
                 "required": [
-                  "url"
+                  "url",
+                  "role",
+                  "category"
                 ]
               },
               "variant": {
@@ -34966,18 +35119,6 @@
               "role": {
                 "types": [
                   "string"
-                ],
-                "enumValues": [
-                  "player",
-                  "enemy",
-                  "npc",
-                  "item",
-                  "tile",
-                  "projectile",
-                  "effect",
-                  "ui",
-                  "decoration",
-                  "vehicle"
                 ]
               },
               "category": {
@@ -35007,6 +35148,11 @@
                   "isometric"
                 ]
               },
+              "variant": {
+                "types": [
+                  "string"
+                ]
+              },
               "dimension": {
                 "types": [
                   "string"
@@ -35027,6 +35173,16 @@
                   "8:1"
                 ]
               },
+              "atlas": {
+                "types": [
+                  "asset"
+                ]
+              },
+              "sprite": {
+                "types": [
+                  "string"
+                ]
+              },
               "name": {
                 "types": [
                   "string"
@@ -35039,7 +35195,9 @@
               }
             },
             "required": [
-              "url"
+              "url",
+              "role",
+              "category"
             ]
           }
         },
@@ -35096,18 +35254,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -35137,6 +35283,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -35157,6 +35308,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -35169,7 +35330,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "icon": {
@@ -38929,18 +39092,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -38970,6 +39121,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -38990,6 +39146,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -39002,7 +39168,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "anchor": {
@@ -39416,18 +39584,6 @@
                   "role": {
                     "types": [
                       "string"
-                    ],
-                    "enumValues": [
-                      "player",
-                      "enemy",
-                      "npc",
-                      "item",
-                      "tile",
-                      "projectile",
-                      "effect",
-                      "ui",
-                      "decoration",
-                      "vehicle"
                     ]
                   },
                   "category": {
@@ -39457,6 +39613,11 @@
                       "isometric"
                     ]
                   },
+                  "variant": {
+                    "types": [
+                      "string"
+                    ]
+                  },
                   "dimension": {
                     "types": [
                       "string"
@@ -39477,6 +39638,16 @@
                       "8:1"
                     ]
                   },
+                  "atlas": {
+                    "types": [
+                      "asset"
+                    ]
+                  },
+                  "sprite": {
+                    "types": [
+                      "string"
+                    ]
+                  },
                   "name": {
                     "types": [
                       "string"
@@ -39489,7 +39660,9 @@
                   }
                 },
                 "required": [
-                  "url"
+                  "url",
+                  "role",
+                  "category"
                 ]
               },
               "anchor": {
@@ -39768,18 +39941,6 @@
             "role": {
               "types": [
                 "string"
-              ],
-              "enumValues": [
-                "player",
-                "enemy",
-                "npc",
-                "item",
-                "tile",
-                "projectile",
-                "effect",
-                "ui",
-                "decoration",
-                "vehicle"
               ]
             },
             "category": {
@@ -39809,6 +39970,11 @@
                 "isometric"
               ]
             },
+            "variant": {
+              "types": [
+                "string"
+              ]
+            },
             "dimension": {
               "types": [
                 "string"
@@ -39829,6 +39995,16 @@
                 "8:1"
               ]
             },
+            "atlas": {
+              "types": [
+                "asset"
+              ]
+            },
+            "sprite": {
+              "types": [
+                "string"
+              ]
+            },
             "name": {
               "types": [
                 "string"
@@ -39841,7 +40017,9 @@
             }
           },
           "propertyRequired": [
-            "url"
+            "url",
+            "role",
+            "category"
           ]
         },
         "backgroundColor": {
@@ -40016,6 +40194,74 @@
         }
       },
       "drawHost": true
+    },
+    "presence": {
+      "type": "presence",
+      "category": "component",
+      "tier": "atoms",
+      "family": "core",
+      "description": "Presence component",
+      "suggestedFor": [
+        "presence"
+      ],
+      "typicalSize": "small",
+      "propsSchema": {
+        "show": {
+          "types": [
+            "boolean"
+          ],
+          "description": "When false, the exit animation runs, then children unmount.",
+          "required": true
+        },
+        "className": {
+          "types": [
+            "string"
+          ],
+          "description": "className prop"
+        },
+        "children": {
+          "types": [
+            "node"
+          ],
+          "description": "children prop",
+          "required": true
+        }
+      }
+    },
+    "page-transition": {
+      "type": "page-transition",
+      "category": "component",
+      "tier": "molecules",
+      "family": "core",
+      "description": "PageTransition component",
+      "suggestedFor": [
+        "page",
+        "transition",
+        "page transition"
+      ],
+      "typicalSize": "medium",
+      "propsSchema": {
+        "locationKey": {
+          "types": [
+            "string"
+          ],
+          "description": "Value that changes on navigation (e.g. `location.pathname`).",
+          "required": true
+        },
+        "children": {
+          "types": [
+            "node"
+          ],
+          "description": "children prop",
+          "required": true
+        },
+        "className": {
+          "types": [
+            "string"
+          ],
+          "description": "className prop"
+        }
+      }
     }
   },
   "categories": [
