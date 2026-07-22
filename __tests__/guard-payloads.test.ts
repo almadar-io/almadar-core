@@ -60,4 +60,33 @@ describe('buildGuardPayloads — and-handler bare-string sub-guards', () => {
     expect(pass).toEqual({});
     expect(fail).toEqual({});
   });
+
+  it('seeds NESTED payload paths (std-booking BookingWizard NEXT: when ?data.providerName)', () => {
+    const { pass, fail } = buildGuardPayloads('@payload.data.providerName');
+    expect(pass).toEqual({ data: { providerName: 'mock-test-value' } });
+    expect(fail).toEqual({ data: { providerName: null } });
+  });
+
+  it('deep-merges sibling nested fields in AND guards (wizard step3)', () => {
+    const { pass } = buildGuardPayloads([
+      'and',
+      '@payload.data.customerName',
+      '@payload.data.email',
+      '@payload.data.phone',
+    ]);
+    expect(pass).toEqual({
+      data: { customerName: 'mock-test-value', email: 'mock-test-value', phone: 'mock-test-value' },
+    });
+  });
+
+  it('nests comparison operators on dotted paths', () => {
+    const { pass, fail } = buildGuardPayloads(['eq', '@payload.data.status', 'ready']);
+    expect(pass).toEqual({ data: { status: 'ready' } });
+    expect(fail).toEqual({ data: { status: 'not-ready' } });
+  });
+
+  it('keeps the row-shaped mock for single-segment existence guards', () => {
+    const { pass } = buildGuardPayloads('@payload.row');
+    expect(pass.row).toEqual({ id: 'mock-test-id', name: 'mock-test-name' });
+  });
 });

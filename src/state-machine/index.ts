@@ -33,7 +33,7 @@ export { buildStateGraph } from './graph.js';
 export { collectReachableStates, walkStatePairs } from './bfs.js';
 
 // Guard payload derivation
-export { buildGuardPayloads, extractPayloadFieldRef, constTruth } from './guard-payloads.js';
+export { buildGuardPayloads, extractPayloadFieldRef, extractPayloadFieldPath, constTruth } from './guard-payloads.js';
 
 // Replay path building
 export { buildReplayPaths, type ReplayTransition } from './replay-paths.js';

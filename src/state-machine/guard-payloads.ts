@@ -8,6 +8,7 @@
  */
 
 import type { GuardPayload } from './types.js';
+import type { EventPayload, EventPayloadValue } from '../types/expression.js';
 
 /**
  * Extracts the first segment of a payload field reference.
@@ -29,6 +30,53 @@ export function extractPayloadFieldRef(ref: unknown): string | null {
   if (typeof ref !== 'string') return null;
   const match = ref.match(/^@payload\.([A-Za-z0-9_]+)/);
   return match ? match[1] : null;
+}
+
+/**
+ * Full dotted path of a payload reference — `'@payload.data.providerName'`
+ * → `['data', 'providerName']`. `extractPayloadFieldRef` keeps only the
+ * first segment, which made every guard on a NESTED payload field
+ * unsatisfiable by synthesis: `when ?data.providerName` was seeded as
+ * `{data: 'mock-test-value'}`, the runtime read `.providerName` off a
+ * string, and the pass-case dispatch was correctly rejected (std-booking
+ * BookingWizard NEXT — the whole step chain became unwalkable). Returns
+ * `null` for non-payload references.
+ */
+export function extractPayloadFieldPath(ref: unknown): string[] | null {
+  if (typeof ref !== 'string') return null;
+  const match = ref.match(/^@payload\.([A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)*)/);
+  return match ? match[1].split('.') : null;
+}
+
+/** `['data','providerName']` + leaf → `{data: {providerName: leaf}}`. */
+function nestedPayload(path: string[], leaf: EventPayloadValue): EventPayload {
+  let value: EventPayloadValue = leaf;
+  for (let i = path.length - 1; i >= 1; i--) {
+    value = { [path[i]]: value };
+  }
+  return { [path[0]]: value };
+}
+
+function isPayloadObject(v: EventPayloadValue): v is EventPayload {
+  return typeof v === 'object' && v !== null && !Array.isArray(v) && !(v instanceof Date);
+}
+
+/**
+ * Deep-merge for synthesized payloads. A shallow spread clobbers sibling
+ * NESTED fields — `(and ?data.customerName ?data.email)` built
+ * `{data:{customerName}}` then `{data:{email}}` and the spread kept only
+ * the last, so multi-field AND guards on one payload object could never
+ * pass. Later keys win on genuine conflicts, mirroring spread order.
+ */
+function mergePayloads(a: EventPayload, b: EventPayload): EventPayload {
+  const out: EventPayload = { ...a };
+  for (const [k, v] of Object.entries(b)) {
+    const prev = out[k];
+    out[k] = prev !== undefined && isPayloadObject(prev) && v !== undefined && isPayloadObject(v)
+      ? mergePayloads(prev, v)
+      : v;
+  }
+  return out;
 }
 
 /**
@@ -122,8 +170,16 @@ export function buildGuardPayloads(guard: unknown): GuardPayload {
   // get empty payloads in both cases — the pass case then fails the
   // server-side guard and the portal observer flags "slot not mounted".
   if (typeof guard === 'string') {
-    const field = extractPayloadFieldRef(guard);
-    if (field) return { pass: { [field]: { id: 'mock-test-id', name: 'mock-test-name' } }, fail: { [field]: null } };
+    const path = extractPayloadFieldPath(guard);
+    // Single-segment existence guards keep the row-shaped mock (`?row` —
+    // std-confirmation/std-modal open a record view off it); a NESTED leaf
+    // (`?data.providerName`) is a scalar field, so a string mock is the
+    // truthy value its consumers (str/…, renders) can actually use.
+    if (path) {
+      return path.length === 1
+        ? { pass: { [path[0]]: { id: 'mock-test-id', name: 'mock-test-name' } }, fail: { [path[0]]: null } }
+        : { pass: nestedPayload(path, 'mock-test-value'), fail: nestedPayload(path, null) };
+    }
   }
 
   if (!Array.isArray(guard) || guard.length === 0) {
@@ -133,61 +189,61 @@ export function buildGuardPayloads(guard: unknown): GuardPayload {
   const op = String(guard[0]);
 
   if (op === 'not-nil' || op === 'not_nil') {
-    const field = extractPayloadFieldRef(guard[1]);
-    if (field) return { pass: { [field]: 'mock-test-value' }, fail: { [field]: null } };
+    const path = extractPayloadFieldPath(guard[1]);
+    if (path) return { pass: nestedPayload(path, 'mock-test-value'), fail: nestedPayload(path, null) };
   }
 
   if (op === 'nil') {
-    const field = extractPayloadFieldRef(guard[1]);
-    if (field) return { pass: {}, fail: { [field]: 'mock-test-value' } };
+    const path = extractPayloadFieldPath(guard[1]);
+    if (path) return { pass: {}, fail: nestedPayload(path, 'mock-test-value') };
   }
 
   if (op === 'eq' || op === '==' || op === '=') {
-    const field = extractPayloadFieldRef(guard[1]);
+    const path = extractPayloadFieldPath(guard[1]);
     const val = guard[2];
-    if (field && val !== undefined) {
+    if (path && val !== undefined) {
       const failVal =
         typeof val === 'number' ? val + 1
         : typeof val === 'string' ? `not-${val}`
         : null;
-      return { pass: { [field]: val }, fail: { [field]: failVal } };
+      return { pass: nestedPayload(path, val), fail: nestedPayload(path, failVal) };
     }
   }
 
   if (op === 'not-eq' || op === '!=' || op === 'neq') {
-    const field = extractPayloadFieldRef(guard[1]);
+    const path = extractPayloadFieldPath(guard[1]);
     const val = guard[2];
-    if (field && val !== undefined) {
+    if (path && val !== undefined) {
       const passVal =
         typeof val === 'number' ? val + 1
         : typeof val === 'string' ? `not-${val}`
         : 'other';
-      return { pass: { [field]: passVal }, fail: { [field]: val } };
+      return { pass: nestedPayload(path, passVal), fail: nestedPayload(path, val) };
     }
   }
 
   if (op === 'gt' || op === '>') {
-    const field = extractPayloadFieldRef(guard[1]);
+    const path = extractPayloadFieldPath(guard[1]);
     const n = typeof guard[2] === 'number' ? guard[2] : 0;
-    if (field) return { pass: { [field]: n + 1 }, fail: { [field]: n - 1 } };
+    if (path) return { pass: nestedPayload(path, n + 1), fail: nestedPayload(path, n - 1) };
   }
 
   if (op === 'gte' || op === '>=') {
-    const field = extractPayloadFieldRef(guard[1]);
+    const path = extractPayloadFieldPath(guard[1]);
     const n = typeof guard[2] === 'number' ? guard[2] : 0;
-    if (field) return { pass: { [field]: n }, fail: { [field]: n - 1 } };
+    if (path) return { pass: nestedPayload(path, n), fail: nestedPayload(path, n - 1) };
   }
 
   if (op === 'lt' || op === '<') {
-    const field = extractPayloadFieldRef(guard[1]);
+    const path = extractPayloadFieldPath(guard[1]);
     const n = typeof guard[2] === 'number' ? guard[2] : 0;
-    if (field) return { pass: { [field]: n - 1 }, fail: { [field]: n + 1 } };
+    if (path) return { pass: nestedPayload(path, n - 1), fail: nestedPayload(path, n + 1) };
   }
 
   if (op === 'lte' || op === '<=') {
-    const field = extractPayloadFieldRef(guard[1]);
+    const path = extractPayloadFieldPath(guard[1]);
     const n = typeof guard[2] === 'number' ? guard[2] : 0;
-    if (field) return { pass: { [field]: n }, fail: { [field]: n + 1 } };
+    if (path) return { pass: nestedPayload(path, n), fail: nestedPayload(path, n + 1) };
   }
 
   if (op === 'and') {
@@ -200,7 +256,7 @@ export function buildGuardPayloads(guard: unknown): GuardPayload {
     const subs = guard.slice(1) as unknown[];
     if (subs.length >= 2) {
       const built = subs.map(buildGuardPayloads);
-      const pass = built.reduce<GuardPayload['pass']>((acc, b) => ({ ...acc, ...b.pass }), {});
+      const pass = built.reduce<GuardPayload['pass']>((acc, b) => mergePayloads(acc, b.pass), {});
       return { pass, fail: built[0].fail };
     }
     if (subs.length === 1) return buildGuardPayloads(subs[0]);
@@ -219,7 +275,7 @@ export function buildGuardPayloads(guard: unknown): GuardPayload {
       // case `(= "edit" "create") || @payload.row` has the first branch
       // return `{}` and the row-payload comes from the second.
       const combinedPass = Object.keys(s1.pass).length > 0 ? s1.pass : s2.pass;
-      return { pass: combinedPass, fail: { ...s1.fail, ...s2.fail } };
+      return { pass: combinedPass, fail: mergePayloads(s1.fail, s2.fail) };
     }
     if (subs.length === 1) return buildGuardPayloads(subs[0]);
   }
