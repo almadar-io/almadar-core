@@ -100,6 +100,41 @@ export function collectEmbeddedTraitReferrers(
 }
 
 /**
+ * Chain `@config.<key>` forwards through the whole config value tree, not
+ * just top-level strings. A vessel like std-service-email's
+ * `EmailComposerSlot { children: [@config.uiTrait] }` carries its forward
+ * INSIDE an array — top-level-only resolution left the literal string in
+ * `children`, so the embedder's `uiTrait` default (the standalone test
+ * form) never rendered and the atom booted blank. An unresolvable forward
+ * (referrer lacks the key) keeps its literal, matching the top-level
+ * behavior.
+ */
+function resolveForwardsDeep(
+  value: TraitConfigValue,
+  referrerConfig: TraitConfig | undefined,
+): TraitConfigValue {
+  if (typeof value === 'string') {
+    const match = CONFIG_FORWARD_RE.exec(value);
+    if (match) {
+      const forwarded = referrerConfig?.[match[1]];
+      if (forwarded !== undefined) return forwarded;
+    }
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => resolveForwardsDeep(item, referrerConfig));
+  }
+  if (value !== null && typeof value === 'object') {
+    const out: Record<string, TraitConfigValue> = {};
+    for (const [k, v] of Object.entries(value)) {
+      out[k] = resolveForwardsDeep(v, referrerConfig);
+    }
+    return out;
+  }
+  return value;
+}
+
+/**
  * Build the trait-name → resolved-`TraitConfig` map for a schema: each
  * trait's raw call-site config, normalized to plain values, with any
  * `@config.<key>` forward chained through to the referrer that actually
@@ -142,11 +177,7 @@ export function buildResolvedTraitConfigs(
     if (referrer && referrer !== name) {
       const referrerConfig = resolveConfig(referrer);
       for (const [key, value] of Object.entries(out)) {
-        if (typeof value !== 'string') continue;
-        const match = CONFIG_FORWARD_RE.exec(value);
-        if (!match) continue;
-        const forwarded = referrerConfig?.[match[1]];
-        if (forwarded !== undefined) out[key] = forwarded;
+        out[key] = resolveForwardsDeep(value, referrerConfig);
       }
     }
     resolving.delete(name);
