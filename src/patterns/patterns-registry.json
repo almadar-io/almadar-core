@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-22T16:18:20.073Z",
+  "exportedAt": "2026-07-23T14:32:35.644Z",
   "patterns": {
     "entity-table": {
       "type": "entity-table",
@@ -3499,7 +3499,8 @@
           "types": [
             "string"
           ],
-          "description": "Event name to dispatch on search (schema metadata, wired by trait) This is metadata used by the trait generator, not by the component."
+          "description": "Declarative search event — emits UI:{event} via eventBus on query submit (alongside canonical UI:SEARCH)",
+          "kind": "event"
         },
         "entity": {
           "types": [
@@ -3658,6 +3659,20 @@
             "inline-column-header"
           ],
           "default": "toolbar"
+        },
+        "event": {
+          "types": [
+            "string"
+          ],
+          "description": "Declarative filter event — emits UI:{event} via eventBus on filter change (alongside canonical UI:FILTER)",
+          "kind": "event"
+        },
+        "clearEvent": {
+          "types": [
+            "string"
+          ],
+          "description": "Declarative clear event — emits UI:{clearEvent} via eventBus on clear-all (alongside canonical UI:CLEAR_FILTERS)",
+          "kind": "event"
         }
       }
     },
@@ -9733,8 +9748,9 @@
           "types": [
             "string"
           ],
-          "description": "Font weight override",
+          "description": "Font weight override — `none` = no override, the variant's baked weight applies",
           "enumValues": [
+            "none",
             "light",
             "normal",
             "medium",
@@ -9748,6 +9764,7 @@
           ],
           "description": "Font size override",
           "enumValues": [
+            "none",
             "xs",
             "sm",
             "md",
@@ -17119,6 +17136,11 @@
                 ]
               },
               "event": {
+                "types": [
+                  "string"
+                ]
+              },
+              "navigatesTo": {
                 "types": [
                   "string"
                 ]

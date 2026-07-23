@@ -171,22 +171,26 @@ export function collectTraitConfigRefAdjacency(
 function resolveForwardsDeep(
   value: TraitConfigValue,
   referrerConfig: TraitConfig | undefined,
+  consumed?: Map<string, TraitConfigValue>,
 ): TraitConfigValue {
   if (typeof value === 'string') {
     const match = CONFIG_FORWARD_RE.exec(value);
     if (match) {
       const forwarded = referrerConfig?.[match[1]];
-      if (forwarded !== undefined) return forwarded;
+      if (forwarded !== undefined) {
+        consumed?.set(match[1], forwarded);
+        return forwarded;
+      }
     }
     return value;
   }
   if (Array.isArray(value)) {
-    return value.map((item) => resolveForwardsDeep(item, referrerConfig));
+    return value.map((item) => resolveForwardsDeep(item, referrerConfig, consumed));
   }
   if (value !== null && typeof value === 'object') {
     const out: Record<string, TraitConfigValue> = {};
     for (const [k, v] of Object.entries(value)) {
-      out[k] = resolveForwardsDeep(v, referrerConfig);
+      out[k] = resolveForwardsDeep(v, referrerConfig, consumed);
     }
     return out;
   }
@@ -235,8 +239,20 @@ export function buildResolvedTraitConfigs(
     const referrer = referrerByChild.get(name);
     if (referrer && referrer !== name) {
       const referrerConfig = resolveConfig(referrer);
+      // Track which referrer keys the forwards consumed: the child's RENDER
+      // TREE still carries the raw token (`content: "@config.title"`), and
+      // render-time interpolation resolves it against the child's own config
+      // — so the consumed key must ALSO surface there, or the knob resolves
+      // while the tree read stays blank (the
+      // R-CONFIG-DEFAULT-INLINE-TRAIT-OWN-CONFIG-UNRESOLVED blank title).
+      const consumed = new Map<string, TraitConfigValue>();
       for (const [key, value] of Object.entries(out)) {
-        out[key] = resolveForwardsDeep(value, referrerConfig);
+        out[key] = resolveForwardsDeep(value, referrerConfig, consumed);
+      }
+      for (const [key, value] of consumed) {
+        if (!(key in out)) {
+          out[key] = value;
+        }
       }
     }
     resolving.delete(name);
