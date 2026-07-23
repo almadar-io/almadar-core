@@ -48,6 +48,8 @@ export interface VerificationCheck {
  */
 export interface EffectTrace {
   type: string;
+  /** For fetch/persist effects: the entity the effect addresses. */
+  entityName?: string;
   args: unknown[];
   status: "executed" | "failed" | "skipped";
   error?: string;
