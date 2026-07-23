@@ -100,6 +100,37 @@ export function collectEmbeddedTraitReferrers(
 }
 
 /**
+ * Per-orbital referrer → embedded-children adjacency: for every trait in the
+ * orbital, the set of trait names it embeds via `@trait.X` (config OR state
+ * machine — same scan as `collectEmbeddedTraitReferrers`, but keeping EVERY
+ * edge instead of first-referrer-wins, and scoped to one orbital so
+ * same-named traits in sibling orbitals never alias). This is the static
+ * mirror of the client's page-binding pull (`OrbPreview.allPageTraits`):
+ * page-declared traits plus this adjacency's transitive closure is the set
+ * of traits that get a state machine on the client.
+ */
+export function collectTraitEmbedAdjacency(
+  orbital: OrbitalDefinition,
+): ReadonlyMap<string, ReadonlySet<string>> {
+  const out = new Map<string, ReadonlySet<string>>();
+  const traits: TraitRef[] = orbital.traits;
+  if (!Array.isArray(traits)) return out;
+  for (const traitRef of traits) {
+    const target = targetTraitOf(traitRef);
+    if (!target) continue;
+    const referrerName = target.name;
+    if (typeof referrerName !== 'string' || referrerName.length === 0) continue;
+    const refs = new Set<string>();
+    if (target.config) collectTraitRefsFromValue(target.config, refs);
+    const stateMachine = (target as { stateMachine?: SExpr }).stateMachine;
+    if (stateMachine) collectTraitRefsFromValue(stateMachine, refs);
+    refs.delete(referrerName);
+    if (refs.size > 0) out.set(referrerName, refs);
+  }
+  return out;
+}
+
+/**
  * Chain `@config.<key>` forwards through the whole config value tree, not
  * just top-level strings. A vessel like std-service-email's
  * `EmailComposerSlot { children: [@config.uiTrait] }` carries its forward

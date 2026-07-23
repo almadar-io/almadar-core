@@ -31,6 +31,7 @@ export {
 // interpreter (`@almadar/runtime`) and the render substrate (`@almadar/ui`).
 export {
   collectEmbeddedTraitReferrers,
+  collectTraitEmbedAdjacency,
   buildResolvedTraitConfigs,
 } from './src/embedded-trait-config';
 
