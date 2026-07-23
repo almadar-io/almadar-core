@@ -17,6 +17,14 @@ export {
   isValidPatternType,
 } from './pattern-types.js';
 
+// Content-grade vs chrome classification (single owner — lint/slot consumers)
+export {
+  RenderUiPayload,
+  isContentBodyPattern,
+  isContentBodyPatternType,
+  isMainSlotRenderUi,
+} from './content-grade.js';
+
 // Backwards compatible alias - registry refers to patterns registry
 export const registry = patternsRegistry;
 

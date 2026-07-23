@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-21T09:54:57.379Z",
+  "exportedAt": "2026-07-22T16:18:20.073Z",
   "patterns": {
     "entity-table": {
       "type": "entity-table",
@@ -5721,9 +5721,9 @@
         },
         "title": {
           "types": [
-            "string"
+            "node"
           ],
-          "description": "Drawer title"
+          "description": "Drawer title (text or any node, e.g. a brand logo + name)."
         },
         "children": {
           "types": [
@@ -15219,37 +15219,7 @@
           "types": [
             "string"
           ],
-          "description": "Programming language for syntax highlighting",
-          "enumValues": [
-            "text",
-            "json",
-            "javascript",
-            "js",
-            "typescript",
-            "ts",
-            "jsx",
-            "tsx",
-            "css",
-            "markdown",
-            "md",
-            "bash",
-            "shell",
-            "sh",
-            "yaml",
-            "yml",
-            "rust",
-            "python",
-            "py",
-            "sql",
-            "diff",
-            "toml",
-            "go",
-            "graphql",
-            "html",
-            "xml",
-            "orb",
-            "lolo"
-          ],
+          "description": "Programming language for syntax highlighting (any Prism id; loaded on demand if not pre-registered)",
           "default": "text"
         },
         "showCopyButton": {
@@ -15450,6 +15420,58 @@
                   "graphql",
                   "html",
                   "xml",
+                  "clojure",
+                  "clj",
+                  "edn",
+                  "haskell",
+                  "hs",
+                  "lisp",
+                  "scheme",
+                  "scala",
+                  "elixir",
+                  "ex",
+                  "exs",
+                  "erlang",
+                  "erl",
+                  "elm",
+                  "fsharp",
+                  "fs",
+                  "fsx",
+                  "ocaml",
+                  "ml",
+                  "java",
+                  "c",
+                  "cpp",
+                  "c++",
+                  "cc",
+                  "cxx",
+                  "hpp",
+                  "h",
+                  "csharp",
+                  "cs",
+                  "objectivec",
+                  "objc",
+                  "php",
+                  "ruby",
+                  "rb",
+                  "swift",
+                  "kotlin",
+                  "kt",
+                  "lua",
+                  "r",
+                  "dart",
+                  "julia",
+                  "fortran",
+                  "f90",
+                  "f95",
+                  "perl",
+                  "pl",
+                  "powershell",
+                  "ps1",
+                  "makefile",
+                  "make",
+                  "nginx",
+                  "ini",
                   "orb",
                   "lolo"
                 ]
@@ -17261,7 +17283,7 @@
           "types": [
             "function"
           ],
-          "description": "Render prop for custom per-card content. When provided, `fields` and `itemActions` are ignored.",
+          "description": "Render prop for custom per-card content. When provided, `fields` are ignored; `itemActions` render as a footer beneath the custom content.",
           "kind": "callback",
           "callbackArgs": [
             {
@@ -34016,22 +34038,6 @@
           "items": {
             "types": [
               "object"
-            ],
-            "properties": {
-              "type": {
-                "types": [
-                  "unknown"
-                ]
-              },
-              "content": {
-                "types": [
-                  "string"
-                ]
-              }
-            },
-            "required": [
-              "type",
-              "content"
             ]
           }
         },
@@ -34051,34 +34057,7 @@
           "types": [
             "object"
           ],
-          "description": "User progress for restoring activation/reflection state",
-          "properties": {
-            "activationResponse": {
-              "types": [
-                "string"
-              ]
-            },
-            "reflectionNotes": {
-              "types": [
-                "array"
-              ],
-              "items": {
-                "types": [
-                  "string"
-                ]
-              }
-            },
-            "bloomAnswered": {
-              "types": [
-                "object"
-              ],
-              "mapValue": {
-                "types": [
-                  "boolean"
-                ]
-              }
-            }
-          }
+          "description": "User progress for restoring activation/reflection state"
         },
         "onRunCodeSimulation": {
           "types": [
@@ -34107,7 +34086,7 @@
           "callbackArgs": [
             {
               "name": "type",
-              "type": "string"
+              "type": "object"
             },
             {
               "name": "description",
