@@ -224,6 +224,7 @@ export {
   type EventPayloadValue,
   isEventPayloadValue,
   type LogMeta,
+  type LogMetaValue,
 } from "./expression.js";
 
 // ============================================================================

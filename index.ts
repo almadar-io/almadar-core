@@ -32,6 +32,7 @@ export {
 export {
   collectEmbeddedTraitReferrers,
   collectTraitEmbedAdjacency,
+  collectTraitConfigRefAdjacency,
   buildResolvedTraitConfigs,
 } from './src/embedded-trait-config';
 

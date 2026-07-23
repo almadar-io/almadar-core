@@ -131,6 +131,34 @@ export function collectTraitEmbedAdjacency(
 }
 
 /**
+ * Config-slot-only sibling of `collectTraitEmbedAdjacency`: edges formed by
+ * `@trait.X` references in trait CONFIG values (`contentTrait`, `idleContent`,
+ * body-content trees) but NOT in state machines. This is the "content
+ * channel" — which trait the page's composed tree designated as its content —
+ * used by the wiring lint to distinguish a claimed content body from chrome
+ * that merely renders into the same slot.
+ */
+export function collectTraitConfigRefAdjacency(
+  orbital: OrbitalDefinition,
+): ReadonlyMap<string, ReadonlySet<string>> {
+  const out = new Map<string, ReadonlySet<string>>();
+  const traits: TraitRef[] = orbital.traits;
+  if (!Array.isArray(traits)) return out;
+  for (const traitRef of traits) {
+    const target = targetTraitOf(traitRef);
+    if (!target) continue;
+    const referrerName = target.name;
+    if (typeof referrerName !== 'string' || referrerName.length === 0) continue;
+    if (!target.config) continue;
+    const refs = new Set<string>();
+    collectTraitRefsFromValue(target.config, refs);
+    refs.delete(referrerName);
+    if (refs.size > 0) out.set(referrerName, refs);
+  }
+  return out;
+}
+
+/**
  * Chain `@config.<key>` forwards through the whole config value tree, not
  * just top-level strings. A vessel like std-service-email's
  * `EmailComposerSlot { children: [@config.uiTrait] }` carries its forward
