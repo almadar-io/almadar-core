@@ -9,6 +9,7 @@
 
 import type { SExpr } from './expression.js';
 import type { EntityRow, FieldValue } from './entity.js';
+import type { ListenSource } from './trait.js';
 import type { AnyPatternConfig } from '../patterns/index.js';
 
 // ============================================================================
@@ -141,6 +142,10 @@ export interface ResolvedTraitListener {
   event: string;
   triggers: string;
   guard?: SExpr;
+  /** `with { ... }` payload rewrite: `{ targetField: "@payload.<sourceField>" | literal }` */
+  payloadMapping?: Record<string, string>;
+  /** Source scoping (see `ListenSource` in types/trait). */
+  source?: ListenSource;
 }
 
 export interface ResolvedTraitDataEntity {
