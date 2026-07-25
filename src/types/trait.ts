@@ -411,11 +411,37 @@ export type TraitTick = {
     emitIds?: EventId[];
 };
 
+/** `"500ms"` / `"5s"` / `"1m"` / `"1h"` / `"1d"` — the duration form both schedulers parse. */
+const DURATION_INTERVAL = /^\d+(ms|s|m|h|d)$/;
+/** A 5-field cron expression, e.g. `"0 9 * * *"`. */
+const CRON_INTERVAL = /^\S+(\s+\S+){4}$/;
+
+/**
+ * A tick's cadence: `"frame"`, a positive number of milliseconds, a duration
+ * string, or a cron expression.
+ *
+ * This schema previously accepted only `"frame"` or a number, while `TraitTick`
+ * declared `string | number` and BOTH schedulers already parsed durations and cron
+ * (`OrbitalServerRuntime.registerTick` → `isValidCronExpression`/
+ * `parseDurationString`; Rust `TickScheduler::parse_interval` → `cron::parse_cron`).
+ * The gate therefore rejected every cron/duration tick before its runtime could
+ * run it — `std-data-erasure`'s hourly `executionScan` made the whole orbital
+ * unloadable in the interpreter with only `traits.N: Invalid input` to go on.
+ */
+export const TickIntervalSchema = z.union([
+    z.literal('frame'),
+    z.number().positive(),
+    z.string().refine((v) => DURATION_INTERVAL.test(v) || CRON_INTERVAL.test(v), {
+        message:
+            'interval must be "frame", a positive number of milliseconds, a duration ("500ms"/"5s"/"1m"/"1h"/"1d"), or a 5-field cron expression ("0 9 * * *")',
+    }),
+]);
+
 export const TraitTickSchema = z.object({
     name: z.string().min(1),
     description: z.string().optional(),
     priority: z.number().optional(),
-    interval: z.union([z.literal('frame'), z.number().positive()]),
+    interval: TickIntervalSchema,
     appliesTo: z.array(z.string()).optional(),
     pages: z.array(z.string()).optional(),
     pageIds: z.array(PageIdSchema).optional(),

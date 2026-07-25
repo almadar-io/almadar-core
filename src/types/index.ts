@@ -507,6 +507,7 @@ export {
   TraitCategorySchema,
   TraitEventListenerSchema,
   ListenSourceSchema,
+  TickIntervalSchema,
   TraitTickSchema,
   TraitDataEntitySchema,
   TraitEntityFieldSchema,
