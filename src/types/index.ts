@@ -257,6 +257,21 @@ export {
   isTraitFieldRef,
 } from "./binding.js";
 
+// Authenticated user context — the shape `@user.x` resolves against, shared by
+// the JS interpreter and the compiled shell.
+export {
+  ANONYMOUS_USER,
+  DEV_TOKEN_PREFIX,
+  MOCK_PERSONAS,
+  decodeDevIdentityToken,
+  encodeDevIdentityToken,
+  findMockPersona,
+  normalizeUserContext,
+  resolvePersonaSpec,
+  type UserContext,
+  type RawUserClaims,
+} from "./user.js";
+
 // ============================================================================
 // State Machine Types
 // ============================================================================
