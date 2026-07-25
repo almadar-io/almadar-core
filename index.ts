@@ -41,6 +41,28 @@ export {
 export { applyListenPayloadMapping } from './src/listen-payload-mapping';
 export type { ListenPayloadEvaluator } from './src/listen-payload-mapping';
 
+// ML contract validation — one pure implementation for the runtime path
+// (`@almadar/evaluator` contract/* operators) and the compiled TS shell.
+export {
+  validateContract,
+  isTensorValue,
+  describeTensorMismatch,
+  tensorShape,
+  tensorLastDimSize,
+  gatherTensorLastDim,
+  mapTensorLastDim,
+  contractFieldName,
+} from './src/ml-contract';
+export type {
+  TensorValue,
+  ContractRange,
+  ContractFieldSpec,
+  ContractFieldEntry,
+  ContractSpec,
+  ContractViolation,
+  ContractValidationResult,
+} from './src/ml-contract';
+
 // Export schema diffing & protection functions
 export {
   diffSchemas,
