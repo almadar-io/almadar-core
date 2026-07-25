@@ -159,7 +159,7 @@ export interface ParsedListenDeclaration {
   event?: string;
   triggers?: string;
   scope?: 'internal' | 'external';
-  payloadMapping?: { [key: string]: string };
+  payloadMapping?: { [key: string]: SExpr };
 }
 
 /**

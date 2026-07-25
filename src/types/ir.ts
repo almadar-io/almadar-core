@@ -142,8 +142,8 @@ export interface ResolvedTraitListener {
   event: string;
   triggers: string;
   guard?: SExpr;
-  /** `with { ... }` payload rewrite: `{ targetField: "@payload.<sourceField>" | literal }` */
-  payloadMapping?: Record<string, string>;
+  /** `with { ... }` payload rewrite: `{ targetField: SExpr }`, evaluated against the source payload. */
+  payloadMapping?: Record<string, SExpr>;
   /** Source scoping (see `ListenSource` in types/trait). */
   source?: ListenSource;
 }

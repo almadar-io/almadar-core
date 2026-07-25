@@ -48,8 +48,8 @@ import {
 } from "./domain.js";
 import type { ServiceRef } from "./service.js";
 import { ServiceRefSchema } from "./service.js";
-import type { Expression } from "./expression.js";
-import { ExpressionSchema } from "./expression.js";
+import type { Expression, SExpr } from "./expression.js";
+import { ExpressionSchema, SExprSchema } from "./expression.js";
 
 // ============================================================================
 // Use Declaration (Import System)
@@ -624,8 +624,8 @@ export type ComputedEventListener = {
   triggers: string;
   /** Guard expression */
   guard?: Expression;
-  /** Payload field mapping */
-  payloadMapping?: Record<string, string>;
+  /** `with { ... }` payload rewrite: `{ targetField: SExpr }`, evaluated against the source payload. */
+  payloadMapping?: Record<string, SExpr>;
 };
 
 export const ComputedEventListenerSchema = z.object({
@@ -633,7 +633,7 @@ export const ComputedEventListenerSchema = z.object({
   source: EventSourceSchema,
   triggers: z.string().min(1),
   guard: ExpressionSchema.optional(),
-  payloadMapping: z.record(z.string()).optional(),
+  payloadMapping: z.record(SExprSchema).optional(),
 });
 
 // ============================================================================

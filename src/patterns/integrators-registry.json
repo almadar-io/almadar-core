@@ -379,6 +379,36 @@
         }
       ]
     },
+    "ml": {
+      "name": "ml",
+      "description": "ML service - model inference on a trained or off-the-shelf checkpoint, reached via a deployed serving orbital",
+      "category": "ai",
+      "actions": [
+        {
+          "name": "infer",
+          "description": "Run inference against a deployed model checkpoint",
+          "params": [
+            {
+              "name": "model",
+              "type": "string",
+              "required": true,
+              "description": "hf:<id> for off-the-shelf weights, or a masar checkpoint id"
+            },
+            {
+              "name": "input",
+              "type": "any",
+              "required": true,
+              "description": "JSON-safe model input (object, array, or primitive tensor payload)"
+            }
+          ],
+          "responseShape": {
+            "output": "object",
+            "confidence": "number",
+            "violations": "string[]"
+          }
+        }
+      ]
+    },
     "deepagent": {
       "name": "deepagent",
       "description": "AI code generation agent with tool use - generates schemas, code, and manages projects",

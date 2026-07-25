@@ -328,13 +328,9 @@ function rewriteListener(
   newName: string,
 ): TraitEventListener {
   if (!listener.payloadMapping) return listener;
-  const prefix = `@${oldName}`;
-  const nextMapping: Record<string, string> = {};
+  const nextMapping: Record<string, SExpr> = {};
   for (const [k, v] of Object.entries(listener.payloadMapping)) {
-    nextMapping[k] =
-      v === prefix || v.startsWith(`${prefix}.`)
-        ? `@${newName}${v.slice(prefix.length)}`
-        : v;
+    nextMapping[k] = rewriteEntityInSExpr(v, oldName, newName);
   }
   return { ...listener, payloadMapping: nextMapping };
 }

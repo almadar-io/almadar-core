@@ -39,6 +39,7 @@ export {
 // Listen-route `with { ... }` payload mapping — shared by the server runtime
 // (`@almadar/runtime`) and the client cross-trait wiring (`@almadar/ui`).
 export { applyListenPayloadMapping } from './src/listen-payload-mapping';
+export type { ListenPayloadEvaluator } from './src/listen-payload-mapping';
 
 // Export schema diffing & protection functions
 export {

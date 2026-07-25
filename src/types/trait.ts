@@ -664,8 +664,13 @@ export type TraitEventListener = {
      * - 'external': Listen to events from other orbitals
      */
     scope?: EventScope;
-    /** Map event payload fields to transition payload */
-    payloadMapping?: Record<string, string>;
+    /**
+     * `with { ... }` payload rewrite: `{ targetField: SExpr }`. Each value is a
+     * full s-expression evaluated against the source payload — a `@payload.<field>`
+     * read, a literal, or an operator list. Apply it with
+     * `applyListenPayloadMapping`.
+     */
+    payloadMapping?: Record<string, SExpr>;
     /**
      * Source scoping (see `ListenSource`). Undefined when the listen entry is
      * a local payload declaration rather than a bus subscription.
@@ -683,7 +688,7 @@ export const TraitEventListenerSchema = z.object({
     tier: z.string().optional(),
     guard: ExpressionSchema.optional(),
     scope: EventScopeSchema.optional(),
-    payloadMapping: z.record(z.string()).optional(),
+    payloadMapping: z.record(SExprSchema).optional(),
     source: ListenSourceSchema.optional(),
 });
 
