@@ -194,6 +194,25 @@ export function isReferenceConfigType(type: string): type is ReferenceConfigType
     return (REFERENCE_CONFIG_TYPES as readonly string[]).includes(type);
 }
 
+/**
+ * The secret config-field types. A config knob typed `secret` holds a
+ * CREDENTIAL (or a reference to one): it must never flow into spec.json,
+ * traces, plan snapshots, or factory bakes in cleartext — consumers mask it
+ * in UI (password-rendered input) and exclude it from serialization. The
+ * `.lolo` language does not yet accept `secret` as a config-field type
+ * (orbital-lolo parser gate); this contract is the single deterministic
+ * source downstream consumers (studio, verifiers, rabit bakes) key on once
+ * it lands — until then hosts use a `string` knob plus a password-rendered
+ * `ui-input` (the std-service-custom-bearer pattern).
+ */
+export const SECRET_CONFIG_TYPES = ['secret'] as const;
+export type SecretConfigType = (typeof SECRET_CONFIG_TYPES)[number];
+
+/** True when a config field's `type` marks its value as a credential to be masked. */
+export function isSecretConfigType(type: string): type is SecretConfigType {
+    return (SECRET_CONFIG_TYPES as readonly string[]).includes(type);
+}
+
 export type ConfigFieldDeclaration = {
     readonly type: string;
     readonly default?: TraitConfigValue;
@@ -312,7 +331,7 @@ export const TraitCategorySchema = z.enum([
 /**
  * Field types for trait data entities
  */
-export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum';
+export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum' | 'email' | 'url' | 'phone' | 'uuid' | 'image';
 
 /**
  * Simplified field for trait data entities
@@ -342,6 +361,11 @@ export const TraitEntityFieldSchema: z.ZodType<TraitEntityField> = z.object({
         'timestamp',
         'datetime',
         'enum',
+        'email',
+        'url',
+        'phone',
+        'uuid',
+        'image',
     ]),
     required: z.boolean().optional(),
     default: TraitConfigValueSchema.optional(),
@@ -727,13 +751,13 @@ export const TraitEventListenerSchema = z.object({
  */
 export type RequiredField = {
     name: string;
-    type: 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum';
+    type: TraitFieldType;
     description?: string;
 };
 
 export const RequiredFieldSchema = z.object({
     name: z.string().min(1),
-    type: z.enum(['string', 'number', 'boolean', 'date', 'array', 'object', 'timestamp', 'datetime', 'enum']),
+    type: z.enum(['string', 'number', 'boolean', 'date', 'array', 'object', 'timestamp', 'datetime', 'enum', 'email', 'url', 'phone', 'uuid', 'image']),
     description: z.string().optional(),
 });
 

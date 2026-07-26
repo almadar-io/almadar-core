@@ -31,6 +31,15 @@ export type FieldType =
     | 'date'
     | 'timestamp'
     | 'datetime'
+    // Semantic string domains. `.lolo` already types `date`/`datetime` rather
+    // than annotating them, so these belong in the type system for the same
+    // reason: a field's domain is a declared fact, not a decoration. They
+    // replaced the optional `format` property, which had zero producers.
+    | 'email'
+    | 'url'
+    | 'phone'
+    | 'uuid'
+    | 'image'
     | 'array'
     | 'object'
     | 'enum'
@@ -39,13 +48,20 @@ export type FieldType =
     | 'slot'
     | 'pattern';
 
-export const FieldTypeSchema = z.enum([
+/** Every `FieldType`, as a runtime array. Downstream imports this instead of
+ *  re-listing the union — five copies had already drifted apart. */
+export const FIELD_TYPES = [
     'string',
     'number',
     'boolean',
     'date',
     'timestamp',
     'datetime',
+    'email',
+    'url',
+    'phone',
+    'uuid',
+    'image',
     'array',
     'object',
     'enum',
@@ -53,7 +69,19 @@ export const FieldTypeSchema = z.enum([
     'trait',
     'slot',
     'pattern',
-]);
+] as const satisfies readonly FieldType[];
+
+/** The semantic string domains — constrained strings, validatable by value. */
+export const SEMANTIC_STRING_TYPES = ['email', 'url', 'phone', 'uuid', 'image'] as const;
+
+export type SemanticStringType = (typeof SEMANTIC_STRING_TYPES)[number];
+
+/** Is this a semantic string domain (as opposed to a bare `string`)? */
+export function isSemanticStringType(type: FieldType): type is SemanticStringType {
+    return (SEMANTIC_STRING_TYPES as readonly string[]).includes(type);
+}
+
+export const FieldTypeSchema = z.enum(FIELD_TYPES);
 
 // ============================================================================
 // Relation Configuration
@@ -142,35 +170,48 @@ export type RelationConfigInput = z.input<typeof RelationConfigSchema>;
 // ============================================================================
 
 /**
- * Field format validators for string fields.
+ * Value rules for the semantic string domains — one owner, so the seeders, the
+ * validators and the verifiers cannot drift apart on what counts as valid.
+ *
+ * These replaced the old optional `format` property, which had zero producers
+ * anywhere in the repo and no Rust counterpart at all: `format` was unreachable
+ * from `.lolo`, so every consumer fell back to guessing from field names.
  */
-export type FieldFormat =
-    | 'email'
-    | 'url'
-    | 'phone'
-    | 'date'
-    | 'datetime'
-    | 'uuid'
-    /** Render hint: this string field stores an image URL. Mock adapters
-     *  generate a deterministic picsum.photos URL; UI patterns can branch
-     *  to an `<img>` instead of a `<typography>`. */
-    | 'image'
-    /** Render hint: avatar-shaped image (square, small). */
-    | 'avatar'
-    /** Render hint: thumbnail image (small landscape). */
-    | 'thumbnail';
+const EMAIL_RE = /^[^\s@]+@[^\s@.]+\.[^\s@]+$/;
+const URL_RE = /^https?:\/\/[^\s]+$/;
+const PHONE_RE = /^[+]?[\d\s().-]{7,}$/;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export const FieldFormatSchema = z.enum([
-    'email',
-    'url',
-    'phone',
-    'date',
-    'datetime',
-    'uuid',
-    'image',
-    'avatar',
-    'thumbnail',
-]);
+export function isEmailValue(value: string): boolean {
+    return EMAIL_RE.test(value);
+}
+
+export function isUrlValue(value: string): boolean {
+    return URL_RE.test(value);
+}
+
+export function isPhoneValue(value: string): boolean {
+    return PHONE_RE.test(value);
+}
+
+export function isUuidValue(value: string): boolean {
+    return UUID_RE.test(value);
+}
+
+/** Does `value` satisfy the declared semantic domain? `image` is a URL. */
+export function isSemanticStringValue(type: SemanticStringType, value: string): boolean {
+    switch (type) {
+        case 'email':
+            return isEmailValue(value);
+        case 'url':
+        case 'image':
+            return isUrlValue(value);
+        case 'phone':
+            return isPhoneValue(value);
+        case 'uuid':
+            return isUuidValue(value);
+    }
+}
 
 // ============================================================================
 // Entity Field — discriminated union by `type`
@@ -187,6 +228,11 @@ type ScalarFieldType =
     | 'date'
     | 'timestamp'
     | 'datetime'
+    | 'email'
+    | 'url'
+    | 'phone'
+    | 'uuid'
+    | 'image'
     | 'trait'
     | 'slot'
     | 'pattern';
@@ -203,8 +249,6 @@ type EntityFieldBase = {
     required?: boolean;
     /** Default value — parsed from `.orb`, always JSON-shaped. */
     default?: JsonValue;
-    /** Validation format */
-    format?: FieldFormat;
     /** Minimum value (for number) or length (for string) */
     min?: number;
     /** Maximum value or length */
@@ -320,7 +364,6 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
         name: z.string().min(1, 'Field name is required').optional(),
         required: z.boolean().optional(),
         default: JsonValueSchema.optional(),
-        format: FieldFormatSchema.optional(),
         min: z.number().optional(),
         max: z.number().optional(),
         properties: z.record(EntityFieldSchema).optional(),
@@ -367,6 +410,11 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
             scalarVariant('date'),
             scalarVariant('timestamp'),
             scalarVariant('datetime'),
+            scalarVariant('email'),
+            scalarVariant('url'),
+            scalarVariant('phone'),
+            scalarVariant('uuid'),
+            scalarVariant('image'),
             scalarVariant('trait'),
             scalarVariant('slot'),
             scalarVariant('pattern'),

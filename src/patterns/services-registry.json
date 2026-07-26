@@ -623,6 +623,73 @@
       ],
       "credentials": []
     },
+    "migration": {
+      "name": "migration",
+      "description": "Migration service — import external data (notes, docs, references) into the system",
+      "category": "infrastructure",
+      "package": "@almadar-io/migration",
+      "actions": [
+        {
+          "name": "listDocuments",
+          "description": "List the documents available from an import source.",
+          "params": [
+            {
+              "name": "source",
+              "type": "ServiceParams",
+              "required": true,
+              "description": "ImportSource descriptor (kind + source-specific config)"
+            }
+          ],
+          "responseShape": {
+            "documents": "array"
+          }
+        },
+        {
+          "name": "fetchDocument",
+          "description": "Fetch one document's content from an import source.",
+          "params": [
+            {
+              "name": "source",
+              "type": "ServiceParams",
+              "required": true,
+              "description": "ImportSource descriptor (kind + source-specific config)"
+            },
+            {
+              "name": "documentId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "document": "object"
+          }
+        },
+        {
+          "name": "commit",
+          "description": "Commit staged import units through the host's sink.",
+          "params": [
+            {
+              "name": "jobId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "units",
+              "type": "array",
+              "required": true,
+              "description": "ImportUnit[] staged for commit"
+            }
+          ],
+          "responseShape": {
+            "committed": "number",
+            "failed": "array"
+          }
+        }
+      ],
+      "credentials": []
+    },
     "skills": {
       "name": "skills",
       "description": "Skills service — AI-powered schema generation",
@@ -1674,6 +1741,43 @@
           "description": "Docker daemon host URL"
         }
       ]
+    },
+    "database": {
+      "name": "database",
+      "description": "Database integration — read-only SQL queries over external connections",
+      "category": "infrastructure",
+      "package": "@almadar/integrations",
+      "actions": [
+        {
+          "name": "query",
+          "description": "",
+          "params": [
+            {
+              "name": "connectionRef",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "sql",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "params",
+              "type": "DatabaseQueryParamValue[]",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "rows": "DatabaseRow[]",
+            "rowCount": "number"
+          }
+        }
+      ],
+      "credentials": []
     },
     "storage": {
       "name": "storage",

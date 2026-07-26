@@ -34,7 +34,7 @@ export type PersistActionName =
   | "query";
 
 /**
- * Union of all service action names across all 22 service contracts.
+ * Union of all service action names across the registered service contracts.
  */
 export type ServiceActionName =
   | PersistActionName
@@ -117,6 +117,9 @@ export type ServiceActionName =
   | "getUserPreferences"
   | "updateUserPreferences"
   | "getThreadHistory"
+  // Migration / Import
+  | "listDocuments"
+  | "fetchDocument"
   // Media
   | "getVideo"
   // Payments

@@ -385,6 +385,13 @@ function signatureFieldToEntityField(f: FactorySignatureEntityField): EntityFiel
     case 'date':
     case 'timestamp':
     case 'datetime':
+    // Semantic string domains carry no dependent payload, so they pass through
+    // as-is and the question widget narrows the input accordingly.
+    case 'email':
+    case 'url':
+    case 'phone':
+    case 'uuid':
+    case 'image':
       return { ...base, type: f.type };
     case 'array':
       return { ...base, type: 'array' };

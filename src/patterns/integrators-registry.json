@@ -624,7 +624,27 @@
           }
         }
       ]
+    },
+    "database": {
+      "name": "database",
+      "description": "Generic SQL database integration - read-only queries over external connections",
+      "category": "infrastructure",
+      "actions": [
+        {
+          "name": "query",
+          "description": "Run a single read-only SELECT against a connection referenced by env var name",
+          "params": [
+            { "name": "connectionRef", "type": "string", "required": true, "description": "Name of the environment variable holding the connection string (never the secret itself)" },
+            { "name": "sql", "type": "string", "required": true, "description": "Single SELECT statement (read-only enforced)" },
+            { "name": "params", "type": "array", "required": false, "description": "Bind parameters for the query" }
+          ],
+          "responseShape": {
+            "rows": "array",
+            "rowCount": "number"
+          }
+        }
+      ]
     }
   },
-  "categories": ["media", "payment", "messaging", "ai", "devtools"]
+  "categories": ["media", "payment", "messaging", "ai", "devtools", "infrastructure"]
 }

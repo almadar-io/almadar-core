@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-25T06:32:53.902Z",
+  "exportedAt": "2026-07-26T06:18:13.545Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -1357,6 +1357,21 @@
     "page-transition": {
       "component": "PageTransition",
       "importPath": "@/components/core/molecules/PageTransition",
+      "category": "component"
+    },
+    "import-preview-tree": {
+      "component": "ImportPreviewTree",
+      "importPath": "@/components/core/molecules/ImportPreviewTree",
+      "category": "component"
+    },
+    "import-progress": {
+      "component": "ImportProgress",
+      "importPath": "@/components/core/molecules/ImportProgress",
+      "category": "component"
+    },
+    "import-source-picker": {
+      "component": "ImportSourcePicker",
+      "importPath": "@/components/core/molecules/ImportSourcePicker",
       "category": "component"
     }
   }

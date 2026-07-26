@@ -11,6 +11,7 @@ export default defineConfig({
     'state-machine/index': 'src/state-machine/index.ts',
     'builders': 'src/builders.ts',
     'patterns/index': 'src/patterns/index.ts',
+    'mock/index': 'src/mock/index.ts',
   },
   format: ['esm'],
   dts: true,

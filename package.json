@@ -42,6 +42,11 @@
       "import": "./dist/patterns/index.js",
       "require": "./dist/patterns/index.js"
     },
+    "./mock": {
+      "types": "./dist/mock/index.d.ts",
+      "import": "./dist/mock/index.js",
+      "require": "./dist/mock/index.js"
+    },
     "./patterns/*": {
       "types": "./dist/patterns/*",
       "import": "./dist/patterns/*",
