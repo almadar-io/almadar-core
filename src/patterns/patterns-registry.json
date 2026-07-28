@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-28T10:40:00.004Z",
+  "exportedAt": "2026-07-28T14:48:23.507Z",
   "patterns": {
     "entity-table": {
       "type": "entity-table",
@@ -40911,6 +40911,445 @@
             "string"
           ],
           "description": "Additional CSS classes"
+        }
+      }
+    },
+    "svg-draw-group": {
+      "type": "svg-draw-group",
+      "category": "game",
+      "tier": "atoms",
+      "family": "game",
+      "description": "SvgDrawGroup component",
+      "suggestedFor": [
+        "svg",
+        "draw",
+        "group",
+        "svg draw group"
+      ],
+      "typicalSize": "small",
+      "propsSchema": {
+        "x": {
+          "types": [
+            "number"
+          ],
+          "description": "Grid-cell x of the group's origin.",
+          "default": 0
+        },
+        "y": {
+          "types": [
+            "number"
+          ],
+          "description": "Grid-cell y of the group's origin.",
+          "default": 0
+        },
+        "scale": {
+          "types": [
+            "number"
+          ],
+          "description": "Uniform scale applied after the translate."
+        },
+        "rotate": {
+          "types": [
+            "number"
+          ],
+          "description": "Rotation in degrees applied after the translate."
+        },
+        "opacity": {
+          "types": [
+            "number"
+          ],
+          "description": "0..1 opacity."
+        },
+        "className": {
+          "types": [
+            "string"
+          ],
+          "description": "Additional CSS classes"
+        },
+        "children": {
+          "types": [
+            "node"
+          ],
+          "description": "children prop"
+        }
+      }
+    },
+    "svg-draw-shape": {
+      "type": "svg-draw-shape",
+      "category": "game",
+      "tier": "atoms",
+      "family": "game",
+      "description": "SvgDrawShape component",
+      "suggestedFor": [
+        "svg",
+        "draw",
+        "shape",
+        "svg draw shape"
+      ],
+      "typicalSize": "small",
+      "propsSchema": {
+        "shape": {
+          "types": [
+            "string"
+          ],
+          "description": "shape prop",
+          "required": true,
+          "enumValues": [
+            "rect",
+            "circle",
+            "ellipse",
+            "polygon",
+            "polyline",
+            "path",
+            "line"
+          ]
+        },
+        "x": {
+          "types": [
+            "number"
+          ],
+          "description": "Grid-cell x of the element's translated origin.",
+          "required": true
+        },
+        "y": {
+          "types": [
+            "number"
+          ],
+          "description": "Grid-cell y of the element's translated origin.",
+          "required": true
+        },
+        "width": {
+          "types": [
+            "number"
+          ],
+          "description": "Rect width in cell units."
+        },
+        "height": {
+          "types": [
+            "number"
+          ],
+          "description": "Rect height in cell units."
+        },
+        "radius": {
+          "types": [
+            "number"
+          ],
+          "description": "Circle radius / ellipse horizontal radius in cell units."
+        },
+        "radiusY": {
+          "types": [
+            "number"
+          ],
+          "description": "Ellipse vertical radius in cell units; omitted → `radius` (a circle)."
+        },
+        "points": {
+          "types": [
+            "string"
+          ],
+          "description": "Polygon/polyline points, viewBox units relative to the translated origin."
+        },
+        "d": {
+          "types": [
+            "string"
+          ],
+          "description": "Path data, viewBox units relative to the translated origin."
+        },
+        "x2": {
+          "types": [
+            "number"
+          ],
+          "description": "Line end x in cell units."
+        },
+        "y2": {
+          "types": [
+            "number"
+          ],
+          "description": "Line end y in cell units."
+        },
+        "fill": {
+          "types": [
+            "string"
+          ],
+          "description": "fill prop"
+        },
+        "stroke": {
+          "types": [
+            "string"
+          ],
+          "description": "stroke prop"
+        },
+        "strokeWidth": {
+          "types": [
+            "number"
+          ],
+          "description": "strokeWidth prop"
+        },
+        "opacity": {
+          "types": [
+            "number"
+          ],
+          "description": "0..1 opacity."
+        },
+        "className": {
+          "types": [
+            "string"
+          ],
+          "description": "Additional CSS classes"
+        }
+      }
+    },
+    "svg-draw-text": {
+      "type": "svg-draw-text",
+      "category": "game",
+      "tier": "atoms",
+      "family": "game",
+      "description": "SvgDrawText component",
+      "suggestedFor": [
+        "svg",
+        "draw",
+        "text",
+        "svg draw text"
+      ],
+      "typicalSize": "small",
+      "propsSchema": {
+        "x": {
+          "types": [
+            "number"
+          ],
+          "description": "Grid-cell x of the text anchor.",
+          "required": true
+        },
+        "y": {
+          "types": [
+            "number"
+          ],
+          "description": "Grid-cell y of the text anchor.",
+          "required": true
+        },
+        "text": {
+          "types": [
+            "string"
+          ],
+          "description": "The text content.",
+          "required": true
+        },
+        "size": {
+          "types": [
+            "number"
+          ],
+          "description": "Font size in viewBox units (default 12).",
+          "default": 12
+        },
+        "fill": {
+          "types": [
+            "string"
+          ],
+          "description": "fill prop",
+          "default": "var(--color-foreground)"
+        },
+        "anchor": {
+          "types": [
+            "string"
+          ],
+          "description": "Text anchor (default 'middle').",
+          "enumValues": [
+            "start",
+            "middle",
+            "end"
+          ],
+          "default": "middle"
+        },
+        "className": {
+          "types": [
+            "string"
+          ],
+          "description": "Additional CSS classes"
+        }
+      }
+    },
+    "svg-draw-shape-layer": {
+      "type": "svg-draw-shape-layer",
+      "category": "game",
+      "tier": "molecules",
+      "family": "game",
+      "description": "SvgDrawShapeLayer component",
+      "suggestedFor": [
+        "svg",
+        "draw",
+        "shape",
+        "layer",
+        "svg draw shape layer"
+      ],
+      "typicalSize": "medium",
+      "propsSchema": {
+        "items": {
+          "types": [
+            "array"
+          ],
+          "description": "items prop",
+          "required": true,
+          "items": {
+            "types": [
+              "object"
+            ],
+            "properties": {
+              "id": {
+                "types": [
+                  "string"
+                ]
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        },
+        "fill": {
+          "types": [
+            "string"
+          ],
+          "description": "Default fill for items that don't set one."
+        },
+        "stroke": {
+          "types": [
+            "string"
+          ],
+          "description": "Default stroke for items that don't set one."
+        },
+        "strokeWidth": {
+          "types": [
+            "number"
+          ],
+          "description": "Default strokeWidth for items that don't set one."
+        },
+        "opacity": {
+          "types": [
+            "number"
+          ],
+          "description": "Default 0..1 opacity for items that don't set one."
+        }
+      }
+    },
+    "svg-stage": {
+      "type": "svg-stage",
+      "category": "game",
+      "tier": "molecules",
+      "family": "game",
+      "description": "SvgStage component",
+      "suggestedFor": [
+        "svg",
+        "stage",
+        "svg stage"
+      ],
+      "typicalSize": "medium",
+      "propsSchema": {
+        "cols": {
+          "types": [
+            "number"
+          ],
+          "description": "Grid width in cells.",
+          "required": true
+        },
+        "rows": {
+          "types": [
+            "number"
+          ],
+          "description": "Grid height in cells.",
+          "required": true
+        },
+        "tileSize": {
+          "types": [
+            "number"
+          ],
+          "description": "ViewBox units per cell (default 32); viewBox is `0 0 cols*tileSize rows*tileSize`.",
+          "default": 32
+        },
+        "background": {
+          "types": [
+            "string"
+          ],
+          "description": "Background rect fill (default `var(--color-background)`).",
+          "default": "var(--color-background)"
+        },
+        "tileClickEvent": {
+          "types": [
+            "string"
+          ],
+          "description": "Emitted as `UI:<event>` with `{ x, y }` cell coords on pointer up (<5px drag).",
+          "kind": "event-ref",
+          "emitPayloadSchema": [
+            {
+              "name": "x",
+              "type": "number",
+              "required": true
+            },
+            {
+              "name": "y",
+              "type": "number",
+              "required": true
+            }
+          ]
+        },
+        "tileHoverEvent": {
+          "types": [
+            "string"
+          ],
+          "description": "Emitted as `UI:<event>` with `{ x, y }` cell coords on pointer move.",
+          "kind": "event-ref",
+          "emitPayloadSchema": [
+            {
+              "name": "x",
+              "type": "number",
+              "required": true
+            },
+            {
+              "name": "y",
+              "type": "number",
+              "required": true
+            }
+          ]
+        },
+        "tileLeaveEvent": {
+          "types": [
+            "string"
+          ],
+          "description": "Emitted as `UI:<event>` with `{}` when the pointer leaves the stage.",
+          "kind": "event-ref",
+          "emitPayloadSchema": []
+        },
+        "keyMap": {
+          "types": [
+            "object"
+          ],
+          "description": "Keyboard → semantic events: `e.code` → event name, emitted as `UI:<event>` with `{}`.",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
+        },
+        "keyUpMap": {
+          "types": [
+            "object"
+          ],
+          "description": "Keyup counterpart of `keyMap`.",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
+        },
+        "className": {
+          "types": [
+            "string"
+          ],
+          "description": "Additional CSS classes"
+        },
+        "children": {
+          "types": [
+            "node"
+          ],
+          "description": "children prop"
         }
       }
     }
