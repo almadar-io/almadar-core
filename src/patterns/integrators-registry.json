@@ -534,74 +534,180 @@
           "name": "cloneRepo",
           "description": "Clone a repository",
           "params": [
-            { "name": "repo", "type": "string", "required": true, "description": "Repository URL or owner/repo" },
-            { "name": "branch", "type": "string", "required": false, "description": "Branch to clone" }
+            {
+              "name": "repo",
+              "type": "string",
+              "required": true,
+              "description": "Repository URL or owner/repo"
+            },
+            {
+              "name": "branch",
+              "type": "string",
+              "required": false,
+              "description": "Branch to clone"
+            }
           ],
-          "responseShape": { "path": "string", "branch": "string" }
+          "responseShape": {
+            "path": "string",
+            "branch": "string"
+          }
         },
         {
           "name": "createBranch",
           "description": "Create a new branch",
           "params": [
-            { "name": "repo", "type": "string", "required": true, "description": "Local repo path" },
-            { "name": "branch", "type": "string", "required": true, "description": "Branch name" }
+            {
+              "name": "repo",
+              "type": "string",
+              "required": true,
+              "description": "Local repo path"
+            },
+            {
+              "name": "branch",
+              "type": "string",
+              "required": true,
+              "description": "Branch name"
+            }
           ],
-          "responseShape": { "branch": "string" }
+          "responseShape": {
+            "branch": "string"
+          }
         },
         {
           "name": "commit",
           "description": "Commit changes",
           "params": [
-            { "name": "repo", "type": "string", "required": true, "description": "Local repo path" },
-            { "name": "message", "type": "string", "required": true, "description": "Commit message" },
-            { "name": "files", "type": "array", "required": false, "description": "Files to stage" }
+            {
+              "name": "repo",
+              "type": "string",
+              "required": true,
+              "description": "Local repo path"
+            },
+            {
+              "name": "message",
+              "type": "string",
+              "required": true,
+              "description": "Commit message"
+            },
+            {
+              "name": "files",
+              "type": "array",
+              "required": false,
+              "description": "Files to stage"
+            }
           ],
-          "responseShape": { "hash": "string", "message": "string" }
+          "responseShape": {
+            "hash": "string",
+            "message": "string"
+          }
         },
         {
           "name": "push",
           "description": "Push commits to remote",
           "params": [
-            { "name": "repo", "type": "string", "required": true, "description": "Local repo path" },
-            { "name": "branch", "type": "string", "required": false, "description": "Branch to push" }
+            {
+              "name": "repo",
+              "type": "string",
+              "required": true,
+              "description": "Local repo path"
+            },
+            {
+              "name": "branch",
+              "type": "string",
+              "required": false,
+              "description": "Branch to push"
+            }
           ],
-          "responseShape": { "success": "boolean" }
+          "responseShape": {
+            "success": "boolean"
+          }
         },
         {
           "name": "createPR",
           "description": "Create a pull request",
           "params": [
-            { "name": "title", "type": "string", "required": true, "description": "PR title" },
-            { "name": "body", "type": "string", "required": false, "description": "PR description" },
-            { "name": "head", "type": "string", "required": true, "description": "Head branch" },
-            { "name": "base", "type": "string", "required": false, "description": "Base branch (default: main)" }
+            {
+              "name": "title",
+              "type": "string",
+              "required": true,
+              "description": "PR title"
+            },
+            {
+              "name": "body",
+              "type": "string",
+              "required": false,
+              "description": "PR description"
+            },
+            {
+              "name": "head",
+              "type": "string",
+              "required": true,
+              "description": "Head branch"
+            },
+            {
+              "name": "base",
+              "type": "string",
+              "required": false,
+              "description": "Base branch (default: main)"
+            }
           ],
-          "responseShape": { "number": "number", "url": "string" }
+          "responseShape": {
+            "number": "number",
+            "url": "string"
+          }
         },
         {
           "name": "getPRComments",
           "description": "Fetch pull request comments",
           "params": [
-            { "name": "prNumber", "type": "number", "required": true, "description": "PR number" }
+            {
+              "name": "prNumber",
+              "type": "number",
+              "required": true,
+              "description": "PR number"
+            }
           ],
-          "responseShape": { "comments": "array" }
+          "responseShape": {
+            "comments": "array"
+          }
         },
         {
           "name": "listIssues",
           "description": "List issues with optional filters",
           "params": [
-            { "name": "state", "type": "string", "required": false, "description": "Issue state: open, closed, all" },
-            { "name": "labels", "type": "string", "required": false, "description": "Comma-separated label names" }
+            {
+              "name": "state",
+              "type": "string",
+              "required": false,
+              "description": "Issue state: open, closed, all"
+            },
+            {
+              "name": "labels",
+              "type": "string",
+              "required": false,
+              "description": "Comma-separated label names"
+            }
           ],
-          "responseShape": { "issues": "array" }
+          "responseShape": {
+            "issues": "array"
+          }
         },
         {
           "name": "getIssue",
           "description": "Get a single issue",
           "params": [
-            { "name": "issueNumber", "type": "number", "required": true, "description": "Issue number" }
+            {
+              "name": "issueNumber",
+              "type": "number",
+              "required": true,
+              "description": "Issue number"
+            }
           ],
-          "responseShape": { "title": "string", "body": "string", "state": "string" }
+          "responseShape": {
+            "title": "string",
+            "body": "string",
+            "state": "string"
+          }
         }
       ]
     },
@@ -614,7 +720,12 @@
           "name": "validate",
           "description": "Validate an orbital schema",
           "params": [
-            { "name": "schema", "type": "string", "required": true, "description": "Schema content to validate" }
+            {
+              "name": "schema",
+              "type": "string",
+              "required": true,
+              "description": "Schema content to validate"
+            }
           ],
           "responseShape": {
             "valid": "boolean",
@@ -634,9 +745,24 @@
           "name": "query",
           "description": "Run a single read-only SELECT against a connection referenced by env var name",
           "params": [
-            { "name": "connectionRef", "type": "string", "required": true, "description": "Name of the environment variable holding the connection string (never the secret itself)" },
-            { "name": "sql", "type": "string", "required": true, "description": "Single SELECT statement (read-only enforced)" },
-            { "name": "params", "type": "array", "required": false, "description": "Bind parameters for the query" }
+            {
+              "name": "connectionRef",
+              "type": "string",
+              "required": true,
+              "description": "Name of the environment variable holding the connection string (never the secret itself)"
+            },
+            {
+              "name": "sql",
+              "type": "string",
+              "required": true,
+              "description": "Single SELECT statement (read-only enforced)"
+            },
+            {
+              "name": "params",
+              "type": "array",
+              "required": false,
+              "description": "Bind parameters for the query"
+            }
           ],
           "responseShape": {
             "rows": "array",
@@ -644,7 +770,125 @@
           }
         }
       ]
+    },
+    "wikimedia": {
+      "name": "wikimedia",
+      "description": "Wikipedia API — redirect-resolved page lookup (description, portrait, lead extract)",
+      "category": "reference",
+      "actions": [
+        {
+          "name": "getPage",
+          "description": "Look up a title on Wikipedia",
+          "params": [
+            {
+              "name": "title",
+              "type": "string",
+              "required": true,
+              "description": "Page title (human-readable name)"
+            }
+          ],
+          "responseShape": {
+            "title": "string",
+            "description": "string",
+            "portraitUrl": "string",
+            "extract": "string"
+          }
+        }
+      ]
+    },
+    "iconify": {
+      "name": "iconify",
+      "description": "Iconify API — brand-logo / icon resolution, search, and body fetch",
+      "category": "reference",
+      "actions": [
+        {
+          "name": "svgExists",
+          "description": "Check whether an SVG path exists",
+          "params": [
+            {
+              "name": "path",
+              "type": "string",
+              "required": true,
+              "description": "Path under api.iconify.design (e.g. devicon/typescript.svg)"
+            }
+          ],
+          "responseShape": {
+            "exists": "boolean"
+          }
+        },
+        {
+          "name": "search",
+          "description": "Relevance search for icons",
+          "params": [
+            {
+              "name": "query",
+              "type": "string",
+              "required": true,
+              "description": "Search term"
+            },
+            {
+              "name": "limit",
+              "type": "number",
+              "required": false,
+              "description": "Max results"
+            }
+          ],
+          "responseShape": {
+            "icons": "string[]"
+          }
+        },
+        {
+          "name": "getIconBody",
+          "description": "Fetch an icon SVG body for color-tone classification",
+          "params": [
+            {
+              "name": "iconId",
+              "type": "string",
+              "required": true,
+              "description": "Icon id (prefix:name)"
+            }
+          ],
+          "responseShape": {
+            "body": "string"
+          }
+        }
+      ]
+    },
+    "arxiv": {
+      "name": "arxiv",
+      "description": "arXiv API — frontier academic preprint search (emerging-axis research backend)",
+      "category": "reference",
+      "actions": [
+        {
+          "name": "search",
+          "description": "Search arXiv preprints by relevance",
+          "params": [
+            {
+              "name": "query",
+              "type": "string",
+              "required": true,
+              "description": "Search query"
+            },
+            {
+              "name": "maxResults",
+              "type": "number",
+              "required": false,
+              "description": "Max results (default 8)"
+            }
+          ],
+          "responseShape": {
+            "results": "ArxivResult[]"
+          }
+        }
+      ]
     }
   },
-  "categories": ["media", "payment", "messaging", "ai", "devtools", "infrastructure"]
+  "categories": [
+    "media",
+    "payment",
+    "messaging",
+    "ai",
+    "devtools",
+    "infrastructure"
+  ]
 }

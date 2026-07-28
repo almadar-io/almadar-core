@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-27T07:50:10.004Z",
+  "exportedAt": "2026-07-28T10:40:00.004Z",
   "patterns": {
     "entity-table": {
       "type": "entity-table",
@@ -14633,6 +14633,27 @@
                   "number"
                 ]
               },
+              "mark": {
+                "types": [
+                  "object"
+                ],
+                "properties": {
+                  "kind": {
+                    "types": [
+                      "unknown"
+                    ]
+                  },
+                  "suggestionId": {
+                    "types": [
+                      "string"
+                    ]
+                  }
+                },
+                "required": [
+                  "kind",
+                  "suggestionId"
+                ]
+              },
               "x": {
                 "types": [
                   "number"
@@ -14654,6 +14675,48 @@
             "array"
           ],
           "description": "Graph edges (the only rendered links)",
+          "items": {
+            "types": [
+              "object"
+            ],
+            "properties": {
+              "source": {
+                "types": [
+                  "string"
+                ]
+              },
+              "target": {
+                "types": [
+                  "string"
+                ]
+              },
+              "label": {
+                "types": [
+                  "string"
+                ]
+              },
+              "weight": {
+                "types": [
+                  "number"
+                ]
+              },
+              "color": {
+                "types": [
+                  "string"
+                ]
+              }
+            },
+            "required": [
+              "source",
+              "target"
+            ]
+          }
+        },
+        "proposedEdges": {
+          "types": [
+            "array"
+          ],
+          "description": "Uncommitted proposal links — rendered dashed/faint in a separate pass, never folded into the layout springs.",
           "items": {
             "types": [
               "object"
@@ -14838,6 +14901,111 @@
                       "number"
                     ]
                   },
+                  "mark": {
+                    "types": [
+                      "object"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "types": [
+                          "unknown"
+                        ]
+                      },
+                      "suggestionId": {
+                        "types": [
+                          "string"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "suggestionId"
+                    ]
+                  },
+                  "x": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "y": {
+                    "types": [
+                      "number"
+                    ]
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        "onMarkClick": {
+          "types": [
+            "function"
+          ],
+          "description": "On marked-node click (suggestion/proposal target). Takes priority over onNodeClick.",
+          "kind": "callback",
+          "callbackArgs": [
+            {
+              "name": "node",
+              "type": "object",
+              "schema": {
+                "types": [
+                  "object"
+                ],
+                "properties": {
+                  "id": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "label": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "group": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "color": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "size": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "badge": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "mark": {
+                    "types": [
+                      "object"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "types": [
+                          "unknown"
+                        ]
+                      },
+                      "suggestionId": {
+                        "types": [
+                          "string"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "suggestionId"
+                    ]
+                  },
                   "x": {
                     "types": [
                       "number"
@@ -14901,6 +15069,27 @@
                       "number"
                     ]
                   },
+                  "mark": {
+                    "types": [
+                      "object"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "types": [
+                          "unknown"
+                        ]
+                      },
+                      "suggestionId": {
+                        "types": [
+                          "string"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "suggestionId"
+                    ]
+                  },
                   "x": {
                     "types": [
                       "number"
@@ -14962,6 +15151,27 @@
                   "badge": {
                     "types": [
                       "number"
+                    ]
+                  },
+                  "mark": {
+                    "types": [
+                      "object"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "types": [
+                          "unknown"
+                        ]
+                      },
+                      "suggestionId": {
+                        "types": [
+                          "string"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "suggestionId"
                     ]
                   },
                   "x": {
@@ -17719,11 +17929,23 @@
           ],
           "description": "Field name identifying the sender (used with variant: \"message\")"
         },
+        "senderLabelField": {
+          "types": [
+            "string"
+          ],
+          "description": "Field holding the sender's human-readable name (used with variant: \"message\"). Defaults to `senderField`. Set this when `senderField` holds an id — an id-keyed thread otherwise labels bubbles `staff-1` instead of `Sam Staff`."
+        },
         "currentUser": {
           "types": [
             "string"
           ],
           "description": "Current user identifier; messages matching this value align right (used with variant: \"message\")"
+        },
+        "emptyMessage": {
+          "types": [
+            "string"
+          ],
+          "description": "Message shown when there are no rows. Falls back to the generic \"no items\" translation. `TableView` already exposes this; an agenda or an inbox wants to say what \"empty\" means in its own words."
         },
         "className": {
           "types": [
