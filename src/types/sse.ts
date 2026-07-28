@@ -222,6 +222,10 @@ export interface ErrorEvent extends SSEEventBase {
   data: {
     error: string;
     code?: string;
+    /** Orbital names that failed, when a generation run ends in failure. */
+    failedOrbitals?: string[];
+    /** Typed validate/failure lines backing `error` (same format as `cache_demoted.errors`). */
+    errors?: string[];
   };
 }
 
@@ -320,6 +324,8 @@ export interface ProcessErrorEvent extends SSEEventBase {
     orbitalName: string;
     method: 'deterministic' | 'llm';
     error: string;
+    /** Typed validate/failure lines for this orbital (from `orbital_failed.errors`). */
+    errors?: string[];
   };
 }
 

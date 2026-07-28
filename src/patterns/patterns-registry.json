@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-27T04:55:27.017Z",
+  "exportedAt": "2026-07-27T07:50:10.004Z",
   "patterns": {
     "entity-table": {
       "type": "entity-table",
@@ -9820,6 +9820,21 @@
             "object"
           ],
           "description": "Inline style"
+        },
+        "format": {
+          "types": [
+            "string"
+          ],
+          "description": "Value formatting applied to string/number/Date content — `none` (the default) renders content as-is. Covers the raw-ISO-date class: a bound datetime renders human-readable via `format=\"date\"|\"time\"|\"datetime\"`.",
+          "enumValues": [
+            "none",
+            "date",
+            "time",
+            "datetime",
+            "number",
+            "currency",
+            "percent"
+          ]
         },
         "content": {
           "types": [

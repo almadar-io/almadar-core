@@ -51,6 +51,14 @@ export type OrbitalEntity = {
     /** Whether this entity's state is shared across all bound traits (vs per-trait copy). Orthogonal to persistence. */
     shared?: boolean;
 
+    /**
+     * Whether this entity types the ambient `@user` viewer. Orthogonal to both
+     * `persistence` and `shared`: `[persistent: people, identity]` is an
+     * app-owned user directory, `[runtime, identity]` the provider-supplied
+     * current viewer. At most one per composed program.
+     */
+    identity?: boolean;
+
     /** Collection name (auto-derived if not provided for persistent entities) */
     collection?: string;
 
@@ -80,6 +88,11 @@ export const OrbitalEntitySchema = z.object({
     name: z.string().min(1, 'Entity name is required'),
     persistence: EntityPersistenceSchema.default('persistent'),
     shared: z.boolean().optional(),
+    // Must stay in step with the Rust serde field (`EntityDefinition.identity`,
+    // orbital-core/src/schema/types.rs). `z.object()` STRIPS unknown keys rather
+    // than rejecting them, so a Rust-only field works on the compiled path and
+    // silently vanishes on the interpreter path.
+    identity: z.boolean().optional(),
     collection: z.string().optional(),
     fields: z.array(EntityFieldSchema).min(1, 'At least one field is required'),
     instances: z.array(z.record(z.unknown())).optional(),
