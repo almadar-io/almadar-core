@@ -59,9 +59,21 @@ function targetTraitOf(traitRef: TraitRef): Trait | undefined {
 
 /**
  * Build the childTraitName → referrerTraitName map: for every trait whose
- * config literally contains `@trait.X`, record `X -> thisTrait`. First
- * referrer wins per child — today's compositions embed a given trait from
- * exactly one referrer.
+ * config literally contains `@trait.X`, record `X -> thisTrait`.
+ *
+ * **One referrer per embedded trait is an invariant, not a convenience.** The
+ * sibling-pull materialises a sub-view PER EMBEDDER on both paths
+ * (`orbital-compiler/src/phases/inline/trait.rs`, `@almadar/runtime`'s
+ * `ReferenceResolver.pullSiblingTraits`), so two embedders can never land on
+ * one child. That matters here because a child's `@config.X` forwards chain to
+ * its referrer: with two referrers only one call site's config could ever win,
+ * and the loser would render the other's columns. It equally matters to
+ * `useUISlots.updateTraitContent`, which is keyed by trait name — N embedders
+ * of one name means N renders of one frame.
+ *
+ * First referrer wins if the invariant is ever violated; the observable check
+ * lives in `@almadar-io/verify`'s wiring lint
+ * (`embedded-sibling-single-referrer`), which is the layer allowed to report.
  *
  * Safe to call on the resolved (post-inline) schema. Memoize by reference.
  */
@@ -156,6 +168,39 @@ export function collectTraitConfigRefAdjacency(
     if (refs.size > 0) out.set(referrerName, refs);
   }
   return out;
+}
+
+/**
+ * True when a trait's own config declares at least one `@config.<key>` forward
+ * — i.e. part of what it renders is decided by whoever embeds it, resolved by
+ * {@link buildResolvedTraitConfigs} against that single referrer. Traits with
+ * no forward render identically regardless of embedder, which is what
+ * separates an inert shared chrome trait (one `Divider` embedded from two
+ * states) from a genuinely embedder-dependent one.
+ */
+export function traitDeclaresConfigForward(trait: Trait | undefined | null): boolean {
+  const config = trait?.config;
+  if (!config) return false;
+  let found = false;
+  const walk = (value: SExpr | undefined): void => {
+    if (found || value === null || value === undefined) return;
+    if (typeof value === 'string') {
+      if (CONFIG_FORWARD_RE.test(value)) found = true;
+      return;
+    }
+    if (Array.isArray(value)) {
+      for (const item of value) walk(item);
+      return;
+    }
+    if (typeof value === 'object') {
+      for (const v of Object.values(value as SExprAtom & Record<string, SExpr>)) walk(v);
+    }
+  };
+  for (const field of Object.values(config)) {
+    walk((field as { default?: SExpr })?.default);
+    if (found) return true;
+  }
+  return false;
 }
 
 /**

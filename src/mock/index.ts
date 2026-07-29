@@ -5,6 +5,7 @@
  */
 
 export * from './random.js';
+export { identityEntityName, ownerFieldsFromSchema } from './identityOwners.js';
 export {
   type SampleEntity,
   type SampleContext,

@@ -190,7 +190,7 @@ describe('V4 zod activation — full id-carrying .orb round-trips through the lo
     const orbital = schema.orbitals[0];
     expect(orbital.id).toBe(ORB);
     const trait = orbital.traits[0];
-    if (typeof trait === 'string' || !('id' in trait)) throw new Error('expected inline trait with id');
+    if (typeof trait === 'string' || 'ref' in trait || !('id' in trait)) throw new Error('expected inline trait with id');
     expect(trait.id).toBe(TRT);
     expect(trait.linkedEntityId).toBe(ENT);
     expect(trait.emits?.[0]?.eventId).toBe(EVT);

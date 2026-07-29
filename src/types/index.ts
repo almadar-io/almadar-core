@@ -269,6 +269,7 @@ export {
 // the JS interpreter and the compiled shell.
 export {
   ANONYMOUS_USER,
+  DEFAULT_VIEWER,
   DEV_TOKEN_PREFIX,
   MOCK_PERSONAS,
   decodeDevIdentityToken,

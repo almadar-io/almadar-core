@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-28T14:48:23.507Z",
+  "exportedAt": "2026-07-28T16:34:50.202Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -1374,29 +1374,9 @@
       "importPath": "@/components/core/molecules/ImportSourcePicker",
       "category": "component"
     },
-    "svg-draw-group": {
-      "component": "SvgDrawGroup",
-      "importPath": "@/components/game/atoms/SvgDrawGroup",
-      "category": "game"
-    },
-    "svg-draw-shape": {
-      "component": "SvgDrawShape",
-      "importPath": "@/components/game/atoms/SvgDrawShape",
-      "category": "game"
-    },
-    "svg-draw-text": {
-      "component": "SvgDrawText",
-      "importPath": "@/components/game/atoms/SvgDrawText",
-      "category": "game"
-    },
-    "svg-draw-shape-layer": {
-      "component": "SvgDrawShapeLayer",
-      "importPath": "@/components/game/molecules/SvgDrawShapeLayer",
-      "category": "game"
-    },
-    "svg-stage": {
-      "component": "SvgStage",
-      "importPath": "@/components/game/molecules/SvgStage",
+    "draw-group": {
+      "component": "DrawGroup",
+      "importPath": "@/components/game/atoms/DrawGroup",
       "category": "game"
     }
   }

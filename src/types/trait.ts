@@ -1185,24 +1185,21 @@ export const TraitSchema = z.object({
     sourceEntityDefinition: EntitySchema.optional(),
 });
 
-// TraitRefSchema defined here after TraitSchema to avoid forward reference
+// TraitRefSchema defined here after TraitSchema to avoid forward reference.
+//
+// The reference arm IS `TraitReferenceSchema` — one schema for one shape. It
+// used to be a narrower hand-rolled copy (`ref`/`config`/`linkedEntity`/`name`/
+// `events` only), and because `z.object()` STRIPS undeclared keys rather than
+// rejecting them, every `.orb` that came through the loader's `safeParse` lost
+// `id`, `refId`, `linkedEntityId`, `listens`, `emitsScope`, `effects`, `fields`
+// and `eventIds` on every trait ref — silently, with a schema that reported
+// success. An atom's own sub-view refs (`trait DenseTableView =
+// TableView.traits.TableViewRender -> BrowseItem { listens {…} }`) arrived with
+// no listens at all, so the interpreted path could not wire what the compiled
+// path wires from the same file.
 export const TraitRefSchema = z.union([
     z.string().min(1),
-    z.object({
-        ref: z.string().min(1),
-        config: TraitConfigSchema.optional(),
-        linkedEntity: z.string().optional(),
-        name: z.string().optional(),
-        // Phase F.4: same non-empty refine as TraitReferenceSchema.events.
-        // Both schemas accept the same call-site argument shape, so the
-        // validators should agree.
-        events: z
-            .record(
-                z.string().min(1, "events key (atom event name) must be non-empty"),
-                z.string().min(1, "events value (caller event name) must be non-empty"),
-            )
-            .optional(),
-    }),
+    TraitReferenceSchema,
     TraitSchema, // Allow inline trait definitions
 ]);
 

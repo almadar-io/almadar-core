@@ -106,6 +106,26 @@ export const MOCK_PERSONAS: readonly UserContext[] = [
   { id: 'customer-1', name: 'Cai Customer', email: 'cai@example.com', role: 'customer', permissions: ['read'] },
 ] as const;
 
+/**
+ * The viewer a host presents when nothing named one.
+ *
+ * Without this, `@user` is `Null` in headless verify and preview, so every
+ * `viewerName: @user.name` binding renders blank and the account menu never
+ * appears — an app that cannot say who you are. Worse, an ownership filter that
+ * works and one that is broken both render an empty table.
+ *
+ * `role` is deliberately EMPTY, not a guess. A default of `admin` would silently
+ * flip which branch renders at the 38 `@user.role` comparisons in the corpus;
+ * an empty role matches no literal, exactly as `Null` did, so this fixes
+ * "undefined at runtime" without changing a single guard outcome.
+ */
+export const DEFAULT_VIEWER: UserContext = {
+  id: 'viewer-1',
+  name: 'Dev Viewer',
+  email: 'viewer@example.com',
+  role: '',
+};
+
 /** Look a dev persona up by id, or by role when no id matches. */
 export function findMockPersona(idOrRole: string): UserContext | undefined {
   return (
