@@ -50,6 +50,7 @@ export type {
   ItemActionPayload,
   SelectionChangePayload,
   LoadMoreRequestPayload,
+  EmojiPickPayload,
   FormSubmitPayload,
 } from './payloads.js';
 

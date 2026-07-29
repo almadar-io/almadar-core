@@ -20,13 +20,13 @@
  *
  * @packageDocumentation
  */
-import type { OrbitalDefinition, OrbitalSchema, SExpr, SExprAtom, Trait, TraitConfig, TraitConfigValue, TraitRef } from './types/index.js';
+import type { OrbitalDefinition, OrbitalSchema, RuntimeValue, SExpr, Trait, TraitConfig, TraitConfigValue, TraitRef } from './types/index.js';
 import { normalizeCallSiteConfigToValues } from './types/index.js';
 
 const TRAIT_BINDING_PREFIX = '@trait.';
 const CONFIG_FORWARD_RE = /^@config\.([A-Za-z_][A-Za-z0-9_]*)$/;
 
-function collectTraitRefsFromValue(value: SExpr, into: Set<string>): void {
+function collectTraitRefsFromValue(value: RuntimeValue, into: Set<string>): void {
   if (value === null || value === undefined) return;
   if (typeof value === 'string') {
     if (value.startsWith(TRAIT_BINDING_PREFIX)) {
@@ -42,7 +42,7 @@ function collectTraitRefsFromValue(value: SExpr, into: Set<string>): void {
     return;
   }
   if (typeof value === 'object') {
-    for (const v of Object.values(value as SExprAtom & Record<string, SExpr>)) {
+    for (const v of Object.values(value as Record<string, RuntimeValue>)) {
       collectTraitRefsFromValue(v, into);
     }
   }
@@ -182,7 +182,7 @@ export function traitDeclaresConfigForward(trait: Trait | undefined | null): boo
   const config = trait?.config;
   if (!config) return false;
   let found = false;
-  const walk = (value: SExpr | undefined): void => {
+  const walk = (value: RuntimeValue): void => {
     if (found || value === null || value === undefined) return;
     if (typeof value === 'string') {
       if (CONFIG_FORWARD_RE.test(value)) found = true;
@@ -193,7 +193,7 @@ export function traitDeclaresConfigForward(trait: Trait | undefined | null): boo
       return;
     }
     if (typeof value === 'object') {
-      for (const v of Object.values(value as SExprAtom & Record<string, SExpr>)) walk(v);
+      for (const v of Object.values(value as Record<string, RuntimeValue>)) walk(v);
     }
   };
   for (const field of Object.values(config)) {

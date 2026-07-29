@@ -128,16 +128,32 @@ export interface BusEventSource {
    */
   fromBridge?: boolean;
   /**
-   * True ONLY for the bridge echo of the event the source trait JUST
-   * dispatched (path 1 of useOrbitalBridge). The originating trait's
-   * `useUIEvents` skips events with this flag to prevent the source
-   * from re-dispatching its own bridge echo (infinite loop). Server-
-   * side cascade emits (path 2) carry `fromBridge: true` but NOT
-   * `dispatched`, so they reach the source trait's transition handler
-   * — that's how a fetch's `emit.success` advances the trait's own
-   * state machine (e.g. `loading -> browsing` on `BrowseItemLoaded`).
+   * True ONLY for bridge echoes the receiving tab already processed, so
+   * the originating trait's self-subscription skips them instead of
+   * re-dispatching its own echo (infinite loop / double execution).
+   * Set by path 1 of useOrbitalBridge (compiled shell — echo of the
+   * just-dispatched event; server-side cascade emits there carry
+   * `fromBridge: true` but NOT `dispatched`, so they still reach the
+   * source trait's transition handler, e.g. `loading -> browsing` on a
+   * fetch's `emit.success`) and by ServerBridge's response-cascade
+   * re-emit (runtime path — every response entry echoes this tab's own
+   * dispatch, already delivered locally via the click-time qualified
+   * emit / bare-cascade subscription; cross-trait `listens` don't filter
+   * on this flag, so their delivery is unaffected). Push-leg events from
+   * OTHER tabs (multiplayer) are never stamped.
    */
   dispatched?: boolean;
+  /**
+   * The client that originated the dispatch whose effects emitted this
+   * event (from `OrbitalEventRequest.clientId`); absent for headless
+   * dispatches (ticks, circuit-router probes, walkers). The server-side
+   * listens fan-out skips client-originated cascade emits — under dual
+   * execution the originating client relays every cascade hop through the
+   * bridge itself, so the server dispatching the same hop double-ran it
+   * (one Send persisted two rows). Headless topology keeps the fan-out:
+   * there is no client to drive the circuit.
+   */
+  originClientId?: string;
 }
 
 /**

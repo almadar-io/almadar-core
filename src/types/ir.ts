@@ -8,7 +8,8 @@
  */
 
 import type { SExpr } from './expression.js';
-import type { EntityRow, FieldValue } from './entity.js';
+import type { Entity, EntityRow, FieldValue } from './entity.js';
+import type { JsonValue, RuntimeValue } from './json.js';
 import type { ListenSource } from './trait.js';
 import type { AnyPatternConfig } from '../patterns/index.js';
 
@@ -33,9 +34,11 @@ export interface ResolvedField {
   type: string;
   tsType: string;
   description?: string;
-  default?: unknown;
+  /** Field default — JSON-shaped, mirroring `EntityField.default`. */
+  default?: JsonValue;
   required: boolean;
-  validation?: unknown;
+  /** Validation constraints carried from the schema (enum whitelist). */
+  validation?: { enum?: string[] };
   /** Enum values for enum or constrained string fields */
   values?: string[];
   /** Enum values (alias for values, for compatibility) */
@@ -371,7 +374,7 @@ export interface ResolvedIR {
   entityBindings: ResolvedEntityBinding[];
 
   /** Raw data entities (used for instance data generation) */
-  rawEntities?: unknown[];
+  rawEntities?: Entity[];
 
   /** Generation timestamp */
   generatedAt: string;
@@ -460,9 +463,9 @@ export function createResolvedField(field: {
   name: string;
   type: string;
   description?: string;
-  default?: unknown;
+  default?: JsonValue;
   required?: boolean;
-  validation?: unknown;
+  validation?: { enum?: string[] };
   values?: string[];
 }): ResolvedField {
   return {
@@ -497,7 +500,7 @@ export function createResolvedField(field: {
  *   console.log('Valid IR:', schema.appName);
  * }
  */
-export function isResolvedIR(ir: unknown): ir is ResolvedIR {
+export function isResolvedIR(ir: RuntimeValue): ir is ResolvedIR {
   if (!ir || typeof ir !== 'object') return false;
   const r = ir as ResolvedIR;
   return typeof r.appName === 'string' && r.traits instanceof Map && r.pages instanceof Map;

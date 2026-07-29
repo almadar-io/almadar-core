@@ -32,6 +32,7 @@
  */
 
 import { z } from 'zod';
+import type { RuntimeValue } from './json.js';
 
 export type BindingRoot =
   | 'entity'
@@ -84,7 +85,7 @@ export type TraitFieldRef = `@trait.${string}`;
 const TRAIT_REF_PATTERN = /^@trait\.[A-Z][a-zA-Z0-9]*$/;
 
 /** Type guard: narrow an unknown value to {@link TraitFieldRef}. */
-export function isTraitFieldRef(value: unknown): value is TraitFieldRef {
+export function isTraitFieldRef(value: RuntimeValue): value is TraitFieldRef {
   return typeof value === 'string' && TRAIT_REF_PATTERN.test(value);
 }
 

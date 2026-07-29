@@ -13,6 +13,7 @@
 
 import type { EntityField } from './field.js';
 import type { EntityPersistence } from './entity.js';
+import type { RuntimeValue } from './json.js';
 import type { OrbitalSchema } from './schema.js';
 import type { PageTraitRef } from './page.js';
 import type { TraitReference, TraitConfigObject } from './trait.js';
@@ -166,7 +167,7 @@ export interface PlanSnapshot {
  * values at the `WorkspaceContext.writePlan` boundary. Discriminates on the
  * snapshot envelope (schemaVersion, status, roster arrays), not deep contents.
  */
-export function isPlanSnapshot(value: unknown): value is PlanSnapshot {
+export function isPlanSnapshot(value: RuntimeValue): value is PlanSnapshot {
     if (typeof value !== 'object' || value === null) return false;
     const statuses: ReadonlyArray<PlanSnapshotStatus> = ['proposed', 'confirmed', 'built', 'failed'];
     return (

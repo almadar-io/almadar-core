@@ -27,6 +27,8 @@ export {
   type CoreBinding,
   type ParsedBinding,
 } from './expression.js';
+import type { SExpr } from './expression.js';
+import type { RuntimeValue } from './json.js';
 
 // ============================================================================
 // Binding Schema
@@ -127,6 +129,83 @@ export const BINDING_CONTEXT_RULES = {
 } as const;
 
 export type BindingContext = keyof typeof BINDING_CONTEXT_RULES;
+
+// ============================================================================
+// Render-Time Binding Markers
+// ============================================================================
+
+/**
+ * Tag property of a `RenderBindingMarker`. `$`-prefixed so it can never
+ * collide with a pattern prop key (prop keys are camelCase identifiers).
+ */
+export const RENDER_BINDING_MARKER = '$renderBinding' as const;
+
+/**
+ * A render-ui prop leaf that is evaluated at RENDER time, not at flush time.
+ *
+ * The interpreted path's executor carries `@entity`-dependent leaves into
+ * slot content as these markers instead of resolving them eagerly; the
+ * renderer (`@almadar/ui`'s SlotContentRenderer) resolves each marker
+ * against the live entity store on every render — the same model the
+ * compiled shell uses (state-based JSX reading `fields?.X` per React
+ * render). Payload-dependent leaves are never deferred: `@payload` is
+ * event-scoped and does not exist at render time.
+ *
+ * A `type` (not `interface`) so it carries an implicit index signature and
+ * stays assignable to the `SExpr` record branch at guard call sites.
+ */
+export type RenderBindingMarker = {
+  readonly [RENDER_BINDING_MARKER]: true;
+  /** The raw prop expression: a binding string (`'@entity.hp'`, embedded
+   * form `'HP: @entity.hp'`) or an S-expression tree. */
+  readonly expression: SExpr;
+};
+
+/** Narrow an arbitrary prop value to a `RenderBindingMarker`. */
+export function isRenderBindingMarker(value: RuntimeValue): value is RenderBindingMarker {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    RENDER_BINDING_MARKER in value &&
+    value[RENDER_BINDING_MARKER] === true
+  );
+}
+
+/** Matches a whole `@entity` token (path or bracket suffix allowed). */
+const ENTITY_BINDING_RE = /@entity(?=[.\[\]]|$)/;
+
+/** Matches a whole `@payload` / `@callsitePayload` token. */
+const PAYLOAD_BINDING_RE = /@(?:callsitePayload|payload)(?=[.\[\]]|$)/;
+
+/**
+ * Does this raw prop expression reference `@entity` anywhere (pure binding,
+ * embedded-binding string, nested S-expression, or object tree)? Marker
+ * objects count as entity-referencing by construction.
+ */
+export function containsEntityBinding(value: SExpr): boolean {
+  if (typeof value === 'string') return ENTITY_BINDING_RE.test(value);
+  if (Array.isArray(value)) return value.some(containsEntityBinding);
+  if (value !== null && typeof value === 'object') {
+    if (isRenderBindingMarker(value)) return true;
+    return Object.values(value as Record<string, SExpr>).some(containsEntityBinding);
+  }
+  return false;
+}
+
+/**
+ * Does this raw prop expression reference the event payload (`@payload` /
+ * `@callsitePayload`) anywhere? Such leaves stay flush-time evaluated —
+ * the payload does not exist at render time.
+ */
+export function containsPayloadBinding(value: SExpr): boolean {
+  if (typeof value === 'string') return PAYLOAD_BINDING_RE.test(value);
+  if (Array.isArray(value)) return value.some(containsPayloadBinding);
+  if (value !== null && typeof value === 'object') {
+    return Object.values(value as Record<string, SExpr>).some(containsPayloadBinding);
+  }
+  return false;
+}
 
 // ============================================================================
 // Binding Validation Helpers

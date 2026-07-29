@@ -19,6 +19,7 @@ import { EntitySchema } from './entity.js';
 import type { AnyPatternConfig } from '../patterns/index.js';
 import type { Expression, SExpr } from './expression.js';
 import { ExpressionSchema, SExprSchema } from './expression.js';
+import { JsonValueSchema } from './json.js';
 
 // ============================================================================
 // Trait Configuration
@@ -121,7 +122,7 @@ const CONFIG_DECLARATION_META_KEYS = ['label', 'description', 'tier', 'synonyms'
  */
 function isConfigFieldSchema(entry: CallSiteConfigEntry): entry is ConfigFieldDeclaration {
     if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) return false;
-    if (!('type' in entry) || typeof (entry as { type?: unknown }).type !== 'string') return false;
+    if (!('type' in entry) || typeof (entry as { type?: TraitConfigValue }).type !== 'string') return false;
     return 'default' in entry || CONFIG_DECLARATION_META_KEYS.some((k) => k in entry);
 }
 
@@ -895,12 +896,9 @@ export const TraitReferenceSchema = z
         // through to the recursive TraitConfigValue union.
         config: z.record(z.union([ConfigFieldDeclarationSchema, TraitConfigValueSchema])).optional(),
         appliesTo: z.array(z.string()).optional(),
-        // Phase F.7: zod accepts an array (the inliner validates element
-        // shape). The full ListenDefinition shape isn't recursively encoded
-        // here because TraitReference is the call-site form — listen entries
-        // pasted in are already-resolved structured definitions, not nested
-        // overrides.
-        listens: z.array(z.unknown()).optional(),
+        // Phase F.7: caller-supplied listen entries are already-resolved
+        // structured definitions (see `TraitReference.listens`).
+        listens: z.array(TraitEventListenerSchema).optional(),
         emitsScope: z.enum(['internal', 'external']).optional(),
         // Phase F.8: per-transition effects override. The keys are event
         // names (the transition triggers AFTER renames); values are SExpr
@@ -977,6 +975,31 @@ export type TraitUIBinding = {
         };
     };
 };
+
+/**
+ * Zod schema for {@link TraitUIBinding}. `content` is a pattern config (or
+ * list of them); pattern configs have no dedicated zod schema in core, so
+ * they are validated as JSON objects here and narrowed by downstream
+ * pattern-aware consumers.
+ */
+export const TraitUIBindingSchema = z.record(
+    z.object({
+        presentation: z.enum(['modal', 'drawer', 'popover', 'inline', 'confirm-dialog']),
+        content: z.union([z.record(JsonValueSchema), z.array(z.record(JsonValueSchema))]),
+        props: z
+            .object({
+                size: z.enum(['sm', 'md', 'lg', 'xl', 'full']).optional(),
+                position: z.enum(['left', 'right', 'top', 'bottom', 'center']).optional(),
+                title: z.string().optional(),
+                closable: z.boolean().optional(),
+                width: z.string().optional(),
+                showProgress: z.boolean().optional(),
+                step: z.number().optional(),
+                totalSteps: z.number().optional(),
+            })
+            .optional(),
+    }),
+);
 
 // ============================================================================
 // Trait Definition
@@ -1179,7 +1202,7 @@ export const TraitSchema = z.object({
     ticks: z.array(TraitTickSchema).optional(),
     emits: z.array(TraitEventContractSchema).optional(),
     listens: z.array(TraitEventListenerSchema).optional(),
-    ui: z.record(z.unknown()).optional(),
+    ui: TraitUIBindingSchema.optional(),
     config: DeclaredTraitConfigSchema.optional(),
     sourceBehavior: SourceBehaviorMetadataSchema.optional(),
     sourceEntityDefinition: EntitySchema.optional(),

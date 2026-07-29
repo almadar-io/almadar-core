@@ -18,7 +18,7 @@
  */
 
 import type { EntityRow } from "./entity.js";
-import type { EventPayload } from "./expression.js";
+import type { EventPayload, SExpr } from "./expression.js";
 import type { BusEventSource } from "./bus.js";
 
 // ── Checks ────────────────────────────────────────────────────────────
@@ -42,15 +42,15 @@ export interface VerificationCheck {
 // ── Transition timeline ──────────────────────────────────────────────
 
 /**
- * Trace of a single effect as it ran on a transition. `args` are left
- * as `unknown[]` because different effect kinds have different argument
- * shapes; consumers narrow via `type` before inspecting.
+ * Trace of a single effect as it ran on a transition. `args` are the
+ * effect tuple's trailing S-expressions; consumers narrow via `type`
+ * before inspecting.
  */
 export interface EffectTrace {
   type: string;
   /** For fetch/persist effects: the entity the effect addresses. */
   entityName?: string;
-  args: unknown[];
+  args: SExpr[];
   status: "executed" | "failed" | "skipped";
   error?: string;
   durationMs?: number;
@@ -187,6 +187,17 @@ export interface EventLogEntry {
 // ── Window bridge contract ───────────────────────────────────────────
 
 /**
+ * A drawable descriptor as exposed over the verification bridge. The
+ * concrete `DrawableNode` union lives downstream in `@almadar/ui`
+ * (`lib/drawable/paintDispatch.ts`) and cannot be imported here without
+ * inverting the dependency axis; the bridge contract carries the `type`
+ * discriminant (`draw-sprite`, `draw-shape`, …) that verifiers narrow on.
+ */
+export interface DrawableDescriptor {
+  type: string;
+}
+
+/**
  * The object attached to `window.__orbitalVerification`. Every optional
  * member is wired up by a corresponding `bind*` / `register*` call on
  * the registry (e.g. `bindEventBus` populates `sendEvent`). Consumers
@@ -229,7 +240,7 @@ export interface OrbitalVerificationAPI {
   /** Canvas frame capture. Populated by game organisms on mount. */
   captureFrame?: () => string | null;
   /** Last neutral drawables list received by the active canvas host. */
-  getLastDrawables?: () => unknown[] | null;
+  getLastDrawables?: () => DrawableDescriptor[] | null;
   /** Asset-url → load-status map. Populated by game organisms. */
   assetStatus?: Record<string, AssetLoadStatus>;
   /** Rolling event bus log. Populated by `bindEventBus`. */

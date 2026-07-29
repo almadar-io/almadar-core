@@ -78,6 +78,16 @@ export type SelectionChangePayload = EventPayload & {
 export type LoadMoreRequestPayload = EventPayload;
 
 /**
+ * Payload dispatched by an emoji-choosing pattern (`pickEvent` on
+ * EmojiPicker) when the user picks a glyph. The receiving trait appends
+ * the glyph to a draft, records a reaction, etc.
+ */
+export type EmojiPickPayload = EventPayload & {
+  /** The chosen emoji glyph (e.g. "😀"). */
+  emoji: string;
+};
+
+/**
  * Payload dispatched by a schema-driven `Form` on successful submit
  * (`submitEvent`). `data` holds the form's collected field values.
  *

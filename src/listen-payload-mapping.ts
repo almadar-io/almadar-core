@@ -23,6 +23,7 @@
 
 import { isEventPayloadValue } from './types/expression.js';
 import type { EventPayload, SExpr } from './types/index';
+import type { RuntimeValue } from './types/json.js';
 
 /**
  * Evaluates one `with{}` mapping value against the source event payload.
@@ -32,7 +33,7 @@ import type { EventPayload, SExpr } from './types/index';
  * `@config` here would let a mapping resolve on the JS path and silently
  * yield nothing on the compiled one.
  */
-export type ListenPayloadEvaluator = (expr: SExpr, payload: EventPayload) => unknown;
+export type ListenPayloadEvaluator = (expr: SExpr, payload: EventPayload) => RuntimeValue;
 
 /**
  * Apply a listen entry's `payloadMapping` to the source event payload.
@@ -53,7 +54,7 @@ export function applyListenPayloadMapping(
     if (!payloadMapping || !payload) return payload;
     const mapped: EventPayload = {};
     for (const [key, expr] of Object.entries(payloadMapping)) {
-        let value: unknown;
+        let value: RuntimeValue;
         try {
             value = evaluate(expr, payload);
         } catch {

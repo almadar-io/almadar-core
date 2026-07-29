@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { applyListenPayloadMapping } from '../src/listen-payload-mapping';
-import type { EventPayload, SExpr } from '../src/types/index';
+import type { EventPayload, RuntimeValue, SExpr } from '../src/types/index';
 
 /**
  * A faithful stand-in for the real evaluator's payload-only semantics
@@ -11,15 +11,15 @@ import type { EventPayload, SExpr } from '../src/types/index';
  * (it sits upstream of it), so end-to-end parity against the REAL evaluator is
  * pinned in `@almadar/runtime`'s suite; this pins the helper's own contract.
  */
-function evaluate(expr: SExpr, payload: EventPayload): unknown {
+function evaluate(expr: SExpr, payload: EventPayload): RuntimeValue {
     if (typeof expr === 'string') {
         if (!expr.startsWith('@')) return expr;
         const path = expr.slice(1).split('.');
         if (path[0] !== 'payload') return undefined;
-        let value: unknown = payload;
+        let value: RuntimeValue = payload;
         for (const seg of path.slice(1)) {
             if (value === null || value === undefined || typeof value !== 'object') return undefined;
-            value = (value as Record<string, unknown>)[seg];
+            value = (value as Record<string, RuntimeValue>)[seg];
         }
         return value;
     }
@@ -29,7 +29,7 @@ function evaluate(expr: SExpr, payload: EventPayload): unknown {
             const target = evaluate(args[0], payload);
             const key = evaluate(args[1], payload);
             if (target === null || typeof target !== 'object' || typeof key !== 'string') return undefined;
-            return (target as Record<string, unknown>)[key];
+            return (target as Record<string, RuntimeValue>)[key];
         }
         if (op === 'str/concat') return args.map((a) => String(evaluate(a, payload))).join('');
         if (op === 'boom') throw new Error('operator failed');
@@ -37,7 +37,7 @@ function evaluate(expr: SExpr, payload: EventPayload): unknown {
         return expr.map((e) => evaluate(e, payload));
     }
     if (expr !== null && typeof expr === 'object') {
-        const out: Record<string, unknown> = {};
+        const out: Record<string, RuntimeValue> = {};
         for (const [k, v] of Object.entries(expr)) out[k] = evaluate(v as SExpr, payload);
         return out;
     }

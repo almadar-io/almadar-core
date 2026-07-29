@@ -90,6 +90,27 @@ export interface SaveResult {
 // ============================================================================
 
 /**
+ * Context attached to validation issues originating from LLM output.
+ * Mirrors the `LLMErrorContext` shapes used by `@almadar/validation`
+ * and the builder's fix-prompt pipeline.
+ */
+export interface LLMErrorContext {
+  /** Preview of the raw LLM output */
+  rawValuePreview?: string;
+  /** Expected type or structure */
+  expectedType?: string;
+  /** Actual type received */
+  actualType?: string;
+  /** Where the error originated */
+  source?: {
+    agent: 'requirements' | 'builder' | 'view-planner';
+    operation: string;
+    promptHash?: string;
+  };
+  tokenUsage?: { prompt: number; completion: number };
+}
+
+/**
  * Validation issue with optional LLM context.
  */
 export interface ValidationIssue {
@@ -98,7 +119,7 @@ export interface ValidationIssue {
   path: (string | number)[];
   severity: 'error' | 'warning' | 'info';
   suggestion?: string;
-  llmContext?: unknown;
+  llmContext?: LLMErrorContext;
 }
 
 /**

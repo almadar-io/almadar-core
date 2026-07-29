@@ -27,6 +27,7 @@ import { ServiceDefinitionSchema } from "./service.js";
 import type { Trait } from "./trait.js";
 import type { IdentityLedger } from "./identity.js";
 import { IdentityLedgerSchema } from "./identity.js";
+import type { RuntimeValue } from "./json.js";
 
 // ============================================================================
 // Orbital Config
@@ -258,7 +259,7 @@ export interface OrbitalSchemaWithTraits extends OrbitalSchema {
  * 
  * @see safeParseOrbitalSchema
  */
-export function parseOrbitalSchema(data: unknown): OrbitalSchema {
+export function parseOrbitalSchema(data: RuntimeValue): OrbitalSchema {
   return OrbitalSchemaSchema.parse(data) as OrbitalSchema;
 }
 
@@ -284,7 +285,7 @@ export function parseOrbitalSchema(data: unknown): OrbitalSchema {
  * 
  * @see parseOrbitalSchema
  */
-export function safeParseOrbitalSchema(data: unknown) {
+export function safeParseOrbitalSchema(data: RuntimeValue) {
   return OrbitalSchemaSchema.safeParse(data);
 }
 

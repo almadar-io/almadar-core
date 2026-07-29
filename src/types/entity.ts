@@ -10,6 +10,7 @@ import { z } from 'zod';
 import type { EntityId } from './identity.js';
 import { EntityFieldSchema, type EntityField } from './field.js';
 import { SemanticAssetRefSchema, type SemanticAssetRef } from './asset.js';
+import { JsonValueSchema, type RuntimeValue } from './json.js';
 
 // ============================================================================
 // Entity Persistence
@@ -95,7 +96,7 @@ export const OrbitalEntitySchema = z.object({
     identity: z.boolean().optional(),
     collection: z.string().optional(),
     fields: z.array(EntityFieldSchema).min(1, 'At least one field is required'),
-    instances: z.array(z.record(z.unknown())).optional(),
+    instances: z.array(z.record(JsonValueSchema)).optional(),
     timestamps: z.boolean().optional(),
     softDelete: z.boolean().optional(),
     description: z.string().optional(),
@@ -199,14 +200,14 @@ export type FieldValue = string | number | boolean | Date | null | string[] | Fi
  * Runtime guard for `FieldValue` — narrows interpreter-produced `unknown`
  * values at typed substrate boundaries (e.g. `IntegrationContext.http` body).
  */
-export function isFieldValue(value: unknown): value is FieldValue {
+export function isFieldValue(value: RuntimeValue): value is FieldValue {
   if (value === null) return true;
   const kind = typeof value;
   if (kind === 'string' || kind === 'number' || kind === 'boolean') return true;
   if (value instanceof Date) return true;
-  if (Array.isArray(value)) return value.every((item: unknown) => isFieldValue(item));
+  if (Array.isArray(value)) return value.every((item: RuntimeValue) => isFieldValue(item));
   if (kind === 'object' && value !== null && typeof value === 'object') {
-    return Object.values(value).every((item: unknown) => item === undefined || isFieldValue(item));
+    return Object.values(value).every((item: RuntimeValue) => item === undefined || isFieldValue(item));
   }
   return false;
 }

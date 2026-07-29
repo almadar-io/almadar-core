@@ -8,7 +8,8 @@
  */
 
 import { z } from 'zod';
-import { type SExpr, type Expression, type EventPayload } from './expression.js';
+import { type SExpr, type Expression, type EventPayload, SExprDataSchema } from './expression.js';
+import type { RuntimeValue } from './json.js';
 import { type ServiceParams } from './service.js';
 import { type EntityRow } from './entity.js';
 
@@ -226,8 +227,8 @@ export interface EmitConfig {
  * @example ['set', '@entity.id', 'count', ['+', '@entity.count', 1]]
  */
 export type SetEffect =
-    | ['set', string, unknown]
-    | ['set', string, string, unknown];
+    | ['set', string, SExpr]
+    | ['set', string, string, SExpr];
 
 /**
  * Trailing config object on persist effects. When present, it carries the
@@ -241,12 +242,14 @@ export type PersistEmitConfig = {
 };
 
 /**
- * Persist effect data argument: either an entity row literal (field map)
- * or a binding string referencing a row in scope (e.g. `@payload.data`,
- * `@entity`). At runtime, binding strings resolve to `EntityRow` values
- * before the persist op runs.
+ * Persist effect data argument: an entity row literal (field map), a
+ * binding string referencing a row in scope (e.g. `@payload.data`,
+ * `@entity`), or an expression form that evaluates to a row (e.g.
+ * `["object/merge", "@payload.data", { sender: "@user.id" }]`). At
+ * runtime, binding strings and expressions resolve to `EntityRow` values
+ * before the persist op runs — both paths evaluate the expression first.
  */
-export type PersistData = EntityRow | string;
+export type PersistData = EntityRow | string | SExpr[];
 
 /**
  * Persist effect - creates, updates, deletes, or clears entities.
@@ -383,13 +386,13 @@ export type WhenEffect = ['when', Expression, SExpr];
  * Uses SExpr to allow deeply nested conditionals.
  * @example ['let', ['temp', ['get', '@payload.value']], ['set', '@entity.value', 'temp']]
  */
-export type LetEffect = ['let', [string, unknown][], ...SExpr[]];
+export type LetEffect = ['let', [string, SExpr][], ...SExpr[]];
 
 /**
  * Log effect - logs a message for debugging.
  * @example ['log', 'User created:', '@entity.name']
  */
-export type LogEffect = ['log', ...unknown[]];
+export type LogEffect = ['log', ...SExpr[]];
 
 /**
  * Wait effect - delays execution.
@@ -536,7 +539,7 @@ export type EvaluateEffect = ['evaluate', EvaluateConfig];
  * Checkpoint save effect - saves model weights.
  * @example ['checkpoint/save', '/path/to/model.pt', '@entity.weights']
  */
-export type CheckpointSaveEffect = ['checkpoint/save', string, unknown];
+export type CheckpointSaveEffect = ['checkpoint/save', string, SExpr];
 
 /**
  * Checkpoint load effect - loads model weights.
@@ -744,9 +747,12 @@ export type TypedEffect =
 export type Effect = TypedEffect;
 
 /**
- * Schema for Effect - validates S-expression format
+ * Schema for Effect - validates S-expression format. Arguments validate as
+ * s-expr-shaped DATA (`SExprDataSchema`) — literal data arrays (empty or
+ * non-operator-headed) are valid argument values; the operator-head refine
+ * applies to the effect itself, not to every argument.
  */
-export const EffectSchema = z.array(z.unknown()).min(1).refine(
+export const EffectSchema = z.array(SExprDataSchema).min(1).refine(
     (arr) => typeof arr[0] === 'string',
     { message: 'Effect must be an S-expression with a string operator as first element' }
 );
@@ -761,15 +767,15 @@ export type EffectInput = z.input<typeof EffectSchema>;
  * and subsequent elements are parameters. Used for runtime validation
  * of effect structures.
  * 
- * @param {unknown} value - Value to check
+ * @param {RuntimeValue} value - Value to check
  * @returns {boolean} True if value is a valid Effect, false otherwise
- * 
+ *
  * @example
  * isEffect(['set', '@entity.health', 100]); // returns true
  * isEffect('not-an-effect'); // returns false
  * isEffect([]); // returns false
  */
-export function isEffect(value: unknown): value is Effect {
+export function isEffect(value: RuntimeValue): value is Effect {
     return Array.isArray(value) && value.length > 0 && typeof value[0] === 'string';
 }
 

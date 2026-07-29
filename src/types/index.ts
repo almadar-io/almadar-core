@@ -202,6 +202,7 @@ export {
   // Types
   type SExpr,
   type SExprAtom,
+  type SExprObject,
   type Expression,
   type ParsedBinding,
   type CoreBinding,
@@ -209,6 +210,7 @@ export {
   type ExpressionInput,
   // Schemas
   SExprSchema,
+  SExprDataSchema,
   SExprAtomSchema,
   ExpressionSchema,
   // Type guards
@@ -245,11 +247,16 @@ export {
   // Constants
   BINDING_DOCS,
   BINDING_CONTEXT_RULES,
+  RENDER_BINDING_MARKER,
   // Types
   type BindingContext,
+  type RenderBindingMarker,
   // Helpers
   validateBindingInContext,
   getBindingExamples,
+  isRenderBindingMarker,
+  containsEntityBinding,
+  containsPayloadBinding,
 } from "./bindings.js";
 
 // Binding root classification (narrow union + helper). Complements the
@@ -519,6 +526,7 @@ export {
   TraitCategorySchema,
   TraitEventListenerSchema,
   ListenSourceSchema,
+  TraitUIBindingSchema,
   TickIntervalSchema,
   TraitTickSchema,
   TraitDataEntitySchema,
@@ -829,6 +837,7 @@ export {
   type SaveOptions,
   type SaveResult,
   type ValidationIssue,
+  type LLMErrorContext,
   type ValidationResults,
   type ValidationDocument,
 } from "./app.js";
@@ -927,6 +936,7 @@ export {
   type VerificationSnapshot,
   type AssetLoadStatus,
   type EventLogEntry,
+  type DrawableDescriptor,
   type OrbitalVerificationAPI,
 } from "./verification.js";
 
@@ -938,6 +948,7 @@ export {
   type JsonValue,
   type JsonObject,
   type ToolArgs,
+  type RuntimeValue,
   isJsonPrimitive,
   isJsonObject,
   isJsonArray,

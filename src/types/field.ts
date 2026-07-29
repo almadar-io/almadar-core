@@ -10,7 +10,7 @@
 import { z } from 'zod';
 import type { EntityId } from './identity.js';
 import { EntityIdSchema } from './identity.js';
-import type { JsonValue } from './json.js';
+import type { JsonValue, RuntimeValue } from './json.js';
 import { JsonValueSchema } from './json.js';
 
 // ============================================================================
@@ -359,6 +359,8 @@ const FIELD_TYPE_ALIASES: Record<string, FieldType> = {
  * Branches on `type` so TS narrows the parsed output to the matching
  * discriminated-union variant.
  */
+// The third type param stays `unknown`: zod v3 bakes `unknown` into
+// `z.preprocess`'s input type, and the recursion needs the explicit annotation.
 export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = z.lazy(() => {
     const baseFieldShape = {
         name: z.string().min(1, 'Field name is required').optional(),
@@ -388,12 +390,12 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
                 input === null ||
                 typeof input !== 'object' ||
                 !('type' in input) ||
-                typeof (input as { type: unknown }).type !== 'string'
+                typeof (input as { type?: RuntimeValue }).type !== 'string'
             ) {
                 return input;
             }
-            const obj = input as { type: string; enum?: unknown; values?: unknown };
-            const next: { type: string; enum?: unknown; values?: unknown } = { ...obj };
+            const obj = input as { type: string; enum?: RuntimeValue; values?: RuntimeValue };
+            const next: { type: string; enum?: RuntimeValue; values?: RuntimeValue } = { ...obj };
             const aliased = FIELD_TYPE_ALIASES[obj.type];
             if (aliased !== undefined) next.type = aliased;
             // Fold legacy `enum: string[]` into `values: string[]`.

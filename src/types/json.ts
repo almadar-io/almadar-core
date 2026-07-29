@@ -54,6 +54,23 @@ export const JsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
 export type ToolArgs = JsonObject;
 
 /**
+ * Universal type-guard input — every runtime value shape a predicate can
+ * be handed, enumerated instead of `unknown` (the repo bans `unknown`
+ * even at guard boundaries). Primitives cover every `typeof` result;
+ * `object` covers arrays, records, class instances, and functions.
+ */
+export type RuntimeValue =
+  | string
+  | number
+  | bigint
+  | boolean
+  | symbol
+  | Date
+  | null
+  | undefined
+  | object;
+
+/**
  * Type guard: is the given value a JSON primitive (non-array,
  * non-object)? Used by walkers that decide whether to recurse.
  */

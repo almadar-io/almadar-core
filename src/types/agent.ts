@@ -14,7 +14,7 @@ import type { JsonSchema } from '../factory/types.js';
 import type { ValidationError } from './validation.js';
 import type { Orbital } from './orbital.js';
 import type { OrbitalSchema } from './schema.js';
-import type { JsonValue } from './json.js';
+import type { JsonValue, RuntimeValue } from './json.js';
 import type { AnalysisResult, PlanSnapshot, GitHubRepo, GitHubIssue } from './plan.js';
 
 // ============================================================================
@@ -289,7 +289,7 @@ export interface SessionHistoryEntry {
  * Runtime guard for `SessionHistoryEntry` — narrows interpreter-produced
  * `unknown` values at the `SessionContext.appendHistory` boundary.
  */
-export function isSessionHistoryEntry(value: unknown): value is SessionHistoryEntry {
+export function isSessionHistoryEntry(value: RuntimeValue): value is SessionHistoryEntry {
     if (typeof value !== 'object' || value === null) return false;
     return (
         'role' in value && typeof value.role === 'string' &&

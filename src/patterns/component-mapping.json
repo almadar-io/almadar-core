@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-28T16:34:50.202Z",
+  "exportedAt": "2026-07-29T19:32:01.461Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -1378,6 +1378,11 @@
       "component": "DrawGroup",
       "importPath": "@/components/game/atoms/DrawGroup",
       "category": "game"
+    },
+    "emoji-picker": {
+      "component": "EmojiPicker",
+      "importPath": "@/components/core/molecules/EmojiPicker",
+      "category": "component"
     }
   }
 }

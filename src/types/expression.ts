@@ -15,6 +15,7 @@
  */
 
 import { z } from 'zod';
+import type { RuntimeValue } from './json.js';
 
 // ============================================================================
 // S-Expression Type
@@ -29,8 +30,11 @@ import { z } from 'zod';
  * - A binding reference (string starting with @)
  * - A call expression (array with operator as first element)
  */
-// eslint-disable-next-line almadar/no-record-string-unknown -- SExprAtom defines the base type for object literals in S-expressions
-export type SExprAtom = string | number | boolean | null | Record<string, unknown>;
+/** Object literal branch of an S-expression atom (payload data, props, etc.). */
+export interface SExprObject {
+  [key: string]: SExpr;
+}
+export type SExprAtom = string | number | boolean | null | SExprObject;
 export type SExpr = SExprAtom | SExpr[];
 
 /**
@@ -47,6 +51,16 @@ export type Expression = SExpr;
 // ============================================================================
 
 /**
+ * Recursive schema for s-expr-shaped DATA in literal positions (object
+ * values, effect arguments). Unlike `SExprSchema`, arrays may be empty or
+ * non-operator-headed — literal data lists (`children: []`, `tiles: [...]`)
+ * are valid here; only call positions get the operator-head refine.
+ */
+export const SExprDataSchema: z.ZodType<SExpr> = z.lazy(() =>
+  z.union([SExprAtomSchema, z.array(SExprDataSchema)]),
+);
+
+/**
  * Schema for atomic S-expression values (non-array)
  * Includes objects for payload data, props, etc.
  */
@@ -55,7 +69,7 @@ export const SExprAtomSchema: z.ZodType<SExprAtom> = z.union([
   z.number(),
   z.boolean(),
   z.null(),
-  z.record(z.unknown()), // Objects for payload data
+  z.record(SExprDataSchema), // Objects for payload data
 ]);
 
 /**
@@ -94,7 +108,7 @@ export const ExpressionSchema: z.ZodType<Expression> = SExprSchema;
  * @param value - Value to check
  * @returns true if value is an S-expression (array with string operator)
  */
-export function isSExpr(value: unknown): value is SExpr[] {
+export function isSExpr(value: RuntimeValue): value is SExpr[] {
   return (
     Array.isArray(value) &&
     value.length > 0 &&
@@ -109,9 +123,9 @@ export function isSExpr(value: unknown): value is SExpr[] {
  * Includes null, strings, numbers, booleans, and objects. Used to
  * distinguish atomic values from S-expression calls (arrays).
  * 
- * @param {unknown} value - Value to check
+ * @param {RuntimeValue} value - Value to check
  * @returns {boolean} True if value is an S-expression atom, false otherwise
- * 
+ *
  * @example
  * isSExprAtom('hello'); // returns true
  * isSExprAtom(42); // returns true
@@ -119,7 +133,7 @@ export function isSExpr(value: unknown): value is SExpr[] {
  * isSExprAtom({ key: 'value' }); // returns true
  * isSExprAtom(['+', 1, 2]); // returns false
  */
-export function isSExprAtom(value: unknown): value is SExprAtom {
+export function isSExprAtom(value: RuntimeValue): value is SExprAtom {
   if (value === null) return true;
   if (Array.isArray(value)) return false;
   const type = typeof value;
@@ -133,16 +147,16 @@ export function isSExprAtom(value: unknown): value is SExprAtom {
  * Bindings reference runtime values like @entity.health, @payload.amount, @now.
  * Used for identifying bindings in S-expressions and validation.
  * 
- * @param {unknown} value - Value to check
+ * @param {RuntimeValue} value - Value to check
  * @returns {boolean} True if value is a binding reference, false otherwise
- * 
+ *
  * @example
  * isBinding('@entity.health'); // returns true
  * isBinding('@payload.amount'); // returns true
  * isBinding('not-a-binding'); // returns false
  * isBinding(123); // returns false
  */
-export function isBinding(value: unknown): value is string {
+export function isBinding(value: RuntimeValue): value is string {
   return typeof value === 'string' && value.startsWith('@');
 }
 
@@ -152,15 +166,15 @@ export function isBinding(value: unknown): value is string {
  * Alias for isSExpr() - validates S-expression call structure.
  * Used to distinguish between S-expression calls and atom values.
  * 
- * @param {unknown} value - Value to check
+ * @param {RuntimeValue} value - Value to check
  * @returns {boolean} True if value is a valid S-expression call, false otherwise
- * 
+ *
  * @example
  * isSExprCall(['+', 1, 2]); // returns true
  * isSExprCall(['set', '@entity.health', 100]); // returns true
  * isSExprCall('not-a-call'); // returns false
  */
-export function isSExprCall(value: unknown): value is SExpr[] {
+export function isSExprCall(value: RuntimeValue): value is SExpr[] {
   return isSExpr(value);
 }
 
@@ -388,14 +402,14 @@ export interface EventPayload {
  * Runtime guard for `EventPayloadValue` — narrows interpreter-produced
  * `unknown` values at typed substrate boundaries (e.g. `TraceContext.emit`).
  */
-export function isEventPayloadValue(value: unknown): value is EventPayloadValue {
+export function isEventPayloadValue(value: RuntimeValue): value is EventPayloadValue {
   if (value === null || value === undefined) return true;
   const kind = typeof value;
   if (kind === 'string' || kind === 'number' || kind === 'boolean') return true;
   if (value instanceof Date) return true;
-  if (Array.isArray(value)) return value.every((item: unknown) => isEventPayloadValue(item));
+  if (Array.isArray(value)) return value.every((item: RuntimeValue) => isEventPayloadValue(item));
   if (kind === 'object' && value !== null && typeof value === 'object') {
-    return Object.values(value).every((item: unknown) => isEventPayloadValue(item));
+    return Object.values(value).every((item: RuntimeValue) => isEventPayloadValue(item));
   }
   return false;
 }
