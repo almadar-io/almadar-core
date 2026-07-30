@@ -91,20 +91,26 @@ export function normalizeUserContext(
 }
 
 /**
- * Dev persona roster — seeded identities for local runs, previews and mocked
- * sign-in. NOT production data: nothing authenticates against this. It exists so
- * an app can be viewed as each persona its domain implies before real auth is
- * wired.
+ * Turn a row of an app's `[identity]` entity into a viewer.
  *
- * A domain whose end-user role is named differently (`patient`, `student`) adds
- * its own persona at the call site; these are defaults, not an allow-list.
+ * There is no separate persona shape: an identity row IS the persona
+ * (`Almadar_LOLO_Identity.md` §4.3), so this only guards the one field the
+ * behavior library requires — a non-empty string `id` — and passes every other
+ * declared field through as a `@user.<field>` claim. Rows without a usable id
+ * yield `undefined` rather than a persona nobody can own rows as.
  */
-export const MOCK_PERSONAS: readonly UserContext[] = [
-  { id: 'admin-1', name: 'Ada Admin', email: 'ada@example.com', role: 'admin', permissions: ['read', 'write', 'delete'] },
-  { id: 'staff-1', name: 'Sam Staff', email: 'sam@example.com', role: 'staff', permissions: ['read', 'write'] },
-  { id: 'member-1', name: 'Maya Member', email: 'maya@example.com', role: 'member', permissions: ['read'] },
-  { id: 'customer-1', name: 'Cai Customer', email: 'cai@example.com', role: 'customer', permissions: ['read'] },
-] as const;
+export function personaFromIdentityRow(
+  row: Record<string, FieldValue | undefined>,
+): UserContext | undefined {
+  const id = row['id'];
+  if (typeof id !== 'string' || id.length === 0) return undefined;
+  const persona: UserContext = { id };
+  for (const [key, value] of Object.entries(row)) {
+    if (key === 'id' || value === undefined) continue;
+    persona[key] = value;
+  }
+  return persona;
+}
 
 /**
  * The viewer a host presents when nothing named one.
@@ -126,33 +132,46 @@ export const DEFAULT_VIEWER: UserContext = {
   role: '',
 };
 
-/** Look a dev persona up by id, or by role when no id matches. */
-export function findMockPersona(idOrRole: string): UserContext | undefined {
+/** Look a persona up in a roster by id, or by role when no id matches. */
+export function findPersonaInRoster(
+  roster: readonly UserContext[],
+  idOrRole: string,
+): UserContext | undefined {
   return (
-    MOCK_PERSONAS.find((p) => p.id === idOrRole) ??
-    MOCK_PERSONAS.find((p) => p.role === idOrRole)
+    roster.find((p) => p.id === idOrRole) ??
+    roster.find((p) => p.role === idOrRole)
   );
 }
 
 /**
- * Resolve a persona spec — a bare seeded id/role (`member-1`, `member`) or a full
+ * Resolve a persona spec — a bare id/role (`Person Id 3`, `moderator`) or a full
  * JSON `UserContext` — into a viewer. This is the `ALMADAR_PERSONA` contract,
  * shared by every host that presents an app as somebody.
+ *
+ * The roster is the app's OWN declared personas — the seeded rows of its
+ * `[identity]` entity (`Almadar_LOLO_Identity.md` §4.3) — supplied by the host
+ * that has them in hand (the runtime's live store on the interpreter path, the
+ * schema-derived seed rows on the compiled path). There is no global roster:
+ * an app without an `[identity]` entity resolves only JSON-form specs.
  *
  * Throws on anything unresolvable rather than returning `undefined`: "no persona"
  * and "persona silently ignored" look identical on screen, so a bad spec must
  * fail at boot instead of rendering as nobody.
  */
-export function resolvePersonaSpec(spec: string): UserContext {
+export function resolvePersonaSpec(spec: string, roster: readonly UserContext[]): UserContext {
   const raw = spec.trim();
   if (!raw.startsWith('{')) {
-    const seeded = findMockPersona(raw);
-    if (!seeded) {
+    const declared = findPersonaInRoster(roster, raw);
+    if (!declared) {
+      const known = roster.map((p) => `${p.id}/${p.role ?? '-'}`).join(', ');
       throw new Error(
-        `Persona "${raw}" is not a seeded persona id or role. Known: ${MOCK_PERSONAS.map((p) => `${p.id}/${p.role}`).join(', ')}`,
+        `Persona "${raw}" is not a declared persona id or role. ` +
+          (roster.length > 0
+            ? `Known: ${known}`
+            : 'This app declares no [identity] entity, so only the JSON persona form is accepted.'),
       );
     }
-    return seeded;
+    return declared;
   }
   let claims: RawUserClaims;
   try {

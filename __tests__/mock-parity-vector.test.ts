@@ -16,6 +16,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { sampleRows, type SampleEntity } from '../src/mock/index.js';
+import { resolvePersonaSpec, type UserContext } from '../src/types/user.js';
 import type { EntityRow } from '../src/types/entity.js';
 
 const FIXTURE_DIR = join(
@@ -65,5 +66,25 @@ describe('mock-seed parity vector', () => {
     // `id` and the timestamps are the caller's to stamp, and the two paths use
     // different id schemes by design ("Member Id 1" vs "Member-1").
     expect(rows[0]).not.toHaveProperty('id');
+  });
+});
+
+interface PersonaVector {
+  roster: UserContext[];
+  cases: Array<{ spec: string; resolvesToId?: string; error?: boolean }>;
+}
+
+describe('persona-resolution parity vector', () => {
+  it('resolves every committed case identically to the Rust path', () => {
+    const { roster, cases } = JSON.parse(
+      readFileSync(join(FIXTURE_DIR, 'persona-resolution.json'), 'utf8'),
+    ) as PersonaVector;
+    for (const c of cases) {
+      if (c.error === true) {
+        expect(() => resolvePersonaSpec(c.spec, roster), c.spec).toThrow();
+      } else {
+        expect(resolvePersonaSpec(c.spec, roster).id, c.spec).toBe(c.resolvesToId);
+      }
+    }
   });
 });

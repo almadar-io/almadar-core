@@ -11,14 +11,21 @@ import { describe, it, expect } from 'vitest';
 import {
   ANONYMOUS_USER,
   DEV_TOKEN_PREFIX,
-  MOCK_PERSONAS,
   decodeDevIdentityToken,
   encodeDevIdentityToken,
-  findMockPersona,
+  findPersonaInRoster,
   normalizeUserContext,
+  personaFromIdentityRow,
   resolvePersonaSpec,
   type UserContext,
 } from '../index';
+
+/** A declared roster as an app's `[identity]` entity would seed it. */
+const ROSTER: readonly UserContext[] = [
+  { id: 'Person Id 1', name: 'Person 1', email: 'person1@example.com', role: 'member' },
+  { id: 'Person Id 2', name: 'Person 2', email: 'person2@example.com', role: 'moderator' },
+  { id: 'Person Id 3', name: 'Person 3', email: 'person3@example.com', role: 'admin' },
+];
 
 describe('normalizeUserContext', () => {
   it('maps a Firebase uid onto id and preserves uid', () => {
@@ -93,39 +100,57 @@ describe('dev identity token', () => {
       .toBeUndefined();
   });
 
-  it('round-trips every seeded persona', () => {
-    for (const p of MOCK_PERSONAS) {
+  it('round-trips every declared persona', () => {
+    for (const p of ROSTER) {
       expect(decodeDevIdentityToken(encodeDevIdentityToken(p))).toEqual(p);
     }
   });
 });
 
 describe('resolvePersonaSpec', () => {
-  it('accepts a bare seeded id or role', () => {
-    expect(resolvePersonaSpec('member-1').name).toBe('Maya Member');
-    expect(resolvePersonaSpec(' admin ').id).toBe('admin-1');
+  it('accepts a bare declared id or role', () => {
+    expect(resolvePersonaSpec('Person Id 2', ROSTER).role).toBe('moderator');
+    expect(resolvePersonaSpec(' admin ', ROSTER).id).toBe('Person Id 3');
   });
 
-  it('accepts a full JSON UserContext', () => {
-    const user = resolvePersonaSpec('{"id":"patient-7","role":"patient"}');
+  it('accepts a full JSON UserContext with or without a roster', () => {
+    const user = resolvePersonaSpec('{"id":"patient-7","role":"patient"}', []);
     expect(user.id).toBe('patient-7');
     expect(user.role).toBe('patient');
   });
 
   it('throws rather than booting as nobody', () => {
-    expect(() => resolvePersonaSpec('who-dis')).toThrow(/not a seeded persona/);
-    expect(() => resolvePersonaSpec('{oops')).toThrow(/not valid JSON/);
-    expect(() => resolvePersonaSpec('{"role":"admin"}')).toThrow(/needs an "id"/);
-    expect(() => resolvePersonaSpec('["member-1"]')).toThrow(/not a seeded persona/);
-    expect(() => resolvePersonaSpec('{"id":""}')).toThrow(/needs an "id"/);
+    expect(() => resolvePersonaSpec('who-dis', ROSTER)).toThrow(/not a declared persona/);
+    expect(() => resolvePersonaSpec('{oops', ROSTER)).toThrow(/not valid JSON/);
+    expect(() => resolvePersonaSpec('{"role":"admin"}', ROSTER)).toThrow(/needs an "id"/);
+    expect(() => resolvePersonaSpec('["member-1"]', ROSTER)).toThrow(/not a declared persona/);
+    expect(() => resolvePersonaSpec('{"id":""}', ROSTER)).toThrow(/needs an "id"/);
+  });
+
+  it('names the missing [identity] entity when the roster is empty', () => {
+    expect(() => resolvePersonaSpec('member', [])).toThrow(/no \[identity\] entity/);
   });
 });
 
 describe('persona roster', () => {
   it('resolves by id and falls back to role', () => {
-    expect(findMockPersona('member-1')?.name).toBe('Maya Member');
-    expect(findMockPersona('admin')?.id).toBe('admin-1');
-    expect(findMockPersona('nobody')).toBeUndefined();
+    expect(findPersonaInRoster(ROSTER, 'Person Id 1')?.role).toBe('member');
+    expect(findPersonaInRoster(ROSTER, 'admin')?.id).toBe('Person Id 3');
+    expect(findPersonaInRoster(ROSTER, 'nobody')).toBeUndefined();
+  });
+
+  it('maps an identity row onto a persona, requiring a string id', () => {
+    const persona = personaFromIdentityRow({
+      id: 'OnlineUser Id 4',
+      name: 'Casey',
+      role: 'moderator',
+      status: 'online',
+    });
+    expect(persona?.id).toBe('OnlineUser Id 4');
+    expect(persona?.role).toBe('moderator');
+    expect(persona?.['status']).toBe('online');
+    expect(personaFromIdentityRow({ name: 'No Id' })).toBeUndefined();
+    expect(personaFromIdentityRow({ id: '' })).toBeUndefined();
   });
 
   it('never seeds an admin as the anonymous fallback', () => {
