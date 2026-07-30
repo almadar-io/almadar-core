@@ -11,6 +11,7 @@ import type { EntityId } from './identity.js';
 import { EntityFieldSchema, type EntityField } from './field.js';
 import { SemanticAssetRefSchema, type SemanticAssetRef } from './asset.js';
 import { JsonValueSchema, type RuntimeValue } from './json.js';
+import { SExprSchema, type SExpr } from './expression.js';
 
 // ============================================================================
 // Entity Persistence
@@ -60,6 +61,22 @@ export type OrbitalEntity = {
      */
     identity?: boolean;
 
+    /**
+     * `@read` — a per-row predicate (`@entity` = candidate row, `@user` =
+     * viewer) ANDed with any call-site `filter:`. The un-bypassable twin of
+     * `filter:`, enforced once for every trait that fetches this entity.
+     */
+    read_policy?: SExpr;
+
+    /** `@create` — `@entity` binds the incoming data about to become a row. */
+    create_policy?: SExpr;
+
+    /** `@update` — `@entity` binds the existing row before mutation. */
+    update_policy?: SExpr;
+
+    /** `@delete` — same binding shape as `@update`. */
+    delete_policy?: SExpr;
+
     /** Collection name (auto-derived if not provided for persistent entities) */
     collection?: string;
 
@@ -94,6 +111,16 @@ export const OrbitalEntitySchema = z.object({
     // than rejecting them, so a Rust-only field works on the compiled path and
     // silently vanishes on the interpreter path.
     identity: z.boolean().optional(),
+    // Same "must stay in step with Rust serde" hazard as `identity` above —
+    // these four mirror `EntityDefinition.{read,create,update,delete}_policy`.
+    // Rust has no `rename_all` on this struct, so the wire key IS snake_case
+    // (unlike this file's other camelCase fields, which are Rust-side-absent
+    // and so never hit this cross-language constraint — see `visual_prompt`
+    // just below for the existing precedent).
+    read_policy: SExprSchema.optional(),
+    create_policy: SExprSchema.optional(),
+    update_policy: SExprSchema.optional(),
+    delete_policy: SExprSchema.optional(),
     collection: z.string().optional(),
     fields: z.array(EntityFieldSchema).min(1, 'At least one field is required'),
     instances: z.array(z.record(JsonValueSchema)).optional(),

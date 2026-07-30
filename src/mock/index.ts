@@ -7,6 +7,11 @@
 export * from './random.js';
 export { identityEntityName, ownerFieldsFromSchema } from './identityOwners.js';
 export {
+  type EntityAccessPolicies,
+  entityAccessPolicies,
+  entityAccessTable,
+} from '../access/entityAccess.js';
+export {
   type SampleEntity,
   type SampleContext,
   type SampleStrategy,
