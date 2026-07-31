@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-07-30T11:18:57.838Z",
+  "exportedAt": "2026-07-31T03:04:39.259Z",
   "patterns": {
     "entity-table": {
       "type": "entity-table",
@@ -35175,6 +35175,12 @@
             "string"
           ],
           "description": "Solid backdrop colour (drawn when no `backgroundImage`)."
+        },
+        "children": {
+          "types": [
+            "node"
+          ],
+          "description": "Declarative JSX drawable children (`<DrawShape .../>` composed in paint order). When `drawables` is empty, each child registers its descriptor via the drawable registry context and the host paints them."
         }
       },
       "drawable": true,
@@ -39329,7 +39335,7 @@
           "types": [
             "number"
           ],
-          "description": "Fine nudge from the anchor point in world units."
+          "description": "Fine nudge in world units — applies to every shape kind except `cell` (rect/ellipse from their anchor point; poly/path from the projected top-left)."
         },
         "offsetY": {
           "types": [
@@ -39360,6 +39366,57 @@
           ],
           "description": "fill prop"
         },
+        "gradient": {
+          "types": [
+            "object"
+          ],
+          "description": "Gradient fill in world units; overrides `fill` when present.",
+          "properties": {
+            "kind": {
+              "types": [
+                "string"
+              ],
+              "enumValues": [
+                "linear",
+                "radial"
+              ]
+            },
+            "from": {
+              "types": [
+                "object"
+              ]
+            },
+            "to": {
+              "types": [
+                "object"
+              ]
+            },
+            "center": {
+              "types": [
+                "object"
+              ]
+            },
+            "radius": {
+              "types": [
+                "number"
+              ]
+            },
+            "stops": {
+              "types": [
+                "array"
+              ],
+              "items": {
+                "types": [
+                  "object"
+                ]
+              }
+            }
+          },
+          "propertyRequired": [
+            "kind",
+            "stops"
+          ]
+        },
         "stroke": {
           "types": [
             "string"
@@ -39371,6 +39428,158 @@
             "number"
           ],
           "description": "strokeWidth prop"
+        },
+        "rotate": {
+          "types": [
+            "number"
+          ],
+          "description": "Rotation in radians (painter units, same as `draw-group`), about `pivot`."
+        },
+        "pivot": {
+          "types": [
+            "object"
+          ],
+          "description": "Rotation pivot in world units relative to the cell's projected top-left; default `{x:0.5, y:0.5}` (cell center)."
+        },
+        "shadow": {
+          "types": [
+            "object"
+          ],
+          "description": "Soft glow / drop-shadow behind the shape; `blur` in world units.",
+          "properties": {
+            "color": {
+              "types": [
+                "string"
+              ]
+            },
+            "blur": {
+              "types": [
+                "number"
+              ]
+            }
+          },
+          "propertyRequired": [
+            "color",
+            "blur"
+          ]
+        },
+        "animation": {
+          "types": [
+            "object"
+          ],
+          "description": "Keyframe animation over this shape's props; the host runs a paint clock while present.",
+          "properties": {
+            "durationMs": {
+              "types": [
+                "number"
+              ]
+            },
+            "loop": {
+              "types": [
+                "boolean"
+              ]
+            },
+            "keyframes": {
+              "types": [
+                "array"
+              ],
+              "items": {
+                "types": [
+                  "object"
+                ],
+                "properties": {
+                  "at": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "offsetX": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "offsetY": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "rotate": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "opacity": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "radiusX": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "radiusY": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "width": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "height": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "strokeWidth": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "fill": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "stroke": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "shadow": {
+                    "types": [
+                      "object"
+                    ],
+                    "properties": {
+                      "color": {
+                        "types": [
+                          "string"
+                        ]
+                      },
+                      "blur": {
+                        "types": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "color",
+                      "blur"
+                    ]
+                  }
+                },
+                "required": [
+                  "at"
+                ]
+              }
+            }
+          },
+          "propertyRequired": [
+            "durationMs",
+            "keyframes"
+          ]
         },
         "opacity": {
           "types": [
@@ -39840,6 +40049,56 @@
                   "string"
                 ]
               },
+              "gradient": {
+                "types": [
+                  "object"
+                ],
+                "properties": {
+                  "kind": {
+                    "types": [
+                      "string"
+                    ],
+                    "enumValues": [
+                      "linear",
+                      "radial"
+                    ]
+                  },
+                  "from": {
+                    "types": [
+                      "object"
+                    ]
+                  },
+                  "to": {
+                    "types": [
+                      "object"
+                    ]
+                  },
+                  "center": {
+                    "types": [
+                      "object"
+                    ]
+                  },
+                  "radius": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "stops": {
+                    "types": [
+                      "array"
+                    ],
+                    "items": {
+                      "types": [
+                        "object"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "kind",
+                  "stops"
+                ]
+              },
               "stroke": {
                 "types": [
                   "string"
@@ -39848,6 +40107,154 @@
               "strokeWidth": {
                 "types": [
                   "number"
+                ]
+              },
+              "rotate": {
+                "types": [
+                  "number"
+                ]
+              },
+              "pivot": {
+                "types": [
+                  "object"
+                ]
+              },
+              "shadow": {
+                "types": [
+                  "object"
+                ],
+                "properties": {
+                  "color": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "blur": {
+                    "types": [
+                      "number"
+                    ]
+                  }
+                },
+                "required": [
+                  "color",
+                  "blur"
+                ]
+              },
+              "animation": {
+                "types": [
+                  "object"
+                ],
+                "properties": {
+                  "durationMs": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "loop": {
+                    "types": [
+                      "boolean"
+                    ]
+                  },
+                  "keyframes": {
+                    "types": [
+                      "array"
+                    ],
+                    "items": {
+                      "types": [
+                        "object"
+                      ],
+                      "properties": {
+                        "at": {
+                          "types": [
+                            "number"
+                          ]
+                        },
+                        "offsetX": {
+                          "types": [
+                            "number"
+                          ]
+                        },
+                        "offsetY": {
+                          "types": [
+                            "number"
+                          ]
+                        },
+                        "rotate": {
+                          "types": [
+                            "number"
+                          ]
+                        },
+                        "opacity": {
+                          "types": [
+                            "number"
+                          ]
+                        },
+                        "radiusX": {
+                          "types": [
+                            "number"
+                          ]
+                        },
+                        "radiusY": {
+                          "types": [
+                            "number"
+                          ]
+                        },
+                        "width": {
+                          "types": [
+                            "number"
+                          ]
+                        },
+                        "height": {
+                          "types": [
+                            "number"
+                          ]
+                        },
+                        "strokeWidth": {
+                          "types": [
+                            "number"
+                          ]
+                        },
+                        "fill": {
+                          "types": [
+                            "string"
+                          ]
+                        },
+                        "stroke": {
+                          "types": [
+                            "string"
+                          ]
+                        },
+                        "shadow": {
+                          "types": [
+                            "object"
+                          ],
+                          "properties": {
+                            "color": {
+                              "types": [
+                                "string"
+                              ]
+                            },
+                            "blur": {
+                              "types": [
+                                "number"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "color",
+                            "blur"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "at"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "durationMs",
+                  "keyframes"
                 ]
               },
               "opacity": {
@@ -40568,6 +40975,12 @@
               "string"
             ]
           }
+        },
+        "children": {
+          "types": [
+            "node"
+          ],
+          "description": "Declarative JSX drawable children (`<DrawShape .../>` composed in paint order). Forwarded to the 2D host, which collects them via drawable registry context."
         }
       },
       "drawHost": true
