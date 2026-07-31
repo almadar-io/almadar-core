@@ -128,6 +128,15 @@ export {
   type WalkStep,
 } from './src/state-machine/index';
 
+// Row-level entity access policies. Also reachable via `@almadar/core/mock`,
+// but server code (generated app servers, `@almadar/server`) must not import
+// through the mock door to read a production authorization contract.
+export {
+  type EntityAccessPolicies,
+  entityAccessPolicies,
+  entityAccessTable,
+} from './src/access/entityAccess';
+
 // Shared-entity frame merge (mechanics-as-traits DRY primitive: the JS
 // interpreter and the generated TypeScript codegen both fold mechanic
 // writes through this one function).

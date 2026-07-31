@@ -77,6 +77,23 @@ export type OrbitalEntity = {
     /** `@delete` — same binding shape as `@update`. */
     delete_policy?: SExpr;
 
+    /**
+     * `@<op> none "<reason>"` — a directive's omission, DECLARED.
+     *
+     * Runtime behaviour is identical to leaving the directive out (an absent
+     * policy is allow-all). It records that the author concluded no per-row
+     * predicate can express the rule — usually because visibility depends on a
+     * DIFFERENT entity, which a per-row predicate cannot join across. Without
+     * it a lint must flag considered and forgotten omissions alike, and a lint
+     * that flags correct code is one people learn to ignore.
+     */
+    access_waivers?: {
+        read?: string;
+        create?: string;
+        update?: string;
+        delete?: string;
+    };
+
     /** Collection name (auto-derived if not provided for persistent entities) */
     collection?: string;
 
@@ -121,6 +138,15 @@ export const OrbitalEntitySchema = z.object({
     create_policy: SExprSchema.optional(),
     update_policy: SExprSchema.optional(),
     delete_policy: SExprSchema.optional(),
+    // Snake_case for the same cross-language reason as the four policies above.
+    access_waivers: z
+        .object({
+            read: z.string().optional(),
+            create: z.string().optional(),
+            update: z.string().optional(),
+            delete: z.string().optional(),
+        })
+        .optional(),
     collection: z.string().optional(),
     fields: z.array(EntityFieldSchema).min(1, 'At least one field is required'),
     instances: z.array(z.record(JsonValueSchema)).optional(),
