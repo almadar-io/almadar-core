@@ -131,6 +131,63 @@ export function isEntityAwarePattern(patternType: string): boolean {
 }
 
 /**
+ * Prop kinds whose value at a call site is a declared EVENT KEY the substrate
+ * turns into a bus emit — the outlet half of the circuit.
+ *
+ * `event-listen` is deliberately absent: it names an event the component
+ * SUBSCRIBES to, not one it fires. `entity` is the inlet.
+ */
+const EVENT_OUTLET_KINDS: ReadonlySet<string> = new Set(['event', 'event-ref', 'callback']);
+
+/** Memoised per-pattern results — the registry is a frozen JSON import. */
+const eventKeyPropsCache = new Map<string, ReadonlySet<string>>();
+const eventListPropsCache = new Map<string, ReadonlyMap<string, string>>();
+
+/**
+ * Prop names of `patternType` whose value is a single declared event key
+ * (`kind: "event" | "event-ref" | "callback"`) — `action`, `cancelEvent`,
+ * `retryEvent`, `onRetry`, and every future sibling, straight from the
+ * registry rather than a hand-maintained key list that silently drifts.
+ *
+ * The consumer is the wiring lint: an affordance prop bound to a lifecycle
+ * event key is a control that does nothing when clicked.
+ *
+ * @param patternType - Pattern type to inspect
+ * @returns the declared event-key prop names (empty for an unknown pattern)
+ */
+export function eventKeyPropsOf(patternType: string): ReadonlySet<string> {
+  const cached = eventKeyPropsCache.get(patternType);
+  if (cached) return cached;
+  const propsSchema = getPatternDefinition(patternType)?.propsSchema;
+  const out = new Set<string>();
+  for (const [prop, def] of Object.entries(propsSchema ?? {})) {
+    if (def.kind && EVENT_OUTLET_KINDS.has(def.kind)) out.add(prop);
+  }
+  eventKeyPropsCache.set(patternType, out);
+  return out;
+}
+
+/**
+ * Prop names of `patternType` carrying `kind: "event-list"` action-descriptor
+ * arrays, each mapped to the field inside an item that holds the event key
+ * (`eventField`, defaulting to `"event"` per {@link PatternPropDef.eventField}).
+ *
+ * @param patternType - Pattern type to inspect
+ * @returns prop name → event field (empty for an unknown pattern)
+ */
+export function eventListPropsOf(patternType: string): ReadonlyMap<string, string> {
+  const cached = eventListPropsCache.get(patternType);
+  if (cached) return cached;
+  const propsSchema = getPatternDefinition(patternType)?.propsSchema;
+  const out = new Map<string, string>();
+  for (const [prop, def] of Object.entries(propsSchema ?? {})) {
+    if (def.kind === 'event-list') out.set(prop, def.eventField ?? 'event');
+  }
+  eventListPropsCache.set(patternType, out);
+  return out;
+}
+
+/**
  * Check if a pattern is a neutral DRAWABLE — a descriptor the canvas draw-host
  * paints (draw-sprite / draw-shape / draw-text / draw-sprite-layer /
  * draw-shape-layer), as opposed to a DOM/React pattern.
