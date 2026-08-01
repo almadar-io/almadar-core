@@ -23,10 +23,10 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
     }
   });
 
-  it('admits the 2D game category (game-shell present, 31 entries)', () => {
+  it('admits the 2D game category (game-shell present, 33 entries)', () => {
     expect(grouped.game).toBeDefined();
     expect(grouped.game.map((p) => p.name)).toContain('game-shell');
-    expect(grouped.game.length).toBe(31);
+    expect(grouped.game.length).toBe(33);
   });
 
   it('excludes debug and template categories', () => {
@@ -40,18 +40,39 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
     }
   });
 
+  // Re-pinned 2026-08-01 from 100/31/233. The six patterns that drifted, named
+  // (registry diff against the commit that wrote the previous pins):
+  //   game      +2  draw-group, draw-mesh                  (the draw-mesh 3D substrate)
+  //   component +4  emoji-picker, import-preview-tree,
+  //                 import-progress, import-source-picker
+  // Nothing was removed or recategorised. A pin bumped without naming the drift
+  // is how a real regression gets papered over — keep this list current.
   it('pins the per-category allowed counts', () => {
     const counts = Object.fromEntries(
       Object.entries(grouped).map(([cat, items]) => [cat, items.length]),
     );
     expect(counts).toMatchObject({
-      component: 100,
+      component: 104,
       display: 40,
       filter: 4,
       form: 10,
-      game: 31,
+      game: 33,
       media: 1,
     });
-    expect(names.length).toBe(233);
+    expect(names.length).toBe(239);
+  });
+
+  it('admits the drifted patterns by name, not just by count', () => {
+    for (const name of ['draw-group', 'draw-mesh']) {
+      expect(grouped.game.map((p) => p.name)).toContain(name);
+    }
+    for (const name of [
+      'emoji-picker',
+      'import-preview-tree',
+      'import-progress',
+      'import-source-picker',
+    ]) {
+      expect(grouped.component.map((p) => p.name)).toContain(name);
+    }
   });
 });

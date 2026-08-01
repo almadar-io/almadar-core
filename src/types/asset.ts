@@ -430,10 +430,11 @@ export const ScenePosSchema = z.object({
 
 /**
  * Camera behaviors, unifying the former per-host vocab (2D `camera` string +
- * 3D `cameraMode`). `isometric`/`top-down` are fixed framings; `follow`/`chase`
- * track a target; `perspective` is the 3D dramatic framing.
+ * 3D `cameraMode`). `isometric`/`top-down`/`front` are fixed framings (`front` =
+ * the straight-on flat elevation — side-scroller / reference-sheet view);
+ * `follow`/`chase` track a target; `perspective` is the 3D dramatic framing.
  */
-export const CAMERA_MODES = ['isometric', 'perspective', 'top-down', 'follow', 'chase'] as const;
+export const CAMERA_MODES = ['isometric', 'perspective', 'top-down', 'front', 'follow', 'chase'] as const;
 
 export type CameraMode = (typeof CAMERA_MODES)[number];
 
