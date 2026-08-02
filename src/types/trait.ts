@@ -1131,6 +1131,14 @@ export type Trait = {
      * External listeners reference namespaced events (TraitName.EVENT_NAME).
      */
     listens?: TraitEventListener[];
+    /**
+     * `events { ACTION: CONFIRM_VOID }` — the call-site rename map that binds a
+     * pattern's own event slot (the key, e.g. a Button's `ACTION`) to the app
+     * event it fires (the value). Emitted into the IR by the inliner and read
+     * by wiring analysis: without it, an affordance whose event lives here
+     * rather than in the render payload looks like it fires nothing.
+     */
+    events?: Readonly<Record<string, string>>;
     ui?: TraitUIBinding;
     /**
      * Declared `config { }` schema authored on the trait. Drives

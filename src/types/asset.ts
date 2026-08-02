@@ -87,12 +87,29 @@ export type AnimationName = (typeof ANIMATION_NAMES)[number];
 
 export const AnimationNameSchema = z.enum(ANIMATION_NAMES);
 
-/** Sheet file directions (physical PNG files a sprite sheet ships as). */
-export const SPRITE_DIRECTIONS = ['se', 'sw'] as const;
+/**
+ * Sheet file directions (physical PNG files a sprite sheet ships as).
+ * Legacy hand-drawn packs ship only se/sw and mirror-flip for ne/nw (a cheat
+ * that shows the face while walking away); 3D-baked sheets ship all four real
+ * directions — the renderer prefers a real sheet and keeps the flip only as
+ * the legacy fallback.
+ */
+export const SPRITE_DIRECTIONS = ['se', 'sw', 'ne', 'nw'] as const;
 
 export type SpriteDirection = (typeof SPRITE_DIRECTIONS)[number];
 
 export const SpriteDirectionSchema = z.enum(SPRITE_DIRECTIONS);
+
+/**
+ * Camera projections a baked sprite sheet can ship. `iso` is directional
+ * (se/sw physical sheets, ne/nw by mirror); `front`/`top`/`perspective` are
+ * single fixed-camera sheets (the mesh reference-sheet camera vocabulary).
+ */
+export const SHEET_PROJECTIONS = ['iso', 'front', 'back', 'top', 'perspective'] as const;
+
+export type SheetProjection = (typeof SHEET_PROJECTIONS)[number];
+
+export const SheetProjectionSchema = z.enum(SHEET_PROJECTIONS);
 
 // ============================================================================
 // Animation Definition
@@ -156,6 +173,18 @@ export interface SpriteSheetAtlas {
     sheets: Partial<Record<SpriteDirection, string>>;
     /** Animation row layout keyed by animation name. */
     animations: Partial<Record<AnimationName, AnimationDef>>;
+    /**
+     * Per-projection sheet PNGs (additive; absent on legacy atlases). `iso`
+     * mirrors `sheets` (directional se/sw); the fixed cameras carry one sheet
+     * each. `sheets` remains the iso back-compat alias — writers emit both.
+     */
+    projections?: {
+        iso?: Partial<Record<SpriteDirection, string>>;
+        front?: string;
+        back?: string;
+        top?: string;
+        perspective?: string;
+    };
 }
 
 export const SpriteSheetAtlasSchema = z.object({
@@ -168,6 +197,15 @@ export const SpriteSheetAtlasSchema = z.object({
     directions: z.array(SpriteDirectionSchema),
     sheets: z.record(SpriteDirectionSchema, z.string()),
     animations: z.record(AnimationNameSchema, AnimationDefSchema),
+    projections: z
+        .object({
+            iso: z.record(SpriteDirectionSchema, z.string()).optional(),
+            front: z.string().optional(),
+            back: z.string().optional(),
+            top: z.string().optional(),
+            perspective: z.string().optional(),
+        })
+        .optional(),
 });
 
 // ============================================================================
@@ -453,6 +491,8 @@ export interface Camera {
     zoom?: number;
     fov?: number;
     mode?: CameraMode;
+    /** Orbit the mode's framing position around the vertical axis through the target, in radians (3D hosts only). */
+    azimuth?: number;
 }
 
 export const CameraSchema = z.object({
@@ -461,6 +501,7 @@ export const CameraSchema = z.object({
     zoom: z.number().optional(),
     fov: z.number().optional(),
     mode: CameraModeSchema.optional(),
+    azimuth: z.number().optional(),
 });
 
 // ============================================================================

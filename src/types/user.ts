@@ -132,6 +132,26 @@ export const DEFAULT_VIEWER: UserContext = {
   role: '',
 };
 
+/**
+ * The viewer to present an app as when nothing named one.
+ *
+ * `DEFAULT_VIEWER` is synthetic — `viewer-1` is in no app's roster — so under it
+ * every ownership predicate (`@entity.<owner> == @user.id`) matches zero rows and
+ * a correctly-scoped app renders empty tables everywhere. That is indistinguishable
+ * on screen from a broken filter, which is exactly the failure DEFAULT_VIEWER's own
+ * comment warns about.
+ *
+ * So when the app declares an `[identity]` roster, the default viewer is a REAL
+ * member of it. `DEFAULT_VIEWER` remains the fallback for apps that declare no
+ * identity entity, where there is nobody to be.
+ *
+ * Both execution paths share this rule; the Rust twin is
+ * `orbital-core::runtime::persona::resolve_default_viewer`.
+ */
+export function resolveDefaultViewer(roster: readonly UserContext[]): UserContext {
+  return roster.length > 0 ? (roster[0] as UserContext) : DEFAULT_VIEWER;
+}
+
 /** Look a persona up in a roster by id, or by role when no id matches. */
 export function findPersonaInRoster(
   roster: readonly UserContext[],

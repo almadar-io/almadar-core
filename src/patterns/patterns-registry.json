@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-08-01T09:06:41.875Z",
+  "exportedAt": "2026-08-02T09:00:22.243Z",
   "patterns": {
     "entity-table": {
       "type": "entity-table",
@@ -8586,6 +8586,11 @@
                 ]
               },
               "event": {
+                "types": [
+                  "string"
+                ]
+              },
+              "url": {
                 "types": [
                   "string"
                 ]
@@ -39934,7 +39939,13 @@
           "types": [
             "string"
           ],
-          "description": "Named GLB animation clip to play (3D backend only; the 2D painter animates via `frame`). Matched case-insensitively against the model's clips."
+          "description": "Animation to play. 3D backend: a named GLB clip (matched case-insensitively). 2D painter: when `asset.atlas` resolves to a `SpriteSheetAtlas` manifest, the canonical row of that name (idle/walk/attack/hit/death) plays off the host paint clock; an explicit `frame` rect overrides."
+        },
+        "loop": {
+          "types": [
+            "boolean"
+          ],
+          "description": "Override the sheet row's loop flag. The paint clock is wall-time, so one-shot rows hold their final frame — preview pages set `true` to cycle attack/hit/death continuously."
         },
         "flipX": {
           "types": [
@@ -40784,6 +40795,11 @@
               "animation": {
                 "types": [
                   "string"
+                ]
+              },
+              "loop": {
+                "types": [
+                  "boolean"
                 ]
               },
               "flipX": {
@@ -42166,6 +42182,22 @@
             }
           }
         },
+        "uvs": {
+          "types": [
+            "array"
+          ],
+          "description": "`polyhedron` only: per-vertex `[u, v]` texture coordinates parallel to `vertices`, glTF convention (`v` grows DOWN from the image's top-left). Pairs with `material.map`.",
+          "items": {
+            "types": [
+              "array"
+            ],
+            "items": {
+              "types": [
+                "number"
+              ]
+            }
+          }
+        },
         "skin": {
           "types": [
             "object"
@@ -42326,6 +42358,11 @@
                 "front",
                 "back",
                 "double"
+              ]
+            },
+            "map": {
+              "types": [
+                "string"
               ]
             }
           }
