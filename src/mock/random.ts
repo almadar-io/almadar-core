@@ -77,6 +77,17 @@ export function randomRecentDate({ days = 30 }: { days?: number } = {}): Date {
   return new Date(now - age);
 }
 
+/** ISO-8601 date string straddling now: `[-days, +days]`. One PRNG draw,
+ *  same call shape as `randomRecentDate`, so seeded field order is unchanged —
+ *  only the window shifts from past-only to centered-on-now. Past-only starved
+ *  any calendar/upcoming view, since every seeded `startsAt` was already over. */
+export function randomStraddlingDate({ days = 15 }: { days?: number } = {}): Date {
+  const now = Date.now();
+  const span = days * 24 * 60 * 60 * 1000;
+  const offset = Math.floor(nextFloat() * span * 2) - span;
+  return new Date(now + offset);
+}
+
 /** Any date in the last ~100 years. */
 export function randomAnytimeDate(): Date {
   const now = Date.now();

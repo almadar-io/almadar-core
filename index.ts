@@ -44,6 +44,7 @@ export {
   isContentMainWriter,
   resolvePageContentOwner,
   resolveContentOwners,
+  reduceToOwners,
 } from './src/page-content-owner';
 export type { PageContentOwner } from './src/page-content-owner';
 

@@ -79,8 +79,14 @@ export function isContentMainWriter(trait: Trait): boolean {
  * with the embed map — makes an ordinary browse page resolve `ambiguous`, and
  * a check gated on having an owner then reports nothing at all while looking
  * perfectly healthy.
+ *
+ * Exported so a caller that already HAS an owner (`unclaimed-main-writer`)
+ * can ask "is THIS other candidate actually a rival, or just this owner's
+ * ancestor/descendant along the same designation-or-containment graph" —
+ * `reduceToOwners(new Set([owner, candidate]), ...).length === 1` means
+ * related, not a second writer. One algorithm, not a second copy of it.
  */
-function reduceToOwners(
+export function reduceToOwners(
   candidates: ReadonlySet<string>,
   configAdjacency: ReadonlyMap<string, ReadonlySet<string>>,
   embedAdjacency: ReadonlyMap<string, ReadonlySet<string>>,

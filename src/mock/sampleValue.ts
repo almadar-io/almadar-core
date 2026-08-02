@@ -21,7 +21,7 @@ import {
   randomEmail,
   randomInt,
   randomPhone,
-  randomRecentDate,
+  randomStraddlingDate,
   randomUrl,
   randomUuid,
   randomWords,
@@ -158,7 +158,7 @@ function sampleDate(ctx: SampleContext, dateOnly: boolean): string {
     const month = String((ctx.index % 12) + 1).padStart(2, '0');
     return dateOnly ? `2026-${month}-15` : `2026-${month}-15T00:00:00.000Z`;
   }
-  const iso = randomRecentDate({ days: 30 }).toISOString();
+  const iso = randomStraddlingDate({ days: 15 }).toISOString();
   return dateOnly ? iso.split('T')[0]! : iso;
 }
 
