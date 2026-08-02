@@ -37,6 +37,16 @@ export {
   buildResolvedTraitConfigs,
 } from './src/embedded-trait-config';
 
+// The slot-outlet contract — which single trait owns a page's content region.
+// Two wiring-lint classes were stuck (one at warning-only, one withdrawn after
+// three calibrations) purely because this fact was not derivable.
+export {
+  isContentMainWriter,
+  resolvePageContentOwner,
+  resolveContentOwners,
+} from './src/page-content-owner';
+export type { PageContentOwner } from './src/page-content-owner';
+
 // Listen-route `with { ... }` payload mapping — shared by the server runtime
 // (`@almadar/runtime`) and the client cross-trait wiring (`@almadar/ui`).
 export { applyListenPayloadMapping } from './src/listen-payload-mapping';
