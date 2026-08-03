@@ -144,12 +144,61 @@ describe('generateQuestions', () => {
     expect(configIds).toHaveLength(1);
   });
 
-  it('humanizes the key name into a label when the source carries no @label', () => {
+  it('humanizes the key name into a label when the source carries no @label, with no appended "?"', () => {
     const result = generateQuestions([makeCall()], [ecommerceSignature]);
     const navQ = result.find(
       (q) => q.id === 'ProductOrbital.ProductCatalog.navItems',
     );
-    expect(navQ?.question).toBe('Nav Items?');
+    expect(navQ?.question).toBe('Nav Items');
+  });
+
+  it('renders an authored @label verbatim, with no appended "?" (noun-phrase label)', () => {
+    const sig: FactorySignature = {
+      ...ecommerceSignature,
+      traits: [
+        {
+          ...ecommerceSignature.traits[0],
+          overridableConfigKeys: [
+            { key: 'currency', type: 'string', label: 'Currency for prices' },
+          ],
+        },
+      ],
+    };
+    const result = generateQuestions([makeCall()], [sig]);
+    const q = result.find((r) => r.id.endsWith('.currency'));
+    expect(q?.question).toBe('Currency for prices');
+  });
+
+  it('renders an authored @label that already ends in "?" with exactly one "?"', () => {
+    const sig: FactorySignature = {
+      ...ecommerceSignature,
+      traits: [
+        {
+          ...ecommerceSignature.traits[0],
+          overridableConfigKeys: [
+            { key: 'currency', type: 'string', label: 'What currency?' },
+          ],
+        },
+      ],
+    };
+    const result = generateQuestions([makeCall()], [sig]);
+    const q = result.find((r) => r.id.endsWith('.currency'));
+    expect(q?.question).toBe('What currency?');
+    expect(q?.question?.match(/\?/g)).toHaveLength(1);
+  });
+
+  // The trait name a consumer renders for disambiguation comes from the
+  // mutation template — the single owner of the question's target
+  // coordinates. It is deliberately NOT mirrored onto DomainQuestion.
+  it('carries the verbatim trait name on config-key questions', () => {
+    const result = generateQuestions([makeCall()], [ecommerceSignature]);
+    const navQ = result.find(
+      (q) => q.id === 'ProductOrbital.ProductCatalog.navItems',
+    );
+    expect(navQ?.mutationTemplate).toMatchObject({
+      kind: 'set-trait-override-config',
+      traitName: 'ProductCatalog',
+    });
   });
 
   it('pre-fills the answer widget from the param default', () => {
@@ -335,6 +384,25 @@ describe('generateQuestions — entity-field question', () => {
     const result = generateQuestions([call], [ecommerceSignature]);
     const q = result.find((q) => q.id.endsWith('.__entityFields'));
     expect(q?.question).toContain('Merchandise');
+  });
+
+  it('renders no article and no double space for a PascalCase entity name', () => {
+    const call: FactoryCallSite = {
+      ...makeCall(),
+      params: { entityName: 'ApBill' },
+    };
+    const result = generateQuestions([call], [ecommerceSignature]);
+    const q = result.find((q) => q.id.endsWith('.__entityFields'));
+    expect(q?.question).toBe('Fields for ApBill');
+    expect(q?.question).not.toMatch(/\ba an?\s/i);
+    expect(q?.question).not.toMatch(/ {2,}/);
+  });
+
+  it('gives the entity-field question no trait target', () => {
+    const result = generateQuestions([makeCall()], [ecommerceSignature]);
+    const q = result.find((q) => q.id.endsWith('.__entityFields'));
+    expect(q?.mutationTemplate.kind).toBe('set-orbital-entity-fields');
+    expect(q?.mutationTemplate).not.toHaveProperty('traitName');
   });
 });
 

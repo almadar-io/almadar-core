@@ -124,11 +124,6 @@ export interface FactoryEntitySignature {
  * the source `.lolo` `config { }` block (which carries typed
  * declarations + defaults). Consumers (the questionnaire generator,
  * the studio) pick a widget from `type` and pre-fill from `default`.
- *
- * `label` is reserved for a future `.lolo` grammar extension that
- * lets atom authors author a human-friendly question prompt; today
- * it's always undefined and the questionnaire derives a fallback
- * from the key name.
  */
 export interface FactoryConfigParam {
   /** Key name as advertised by the trait. Matches the override path
@@ -150,8 +145,14 @@ export interface FactoryConfigParam {
    *  supplied. Pre-fills the form widget so users see what they're
    *  about to change. */
   default?: FactoryParamValue;
-  /** Optional human-friendly question prompt. Lifted from the source
-   *  `.lolo` `@label "..."` annotation. */
+  /** Human-friendly question prompt, lifted verbatim from the source
+   *  `.lolo` `@label "..."` annotation. Contract: `@label` IS the
+   *  rendered string — the questionnaire never manipulates it (no
+   *  appended punctuation, no humanization, no fallback logic layered
+   *  on top of an authored value). Undefined only when the atom author
+   *  did not tag the knob; `buildConfigKeyQuestion` then falls back to
+   *  `humanizeKey(key)` as a type guard, not user-facing inference — a
+   *  domain-tier knob reaching that fallback is a source defect. */
   label?: string;
   /** Optional help-text. Lifted from `.lolo` `@description "..."`. */
   description?: string;

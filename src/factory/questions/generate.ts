@@ -103,8 +103,9 @@ function buildConfigKeyQuestion(
   trait: FactoryTraitSignature,
   param: FactoryConfigParam,
 ): DomainQuestion {
-  const label = param.label ?? humanizeKey(param.key);
-  const question = `${label}?`;
+  // `@label` renders verbatim; the fallback is a type guard, not inference —
+  // a domain-tier knob reaching it is a missing-`@label` source defect.
+  const question = param.label ?? humanizeKey(param.key);
   // Call-site override (organism pre-pinned this knob) takes precedence
   // over the atom-author's default. The question still renders so the
   // user can confirm or change the pre-pinned value.
@@ -310,6 +311,12 @@ function stringifyDefault(v: FactoryParamValue): string {
  * `fieldCandidates`    = name → EntityField for the UI's resolution step.
  * `fieldDescriptions`  = name → description for checkbox sub-labels.
  *
+ * Phrased without an article so no "a"/"an" guess is needed: no
+ * source-tagged noun phrase for an entity exists yet — the only
+ * candidate, `defaultLabels.entitySingular`, lives on a different
+ * registry AND defaults to the raw entity name, so it would not help.
+ * An authored `@entityLabel` on the entity is the real fix.
+ *
  * Type note: `FactorySignatureEntityField.type` is `SchemaFieldType` while
  * `EntityField` is a discriminated union. `signatureFieldToEntityField` maps
  * each variant faithfully.
@@ -342,7 +349,7 @@ function entityFieldQuestions(
   const q: DomainQuestion = {
     id: `${call.orbital}.__entityFields`,
     orbitalName: call.orbital,
-    question: `Which fields should a ${entityName} have?`,
+    question: `Fields for ${entityName}`,
     reason: `Defines the data model for ${entityName}. Pick the fields that matter for your use case.`,
     inputType: 'multiselect',
     mutationTemplate: {
