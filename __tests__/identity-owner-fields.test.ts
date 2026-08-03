@@ -97,4 +97,32 @@ describe('ownerFieldsFromSchema', () => {
 
         expect(ownerFieldsFromSchema(schema)).toEqual(['Draft.owner']);
     });
+
+    it('a same-collection sibling inherits a declared owner column by name; a different collection does not', () => {
+        // Mirror of entityAccessTable's policy inheritance: a composed atom's
+        // entity shares the collection (and therefore the @read scope) of the
+        // organism's declaring entity, but structurally cannot declare the
+        // identity relation itself.
+        const declaring: OrbitalEntity = {
+            ...entity('RenewalRiskSearch', [relation('assignedCsm', 'Person')]),
+            collection: 'renewalrisks',
+        };
+        const atomView: OrbitalEntity = {
+            ...entity('RenewalRisk', [{ name: 'assignedCsm', type: 'string' }]),
+            collection: 'renewalrisks',
+        };
+        const otherCollection: OrbitalEntity = {
+            ...entity('Invoice', [{ name: 'assignedCsm', type: 'string' }]),
+            collection: 'invoices',
+        };
+        const schema = schemaOf([
+            orbital('RiskOrbital', declaring, [atomView, otherCollection]),
+            personOrbital(),
+        ]);
+
+        expect(ownerFieldsFromSchema(schema)).toEqual([
+            'RenewalRiskSearch.assignedCsm',
+            'RenewalRisk.assignedCsm',
+        ]);
+    });
 });

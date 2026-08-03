@@ -49,13 +49,36 @@ export function ownerFieldsFromSchema(schema: OrbitalSchema): string[] {
   if (identity === undefined) return [];
 
   const out: string[] = [];
-  for (const def of inlineEntities(schema)) {
+  const defs = inlineEntities(schema);
+  const declaredByCollection = new Map<string, string[]>();
+  for (const def of defs) {
     for (const field of def.fields ?? []) {
       // Cardinality-one only: an owner column holds ONE viewer id. A
       // `[Person]` array is a participant list, not ownership.
       if (field.name && field.type === 'relation' && field.relation.entity === identity) {
         out.push(`${def.name}.${field.name}`);
+        if (def.collection) {
+          const cols = declaredByCollection.get(def.collection) ?? [];
+          if (!cols.includes(field.name)) cols.push(field.name);
+          declaredByCollection.set(def.collection, cols);
+        }
       }
+    }
+  }
+
+  // Collection mirror of `entityAccessTable`'s policy inheritance: an entity
+  // sharing a collection with a declaring sibling is scoped by that sibling's
+  // @read policy, so its same-named column IS the owner column the policy
+  // compares — an imported atom's entity structurally cannot declare the
+  // relation itself (it does not know the app's identity entity). Still
+  // declaration-grounded, never name-guessing across collections.
+  for (const def of defs) {
+    const cols = def.collection ? declaredByCollection.get(def.collection) : undefined;
+    if (!cols) continue;
+    for (const col of cols) {
+      const key = `${def.name}.${col}`;
+      if (out.includes(key)) continue;
+      if ((def.fields ?? []).some((f) => f.name === col)) out.push(key);
     }
   }
   return out;
