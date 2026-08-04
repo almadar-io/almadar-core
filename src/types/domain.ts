@@ -8,6 +8,7 @@
  */
 
 import { z } from "zod";
+import type { JsonValue } from './json.js';
 
 // ============================================================================
 // Domain Categories
@@ -1045,6 +1046,22 @@ export const ThemeDefinitionSchema = z.object({
  * Reference format: "Alias.theme"
  */
 export type ThemeRef = ThemeDefinition | string;
+
+/**
+ * NavItem - a single navigation entry rendered by a layout trait (e.g.
+ * `AppShell.traits.AppLayout`'s `navItems`). `label` + `href` are required;
+ * `icon`/`badge`/`children` are optional shaping knobs an author may set on a
+ * call-site override. The `@pages` render sigil yields the minimal
+ * `{ href, label }` form (one per inline page: `href = page.path`,
+ * `label = page.name`), which is assignable to this type.
+ */
+export interface NavItem {
+  label: string;
+  href: string;
+  icon?: string;
+  badge?: string;
+  children?: JsonValue[];
+}
 
 /**
  * Checks if a theme reference is a string.

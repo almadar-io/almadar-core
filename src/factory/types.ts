@@ -261,6 +261,13 @@ export interface FactoryTraitSignature {
    *  header annotations. Free-form strings — the translator overlay
    *  matches rules to traits by exact set membership. */
   capabilities: ReadonlyArray<string>;
+  /** The entity this trait is bound to at THIS call site — the `.orb`
+   *  `TraitReference.linkedEntity` / inline `Trait.linkedEntity` (the same
+   *  field a `traitOverrides.<name>.linkedEntity` rebind ultimately writes).
+   *  Absent for a bare string ref, whose binding lives on the referenced
+   *  atom's own signature entry in the same catalog. Read directly off the
+   *  trait node — no inference. */
+  linkedEntity?: string;
   /** `true` when the source trait's entity binding was authored
    *  `-> @rebindable Entity`. Only then may a consumer rebind it via
    *  `traitOverrides.<name>.linkedEntity`; rabit enum-constrains that
@@ -448,6 +455,16 @@ export interface FactoryCallSiteParams {
   collection?: string;
   /** Per-page path overrides keyed by `signature.pages[i].name`. */
   pagePaths?: Readonly<Record<string, string>>;
+  /**
+   * Theme name (a `data-theme` key from the built-in `@almadar-ui/themes/`
+   * registry) stamped onto `Orbital.theme` post-factory. Plan-level and
+   * uniform — the coordinator decides it once and threads the same value
+   * to every orbital; the per-orbital subagent does not independently pick.
+   * Applied post-`dispatchOrbitalFactoryMerged` via `applyOrbitalTheme`,
+   * exactly as `pagePaths`/`pages` are applied post-factory, so the factory's
+   * typed guard never sees it.
+   */
+  theme?: string;
   /** Trait-level overrides keyed by `signature.traits[i].name`. Each value
    *  is a {@link TraitOverlayEntry} — the canonical override surface that
    *  admits the full documented set (`config`, `linkedEntity`, `events`,

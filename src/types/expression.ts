@@ -205,8 +205,13 @@ export interface ParsedBinding {
  * `callsitePayload` is the call-site-captured event payload emitted by the
  * compiler's inline-trait hoisting; the runtime BindingResolver resolves it
  * at the composing effect.
+ * `pages` / `currentTheme` are render-resolved schema sigils (effect-only,
+ * see `orbital-rust/crates/orbital-compiler/src/phases/resolve.rs`):
+ * substituted from the host orbital's schema (`@pages` → its `NavItem[]`
+ * nav array, `@currentTheme` → its `data-theme` key) before codegen — they
+ * never survive as live bindings past that substitution pass.
  */
-export const CORE_BINDINGS = ['entity', 'payload', 'state', 'now', 'config', 'computed', 'trait', 'user', 'callsitePayload'] as const;
+export const CORE_BINDINGS = ['entity', 'payload', 'state', 'now', 'config', 'computed', 'trait', 'user', 'callsitePayload', 'pages', 'currentTheme'] as const;
 export type CoreBinding = (typeof CORE_BINDINGS)[number];
 
 /**

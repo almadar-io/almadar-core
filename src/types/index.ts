@@ -579,6 +579,7 @@ export {
   type ThemeVariant,
   type ThemeDefinition,
   type ThemeRef,
+  type NavItem,
   // Skin axis sub-interfaces (Layer 1 visual variation)
   type SpacingScale,
   type DensityTokens,
