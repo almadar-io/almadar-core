@@ -97,6 +97,13 @@ export type OrbitalPage = {
 
     /** Is this the initial page for navigation? */
     isInitial?: boolean;
+
+    /** Nav icon name — `@icon "..."` annotation on the page declaration. */
+    icon?: string;
+
+    /** Human nav label — `@label "..."` annotation; when absent, a label is
+     * derived (strip a trailing `Page` suffix from `name`). */
+    label?: string;
 };
 
 /**
@@ -110,6 +117,8 @@ export const OrbitalPageStrictSchema = z.object({
     primaryEntity: z.string().min(1, 'Primary entity is required'),
     traits: z.array(PageTraitRefSchema).min(1, 'Page must have at least one trait'),
     title: z.string().optional(),
+    icon: z.string().optional(),
+    label: z.string().optional(),
 }).strict(); // Reject unknown keys like 'sections'
 
 /**
@@ -126,6 +135,8 @@ export const OrbitalPageSchema = z.object({
     primaryEntity: z.string().optional(),
     traits: z.array(PageTraitRefSchema).optional(),
     isInitial: z.boolean().optional(),
+    icon: z.string().optional(),
+    label: z.string().optional(),
 }).strict(); // Reject unknown keys like 'sections' - use traits with render_ui effects
 
 export type OrbitalPageInput = z.input<typeof OrbitalPageSchema>;

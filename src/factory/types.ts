@@ -282,6 +282,19 @@ export interface FactoryTraitSignature {
    *  fed to catalog prose + knob-embeddings for binding-discovery. */
   entityBindingDescription?: string;
   entityBindingSynonyms?: string;
+  /** Entity names this trait's state-machine effects reference
+   *  (`stateMachine.transitions[].effects[]` — `persist create/update/delete`
+   *  and `fetch`), deduplicated. Distinct from `linkedEntity` (the trait's
+   *  OWN binding): this is every OTHER entity an effect reads or writes,
+   *  e.g. `CheckoutWizard`'s `persist create OrderRecord` names
+   *  `'OrderRecord'` here even though the trait itself is bound to
+   *  `Checkout`. `subset_closure` (`packages/almadar-rabit`) uses this to
+   *  detect a roster subset that would otherwise dangle a persist-effect
+   *  reference the relation-field/`linkedEntity` walk alone can't see —
+   *  measured cause of `ORB_EFF_FETCH_INVALID_ENTITY` on a scoped roster
+   *  (`docs/Almadar_Studio_Failures_2026-08-04.md` §N). Absent = topology
+   *  unknown (legacy catalogs), same convention as `transitionEvents`. */
+  effectEntityRefs?: ReadonlyArray<string>;
 }
 
 /** One event a trait emits or listens for, with its authored annotations — the
