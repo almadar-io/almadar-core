@@ -21,6 +21,9 @@ export {
   // Use Declaration (Import System)
   type UseDeclaration,
   UseDeclarationSchema,
+  // Expect Declaration (Consumer-Side Requirements)
+  type ExpectDeclaration,
+  ExpectDeclarationSchema,
   // Entity/Page reference types
   type EntityRef,
   type EntityCall,

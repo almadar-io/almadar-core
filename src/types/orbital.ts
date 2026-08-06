@@ -102,6 +102,60 @@ export const UseDeclarationSchema = z.object({
 });
 
 // ============================================================================
+// Expect Declaration (Consumer-Side Requirements)
+// ============================================================================
+
+/**
+ * ExpectDeclaration - a consumer-side requirement: "some sibling orbital
+ * provides this, and here is the minimal typed slice of it I rely on."
+ *
+ * The dual of a provider: the entity `[identity]` tag declares "I am the
+ * roster"; `expects identity` declares "I read the roster". Standalone
+ * validation trusts the declaration and uses its shape as the local type
+ * environment; composed-program validation link-checks it against the real
+ * provider. The shape reuses the canonical `EntityField` so all type
+ * compatibility flows through the one compat owner. Compile-time only.
+ * See docs/Almadar_LOLO_Expects_Proposal.md.
+ */
+export type ExpectDeclaration =
+  | {
+      /** `expects identity Customer { role : "admin" | "member" }` — the `@user` fields this orbital reads, typed. */
+      kind: "identity";
+      name?: string;
+      shape?: EntityField[];
+    }
+  | {
+      /** `expects entity OrderRecord { totalAmount : number }` — a sibling entity this orbital touches. Shape omitted = opaque reference. */
+      kind: "entity";
+      name: string;
+      shape?: EntityField[];
+    }
+  | {
+      /** `expects event Checkout.ORDER_PLACED` — a sibling trait produces this event (Phase 2). */
+      kind: "event";
+      traitName: string;
+      event: string;
+    };
+
+export const ExpectDeclarationSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("identity"),
+    name: z.string().optional(),
+    shape: z.array(EntityFieldSchema).optional(),
+  }),
+  z.object({
+    kind: z.literal("entity"),
+    name: z.string().min(1, "Expected entity name is required"),
+    shape: z.array(EntityFieldSchema).optional(),
+  }),
+  z.object({
+    kind: z.literal("event"),
+    traitName: z.string().min(1, "Expected event trait name is required"),
+    event: z.string().min(1, "Expected event name is required"),
+  }),
+]);
+
+// ============================================================================
 // Entity Reference (Inline OR Reference)
 // ============================================================================
 
@@ -691,6 +745,17 @@ export type OrbitalDefinition = {
    */
   uses?: UseDeclaration[];
 
+  /**
+   * Consumer-side requirement declarations (`.lolo` `expects ...`).
+   *
+   * Promises about sibling orbitals this unit relies on: trusted as the
+   * local type environment when the orbital is validated standalone,
+   * link-checked against real providers at compose. Compile-time only —
+   * runtime semantics are unchanged.
+   * See docs/Almadar_LOLO_Expects_Proposal.md.
+   */
+  expects?: ExpectDeclaration[];
+
   // ========================================================================
   // Theme & Services
   // ========================================================================
@@ -826,6 +891,8 @@ export const OrbitalDefinitionSchema = z.object({
   visual_prompt: z.string().optional(),
   // Import system
   uses: z.array(UseDeclarationSchema).optional(),
+  // Consumer-side requirement declarations (`.lolo` `expects ...`)
+  expects: z.array(ExpectDeclarationSchema).optional(),
   // Theme & Services
   theme: ThemeRefSchema.optional(),
   services: z.array(ServiceRefSchema).optional(),

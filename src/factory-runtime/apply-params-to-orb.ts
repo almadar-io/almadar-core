@@ -612,6 +612,39 @@ export function applyDeclarationEntityRename(
 }
 
 /**
+ * Ledger/declaration agreement heal for the factory build path: every entity
+ * declaration carrying an id must find its ledger row naming the SAME name
+ * the declaration carries. A re-instantiate adopts the prior `.orb`'s ledger
+ * via `orb stamp --prior` — including rename rows an earlier build recorded —
+ * while the factory re-emits the entity at its baked/requested name, so a
+ * stale `curName` would survive a corrective rebuild unchanged and
+ * manufacture an `ORB_ID_NAME_MISMATCH` no repair pass can edit away
+ * (battery 2026-08-06 domain-rule: param-fill renamed MarketplaceUserOrbital's
+ * entity to `Product`; the corrective re-instantiate at `entityName:
+ * "MarketplaceUser"` applies NO rename — from === to — and the adopted row
+ * kept `curName: "Product"` against a `MarketplaceUser` declaration).
+ *
+ * Sound on this path only: the factory always re-emits the declaration at the
+ * requested/baked name, so the declaration is the build's truth and the
+ * adopted row carries identity (the id) forward. No-op when they agree.
+ */
+export function healEntityLedgerRows(schema: OrbitalSchema, at: string): OrbitalSchema {
+  let ledger = schema.ledger;
+  if (ledger === undefined) return schema;
+  for (const orbital of schema.orbitals) {
+    const entity = orbital.entity;
+    if (typeof entity !== 'object' || entity === null) continue;
+    const id = (entity as { id?: string }).id;
+    const name = entity.name;
+    if (typeof id !== 'string' || typeof name !== 'string') continue;
+    const entry = ledger.entries[id];
+    if (entry === undefined || entry.kind !== 'entity' || entry.curName === name) continue;
+    ledger = ledgerRename(ledger, id, name, at);
+  }
+  return ledger !== schema.ledger ? { ...schema, ledger } : schema;
+}
+
+/**
  * The overlay. Resolves the effective entity name + collection, calls
  * `makeOrbitalWithUses` with the rewritten data, then applies the params'
  * trait/page overrides post-hoc.
@@ -646,6 +679,10 @@ export function applyParamsToOrb(
   const built = makeOrbitalWithUses({
     name: orbital.name,
     uses: orbital.uses ?? [],
+    // Derived `expects` declarations ride the overlay untouched — they name
+    // SIBLING entities (never the orbital's own), so the entityName rename
+    // below cannot affect them.
+    ...(orbital.expects !== undefined ? { expects: orbital.expects } : {}),
     entity: buildEntity(ctx, canonicalEntityName, effectiveCollection, params),
     traits: rebuildTraits(orbital.traits),
     pages: rebuildPages(orbital.pages),

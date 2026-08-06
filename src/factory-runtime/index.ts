@@ -17,6 +17,7 @@ export {
   applyParamsToOrb,
   applyDeclarationTraitRenames,
   applyDeclarationEntityRename,
+  healEntityLedgerRows,
   rebindInlineTraitEntity,
   rewriteEntityInInlineTrait,
   mergeCallSiteConfigOverrides,

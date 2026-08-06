@@ -16,7 +16,7 @@
 import type { Entity, EntityPersistence, EntityRow } from './types/entity.js';
 import type { EntityField } from './types/field.js';
 import type { Page } from './types/page.js';
-import type { EntityRef, OrbitalDefinition, PageRef, PageRefObject, UseDeclaration } from './types/orbital.js';
+import type { EntityRef, ExpectDeclaration, OrbitalDefinition, PageRef, PageRefObject, UseDeclaration } from './types/orbital.js';
 import { isEntityCall, isEntityReference, parseEntityRef } from './types/orbital.js';
 import type { OrbitalSchema } from './types/schema.js';
 import type { TraitEventContract, TraitEventListener, Trait, TraitRef, TraitReference, TraitConfig, CallSiteConfig } from './types/trait.js';
@@ -339,6 +339,12 @@ export interface MakeOrbitalWithUsesOpts {
   uses: UseDeclaration[];
   /** Entity (inline or reference form). */
   entity: EntityRef;
+  /**
+   * Derived `expects` declarations (consumer-side requirements). Threaded
+   * verbatim — derivation lives in `deriveExpectations`; builders never
+   * compute it. Omitted from the result when not provided.
+   */
+  expects?: ExpectDeclaration[];
   /** Trait references. */
   traits: TraitRef[];
   /** Optional page references (omitted entirely when not provided). */
@@ -357,6 +363,7 @@ export function makeOrbitalWithUses(opts: MakeOrbitalWithUsesOpts): OrbitalDefin
   const orbital: OrbitalDefinition = {
     name: opts.name,
     uses: opts.uses,
+    ...(opts.expects !== undefined ? { expects: opts.expects } : {}),
     entity: opts.entity,
     traits: opts.traits,
     pages: opts.pages ?? [],

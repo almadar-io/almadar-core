@@ -148,6 +148,16 @@ export {
   entityAccessTable,
 } from './src/access/entityAccess';
 
+// `expects` derivation — compute an orbital's consumer-side requirement
+// declarations from the organism's golden schema (proposal §7; the ONE owner —
+// rabit's factory generation and edit-demote materializer both derive through
+// this, never their own walks).
+export {
+  deriveExpectations,
+  type DeriveExpectationsResult,
+  type ExpectationDiagnostic,
+} from './src/derive-expectations';
+
 // Shared-entity frame merge (mechanics-as-traits DRY primitive: the JS
 // interpreter and the generated TypeScript codegen both fold mechanic
 // writes through this one function).

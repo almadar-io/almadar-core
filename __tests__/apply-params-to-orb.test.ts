@@ -59,3 +59,103 @@ describe('mergeCallSiteConfigOverrides — no double-wrapping', () => {
     expect(merged['title']).toEqual({ type: 'string', default: 'Q Revenue', label: 'Title' });
   });
 });
+
+// E5a — derived `expects` declarations must survive the L1 params overlay:
+// `applyParamsToOrb` rebuilds the orbital through `makeOrbitalWithUses`, and a
+// rebuild that drops `expects` would strip the slice's standalone-validation
+// contract on every factory dispatch.
+describe('applyParamsToOrb — expects preservation', () => {
+  it('threads the orbital’s derived expects through the rebuild untouched', async () => {
+    const { applyParamsToOrb } = await import('../src/factory-runtime/apply-params-to-orb.js');
+    const expects = [
+      {
+        kind: 'identity' as const,
+        name: 'Customer',
+        shape: [{ name: 'role', type: 'enum' as const, values: ['customer', 'store-manager'] }],
+      },
+      { kind: 'entity' as const, name: 'OrderRecord' },
+    ];
+    const orb = {
+      name: 'fixture',
+      orbitals: [
+        {
+          name: 'ProductOrbital',
+          entity: { name: 'Product', fields: [{ name: 'id', type: 'string' as const, required: true }] },
+          expects,
+          traits: [],
+          pages: [],
+        },
+      ],
+    };
+    const manifest = {
+      organism: 'fixture',
+      orbitalName: 'ProductOrbital',
+      paramFields: [],
+      traitNames: [],
+      inlineTraitNames: [],
+    };
+    const built = applyParamsToOrb(orb, 'ProductOrbital', manifest, {});
+    expect(built.expects).toEqual(expects);
+  });
+});
+
+// G-L3-ENTITY-ID-COLLISION (factory-path half) — a corrective re-instantiate
+// at the baked entity name applies no rename (from === to), so a stale
+// ledger row adopted from the prior `.orb` must be healed to the declaration
+// name or the file manufactures ORB_ID_NAME_MISMATCH.
+describe('healEntityLedgerRows — factory rebuild ledger agreement', () => {
+  const makeSchema = (curName: string) => ({
+    name: 'fixture',
+    orbitals: [
+      {
+        name: 'MarketplaceUserOrbital',
+        entity: {
+          id: 'ent_01TESTHEAL0000000000000',
+          name: 'MarketplaceUser',
+          fields: [{ name: 'id', type: 'string' as const, required: true }],
+        },
+        traits: [],
+        pages: [],
+      },
+    ],
+    ledger: {
+      schemaVersion: 1 as const,
+      entries: {
+        ent_01TESTHEAL0000000000000: {
+          id: 'ent_01TESTHEAL0000000000000',
+          kind: 'entity' as const,
+          bakedName: 'MarketplaceUser',
+          curName,
+          renames: [{ from: 'MarketplaceUser', to: curName, at: '2026-08-06T11:06:10.355Z' }],
+          owner: 'workspace' as const,
+        },
+      },
+    },
+  });
+
+  it('heals a stale curName back to the declaration name, appending the rename row', async () => {
+    const { healEntityLedgerRows } = await import('../src/factory-runtime/apply-params-to-orb.js');
+    const healed = healEntityLedgerRows(makeSchema('Product'), '2026-08-06T11:09:26.000Z');
+    const entry = healed.ledger!.entries['ent_01TESTHEAL0000000000000']!;
+    expect(entry.curName).toBe('MarketplaceUser');
+    expect(entry.renames).toHaveLength(2);
+    expect(entry.renames[1]).toEqual({
+      from: 'Product',
+      to: 'MarketplaceUser',
+      at: '2026-08-06T11:09:26.000Z',
+    });
+  });
+
+  it('is a no-op when the row already agrees with the declaration', async () => {
+    const { healEntityLedgerRows } = await import('../src/factory-runtime/apply-params-to-orb.js');
+    const schema = makeSchema('MarketplaceUser');
+    expect(healEntityLedgerRows(schema, '2026-08-06T11:09:26.000Z')).toBe(schema);
+  });
+
+  it('leaves non-entity rows and id-less declarations untouched', async () => {
+    const { healEntityLedgerRows } = await import('../src/factory-runtime/apply-params-to-orb.js');
+    const schema = makeSchema('Product');
+    schema.orbitals[0]!.entity = { name: 'MarketplaceUser', fields: [] } as never;
+    expect(healEntityLedgerRows(schema, '2026-08-06T11:09:26.000Z')).toBe(schema);
+  });
+});
