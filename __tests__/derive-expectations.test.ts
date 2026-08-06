@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { deriveExpectations } from '../src/derive-expectations.js';
 import type { OrbitalSchema } from '../src/types/schema.js';
+import type { EntityField } from '../src/types/field.js';
 import type { Trait } from '../src/types/trait.js';
 
 /**
@@ -10,18 +11,18 @@ import type { Trait } from '../src/types/trait.js';
  * cross-orbital writer (Checkout → OrderRecord), a pure provider
  * (OrderRecord), plus a fully self-contained orbital (Standalone).
  */
-const customerFields = [
+const customerFields: EntityField[] = [
     { name: 'id', type: 'string', required: true },
     { name: 'name', type: 'string', required: true },
     { name: 'role', type: 'enum', values: ['customer', 'store-manager'], default: 'customer' },
-] as const;
+];
 
-const orderRecordFields = [
+const orderRecordFields: EntityField[] = [
     { name: 'id', type: 'string', required: true },
     { name: 'status', type: 'enum', values: ['placed', 'shipped'] },
     { name: 'totalAmount', type: 'number' },
     { name: 'customer', type: 'relation', relation: { entity: 'Customer', cardinality: 'one' } },
-] as const;
+];
 
 function buildSchema(): OrbitalSchema {
     const checkoutTrait: Trait = {
@@ -245,7 +246,7 @@ describe('deriveExpectations', () => {
         const customer = schema.orbitals.find((o) => o.name === 'CustomerOrbital');
         const roleField =
             typeof customer?.entity === 'object' && 'fields' in customer.entity
-                ? customer.entity.fields.find((f) => f.type === 'enum')
+                ? customer.entity.fields?.find((f) => f.type === 'enum')
                 : undefined;
         expect(roleField?.name).toBe('role');
     });

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { mergeCallSiteConfigOverrides } from '../src/factory-runtime/apply-params-to-orb.js';
-import { isCallSiteConfigDeclaration } from '../src/types/index.js';
+import { isCallSiteConfigDeclaration, asEntityId } from '../src/types/index.js';
+import type { OrbitalSchema } from '../src/types/index.js';
 
 // RABIT-BUG-2 — trait-slot objectification. A trait-typed config slot
 // (e.g. `toolbar1Trait`) must always resolve to a plain `@trait.<Name>`
@@ -104,13 +105,13 @@ describe('applyParamsToOrb — expects preservation', () => {
 // ledger row adopted from the prior `.orb` must be healed to the declaration
 // name or the file manufactures ORB_ID_NAME_MISMATCH.
 describe('healEntityLedgerRows — factory rebuild ledger agreement', () => {
-  const makeSchema = (curName: string) => ({
+  const makeSchema = (curName: string): OrbitalSchema => ({
     name: 'fixture',
     orbitals: [
       {
         name: 'MarketplaceUserOrbital',
         entity: {
-          id: 'ent_01TESTHEAL0000000000000',
+          id: asEntityId('ent_01TESTHEAL0000000000000'),
           name: 'MarketplaceUser',
           fields: [{ name: 'id', type: 'string' as const, required: true }],
         },
