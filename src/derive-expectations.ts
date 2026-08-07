@@ -273,6 +273,21 @@ export function deriveExpectations(
   // ---- Build declarations -------------------------------------------------
   const expectations: ExpectDeclaration[] = [];
 
+  // One name, one declaration: when the [identity] roster is ALSO a referenced
+  // sibling entity (e.g. a relation field targeting it), fold those field refs
+  // into the identity expectation instead of emitting a second
+  // `expects entity` for the same name — duplicate expectations are a parse
+  // error downstream (ELOLO_DUPLICATE_EXPECTATION), and the named identity
+  // declaration is the one that carries relation-target resolution
+  // (Almadar_LOLO_Expects_Proposal.md §5.1).
+  if (identityDef !== undefined && userFields.size > 0) {
+    const alsoReferenced = entityRefs.get(identityDef.name);
+    if (alsoReferenced !== undefined) {
+      for (const field of alsoReferenced) userFields.add(field);
+      entityRefs.delete(identityDef.name);
+    }
+  }
+
   if (userFields.size > 0) {
     const shape: EntityField[] = [];
     for (const field of [...userFields].sort()) {

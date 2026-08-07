@@ -127,11 +127,16 @@ describe('deriveExpectations', () => {
         ]);
     });
 
-    it('derives an existence-only entity expectation from an opaque relation field', () => {
+    it('folds a relation ref targeting the [identity] entity into the identity expectation — never a duplicate declaration', () => {
+        // ProductOrbital reads `@user.role` (identity) AND its `owner` field is
+        // a relation to Customer, the [identity] entity. One name gets ONE
+        // declaration: the relation ref merges into `expects identity Customer`
+        // (duplicates are ELOLO_DUPLICATE_EXPECTATION downstream, and the named
+        // identity declaration carries relation-target resolution — §5.1).
         const { expectations } = deriveExpectations(buildSchema(), 'ProductOrbital');
-        const customer = expectations.find((e) => e.kind === 'entity' && e.name === 'Customer');
-        expect(customer).toBeDefined();
-        expect(customer?.kind === 'entity' && 'shape' in customer && customer.shape !== undefined).toBe(false);
+        expect(expectations.some((e) => e.kind === 'entity' && e.name === 'Customer')).toBe(false);
+        const identity = expectations.find((e) => e.kind === 'identity');
+        expect(identity?.kind === 'identity' && identity.name).toBe('Customer');
     });
 
     it('copies persist payload + fetch include field types from the provider, and reads @user in guards', () => {
@@ -166,7 +171,9 @@ describe('deriveExpectations', () => {
     it('OrderRecordOrbital reads @user.role in a policy but holds no sibling usage besides its relation', () => {
         const { expectations } = deriveExpectations(buildSchema(), 'OrderRecordOrbital');
         const kinds = expectations.map((e) => (e.kind === 'entity' ? `entity:${e.name}` : 'identity'));
-        expect(kinds).toEqual(['identity', 'entity:Customer']);
+        // The `customer` relation targets the [identity] entity, so it merges
+        // into the identity expectation rather than a second declaration.
+        expect(kinds).toEqual(['identity']);
     });
 
     it('reports a diagnostic and omits the shape entry when the provider does not declare the field', () => {

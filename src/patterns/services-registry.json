@@ -138,6 +138,27 @@
             "summary": "string",
             "keyPoints": "string[]"
           }
+        },
+        {
+          "name": "embed",
+          "description": "Generate embeddings for an array of texts.",
+          "params": [
+            {
+              "name": "texts",
+              "type": "string[]",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "embeddings": "number[][]"
+          }
         }
       ],
       "credentials": [

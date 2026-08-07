@@ -345,6 +345,12 @@ export interface MakeOrbitalWithUsesOpts {
    * compute it. Omitted from the result when not provided.
    */
   expects?: ExpectDeclaration[];
+  /**
+   * Auxiliary entities (name-resolution side channel for un-rebound atom
+   * imports — see {@link OrbitalDefinition.auxiliaryEntities}). Threaded
+   * verbatim; omitted from the result when not provided.
+   */
+  auxiliaryEntities?: EntityRef[];
   /** Trait references. */
   traits: TraitRef[];
   /** Optional page references (omitted entirely when not provided). */
@@ -365,6 +371,7 @@ export function makeOrbitalWithUses(opts: MakeOrbitalWithUsesOpts): OrbitalDefin
     uses: opts.uses,
     ...(opts.expects !== undefined ? { expects: opts.expects } : {}),
     entity: opts.entity,
+    ...(opts.auxiliaryEntities !== undefined ? { auxiliaryEntities: opts.auxiliaryEntities } : {}),
     traits: opts.traits,
     pages: opts.pages ?? [],
   };

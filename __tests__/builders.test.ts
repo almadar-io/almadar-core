@@ -177,6 +177,30 @@ describe('makeOrbitalWithUses', () => {
         ]);
     });
 
+    it('threads auxiliaryEntities verbatim and omits the key when absent', () => {
+        const aux: Entity = {
+            name: 'MultiPartyView',
+            persistence: 'runtime',
+            fields: [{ name: 'errorMessage', type: 'string' }],
+        };
+        const withAux = makeOrbitalWithUses({
+            name: 'MultiPartyTransactionOrbital',
+            uses: [{ from: 'std/behaviors/atoms/std-browse', as: 'Browse' }],
+            entity: BROWSE_ENTITY,
+            auxiliaryEntities: [aux],
+            traits: [{ ref: 'Browse.traits.BrowseItemBrowse' }],
+        });
+        expect(withAux.auxiliaryEntities).toEqual([aux]);
+
+        const withoutAux = makeOrbitalWithUses({
+            name: 'BrowseItemOrbital',
+            uses: [{ from: 'std/behaviors/atoms/std-browse', as: 'Browse' }],
+            entity: BROWSE_ENTITY,
+            traits: [{ ref: 'Browse.traits.BrowseItemBrowse' }],
+        });
+        expect('auxiliaryEntities' in withoutAux).toBe(false);
+    });
+
     it('supports entity references (call-form) as well as inline entities', () => {
         const result = makeOrbitalWithUses({
             name: 'CartItemOrbital',

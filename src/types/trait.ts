@@ -332,7 +332,10 @@ export const TraitCategorySchema = z.enum([
 /**
  * Field types for trait data entities
  */
-export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum' | 'email' | 'url' | 'phone' | 'uuid' | 'image';
+// `trait` / `slot` / `pattern` mirror Rust's `FieldType::{Trait, Slot, Pattern}`
+// (orbital-core schema/types.rs) — config-field-only types: a `@trait.X`
+// embed slot, a UI slot name, a pattern type name.
+export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum' | 'email' | 'url' | 'phone' | 'uuid' | 'image' | 'trait' | 'slot' | 'pattern';
 
 /**
  * Simplified field for trait data entities
@@ -367,6 +370,9 @@ export const TraitEntityFieldSchema: z.ZodType<TraitEntityField> = z.object({
         'phone',
         'uuid',
         'image',
+        'trait',
+        'slot',
+        'pattern',
     ]),
     required: z.boolean().optional(),
     default: TraitConfigValueSchema.optional(),
@@ -758,7 +764,7 @@ export type RequiredField = {
 
 export const RequiredFieldSchema = z.object({
     name: z.string().min(1),
-    type: z.enum(['string', 'number', 'boolean', 'date', 'array', 'object', 'timestamp', 'datetime', 'enum', 'email', 'url', 'phone', 'uuid', 'image']),
+    type: z.enum(['string', 'number', 'boolean', 'date', 'array', 'object', 'timestamp', 'datetime', 'enum', 'email', 'url', 'phone', 'uuid', 'image', 'trait', 'slot', 'pattern']),
     description: z.string().optional(),
 });
 

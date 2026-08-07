@@ -168,6 +168,23 @@ export function eventKeyPropsOf(patternType: string): ReadonlySet<string> {
 }
 
 /**
+ * A VALUE-INPUT pattern renders its interactive affordance from `value` alone —
+ * a slider thumb, a text box, a select — no label prop required for it to be
+ * visible. The wiring lint's way-on scan needs the distinction: a labelless
+ * button renders nothing (the dead affordance being hunted), while a labelless
+ * slider still renders a draggable control.
+ *
+ * @param patternType - Pattern type to inspect
+ * @returns true when the registry declares both a `value` prop and at least
+ *   one event-outlet prop
+ */
+export function isValueInputPattern(patternType: string): boolean {
+  const propsSchema = getPatternDefinition(patternType)?.propsSchema;
+  if (!propsSchema || !('value' in propsSchema)) return false;
+  return eventKeyPropsOf(patternType).size > 0;
+}
+
+/**
  * Prop names of `patternType` carrying `kind: "event-list"` action-descriptor
  * arrays, each mapped to the field inside an item that holds the event key
  * (`eventField`, defaulting to `"event"` per {@link PatternPropDef.eventField}).

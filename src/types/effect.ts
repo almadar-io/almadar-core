@@ -9,7 +9,7 @@
 
 import { z } from 'zod';
 import { type SExpr, type Expression, type EventPayload, SExprDataSchema } from './expression.js';
-import type { RuntimeValue } from './json.js';
+import type { RuntimeValue, JsonValue } from './json.js';
 import { type ServiceParams } from './service.js';
 import { type EntityRow } from './entity.js';
 
@@ -127,15 +127,39 @@ export type CallServiceConfig = {
 export type RenderBinding = `@${string}`;
 
 /**
+ * A binding reference resolving to a {@link UISlot} at inline time — a trait
+ * `config` knob holding the slot name, e.g. `"@config.reviewSlot"`. Mirrors
+ * {@link RenderBinding} for the SLOT position: the compiler's inline phase
+ * substitutes the config value before anything renders, and the Rust
+ * validator accepts the pre-substitution form (worked example:
+ * `std-approval-gate`'s review queue renders into `@config.reviewSlot`).
+ * This variant lets the TS effect type express the template-layer form.
+ */
+export type SlotBinding = `@config.${string}`;
+
+/**
+ * Template-layer pattern node: a render tree whose discriminant and/or props
+ * are still bindings (`type: '@config.viewPattern'`, `title: '@config.title'`)
+ * or loose nested descriptors the compiler's inline phase resolves. The
+ * resolved layer is {@link AnyPatternConfig}; this variant lets generated
+ * behavior descriptors (std-ts) carry the pre-substitution form the Rust
+ * validator accepts (worked example: `std-graphs` renders
+ * `{ type: '@config.viewPattern', chartType: '@config.chartType', … }`).
+ */
+export type TemplatePatternConfig = { type: PatternType | RenderBinding } & Record<string, JsonValue>;
+
+/**
  * Render UI effect - displays a pattern in a UI slot.
  * @example ['render-ui', 'main', { patternType: 'entity-table', columns: ['name'] }]
  * @example ['render-ui', 'main', '@config.bodyContent']  // a {@link RenderBinding} target
+ * @example ['render-ui', '@config.reviewSlot', { patternType: 'entity-table' }]  // a {@link SlotBinding} slot
  */
 export type RenderUIEffect =
-    | ['render-ui', UISlot, AnyPatternConfig]
-    | ['render-ui', UISlot, AnyPatternConfig, ResolvedPatternProps]
-    | ['render-ui', UISlot, RenderBinding]
-    | ['render-ui', UISlot, null];
+    | ['render-ui', UISlot | SlotBinding, AnyPatternConfig]
+    | ['render-ui', UISlot | SlotBinding, AnyPatternConfig, ResolvedPatternProps]
+    | ['render-ui', UISlot | SlotBinding, TemplatePatternConfig]
+    | ['render-ui', UISlot | SlotBinding, RenderBinding]
+    | ['render-ui', UISlot | SlotBinding, null];
 
 /**
  * Lambda expression for per-item rendering in data-grid/data-list.
@@ -336,10 +360,12 @@ export type FetchOptions = {
     id?: string;
     /** Filter expression (S-expression) */
     filter?: SExpr;
-    /** Maximum number of entities to return */
-    limit?: number;
-    /** Number of entities to skip */
-    offset?: number;
+    /** Maximum number of entities to return. The template layer may carry a
+     *  binding (`'@config.pageSize'`) or a computed S-expression — the
+     *  compiler's inline phase resolves it to a number. */
+    limit?: number | RenderBinding | SExpr[];
+    /** Number of entities to skip — same template-layer forms as `limit`. */
+    offset?: number | RenderBinding | SExpr[];
     /** Relations to populate (entity field names) */
     include?: string[];
     /** Lifecycle events to emit on resolve / reject */

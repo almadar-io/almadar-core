@@ -376,6 +376,27 @@
             "summary": "string",
             "keyPoints": "array"
           }
+        },
+        {
+          "name": "embed",
+          "description": "Generate embeddings for an array of texts",
+          "params": [
+            {
+              "name": "texts",
+              "type": "string[]",
+              "required": true,
+              "description": "Texts to embed"
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": "Embedding model ID"
+            }
+          ],
+          "responseShape": {
+            "embeddings": "array"
+          }
         }
       ]
     },

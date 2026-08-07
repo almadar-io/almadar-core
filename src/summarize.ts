@@ -77,7 +77,7 @@ export function classifyWorkflow(states: State[]): 'crud' | 'wizard' | 'custom' 
  * @internal
  */
 function isPrimaryKey(field: EntityField): boolean {
-  return (field as EntityField & { primaryKey?: boolean }).primaryKey === true;
+  return field.primaryKey === true;
 }
 
 /**
