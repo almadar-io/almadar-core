@@ -31,6 +31,7 @@ import type {
   TraitEventListener,
   TraitReference,
   TraitTick,
+  TraitId,
 } from '../types/index.js';
 import { isCallSiteConfigDeclaration, persistenceModeAllowsOverrides, ledgerRename } from '../types/index.js';
 import type {
@@ -462,18 +463,92 @@ export function mergeCallSiteConfigOverrides(
 }
 
 /**
- * Apply `traitOverrides.<T>.name` renames to trait DECLARATIONS only,
- * AFTER the schema has been stamped (V4-W4 stamp-before-rename).
+ * Read-only structural view over the JSON lattice the reference-rewrite
+ * walker traverses — same trick as `derive-expectations.ts` (`SExpr` and
+ * `TraitConfigValue` both assign to it). Exported alongside
+ * `rewriteTraitRefsInTree` for the rabit composer's dedupe backstop.
+ */
+export type WalkableData =
+  | string
+  | number
+  | boolean
+  | null
+  | ReadonlyArray<WalkableData>
+  | { readonly [key: string]: WalkableData };
+
+/**
+ * Boundary-checked `@trait.<from>` → `@trait.<to>` rewrite of one string
+ * (next char `.`/`[`/end), mirroring the compiler's
+ * `rewrite_trait_embed_in_sexpr`.
+ */
+function rewriteTraitRefToken(value: string, renames: ReadonlyMap<string, string>): string {
+  const prefix = '@trait.';
+  if (!value.startsWith(prefix)) return value;
+  const rest = value.slice(prefix.length);
+  const splitAt = rest.search(/[.[]/);
+  const name = splitAt === -1 ? rest : rest.slice(0, splitAt);
+  const to = renames.get(name);
+  if (to === undefined) return value;
+  return `${prefix}${to}${splitAt === -1 ? '' : rest.slice(splitAt)}`;
+}
+
+/**
+ * Deep `@trait.<from>` → `@trait.<to>` token rewrite over a JSON tree —
+ * config values at any depth, state-machine trees, listen/tick arms. The
+ * rename pass (`applyDeclarationTraitRenames`) and the rabit composer's
+ * inline-trait dedupe backstop share this one walker so both cover exactly
+ * the positions the compiled path's `rewrite_trait_embed_in_sexpr` does.
+ */
+export function rewriteTraitRefsInTree(node: WalkableData, renames: ReadonlyMap<string, string>): WalkableData {
+  if (typeof node === 'string') return rewriteTraitRefToken(node, renames);
+  if (Array.isArray(node)) return node.map((item) => rewriteTraitRefsInTree(item, renames));
+  if (node !== null && typeof node === 'object') {
+    const out: { [key: string]: WalkableData } = {};
+    for (const [key, value] of Object.entries(node)) out[key] = rewriteTraitRefsInTree(value, renames);
+    return out;
+  }
+  return node;
+}
+
+/**
+ * Re-key a `traitEmbedIds` side-map for the renamed tokens: the map is keyed
+ * by the token NAME as it appears in the body, so after the body tokens move
+ * to the new name the side-map key must follow (id value unchanged — the
+ * compiled path's `identity_normalize` then sees token == current name and
+ * no-ops, and the runtime's id-primary lookup keeps resolving).
+ */
+function rekeyTraitEmbedIds(
+  embedIds: Record<string, TraitId>,
+  renames: ReadonlyMap<string, string>,
+): Record<string, TraitId> {
+  let out: Record<string, TraitId> | undefined;
+  for (const [token, id] of Object.entries(embedIds)) {
+    const to = renames.get(token);
+    if (to === undefined) continue;
+    out = out ?? { ...embedIds };
+    delete out[token];
+    out[to] = id;
+  }
+  return out ?? embedIds;
+}
+
+/**
+ * Apply `traitOverrides.<T>.name` renames to trait DECLARATIONS, AFTER the
+ * schema has been stamped (V4-W4 stamp-before-rename).
  *
- * A trait rename is a pure display-name change: it renames the declaration
- * (`traits[].name` for inline traits, the ref object's local `name` for
- * reference traits) and nothing else. Every REFERENCE to the trait —
- * `pages[].traits[].ref`, `@trait.<canonical>` tokens in sibling config /
- * stateMachine effect trees — is left carrying its canonical name AND its
- * stamped id (page ref `refId`, the referring trait's `traitEmbedIds`
- * side-map). Readers resolve those references by stable id onto the renamed
- * declaration, so no token/page-ref rewrite is needed (this replaced the
- * deleted `applyTraitRenames`).
+ * The rename moves the declaration (`traits[].name` for inline traits, the
+ * ref object's local `name` for reference traits), the ledger `curName` of
+ * each renamed declaration id, AND every name-based reference to the old
+ * name: `@trait.<old>` tokens in config values and state-machine/tick effect
+ * trees, the `traitEmbedIds` side-map keys that index those tokens, and page
+ * trait refs (`pages[].traits[].ref`). The dual-carry ids (`refId`,
+ * `traitEmbedIds` values) are untouched, so the compiled path's
+ * `identity_normalize` pass observes tokens already equal to the id-resolved
+ * current name and no-ops, while the JS runtime — which resolves `@trait.X`
+ * config knobs (e.g. `DashboardLayout.config.tile2Trait`) and page refs BY
+ * NAME — never sees a dangling reference (FIX-H, dashboard-edit-title-string
+ * 2026-08-06: the declaration-only rename left `@trait.DefaultRevenueChart`
+ * in a sibling's config and the page ref while validate stayed green).
  *
  * The keys are canonical names because stamping ran while the declaration
  * still carried its canonical name (the factory no longer renames — see
@@ -500,18 +575,51 @@ export function applyDeclarationTraitRenames(
   const renamedTraitIds: Array<{ id: string; to: string }> = [];
   const renameDeclaration = (t: TraitElem): TraitElem => {
     if (typeof t !== 'object' || t === null) return t;
+    let next = t;
     const named = t as { name?: string };
-    if (typeof named.name !== 'string') return t;
-    const renamed = renames.get(named.name);
-    if (renamed === undefined) return t;
-    const id = (t as { id?: string }).id;
-    if (typeof id === 'string') renamedTraitIds.push({ id, to: renamed });
-    return { ...t, name: renamed };
+    if (typeof named.name === 'string') {
+      const renamed = renames.get(named.name);
+      if (renamed !== undefined) {
+        const id = (t as { id?: string }).id;
+        if (typeof id === 'string') renamedTraitIds.push({ id, to: renamed });
+        next = { ...next, name: renamed };
+      }
+    }
+    const walked = rewriteTraitRefsInTree(next as WalkableData, renames) as TraitElem;
+    // `walked` is the walker's fresh copy — re-keying its side-map mutates no input.
+    const embedIds = (walked as { traitEmbedIds?: Record<string, TraitId> }).traitEmbedIds;
+    if (embedIds !== undefined) {
+      const rekeyed = rekeyTraitEmbedIds(embedIds, renames);
+      if (rekeyed !== embedIds) {
+        (walked as { traitEmbedIds?: Record<string, TraitId> }).traitEmbedIds = rekeyed;
+      }
+    }
+    return walked;
+  };
+  const renamePageTraitRefs = (p: PageInput): PageInput => {
+    if (typeof p !== 'object' || p === null) return p;
+    // Deep walk first: page-trait `config` values can carry `@trait.<old>` too
+    // (the compiler's config-ref normalization covers page-ref config).
+    const walked = rewriteTraitRefsInTree(p as WalkableData, renames) as Exclude<PageInput, string>;
+    const traits = (walked as { traits?: ReadonlyArray<PageTraitRef | string> }).traits;
+    if (!Array.isArray(traits)) return walked;
+    return {
+      ...walked,
+      traits: traits.map((t) => {
+        if (typeof t === 'string') return renames.get(t) ?? t;
+        const to = renames.get(t.ref);
+        return to === undefined ? t : { ...t, ref: to };
+      }),
+    } as PageInput;
   };
 
   const orbitals = schema.orbitals.map((orbital) => {
     if (!('traits' in orbital) || !Array.isArray(orbital.traits)) return orbital;
-    return { ...orbital, traits: orbital.traits.map(renameDeclaration) };
+    return {
+      ...orbital,
+      traits: orbital.traits.map(renameDeclaration),
+      ...(orbital.pages !== undefined ? { pages: orbital.pages.map(renamePageTraitRefs) } : {}),
+    };
   });
 
   // Update the ledger `curName` for each renamed trait declaration id so the
@@ -640,6 +748,43 @@ export function healEntityLedgerRows(schema: OrbitalSchema, at: string): Orbital
     const entry = ledger.entries[id];
     if (entry === undefined || entry.kind !== 'entity' || entry.curName === name) continue;
     ledger = ledgerRename(ledger, id, name, at);
+  }
+  return ledger !== schema.ledger ? { ...schema, ledger } : schema;
+}
+
+/**
+ * Trait-declaration sibling of `healEntityLedgerRows`. A re-instantiate with
+ * NO trait renames in its params (a corrective rebuild, or the plan-repair
+ * reset-to-factory-defaults verb) adopts the prior `.orb`'s ledger — including
+ * trait rename rows an earlier build recorded — while the factory re-emits
+ * every trait declaration at its baked/requested name, so the stale `curName`
+ * would manufacture an `ORB_ID_NAME_MISMATCH` (the entity twin of this is the
+ * battery 2026-08-06 `healEntityLedgerRows` case). Same soundness argument:
+ * on this path the factory re-emission is the build's truth and the adopted
+ * row carries identity (the id) forward. Reference-form declarations resolve
+ * their current name as `name ?? <ref last segment>` (mirrors the compiler's
+ * `collect_trait_id_names`). No-op when they agree.
+ */
+export function healTraitLedgerRows(schema: OrbitalSchema, at: string): OrbitalSchema {
+  let ledger = schema.ledger;
+  if (ledger === undefined) return schema;
+  for (const orbital of schema.orbitals) {
+    for (const trait of orbital.traits ?? []) {
+      if (typeof trait !== 'object' || trait === null) continue;
+      const id = (trait as { id?: string }).id;
+      if (typeof id !== 'string') continue;
+      const declared = (trait as { name?: string; ref?: string });
+      const name =
+        typeof declared.name === 'string'
+          ? declared.name
+          : typeof declared.ref === 'string'
+            ? declared.ref.slice(declared.ref.lastIndexOf('.') + 1)
+            : undefined;
+      if (name === undefined) continue;
+      const entry = ledger.entries[id];
+      if (entry === undefined || entry.kind !== 'trait' || entry.curName === name) continue;
+      ledger = ledgerRename(ledger, id, name, at);
+    }
   }
   return ledger !== schema.ledger ? { ...schema, ledger } : schema;
 }

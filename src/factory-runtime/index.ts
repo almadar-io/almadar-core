@@ -18,12 +18,14 @@ export {
   applyDeclarationTraitRenames,
   applyDeclarationEntityRename,
   healEntityLedgerRows,
+  healTraitLedgerRows,
   rebindInlineTraitEntity,
   rewriteEntityInInlineTrait,
+  rewriteTraitRefsInTree,
   mergeCallSiteConfigOverrides,
   validateOrbitalFactoryParams,
 } from './apply-params-to-orb.js';
-export type { EntityDeclarationRename } from './apply-params-to-orb.js';
+export type { EntityDeclarationRename, WalkableData } from './apply-params-to-orb.js';
 export { applyParamsToWholeOrb } from './apply-params-to-whole-orb.js';
 export type {
   OrbitalFactoryParams,
