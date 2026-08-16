@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-05-20T19:26:16.363Z",
+  "exportedAt": "2026-08-16T04:55:02.135Z",
   "services": {
     "llm": {
       "name": "llm",
@@ -138,27 +138,6 @@
             "summary": "string",
             "keyPoints": "string[]"
           }
-        },
-        {
-          "name": "embed",
-          "description": "Generate embeddings for an array of texts.",
-          "params": [
-            {
-              "name": "texts",
-              "type": "string[]",
-              "required": true,
-              "description": ""
-            },
-            {
-              "name": "model",
-              "type": "string",
-              "required": false,
-              "description": ""
-            }
-          ],
-          "responseShape": {
-            "embeddings": "number[][]"
-          }
         }
       ],
       "credentials": [
@@ -171,6 +150,49 @@
           "envVar": "OPENAI_API_KEY",
           "required": false,
           "description": "OpenAI API key (use this OR ANTHROPIC_API_KEY)"
+        }
+      ]
+    },
+    "ml": {
+      "name": "ml",
+      "description": "ML service — model inference on a trained or off-the-shelf model",
+      "category": "ai",
+      "package": "@almadar/llm",
+      "actions": [
+        {
+          "name": "infer",
+          "description": "Run inference against a deployed model checkpoint.",
+          "params": [
+            {
+              "name": "model",
+              "type": "string",
+              "required": true,
+              "description": "`hf:<id>` for off-the-shelf weights, or a masar checkpoint id."
+            },
+            {
+              "name": "input",
+              "type": "ServiceParamsValue",
+              "required": true,
+              "description": "JSON-safe model input (tensor-shaped payload from `contract/entity-to-tensor`)."
+            }
+          ],
+          "responseShape": {
+            "output": "ServiceParamsValue",
+            "confidence": "number",
+            "violations": "ServiceParamsValue[]"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "MASAR_URL",
+          "required": true,
+          "description": "Base URL of the deployed model-serving orbital"
+        },
+        {
+          "envVar": "MASAR_ML_TRAIT",
+          "required": true,
+          "description": "Kebab-case trait name the serving orbital exposes its /events route under"
         }
       ]
     },
@@ -410,240 +432,6 @@
       ],
       "credentials": []
     },
-    "session": {
-      "name": "session",
-      "description": "Session management — create, get, list, clear agent sessions",
-      "category": "ai",
-      "package": "@almadar/agent",
-      "actions": [
-        {
-          "name": "create",
-          "description": "",
-          "params": [
-            {
-              "name": "threadId",
-              "type": "string",
-              "required": true,
-              "description": ""
-            },
-            {
-              "name": "userId",
-              "type": "string",
-              "required": false,
-              "description": ""
-            }
-          ],
-          "responseShape": {
-            "threadId": "string",
-            "created": "boolean"
-          }
-        },
-        {
-          "name": "get",
-          "description": "",
-          "params": [
-            {
-              "name": "threadId",
-              "type": "string",
-              "required": true,
-              "description": ""
-            }
-          ],
-          "responseShape": {
-            "session": "EventPayload | null"
-          }
-        },
-        {
-          "name": "list",
-          "description": "",
-          "params": [
-            {
-              "name": "userId",
-              "type": "string",
-              "required": false,
-              "description": ""
-            }
-          ],
-          "responseShape": {
-            "sessions": "array"
-          }
-        },
-        {
-          "name": "clear",
-          "description": "",
-          "params": [
-            {
-              "name": "threadId",
-              "type": "string",
-              "required": true,
-              "description": ""
-            }
-          ],
-          "responseShape": {
-            "cleared": "boolean"
-          }
-        }
-      ],
-      "credentials": []
-    },
-    "memory": {
-      "name": "memory",
-      "description": "Memory service — user preferences and generation history",
-      "category": "ai",
-      "package": "@almadar/agent",
-      "actions": [
-        {
-          "name": "getUserPreferences",
-          "description": "",
-          "params": [
-            {
-              "name": "userId",
-              "type": "string",
-              "required": true,
-              "description": ""
-            }
-          ],
-          "responseShape": {
-            "preferences": "EventPayload | null"
-          }
-        },
-        {
-          "name": "updateUserPreferences",
-          "description": "",
-          "params": [
-            {
-              "name": "userId",
-              "type": "string",
-              "required": true,
-              "description": ""
-            },
-            {
-              "name": "preferences",
-              "type": "ServiceParams",
-              "required": true,
-              "description": ""
-            }
-          ],
-          "responseShape": {
-            "updated": "boolean"
-          }
-        },
-        {
-          "name": "recordGeneration",
-          "description": "",
-          "params": [
-            {
-              "name": "userId",
-              "type": "string",
-              "required": true,
-              "description": ""
-            },
-            {
-              "name": "prompt",
-              "type": "string",
-              "required": true,
-              "description": ""
-            },
-            {
-              "name": "result",
-              "type": "string",
-              "required": true,
-              "description": ""
-            },
-            {
-              "name": "skill",
-              "type": "string",
-              "required": false,
-              "description": ""
-            }
-          ],
-          "responseShape": {
-            "sessionId": "string"
-          }
-        },
-        {
-          "name": "getGenerationHistory",
-          "description": "",
-          "params": [
-            {
-              "name": "userId",
-              "type": "string",
-              "required": true,
-              "description": ""
-            },
-            {
-              "name": "limit",
-              "type": "number",
-              "required": false,
-              "description": ""
-            }
-          ],
-          "responseShape": {
-            "sessions": "array"
-          }
-        }
-      ],
-      "credentials": []
-    },
-    "agent": {
-      "name": "agent",
-      "description": "Agent service — send messages and manage generation",
-      "category": "ai",
-      "package": "@almadar/agent",
-      "actions": [
-        {
-          "name": "sendMessage",
-          "description": "",
-          "params": [
-            {
-              "name": "message",
-              "type": "string",
-              "required": true,
-              "description": ""
-            },
-            {
-              "name": "threadId",
-              "type": "string",
-              "required": false,
-              "description": ""
-            },
-            {
-              "name": "skill",
-              "type": "string",
-              "required": false,
-              "description": ""
-            },
-            {
-              "name": "context",
-              "type": "ServiceParams",
-              "required": false,
-              "description": ""
-            }
-          ],
-          "responseShape": {
-            "response": "string",
-            "threadId": "string",
-            "toolCalls": "readonly EventPayloadValue[]"
-          }
-        },
-        {
-          "name": "cancelGeneration",
-          "description": "",
-          "params": [
-            {
-              "name": "threadId",
-              "type": "string",
-              "required": true,
-              "description": ""
-            }
-          ],
-          "responseShape": {
-            "cancelled": "boolean"
-          }
-        }
-      ],
-      "credentials": []
-    },
     "migration": {
       "name": "migration",
       "description": "Migration service — import external data (notes, docs, references) into the system",
@@ -656,9 +444,21 @@
           "params": [
             {
               "name": "source",
-              "type": "ServiceParams",
+              "type": "object",
               "required": true,
               "description": "ImportSource descriptor (kind + source-specific config)"
+            },
+            {
+              "name": "connectionRef",
+              "type": "string",
+              "required": false,
+              "description": "Host-side credential reference (a name, never the secret)"
+            },
+            {
+              "name": "files",
+              "type": "string[]",
+              "required": false,
+              "description": "Optional explicit file list to restrict the listing"
             }
           ],
           "responseShape": {
@@ -671,7 +471,7 @@
           "params": [
             {
               "name": "source",
-              "type": "ServiceParams",
+              "type": "object",
               "required": true,
               "description": "ImportSource descriptor (kind + source-specific config)"
             },
@@ -680,6 +480,12 @@
               "type": "string",
               "required": true,
               "description": ""
+            },
+            {
+              "name": "connectionRef",
+              "type": "string",
+              "required": false,
+              "description": "Host-side credential reference (a name, never the secret)"
             }
           ],
           "responseShape": {
@@ -701,6 +507,12 @@
               "type": "array",
               "required": true,
               "description": "ImportUnit[] staged for commit"
+            },
+            {
+              "name": "connectionRef",
+              "type": "string",
+              "required": false,
+              "description": "Host-side credential reference (a name, never the secret)"
             }
           ],
           "responseShape": {
@@ -1334,6 +1146,27 @@
             "summary": "string",
             "keyPoints": "string[]"
           }
+        },
+        {
+          "name": "embed",
+          "description": "",
+          "params": [
+            {
+              "name": "texts",
+              "type": "string[]",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "embeddings": "number[][]"
+          }
         }
       ],
       "credentials": [
@@ -1549,6 +1382,61 @@
           "envVar": "FROM_EMAIL",
           "required": false,
           "description": "Default sender email address"
+        }
+      ]
+    },
+    "webhook": {
+      "name": "webhook",
+      "description": "Outbound webhook — signed HTTP POST notifications to external endpoints",
+      "category": "messaging",
+      "package": "@almadar/integrations",
+      "actions": [
+        {
+          "name": "send",
+          "description": "",
+          "params": [
+            {
+              "name": "url",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "event",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "payload",
+              "type": "object",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "secret",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "status": "number",
+            "ok": "boolean",
+            "durationMs": "number"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "WEBHOOK_SIGNING_SECRET",
+          "required": false,
+          "description": "Default HMAC-SHA256 signing secret (per-call secret overrides)"
+        },
+        {
+          "envVar": "WEBHOOK_TIMEOUT_MS",
+          "required": false,
+          "description": "Per-request timeout (ms, default 10000)"
         }
       ]
     },

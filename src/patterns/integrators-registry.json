@@ -902,6 +902,48 @@
           }
         }
       ]
+    },
+    "webhook": {
+      "name": "webhook",
+      "description": "Outbound webhook - signed HTTP POST notifications to external endpoints",
+      "category": "messaging",
+      "actions": [
+        {
+          "name": "send",
+          "description": "POST a JSON event envelope to an external URL, HMAC-SHA256 signed when a secret is configured",
+          "params": [
+            {
+              "name": "url",
+              "type": "string",
+              "required": true,
+              "description": "Target endpoint URL"
+            },
+            {
+              "name": "event",
+              "type": "string",
+              "required": true,
+              "description": "Event name carried in the envelope and X-Almadar-Event header"
+            },
+            {
+              "name": "payload",
+              "type": "object",
+              "required": false,
+              "description": "Event payload fields (string map)"
+            },
+            {
+              "name": "secret",
+              "type": "string",
+              "required": false,
+              "description": "Per-call HMAC signing secret (overrides WEBHOOK_SIGNING_SECRET)"
+            }
+          ],
+          "responseShape": {
+            "status": "number",
+            "ok": "boolean",
+            "durationMs": "number"
+          }
+        }
+      ]
     }
   },
   "categories": [

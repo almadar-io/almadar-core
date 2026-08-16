@@ -11,7 +11,7 @@ import { z } from 'zod';
 import { type SExpr, type Expression, type EventPayload, SExprDataSchema } from './expression.js';
 import type { RuntimeValue, JsonValue } from './json.js';
 import { type ServiceParams } from './service.js';
-import { type EntityRow } from './entity.js';
+import { type EntityRow, type FieldValue } from './entity.js';
 
 // ============================================================================
 // UI Slots
@@ -189,7 +189,7 @@ export type RenderChildrenMap = ['array/map', SExpr, RenderItemLambda];
  */
 export type NavigateEffect =
     | ['navigate', string | SExpr]
-    | ['navigate', string | SExpr, Record<string, string>];
+    | ['navigate', string | SExpr, Record<string, string | SExpr>];
 
 /**
  * Emit effect - emits an event, optionally with payload.
@@ -273,7 +273,9 @@ export type PersistEmitConfig = {
  * runtime, binding strings and expressions resolve to `EntityRow` values
  * before the persist op runs — both paths evaluate the expression first.
  */
-export type PersistData = EntityRow | string | SExpr[];
+export type PersistRowInput = { id?: string | SExpr } & Record<string, FieldValue | SExpr | undefined>;
+
+export type PersistData = EntityRow | PersistRowInput | string | SExpr[];
 
 /**
  * Persist effect - creates, updates, deletes, or clears entities.
@@ -342,8 +344,8 @@ export type DoEffect = ['do', ...SExpr[]];
 
 /**
  * Notify effect - sends a notification.
- * @example ['notify', 'in_app', 'Task created successfully']
- * @example ['notify', 'in_app', ['str/concat', 'Item: ', '@entity.name']]
+ * @example ['notify', 'in-app', 'Task created successfully']
+ * @example ['notify', 'in-app', ['str/concat', 'Item: ', '@entity.name']]
  */
 export type NotifyEffect =
     | ['notify', string, string | SExpr]
@@ -962,19 +964,19 @@ export function doEffects(...effects: SExpr[]): DoEffect {
 
 /**
  * Create a notify effect
- * @example ["notify", "in_app", "Task created successfully"]
+ * @example ["notify", "in-app", "Task created successfully"]
  */
 export function notify(
-    channel: 'email' | 'push' | 'sms' | 'in_app',
+    channel: 'email' | 'push' | 'sms' | 'in-app',
     message: string
 ): NotifyEffect;
 export function notify(
-    channel: 'email' | 'push' | 'sms' | 'in_app',
+    channel: 'email' | 'push' | 'sms' | 'in-app',
     message: string,
     recipient: string
 ): NotifyEffect;
 export function notify(
-    channel: 'email' | 'push' | 'sms' | 'in_app',
+    channel: 'email' | 'push' | 'sms' | 'in-app',
     message: string,
     recipient?: string
 ): NotifyEffect {
