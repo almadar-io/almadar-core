@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-08-16T04:34:48.224Z",
+  "exportedAt": "2026-08-17T13:06:21.152Z",
   "patterns": {
     "entity-table": {
       "type": "entity-table",
@@ -105,7 +105,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -580,7 +585,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -967,7 +977,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -1316,7 +1331,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -2076,7 +2096,18 @@
                 "types": [
                   "object"
                 ],
-                "freeform": true
+                "properties": {
+                  "enum": {
+                    "types": [
+                      "array"
+                    ],
+                    "items": {
+                      "types": [
+                        "string"
+                      ]
+                    }
+                  }
+                }
               },
               "readonly": {
                 "types": [
@@ -2559,7 +2590,18 @@
                       "types": [
                         "object"
                       ],
-                      "freeform": true
+                      "properties": {
+                        "enum": {
+                          "types": [
+                            "array"
+                          ],
+                          "items": {
+                            "types": [
+                              "string"
+                            ]
+                          }
+                        }
+                      }
                     },
                     "readonly": {
                       "types": [
@@ -2863,7 +2905,18 @@
                 "types": [
                   "object"
                 ],
-                "freeform": true
+                "properties": {
+                  "enum": {
+                    "types": [
+                      "array"
+                    ],
+                    "items": {
+                      "types": [
+                        "string"
+                      ]
+                    }
+                  }
+                }
               },
               "readonly": {
                 "types": [
@@ -3346,7 +3399,18 @@
                       "types": [
                         "object"
                       ],
-                      "freeform": true
+                      "properties": {
+                        "enum": {
+                          "types": [
+                            "array"
+                          ],
+                          "items": {
+                            "types": [
+                              "string"
+                            ]
+                          }
+                        }
+                      }
                     },
                     "readonly": {
                       "types": [
@@ -6107,7 +6171,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -6605,7 +6674,12 @@
           "types": [
             "object"
           ],
-          "description": "Inline styles"
+          "description": "Inline styles",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "children": {
           "types": [
@@ -6688,7 +6762,12 @@
           "types": [
             "object"
           ],
-          "description": "Inline styles"
+          "description": "Inline styles",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "children": {
           "types": [
@@ -7449,7 +7528,12 @@
           "types": [
             "object"
           ],
-          "description": "Inline style"
+          "description": "Inline style",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         }
       }
     },
@@ -9525,7 +9609,12 @@
           "types": [
             "object"
           ],
-          "description": "Inline styles"
+          "description": "Inline styles",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "children": {
           "types": [
@@ -9880,7 +9969,12 @@
           "types": [
             "object"
           ],
-          "description": "Inline style"
+          "description": "Inline style",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "format": {
           "types": [
@@ -14124,7 +14218,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -16052,7 +16151,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -21587,7 +21691,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -21761,7 +21870,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -21942,7 +22056,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -22174,7 +22293,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -22363,7 +22487,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -22560,7 +22689,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -22716,7 +22850,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -22897,7 +23036,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -30370,7 +30514,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -31815,7 +31964,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -32553,7 +32707,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -34025,7 +34184,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -34527,7 +34691,34 @@
           "types": [
             "object"
           ],
-          "description": "User progress for restoring activation/reflection state"
+          "description": "User progress for restoring activation/reflection state",
+          "properties": {
+            "activationResponse": {
+              "types": [
+                "string"
+              ]
+            },
+            "reflectionNotes": {
+              "types": [
+                "array"
+              ],
+              "items": {
+                "types": [
+                  "string"
+                ]
+              }
+            },
+            "bloomAnswered": {
+              "types": [
+                "object"
+              ],
+              "mapValue": {
+                "types": [
+                  "boolean"
+                ]
+              }
+            }
+          }
         },
         "onRunCodeSimulation": {
           "types": [
@@ -34671,7 +34862,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -34826,7 +35022,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -35926,7 +36127,12 @@
           "types": [
             "object"
           ],
-          "description": "Inline styles"
+          "description": "Inline styles",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "children": {
           "types": [
@@ -36091,7 +36297,12 @@
           "types": [
             "object"
           ],
-          "description": "Inline styles"
+          "description": "Inline styles",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "children": {
           "types": [
@@ -36268,7 +36479,12 @@
           "types": [
             "object"
           ],
-          "description": "Active filters"
+          "description": "Active filters",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "selectedIds": {
           "types": [
@@ -36694,6 +36910,36 @@
           ],
           "description": "backgroundColor prop"
         },
+        "mode": {
+          "types": [
+            "string"
+          ],
+          "description": "Painter: 2D raster (default) or 3D mesh scene via the lazy three.js host.",
+          "enumValues": [
+            "2d",
+            "3d"
+          ],
+          "default": "2d"
+        },
+        "camera": {
+          "types": [
+            "object"
+          ],
+          "description": "3D only: neutral camera pose ({ mode, zoom, fov, azimuth, target }).",
+          "freeform": true
+        },
+        "lighting": {
+          "types": [
+            "object"
+          ],
+          "description": "3D only: scene light rig as data."
+        },
+        "post": {
+          "types": [
+            "object"
+          ],
+          "description": "3D only: post-processing stack (bloom/vignette)."
+        },
         "nodes": {
           "types": [
             "array"
@@ -36715,6 +36961,11 @@
                 ]
               },
               "y": {
+                "types": [
+                  "number"
+                ]
+              },
+              "z": {
                 "types": [
                   "number"
                 ]
@@ -36743,6 +36994,27 @@
                   "organelle",
                   "molecule",
                   "organism"
+                ]
+              },
+              "shape": {
+                "types": [
+                  "string"
+                ],
+                "enumValues": [
+                  "box",
+                  "sphere",
+                  "capsule",
+                  "cylinder",
+                  "cone",
+                  "torus",
+                  "plane",
+                  "circle",
+                  "polyhedron"
+                ]
+              },
+              "opacity": {
+                "types": [
+                  "number"
                 ]
               }
             },
@@ -36795,7 +37067,7 @@
           "types": [
             "array"
           ],
-          "description": "Extra declarative shapes in canvas pixel coordinates.",
+          "description": "Extra declarative shapes in canvas pixel coordinates (2D mode only — ignored in 3D).",
           "items": {
             "types": [
               "object"
@@ -36974,18 +37246,29 @@
           },
           "default": []
         },
+        "showGrid": {
+          "types": [
+            "boolean"
+          ],
+          "description": "3D only: show the ground grid (default off)."
+        },
+        "shadows": {
+          "types": [
+            "boolean"
+          ],
+          "description": "3D only: enable shadows. Omitted → the host default."
+        },
         "interactive": {
           "types": [
             "boolean"
           ],
-          "description": "interactive prop",
-          "default": false
+          "description": "2D: pointer interaction (click/hover). 3D: orbit camera controls."
         },
         "animate": {
           "types": [
             "boolean"
           ],
-          "description": "animate prop",
+          "description": "2D only: continuous redraw loop. 3D motion is entity-state driven.",
           "default": false
         },
         "onShapeClick": {
@@ -37110,6 +37393,36 @@
           ],
           "description": "backgroundColor prop"
         },
+        "mode": {
+          "types": [
+            "string"
+          ],
+          "description": "Painter: 2D raster (default) or 3D mesh scene via the lazy three.js host.",
+          "enumValues": [
+            "2d",
+            "3d"
+          ],
+          "default": "2d"
+        },
+        "camera": {
+          "types": [
+            "object"
+          ],
+          "description": "3D only: neutral camera pose ({ mode, zoom, fov, azimuth, target }).",
+          "freeform": true
+        },
+        "lighting": {
+          "types": [
+            "object"
+          ],
+          "description": "3D only: scene light rig as data."
+        },
+        "post": {
+          "types": [
+            "object"
+          ],
+          "description": "3D only: post-processing stack (bloom/vignette)."
+        },
         "atoms": {
           "types": [
             "array"
@@ -37131,6 +37444,11 @@
                 ]
               },
               "y": {
+                "types": [
+                  "number"
+                ]
+              },
+              "z": {
                 "types": [
                   "number"
                 ]
@@ -37253,7 +37571,7 @@
           "types": [
             "array"
           ],
-          "description": "Extra declarative shapes in canvas pixel coordinates.",
+          "description": "Extra declarative shapes in canvas pixel coordinates (2D mode only — ignored in 3D).",
           "items": {
             "types": [
               "object"
@@ -37432,18 +37750,29 @@
           },
           "default": []
         },
+        "showGrid": {
+          "types": [
+            "boolean"
+          ],
+          "description": "3D only: show the ground grid (default off)."
+        },
+        "shadows": {
+          "types": [
+            "boolean"
+          ],
+          "description": "3D only: enable shadows. Omitted → the host default."
+        },
         "interactive": {
           "types": [
             "boolean"
           ],
-          "description": "interactive prop",
-          "default": false
+          "description": "2D: pointer interaction (click/hover). 3D: orbit camera controls."
         },
         "animate": {
           "types": [
             "boolean"
           ],
-          "description": "animate prop",
+          "description": "2D only: continuous redraw loop. 3D motion is entity-state driven.",
           "default": false
         },
         "onShapeClick": {
@@ -38076,6 +38405,36 @@
           ],
           "description": "backgroundColor prop"
         },
+        "mode": {
+          "types": [
+            "string"
+          ],
+          "description": "Painter: 2D raster (default) or 3D mesh scene via the lazy three.js host.",
+          "enumValues": [
+            "2d",
+            "3d"
+          ],
+          "default": "2d"
+        },
+        "camera": {
+          "types": [
+            "object"
+          ],
+          "description": "3D only: neutral camera pose ({ mode, zoom, fov, azimuth, target }).",
+          "freeform": true
+        },
+        "lighting": {
+          "types": [
+            "object"
+          ],
+          "description": "3D only: scene light rig as data."
+        },
+        "post": {
+          "types": [
+            "object"
+          ],
+          "description": "3D only: post-processing stack (bloom/vignette)."
+        },
         "bodies": {
           "types": [
             "array"
@@ -38097,6 +38456,11 @@
                 ]
               },
               "y": {
+                "types": [
+                  "number"
+                ]
+              },
+              "z": {
                 "types": [
                   "number"
                 ]
@@ -38126,12 +38490,22 @@
                   "number"
                 ]
               },
+              "vz": {
+                "types": [
+                  "number"
+                ]
+              },
               "fx": {
                 "types": [
                   "number"
                 ]
               },
               "fy": {
+                "types": [
+                  "number"
+                ]
+              },
+              "fz": {
                 "types": [
                   "number"
                 ]
@@ -38209,7 +38583,7 @@
           "types": [
             "array"
           ],
-          "description": "Extra declarative shapes in canvas pixel coordinates.",
+          "description": "Extra declarative shapes in canvas pixel coordinates (2D mode only — ignored in 3D).",
           "items": {
             "types": [
               "object"
@@ -38388,18 +38762,29 @@
           },
           "default": []
         },
+        "showGrid": {
+          "types": [
+            "boolean"
+          ],
+          "description": "3D only: show the ground grid (default off)."
+        },
+        "shadows": {
+          "types": [
+            "boolean"
+          ],
+          "description": "3D only: enable shadows. Omitted → the host default."
+        },
         "interactive": {
           "types": [
             "boolean"
           ],
-          "description": "interactive prop",
-          "default": false
+          "description": "2D: pointer interaction (click/hover). 3D: orbit camera controls."
         },
         "animate": {
           "types": [
             "boolean"
           ],
-          "description": "animate prop",
+          "description": "2D only: continuous redraw loop. 3D motion is entity-state driven.",
           "default": false
         },
         "onShapeClick": {
@@ -39250,7 +39635,12 @@
           "types": [
             "object"
           ],
-          "description": "style prop"
+          "description": "style prop",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "aria-hidden": {
           "types": [
@@ -39326,7 +39716,12 @@
           "types": [
             "object"
           ],
-          "description": "style prop"
+          "description": "style prop",
+          "mapValue": {
+            "types": [
+              "string"
+            ]
+          }
         },
         "children": {
           "types": [
@@ -39461,6 +39856,22 @@
           "items": {
             "types": [
               "object"
+            ],
+            "properties": {
+              "x": {
+                "types": [
+                  "number"
+                ]
+              },
+              "y": {
+                "types": [
+                  "number"
+                ]
+              }
+            },
+            "required": [
+              "x",
+              "y"
             ]
           }
         },
@@ -39495,16 +39906,64 @@
             "from": {
               "types": [
                 "object"
+              ],
+              "properties": {
+                "x": {
+                  "types": [
+                    "number"
+                  ]
+                },
+                "y": {
+                  "types": [
+                    "number"
+                  ]
+                }
+              },
+              "required": [
+                "x",
+                "y"
               ]
             },
             "to": {
               "types": [
                 "object"
+              ],
+              "properties": {
+                "x": {
+                  "types": [
+                    "number"
+                  ]
+                },
+                "y": {
+                  "types": [
+                    "number"
+                  ]
+                }
+              },
+              "required": [
+                "x",
+                "y"
               ]
             },
             "center": {
               "types": [
                 "object"
+              ],
+              "properties": {
+                "x": {
+                  "types": [
+                    "number"
+                  ]
+                },
+                "y": {
+                  "types": [
+                    "number"
+                  ]
+                }
+              },
+              "required": [
+                "x",
+                "y"
               ]
             },
             "radius": {
@@ -39604,16 +40063,64 @@
             "from": {
               "types": [
                 "object"
+              ],
+              "properties": {
+                "x": {
+                  "types": [
+                    "number"
+                  ]
+                },
+                "y": {
+                  "types": [
+                    "number"
+                  ]
+                }
+              },
+              "required": [
+                "x",
+                "y"
               ]
             },
             "to": {
               "types": [
                 "object"
+              ],
+              "properties": {
+                "x": {
+                  "types": [
+                    "number"
+                  ]
+                },
+                "y": {
+                  "types": [
+                    "number"
+                  ]
+                }
+              },
+              "required": [
+                "x",
+                "y"
               ]
             },
             "center": {
               "types": [
                 "object"
+              ],
+              "properties": {
+                "x": {
+                  "types": [
+                    "number"
+                  ]
+                },
+                "y": {
+                  "types": [
+                    "number"
+                  ]
+                }
+              },
+              "required": [
+                "x",
+                "y"
               ]
             },
             "radius": {
@@ -39704,7 +40211,23 @@
           "types": [
             "object"
           ],
-          "description": "Rotation pivot in world units relative to the cell's projected top-left; default `{x:0.5, y:0.5}` (cell center)."
+          "description": "Rotation pivot in world units relative to the cell's projected top-left; default `{x:0.5, y:0.5}` (cell center).",
+          "properties": {
+            "x": {
+              "types": [
+                "number"
+              ]
+            },
+            "y": {
+              "types": [
+                "number"
+              ]
+            }
+          },
+          "propertyRequired": [
+            "x",
+            "y"
+          ]
         },
         "shadow": {
           "types": [
@@ -40038,7 +40561,35 @@
           "types": [
             "object"
           ],
-          "description": "Explicit atlas sub-rect override (px); omitted → resolved from `asset.atlas`/`asset.sprite`."
+          "description": "Explicit atlas sub-rect override (px); omitted → resolved from `asset.atlas`/`asset.sprite`.",
+          "properties": {
+            "x": {
+              "types": [
+                "number"
+              ]
+            },
+            "y": {
+              "types": [
+                "number"
+              ]
+            },
+            "w": {
+              "types": [
+                "number"
+              ]
+            },
+            "h": {
+              "types": [
+                "number"
+              ]
+            }
+          },
+          "propertyRequired": [
+            "x",
+            "y",
+            "w",
+            "h"
+          ]
         },
         "animation": {
           "types": [
@@ -40074,7 +40625,23 @@
           "types": [
             "object"
           ],
-          "description": "Drop shadow (e.g. a team-colored glow)."
+          "description": "Drop shadow (e.g. a team-colored glow).",
+          "properties": {
+            "color": {
+              "types": [
+                "string"
+              ]
+            },
+            "blur": {
+              "types": [
+                "number"
+              ]
+            }
+          },
+          "propertyRequired": [
+            "color",
+            "blur"
+          ]
         }
       },
       "drawable": true
@@ -40174,15 +40741,30 @@
         },
         "align": {
           "types": [
-            "object"
+            "string"
           ],
-          "description": "align prop"
+          "description": "align prop",
+          "enumValues": [
+            "center",
+            "end",
+            "left",
+            "right",
+            "start"
+          ]
         },
         "baseline": {
           "types": [
-            "object"
+            "string"
           ],
-          "description": "baseline prop"
+          "description": "baseline prop",
+          "enumValues": [
+            "alphabetic",
+            "bottom",
+            "hanging",
+            "ideographic",
+            "middle",
+            "top"
+          ]
         },
         "opacity": {
           "types": [
@@ -40317,6 +40899,22 @@
                 "items": {
                   "types": [
                     "object"
+                  ],
+                  "properties": {
+                    "x": {
+                      "types": [
+                        "number"
+                      ]
+                    },
+                    "y": {
+                      "types": [
+                        "number"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y"
                   ]
                 }
               },
@@ -40348,16 +40946,64 @@
                   "from": {
                     "types": [
                       "object"
+                    ],
+                    "properties": {
+                      "x": {
+                        "types": [
+                          "number"
+                        ]
+                      },
+                      "y": {
+                        "types": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
                     ]
                   },
                   "to": {
                     "types": [
                       "object"
+                    ],
+                    "properties": {
+                      "x": {
+                        "types": [
+                          "number"
+                        ]
+                      },
+                      "y": {
+                        "types": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
                     ]
                   },
                   "center": {
                     "types": [
                       "object"
+                    ],
+                    "properties": {
+                      "x": {
+                        "types": [
+                          "number"
+                        ]
+                      },
+                      "y": {
+                        "types": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
                     ]
                   },
                   "radius": {
@@ -40453,16 +41099,64 @@
                   "from": {
                     "types": [
                       "object"
+                    ],
+                    "properties": {
+                      "x": {
+                        "types": [
+                          "number"
+                        ]
+                      },
+                      "y": {
+                        "types": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
                     ]
                   },
                   "to": {
                     "types": [
                       "object"
+                    ],
+                    "properties": {
+                      "x": {
+                        "types": [
+                          "number"
+                        ]
+                      },
+                      "y": {
+                        "types": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
                     ]
                   },
                   "center": {
                     "types": [
                       "object"
+                    ],
+                    "properties": {
+                      "x": {
+                        "types": [
+                          "number"
+                        ]
+                      },
+                      "y": {
+                        "types": [
+                          "number"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "x",
+                      "y"
                     ]
                   },
                   "radius": {
@@ -40547,6 +41241,22 @@
               "pivot": {
                 "types": [
                   "object"
+                ],
+                "properties": {
+                  "x": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "y": {
+                    "types": [
+                      "number"
+                    ]
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
                 ]
               },
               "shadow": {
@@ -40895,6 +41605,34 @@
               "frame": {
                 "types": [
                   "object"
+                ],
+                "properties": {
+                  "x": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "y": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "w": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "h": {
+                    "types": [
+                      "number"
+                    ]
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
                 ]
               },
               "animation": {
@@ -40925,6 +41663,22 @@
               "shadow": {
                 "types": [
                   "object"
+                ],
+                "properties": {
+                  "color": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "blur": {
+                    "types": [
+                      "number"
+                    ]
+                  }
+                },
+                "required": [
+                  "color",
+                  "blur"
                 ]
               }
             },
@@ -41040,12 +41794,27 @@
               },
               "align": {
                 "types": [
-                  "object"
+                  "string"
+                ],
+                "enumValues": [
+                  "center",
+                  "end",
+                  "left",
+                  "right",
+                  "start"
                 ]
               },
               "baseline": {
                 "types": [
-                  "object"
+                  "string"
+                ],
+                "enumValues": [
+                  "alphabetic",
+                  "bottom",
+                  "hanging",
+                  "ideographic",
+                  "middle",
+                  "top"
                 ]
               },
               "opacity": {

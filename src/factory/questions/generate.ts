@@ -416,6 +416,10 @@ function signatureFieldToEntityField(f: FactorySignatureEntityField): EntityFiel
       }
       // No relation config present — safe fallback.
       return { ...base, type: 'string' };
+    case 'node':
+      // Renderable content is computed by the trait's effects, never asked
+      // for in a questionnaire — no question payload beyond the tag.
+      return { ...base, type: 'node' };
     default: {
       const _exhaustive: never = f.type;
       return { ...base, type: 'string' };

@@ -276,6 +276,9 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
     case 'trait':
     case 'slot':
     case 'pattern':
+    // Renderable content is computed by the owning trait's effects, never
+    // seeded — same no-sample treatment as the config-only reference types.
+    case 'node':
       return undefined;
     default:
       return sampleText(field, ctx);

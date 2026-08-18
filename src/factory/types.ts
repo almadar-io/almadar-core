@@ -85,7 +85,8 @@ export type SchemaFieldType =
   | 'array'
   | 'object'
   | 'enum'
-  | 'relation';
+  | 'relation'
+  | 'node';
 
 export interface FactorySignatureEntityField {
   name: string;

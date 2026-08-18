@@ -1078,3 +1078,9 @@ export {
   type ParsedDesign,
   type ValidatedOrbital,
 } from "./parsed-ast.js";
+
+// Renderable-content value types for `node`-typed fields/knobs. Type-only
+// re-export (erased at runtime) — `render-ui-edit.ts` imports value helpers
+// FROM this barrel, so a runtime re-export would cycle; a type re-export
+// cannot.
+export type { PatternNode, PatternValue } from "../render-ui-edit.js";

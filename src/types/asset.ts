@@ -493,6 +493,8 @@ export interface Camera {
     mode?: CameraMode;
     /** Orbit the mode's framing position around the vertical axis through the target, in radians (3D hosts only). */
     azimuth?: number;
+    /** Orbit height angle above the ground plane, in radians (3D hosts only). */
+    elevation?: number;
 }
 
 export const CameraSchema = z.object({
@@ -502,6 +504,7 @@ export const CameraSchema = z.object({
     fov: z.number().optional(),
     mode: CameraModeSchema.optional(),
     azimuth: z.number().optional(),
+    elevation: z.number().optional(),
 });
 
 // ============================================================================

@@ -335,7 +335,7 @@ export const TraitCategorySchema = z.enum([
 // `trait` / `slot` / `pattern` mirror Rust's `FieldType::{Trait, Slot, Pattern}`
 // (orbital-core schema/types.rs) — config-field-only types: a `@trait.X`
 // embed slot, a UI slot name, a pattern type name.
-export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum' | 'email' | 'url' | 'phone' | 'uuid' | 'image' | 'trait' | 'slot' | 'pattern';
+export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum' | 'email' | 'url' | 'phone' | 'uuid' | 'image' | 'trait' | 'slot' | 'pattern' | 'node';
 
 /**
  * Simplified field for trait data entities

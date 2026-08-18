@@ -431,6 +431,10 @@ export function inferTsType(schemaType: string): string {
     array: 'unknown[]',
     object: 'Record<string, unknown>',
     any: 'unknown',
+    // Renderable UI content — the canonical pattern-tree type from
+    // render-ui-edit.ts. Without this entry the raw tag `node` would leak
+    // out as a (nonexistent) TS type name.
+    node: 'PatternNode | PatternNode[]',
   };
 
   // Handle array types like "string[]"

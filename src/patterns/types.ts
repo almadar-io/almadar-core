@@ -88,6 +88,13 @@ export interface PatternPayloadField {
 export interface PatternCallbackArg {
   name: string;
   type: string;
+  /** Nested structural shape for an object-typed arg (e.g. a canvas
+   *  `onShapeClick` payload `{ id?, type?, index }`). The pattern-sync
+   *  parser has always written this into `patterns-registry.json`; the
+   *  public type dropped it, which forced listen contracts down to a
+   *  shapeless `payload : object`. Surfaced so validators can demand a
+   *  structurally-typed listen payload (type-integrity campaign, Gate B). */
+  schema?: PatternPropTypeSchema;
 }
 
 /**
