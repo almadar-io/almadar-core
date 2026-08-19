@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-08-17T13:06:21.152Z",
+  "exportedAt": "2026-08-19T03:03:56.666Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -1388,6 +1388,11 @@
       "component": "DrawMesh",
       "importPath": "@/components/game/atoms/DrawMesh",
       "category": "game"
+    },
+    "algo-graph-canvas": {
+      "component": "AlgoGraphCanvas",
+      "importPath": "@/components/learning/molecules/AlgoGraphCanvas",
+      "category": "learning"
     }
   }
 }
