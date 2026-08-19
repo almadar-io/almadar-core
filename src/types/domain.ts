@@ -1081,13 +1081,18 @@ export function isThemeReference(theme: ThemeRef): theme is string {
 }
 
 /**
- * Validate theme reference format: "Alias.theme"
+ * Validate theme reference format: either the legacy import form
+ * "Alias.theme" or a registry theme key (the full kebab-case `data-theme`
+ * value, e.g. "linear-clean-light") — the form rabit stamps per-orbital and
+ * the `.lolo` `theme "<key>"` declarations carry. Mirrors the compiler's
+ * `is_valid_theme_reference` acceptance; key existence is validated there,
+ * not here.
  */
 export const ThemeRefStringSchema = z
   .string()
   .regex(
-    /^[A-Z][a-zA-Z0-9]*\.theme$/,
-    'Theme reference must be in format "Alias.theme" (e.g., "Ocean.theme")',
+    /^([A-Z][a-zA-Z0-9]*\.theme|[a-z][a-z0-9]*(-[a-z0-9]+)*)$/,
+    'Theme reference must be "Alias.theme" or a registry theme key (e.g., "linear-clean-light")',
   );
 
 export const ThemeRefSchema = z.union([

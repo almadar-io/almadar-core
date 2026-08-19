@@ -27,6 +27,8 @@ import { ServiceDefinitionSchema } from "./service.js";
 import type { Trait } from "./trait.js";
 import type { IdentityLedger } from "./identity.js";
 import { IdentityLedgerSchema } from "./identity.js";
+import type { ThemeRef } from "./domain.js";
+import { ThemeRefSchema } from "./domain.js";
 import type { RuntimeValue } from "./json.js";
 
 // ============================================================================
@@ -118,6 +120,17 @@ export interface OrbitalSchema {
   description?: string;
 
   /**
+   * App-level theme: the skin every orbital's `@currentTheme` seeds from
+   * unless the orbital declares its own `theme` (precedence: orbital →
+   * app → the runtime's baseline default). Authored as `theme "<key>"` in
+   * the `.lolo` app header; a full `<base>-<light|dark>` registry key.
+   * Distinct from the legacy `config.theme` color knobs
+   * ({@link OrbitalConfig}) — this names a registry theme, not palette
+   * values.
+   */
+  theme?: ThemeRef;
+
+  /**
    * Short human-readable summary distinct from `description`. Typically an
    * AI-generated one-liner used by app list views, breadcrumbs, and the
    * `GET /graphs/:appId/domain-text` projection. Kept separate from
@@ -190,6 +203,7 @@ export const SchemaMetadataSchema = z.object({
 export const OrbitalSchemaSchema = z.object({
   name: z.string().min(1, "Schema name is required"),
   description: z.string().optional(),
+  theme: ThemeRefSchema.optional(),
   summary: z.string().optional(),
   version: z.string().optional(),
   domainContext: DomainContextSchema.optional(),
