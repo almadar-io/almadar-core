@@ -257,6 +257,26 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
       const stepped = (field.min ?? 0) + ctx.index * 10;
       return field.max !== undefined && stepped > field.max ? field.max : stepped;
     }
+    // Money is numeric at rest — same sampling as `number` (index strategy
+    // mirrors the Rust seeder for the shared parity fixture).
+    case 'money': {
+      if (ctx.strategy === 'seeded') {
+        return randomInt({ min: field.min ?? 0, max: field.max ?? 100 });
+      }
+      const steppedMoney = (field.min ?? 0) + ctx.index * 10;
+      return field.max !== undefined && steppedMoney > field.max ? field.max : steppedMoney;
+    }
+    // File seeds the canonical struct value (satisfies isFileValue) —
+    // mirrors the Rust seeder's FieldType::File arm byte-for-byte.
+    case 'file': {
+      const base = slug(field.name ?? 'file');
+      return {
+        name: `${base}-${ctx.index}.pdf`,
+        url: `https://example.com/files/${base}/${ctx.index}.pdf`,
+        mimeType: 'application/pdf',
+        sizeBytes: ctx.index * 1024,
+      };
+    }
     case 'boolean':
       return ctx.strategy === 'seeded' ? randomBoolean() : ctx.index % 2 === 0;
     case 'date':

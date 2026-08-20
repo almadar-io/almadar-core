@@ -45,6 +45,8 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
   //   game      +2  draw-group, draw-mesh                  (the draw-mesh 3D substrate)
   //   component +4  emoji-picker, import-preview-tree,
   //                 import-progress, import-source-picker
+  // Re-pinned 2026-08-19 from 239:
+  //   learning  +1  algo-graph-canvas                      (the algo substrate)
   // Nothing was removed or recategorised. A pin bumped without naming the drift
   // is how a real regression gets papered over — keep this list current.
   it('pins the per-category allowed counts', () => {
@@ -59,7 +61,7 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
       game: 33,
       media: 1,
     });
-    expect(names.length).toBe(239);
+    expect(names.length).toBe(240);
   });
 
   it('admits the drifted patterns by name, not just by count', () => {

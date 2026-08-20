@@ -40,6 +40,13 @@ export type FieldType =
     | 'phone'
     | 'uuid'
     | 'image'
+    // Promoted value types (2026-08-20). `money` is numeric at rest - the
+    // declared type (never a field-name heuristic) drives currency inputs
+    // and formatting. `file` is the canonical struct value
+    // {name, url, mimeType, sizeBytes} - an uploaded artifact, not a
+    // validated string; `url` is a data: URI in mock mode.
+    | 'money'
+    | 'file'
     | 'array'
     | 'object'
     | 'enum'
@@ -66,6 +73,8 @@ export const FIELD_TYPES = [
     'phone',
     'uuid',
     'image',
+    'money',
+    'file',
     'array',
     'object',
     'enum',
@@ -203,6 +212,36 @@ export function isUuidValue(value: string): boolean {
     return UUID_RE.test(value);
 }
 
+// ============================================================================
+// File value — the canonical struct a `file`-typed field holds at rest.
+// ONE owner for the shape; mirrors `file_value_fields()` in orbital-core
+// (ir/render.rs) and the codegen zod emitter.
+// ============================================================================
+
+/** The value a `file`-typed entity field holds: an uploaded artifact.
+ *  `url` is a `data:` URI in mock/playground mode (size-ceilinged by the
+ *  mock adapter) or an object-storage URL in production. */
+export interface FileValue {
+    name: string;
+    url: string;
+    mimeType: string;
+    sizeBytes: number;
+}
+
+/** Zod schema for {@link FileValue}. */
+export const FileValueSchema = z.object({
+    name: z.string(),
+    url: z.string(),
+    mimeType: z.string(),
+    sizeBytes: z.number(),
+});
+
+/** Is `value` a well-formed {@link FileValue}? The `file` twin of
+ *  `isSemanticStringValue` — the seeder's output must satisfy this. */
+export function isFileValue(value: unknown): value is FileValue {
+    return FileValueSchema.safeParse(value).success;
+}
+
 /** Does `value` satisfy the declared semantic domain? `image` is a URL. */
 export function isSemanticStringValue(type: SemanticStringType, value: string): boolean {
     switch (type) {
@@ -238,6 +277,8 @@ type ScalarFieldType =
     | 'phone'
     | 'uuid'
     | 'image'
+    | 'money'
+    | 'file'
     | 'trait'
     | 'slot'
     | 'pattern'
@@ -431,6 +472,8 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
             scalarVariant('slot'),
             scalarVariant('pattern'),
             scalarVariant('node'),
+            scalarVariant('money'),
+            scalarVariant('file'),
             // Enum variant — REQUIRES non-empty values.
             z.object({
                 ...baseFieldShape,

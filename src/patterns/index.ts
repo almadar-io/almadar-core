@@ -75,6 +75,12 @@ export type PatternEntry = {
    *  identity (not a name/signal); UISlotRenderer routes the host's authored
    *  `children` into its `drawables` prop (painted) instead of DOM-wrapping them. */
   drawHost?: boolean;
+  /** Declared fields-consumption contract from the component's
+   *  `@fieldsContract` JSDoc tag: `form` = editable SchemaFields (schema
+   *  enrichment + relationsData), `display` = read-only display fields
+   *  ({key, header} + typed meta). THE capability every enrichment consumer
+   *  keys on — never a hardcoded pattern-name list. */
+  fieldsContract?: 'form' | 'display';
 };
 
 type PatternsRegistry = {
@@ -219,6 +225,17 @@ export function eventListPropsOf(patternType: string): ReadonlyMap<string, strin
  * @param patternType - Pattern type to check
  * @returns true if the pattern is a drawable
  */
+/**
+ * The pattern's declared fields-consumption contract (`@fieldsContract` on
+ * the owning component), or undefined for patterns without entity-bound
+ * field lists. Consumers: UISlotRenderer's schema enrichment, the server
+ * runtime's relation-option injection, and orbital-rust codegen (via the
+ * baked registry) — all key on THIS declaration, never on pattern names.
+ */
+export function getPatternFieldsContract(patternType: string): 'form' | 'display' | undefined {
+  return getPatternDefinition(patternType)?.fieldsContract;
+}
+
 export function isDrawablePattern(patternType: string): boolean {
   const definition = getPatternDefinition(patternType);
   if (!definition) return false;

@@ -57,6 +57,7 @@ describe('mock-seed parity vector', () => {
       'falseBool', 'dateOnly', 'withTime', 'stampish', 'emptyArray',
       'scalarItems', 'objectItems', 'emptyObject', 'propObject',
       'relOne', 'relMany', 'intrinsicNoDefault', 'intrinsicWithDefault', 'traitField',
+      'moneyField', 'fileField',
     ]) {
       expect(names).toContain(required);
     }

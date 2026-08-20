@@ -136,8 +136,11 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
           description: (field as unknown as { description?: string }).description,
           default: field.default,
           required: field.required ?? false,
-          values: field.type === 'enum' ? field.values : undefined,
-          enumValues: field.type === 'enum' ? field.values : undefined,
+          // lolo string unions lower to `type:'string'` + a `values` sidecar
+          // (FieldType::Enum is never emitted) — read values off any variant
+          // that carries them, not just `enum`.
+          values: 'values' in field && field.values?.length ? field.values : undefined,
+          enumValues: 'values' in field && field.values?.length ? field.values : undefined,
           relation: field.type === 'relation' ? field.relation : undefined,
         })),
         runtime: entityDef.persistence === 'runtime',
@@ -288,6 +291,8 @@ function inferTsType(schemaType: string): string {
     date: 'Date',
     datetime: 'Date',
     timestamp: 'number',
+    money: 'number',
+    file: 'FileValue',
     array: 'unknown[]',
     object: 'Record<string, unknown>',
     any: 'unknown',
