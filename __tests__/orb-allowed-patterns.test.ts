@@ -23,10 +23,10 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
     }
   });
 
-  it('admits the 2D game category (game-shell present, 33 entries)', () => {
+  it('admits the 2D game category (game-shell present, 34 entries)', () => {
     expect(grouped.game).toBeDefined();
     expect(grouped.game.map((p) => p.name)).toContain('game-shell');
-    expect(grouped.game.length).toBe(33);
+    expect(grouped.game.length).toBe(34);
   });
 
   it('excludes debug and template categories', () => {
@@ -47,6 +47,9 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
   //                 import-progress, import-source-picker
   // Re-pinned 2026-08-19 from 239:
   //   learning  +1  algo-graph-canvas                      (the algo substrate)
+  // Re-pinned 2026-08-21 from 240:
+  //   game      +1  draw-fx-layer                          (the fx substrate)
+  //   container +1  fx-overlay
   // Nothing was removed or recategorised. A pin bumped without naming the drift
   // is how a real regression gets papered over — keep this list current.
   it('pins the per-category allowed counts', () => {
@@ -58,10 +61,10 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
       display: 40,
       filter: 4,
       form: 10,
-      game: 33,
+      game: 34,
       media: 1,
     });
-    expect(names.length).toBe(240);
+    expect(names.length).toBe(242);
   });
 
   it('admits the drifted patterns by name, not just by count', () => {

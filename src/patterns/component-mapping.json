@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-08-20T06:39:15.858Z",
+  "exportedAt": "2026-08-20T23:14:19.545Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -1393,6 +1393,16 @@
       "component": "AlgoGraphCanvas",
       "importPath": "@/components/learning/molecules/AlgoGraphCanvas",
       "category": "learning"
+    },
+    "fx-overlay": {
+      "component": "FxOverlay",
+      "importPath": "@/components/core/molecules/FxOverlay",
+      "category": "container"
+    },
+    "draw-fx-layer": {
+      "component": "DrawFxLayer",
+      "importPath": "@/components/game/molecules/DrawFxLayer",
+      "category": "game"
     }
   }
 }
