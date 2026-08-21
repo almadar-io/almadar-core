@@ -1064,6 +1064,20 @@ export interface NavItem {
 }
 
 /**
+ * NavStackEntry - one level of the client-session navigation stack an
+ * orbital's pages accumulate. The stack lives client-side (per browser
+ * session, keyed per orbital) and is what breadcrumb bands and the
+ * `navigate-back` effect read: `href` is the visited page path with route
+ * params substituted; `label` is the pushed `crumb` from the navigate
+ * effect's options when one was carried, else the page's declared/derived
+ * label.
+ */
+export interface NavStackEntry {
+  href: string;
+  label: string;
+}
+
+/**
  * Checks if a theme reference is a string.
  * 
  * Type guard to determine if a theme reference is a string reference

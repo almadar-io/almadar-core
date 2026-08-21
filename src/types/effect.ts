@@ -183,13 +183,33 @@ export type RenderItemLambda = ['fn', string, AnyPatternConfig];
 export type RenderChildrenMap = ['array/map', SExpr, RenderItemLambda];
 
 /**
+ * Trailing options object on navigate effects. `crumb` labels the navigation
+ * stack entry the client pushes for the target page (e.g. the record title a
+ * list router has in `?row` at push time); without it the entry falls back to
+ * the target page's declared/derived label.
+ */
+export type NavigateOptions = { crumb?: string | SExpr };
+
+/**
  * Navigate effect - navigates to an internal page path or an external URL.
  * @example ['navigate', '/tasks'] or ['navigate', '/tasks/:id', { id: '123' }]
  * @example ['navigate', 'https://example.com']
+ * @example ['navigate', '/contracts/42', { id: '42' }, { crumb: '@payload.row.title' }]
  */
 export type NavigateEffect =
     | ['navigate', string | SExpr]
-    | ['navigate', string | SExpr, Record<string, string | SExpr>];
+    | ['navigate', string | SExpr, Record<string, string | SExpr>]
+    | ['navigate', string | SExpr, Record<string, string | SExpr>, NavigateOptions];
+
+/**
+ * Navigate-back effect - pops the current entry off the orbital-scoped
+ * navigation stack and navigates to the previous one. The stack is
+ * client-session state (cold loads are seeded from declared page-path
+ * prefixes), so an ancestor always exists on nested paths; the validator
+ * rejects `navigate-back` reachable only from pages with no path ancestor.
+ * @example ['navigate-back']
+ */
+export type NavigateBackEffect = ['navigate-back'];
 
 /**
  * Emit effect - emits an event, optionally with payload.
@@ -700,6 +720,7 @@ export type AsyncSequenceEffect = ['async/sequence', ...Effect[]];
 export type TypedEffect =
     | RenderUIEffect
     | NavigateEffect
+    | NavigateBackEffect
     | EmitEffect
     | SetEffect
     | PersistEffect
@@ -871,8 +892,21 @@ export function emit(event: string, payload?: EventPayload): Effect {
  */
 export function navigate(path: string): NavigateEffect;
 export function navigate(path: string, params: Record<string, string>): NavigateEffect;
-export function navigate(path: string, params?: Record<string, string>): NavigateEffect {
+export function navigate(path: string, params: Record<string, string>, options: NavigateOptions): NavigateEffect;
+export function navigate(path: string, params?: Record<string, string>, options?: NavigateOptions): NavigateEffect {
+    if (params && options) return ['navigate', path, params, options];
     return params ? ['navigate', path, params] : ['navigate', path];
+}
+
+/**
+ * Creates a navigate-back effect: pop the orbital's navigation stack and
+ * navigate to the previous entry.
+ *
+ * @example
+ * navigateBack(); // returns ["navigate-back"]
+ */
+export function navigateBack(): NavigateBackEffect {
+    return ['navigate-back'];
 }
 
 /**
