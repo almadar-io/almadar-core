@@ -1,12 +1,13 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-08-16T04:55:02.135Z",
+  "exportedAt": "2026-08-22T11:31:33.279Z",
   "services": {
     "llm": {
       "name": "llm",
       "description": "LLM service — text generation, classification, extraction, summarization",
       "category": "ai",
       "package": "@almadar/llm",
+      "backend": "production",
       "actions": [
         {
           "name": "generate",
@@ -138,6 +139,27 @@
             "summary": "string",
             "keyPoints": "string[]"
           }
+        },
+        {
+          "name": "embed",
+          "description": "Generate embeddings for an array of texts.",
+          "params": [
+            {
+              "name": "texts",
+              "type": "string[]",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "embeddings": "number[][]"
+          }
         }
       ],
       "credentials": [
@@ -158,6 +180,7 @@
       "description": "ML service — model inference on a trained or off-the-shelf model",
       "category": "ai",
       "package": "@almadar/llm",
+      "backend": "production",
       "actions": [
         {
           "name": "infer",
@@ -201,6 +224,7 @@
       "description": "Data service — CRUD operations on entities",
       "category": "infrastructure",
       "package": "@almadar/server",
+      "backend": "production",
       "actions": [
         {
           "name": "list",
@@ -315,6 +339,7 @@
       "description": "Event bus — cross-trait pub/sub messaging",
       "category": "infrastructure",
       "package": "@almadar/server",
+      "backend": "production",
       "actions": [
         {
           "name": "emit",
@@ -353,6 +378,7 @@
       "description": "Service discovery — register and find services",
       "category": "infrastructure",
       "package": "@almadar/server",
+      "backend": "production",
       "actions": [
         {
           "name": "register",
@@ -437,6 +463,7 @@
       "description": "Migration service — import external data (notes, docs, references) into the system",
       "category": "infrastructure",
       "package": "@almadar-io/migration",
+      "backend": "production",
       "actions": [
         {
           "name": "listDocuments",
@@ -528,6 +555,7 @@
       "description": "Skills service — AI-powered schema generation",
       "category": "ai",
       "package": "@almadar/skills",
+      "backend": "production",
       "actions": [
         {
           "name": "generateOrbitals",
@@ -602,6 +630,7 @@
       "description": "GitHub integration — repos, issues, PRs",
       "category": "devtools",
       "package": "@almadar/integrations",
+      "backend": "production",
       "actions": [
         {
           "name": "cloneRepo",
@@ -710,15 +739,21 @@
               "description": ""
             },
             {
-              "name": "head",
+              "name": "baseBranch",
               "type": "string",
               "required": true,
               "description": ""
             },
             {
-              "name": "base",
+              "name": "headBranch",
               "type": "string",
               "required": true,
+              "description": ""
+            },
+            {
+              "name": "draft",
+              "type": "boolean",
+              "required": false,
               "description": ""
             }
           ],
@@ -928,6 +963,7 @@
       "description": "Stripe integration — payments, subscriptions, invoices",
       "category": "payment",
       "package": "@almadar/integrations",
+      "backend": "production",
       "actions": [
         {
           "name": "createPaymentIntent",
@@ -1018,6 +1054,7 @@
       "description": "LLM integration — generate, embed, classify via external providers",
       "category": "ai",
       "package": "@almadar/integrations",
+      "backend": "production",
       "actions": [
         {
           "name": "generate",
@@ -1187,6 +1224,7 @@
       "description": "YouTube Data API — search videos, get video/channel details",
       "category": "media",
       "package": "@almadar/integrations",
+      "backend": "production",
       "actions": [
         {
           "name": "search",
@@ -1262,6 +1300,7 @@
       "description": "Twilio — SMS, voice calls, verification",
       "category": "messaging",
       "package": "@almadar/integrations",
+      "backend": "production",
       "actions": [
         {
           "name": "sendSMS",
@@ -1331,6 +1370,7 @@
       "description": "Email service — send, send with template",
       "category": "messaging",
       "package": "@almadar/integrations",
+      "backend": "production",
       "actions": [
         {
           "name": "send",
@@ -1390,6 +1430,7 @@
       "description": "Outbound webhook — signed HTTP POST notifications to external endpoints",
       "category": "messaging",
       "package": "@almadar/integrations",
+      "backend": "production",
       "actions": [
         {
           "name": "send",
@@ -1440,11 +1481,825 @@
         }
       ]
     },
+    "push": {
+      "name": "push",
+      "description": "Web Push — VAPID-signed browser push notifications",
+      "category": "messaging",
+      "package": "@almadar/integrations",
+      "backend": "production",
+      "actions": [
+        {
+          "name": "send",
+          "description": "",
+          "params": [
+            {
+              "name": "subscription",
+              "type": "object",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "title",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "body",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "url",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "icon",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "statusCode": "number",
+            "ok": "boolean",
+            "expired": "boolean"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "VAPID_PUBLIC_KEY",
+          "required": true,
+          "description": "VAPID public key (web-push generate-vapid-keys)"
+        },
+        {
+          "envVar": "VAPID_PRIVATE_KEY",
+          "required": true,
+          "description": "VAPID private key"
+        },
+        {
+          "envVar": "VAPID_SUBJECT",
+          "required": true,
+          "description": "VAPID subject (mailto: or https: contact URI)"
+        }
+      ]
+    },
+    "calendar": {
+      "name": "calendar",
+      "description": "Google Calendar — list/create/update/delete events, free-busy, push-channel watch (service account, domain-wide delegation)",
+      "category": "infrastructure",
+      "package": "@almadar/integrations",
+      "backend": "production",
+      "actions": [
+        {
+          "name": "listEvents",
+          "description": "",
+          "params": [
+            {
+              "name": "calendarId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "timeMin",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "timeMax",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "syncToken",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "maxResults",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "events": "array",
+            "nextSyncToken": "string | null"
+          }
+        },
+        {
+          "name": "createEvent",
+          "description": "",
+          "params": [
+            {
+              "name": "calendarId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "summary",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "location",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "start",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "end",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "durationMinutes",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "status": "string",
+            "htmlLink": "string"
+          }
+        },
+        {
+          "name": "updateEvent",
+          "description": "",
+          "params": [
+            {
+              "name": "calendarId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "eventId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "summary",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "location",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "start",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "end",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "status": "string"
+          }
+        },
+        {
+          "name": "deleteEvent",
+          "description": "",
+          "params": [
+            {
+              "name": "calendarId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "eventId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "deleted": "boolean"
+          }
+        },
+        {
+          "name": "freeBusy",
+          "description": "",
+          "params": [
+            {
+              "name": "calendarId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "timeMin",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "timeMax",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "busy": "array"
+          }
+        },
+        {
+          "name": "watch",
+          "description": "",
+          "params": [
+            {
+              "name": "calendarId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "channelId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "address",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "ttlSeconds",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "channelId": "string",
+            "resourceId": "string",
+            "expiration": "string"
+          }
+        },
+        {
+          "name": "stopWatch",
+          "description": "",
+          "params": [
+            {
+              "name": "channelId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "resourceId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "stopped": "boolean"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "GOOGLE_CALENDAR_SA_KEY",
+          "required": true,
+          "description": "Google service-account key JSON (raw or base64) with calendar scope; store in Secret Manager, bind as env"
+        },
+        {
+          "envVar": "GOOGLE_CALENDAR_SUBJECT",
+          "required": false,
+          "description": "Workspace user to impersonate (domain-wide delegation); empty = act as the service account"
+        },
+        {
+          "envVar": "GOOGLE_CALENDAR_ID",
+          "required": false,
+          "description": "Default calendar id (default: primary)"
+        }
+      ]
+    },
+    "drive": {
+      "name": "drive",
+      "description": "Google Drive — list/get/upload files, folders, sharing (service account, domain-wide delegation)",
+      "category": "infrastructure",
+      "package": "@almadar/integrations",
+      "backend": "production",
+      "actions": [
+        {
+          "name": "listFiles",
+          "description": "",
+          "params": [
+            {
+              "name": "folderId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "query",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "maxResults",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "files": "array"
+          }
+        },
+        {
+          "name": "getFile",
+          "description": "",
+          "params": [
+            {
+              "name": "fileId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "name": "string",
+            "mimeType": "string",
+            "content": "string",
+            "size": "number"
+          }
+        },
+        {
+          "name": "uploadFile",
+          "description": "",
+          "params": [
+            {
+              "name": "name",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "content",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "mimeType",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "folderId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "name": "string",
+            "webViewLink": "string"
+          }
+        },
+        {
+          "name": "createFolder",
+          "description": "",
+          "params": [
+            {
+              "name": "name",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "parentId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "name": "string"
+          }
+        },
+        {
+          "name": "shareFile",
+          "description": "",
+          "params": [
+            {
+              "name": "fileId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "email",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "role",
+              "type": "'reader' | 'writer' | 'commenter'",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "shared": "boolean",
+            "permissionId": "string"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "GOOGLE_DRIVE_SA_KEY",
+          "required": true,
+          "description": "Google service-account key JSON (raw or base64) with drive scope; store in Secret Manager, bind as env"
+        },
+        {
+          "envVar": "GOOGLE_DRIVE_SUBJECT",
+          "required": false,
+          "description": "Workspace user to impersonate (domain-wide delegation); empty = act as the service account"
+        }
+      ]
+    },
+    "metaAds": {
+      "name": "metaAds",
+      "description": "Meta Ads — read-only Marketing Insights (spend, campaigns) for profitability reporting",
+      "category": "marketing",
+      "package": "@almadar/integrations",
+      "backend": "production",
+      "actions": [
+        {
+          "name": "getSpend",
+          "description": "",
+          "params": [
+            {
+              "name": "accountId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "since",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "until",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "clientTag",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "spend": "number",
+            "currency": "string",
+            "impressions": "number",
+            "clicks": "number"
+          }
+        },
+        {
+          "name": "listCampaigns",
+          "description": "",
+          "params": [
+            {
+              "name": "accountId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "campaigns": "array"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "META_ACCESS_TOKEN",
+          "required": true,
+          "description": "Meta Graph API access token (Marketing API, ads_read)"
+        },
+        {
+          "envVar": "META_AD_ACCOUNT_ID",
+          "required": false,
+          "description": "Default ad account id (act_…); per-call accountId overrides"
+        }
+      ]
+    },
+    "accounting": {
+      "name": "accounting",
+      "description": "Accounting export — invoice/journal rows to import-ready CSV (provider-pluggable)",
+      "category": "finance",
+      "package": "@almadar/integrations",
+      "backend": "production",
+      "actions": [
+        {
+          "name": "exportInvoices",
+          "description": "",
+          "params": [
+            {
+              "name": "invoices",
+              "type": "array",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "format",
+              "type": "'csv'",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "content": "string",
+            "filename": "string",
+            "count": "number"
+          }
+        },
+        {
+          "name": "exportJournal",
+          "description": "",
+          "params": [
+            {
+              "name": "entries",
+              "type": "array",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "format",
+              "type": "'csv'",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "content": "string",
+            "filename": "string",
+            "count": "number"
+          }
+        }
+      ],
+      "credentials": []
+    },
+    "banking": {
+      "name": "banking",
+      "description": "Banking — GoCardless Bank Account Data (requisitions, accounts, transactions) for reconciliation",
+      "category": "finance",
+      "package": "@almadar/integrations",
+      "backend": "production",
+      "actions": [
+        {
+          "name": "createRequisition",
+          "description": "",
+          "params": [
+            {
+              "name": "institutionId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "redirectUrl",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "reference",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "requisitionId": "string",
+            "link": "string"
+          }
+        },
+        {
+          "name": "listAccounts",
+          "description": "",
+          "params": [
+            {
+              "name": "requisitionId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "accounts": "string[]"
+          }
+        },
+        {
+          "name": "listTransactions",
+          "description": "",
+          "params": [
+            {
+              "name": "accountId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "dateFrom",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "dateTo",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "transactions": "array"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "GOCARDLESS_SECRET_ID",
+          "required": true,
+          "description": "GoCardless Bank Account Data secret id"
+        },
+        {
+          "envVar": "GOCARDLESS_SECRET_KEY",
+          "required": true,
+          "description": "GoCardless Bank Account Data secret key"
+        }
+      ]
+    },
+    "esign": {
+      "name": "esign",
+      "description": "E-signature — send/track/download envelopes (DocuSign first, provider-pluggable)",
+      "category": "infrastructure",
+      "package": "@almadar/integrations",
+      "backend": "production",
+      "actions": [
+        {
+          "name": "sendEnvelope",
+          "description": "",
+          "params": [
+            {
+              "name": "recipientEmail",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "recipientName",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "documentName",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "documentContent",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "emailSubject",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "envelopeId": "string",
+            "status": "string"
+          }
+        },
+        {
+          "name": "getEnvelopeStatus",
+          "description": "",
+          "params": [
+            {
+              "name": "envelopeId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "status": "string",
+            "completedAt": "string"
+          }
+        },
+        {
+          "name": "downloadDocument",
+          "description": "",
+          "params": [
+            {
+              "name": "envelopeId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "content": "string",
+            "documentName": "string"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "DOCUSIGN_BASE_URL",
+          "required": true,
+          "description": "DocuSign REST base (e.g. https://demo.docusign.net/restapi/v2.1/accounts/<accountId>)"
+        },
+        {
+          "envVar": "DOCUSIGN_ACCESS_TOKEN",
+          "required": true,
+          "description": "DocuSign OAuth access token (JWT grant rotation is the deployment concern)"
+        }
+      ]
+    },
     "docker": {
       "name": "docker",
       "description": "Docker — container and image management",
       "category": "devtools",
       "package": "@almadar/integrations",
+      "backend": "simulated",
       "actions": [
         {
           "name": "build",
@@ -1656,6 +2511,7 @@
       "description": "Database integration — read-only SQL queries over external connections",
       "category": "infrastructure",
       "package": "@almadar/integrations",
+      "backend": "production",
       "actions": [
         {
           "name": "query",
@@ -1693,6 +2549,7 @@
       "description": "Object storage — upload, download, delete, list files",
       "category": "infrastructure",
       "package": "@almadar/integrations",
+      "backend": "production",
       "actions": [
         {
           "name": "upload",
@@ -1724,7 +2581,7 @@
             },
             {
               "name": "file",
-              "type": "IntegrationParams",
+              "type": "object",
               "required": false,
               "description": ""
             },
@@ -1751,7 +2608,9 @@
             "key": "string",
             "bucket": "string",
             "size": "number",
-            "etag": "string"
+            "etag": "string",
+            "id": "string",
+            "url": "string"
           }
         },
         {
@@ -1864,14 +2723,34 @@
       ],
       "credentials": [
         {
+          "envVar": "STORAGE_ACCESS_KEY_ID",
+          "required": true,
+          "description": "S3-compatible access key id"
+        },
+        {
+          "envVar": "STORAGE_SECRET_ACCESS_KEY",
+          "required": true,
+          "description": "S3-compatible secret access key"
+        },
+        {
           "envVar": "STORAGE_BUCKET",
           "required": true,
-          "description": "Cloud storage bucket name"
+          "description": "Default bucket name"
         },
         {
           "envVar": "STORAGE_REGION",
           "required": false,
-          "description": "Storage region"
+          "description": "Region (default us-east-1)"
+        },
+        {
+          "envVar": "STORAGE_ENDPOINT",
+          "required": false,
+          "description": "Custom S3-compatible endpoint (R2/MinIO/…); empty = AWS S3"
+        },
+        {
+          "envVar": "STORAGE_PUBLIC_URL_BASE",
+          "required": false,
+          "description": "Base URL for public-acl object links; empty = endpoint-derived"
         }
       ]
     },
@@ -1880,6 +2759,7 @@
       "description": "Message queue — publish, subscribe, acknowledge messages",
       "category": "infrastructure",
       "package": "@almadar/integrations",
+      "backend": "simulated",
       "actions": [
         {
           "name": "enqueue",
@@ -2034,6 +2914,7 @@
       "description": "Redis — cache get/set/delete, pub/sub",
       "category": "infrastructure",
       "package": "@almadar/integrations",
+      "backend": "simulated",
       "actions": [
         {
           "name": "get",
@@ -2224,9 +3105,10 @@
     },
     "oauth": {
       "name": "oauth",
-      "description": "OAuth — authorization flow, token management",
+      "description": "OAuth/OIDC — authorization-code + PKCE flow, token management, userinfo",
       "category": "auth",
       "package": "@almadar/integrations",
+      "backend": "production",
       "actions": [
         {
           "name": "authorize",
@@ -2334,17 +3216,125 @@
         {
           "envVar": "OAUTH_CLIENT_ID",
           "required": true,
-          "description": "OAuth2 client ID"
+          "description": "OIDC client ID"
         },
         {
           "envVar": "OAUTH_CLIENT_SECRET",
           "required": true,
-          "description": "OAuth2 client secret"
+          "description": "OIDC client secret"
         },
         {
           "envVar": "OAUTH_REDIRECT_URI",
           "required": false,
-          "description": "OAuth2 redirect URI"
+          "description": "OIDC redirect URI (default per-call param)"
+        },
+        {
+          "envVar": "OIDC_ISSUER_URL",
+          "required": false,
+          "description": "OIDC issuer URL (default https://accounts.google.com)"
+        }
+      ]
+    },
+    "credentials": {
+      "name": "credentials",
+      "description": "Tenant credential store — masked list, set/remove, test connection (settings-page backend)",
+      "category": "auth",
+      "package": "@almadar/integrations",
+      "backend": "production",
+      "actions": [
+        {
+          "name": "list",
+          "description": "",
+          "params": [
+            {
+              "name": "service",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "enabled": "boolean",
+            "entries": "array"
+          }
+        },
+        {
+          "name": "set",
+          "description": "",
+          "params": [
+            {
+              "name": "service",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "envVar",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "value",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "saved": "boolean",
+            "service": "string",
+            "envVar": "string",
+            "last4": "string"
+          }
+        },
+        {
+          "name": "remove",
+          "description": "",
+          "params": [
+            {
+              "name": "service",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "envVar",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "removed": "boolean"
+          }
+        },
+        {
+          "name": "test",
+          "description": "",
+          "params": [
+            {
+              "name": "service",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "service": "string",
+            "configured": "boolean",
+            "missing": "string[]",
+            "probed": "boolean",
+            "ok": "boolean",
+            "message": "string"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "ALMADAR_CREDENTIAL_MASTER_KEY",
+          "required": false,
+          "description": "AES-256 master key (64-char hex) enabling the hosted credential store — hold it alone in the platform secret store"
         }
       ]
     },
@@ -2353,6 +3343,7 @@
       "description": "OpenTelemetry — spans, metrics, logs",
       "category": "infrastructure",
       "package": "@almadar/integrations",
+      "backend": "simulated",
       "actions": [
         {
           "name": "startSpan",
@@ -2501,6 +3492,7 @@
       "description": "CLI tool execution — run commands, get output",
       "category": "devtools",
       "package": "@almadar/integrations",
+      "backend": "production",
       "actions": [
         {
           "name": "validate",
@@ -2528,6 +3520,7 @@
       "description": "DeepAgent — AI agent orchestration",
       "category": "ai",
       "package": "@almadar/integrations",
+      "backend": "production",
       "actions": [
         {
           "name": "sendMessage",
@@ -2644,15 +3637,274 @@
           "description": "DeepAgent API key"
         }
       ]
+    },
+    "wikimedia": {
+      "name": "wikimedia",
+      "description": "Wikipedia API — redirect-resolved page lookup (description, portrait, lead extract)",
+      "category": "reference",
+      "package": "@almadar/integrations",
+      "backend": "production",
+      "actions": [
+        {
+          "name": "getPage",
+          "description": "",
+          "params": [
+            {
+              "name": "title",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "title": "string",
+            "description": "string",
+            "portraitUrl": "string",
+            "extract": "string"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "WIKIMEDIA_USER_AGENT",
+          "required": false,
+          "description": "Descriptive User-Agent for the Wikipedia API"
+        },
+        {
+          "envVar": "WIKIMEDIA_TIMEOUT_MS",
+          "required": false,
+          "description": "Per-request timeout (ms)"
+        }
+      ]
+    },
+    "iconify": {
+      "name": "iconify",
+      "description": "Iconify API — brand-logo / icon resolution, search, and body fetch",
+      "category": "reference",
+      "package": "@almadar/integrations",
+      "backend": "production",
+      "actions": [
+        {
+          "name": "svgExists",
+          "description": "",
+          "params": [
+            {
+              "name": "path",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "exists": "boolean"
+          }
+        },
+        {
+          "name": "search",
+          "description": "",
+          "params": [
+            {
+              "name": "query",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "limit",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "icons": "string[]"
+          }
+        },
+        {
+          "name": "getIconBody",
+          "description": "",
+          "params": [
+            {
+              "name": "iconId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "body": "string | null"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "ICONIFY_USER_AGENT",
+          "required": false,
+          "description": "User-Agent for the Iconify API"
+        },
+        {
+          "envVar": "ICONIFY_TIMEOUT_MS",
+          "required": false,
+          "description": "Per-request timeout (ms)"
+        }
+      ]
+    },
+    "arxiv": {
+      "name": "arxiv",
+      "description": "arXiv API — frontier academic preprint search (emerging-axis research backend)",
+      "category": "reference",
+      "package": "@almadar/integrations",
+      "backend": "production",
+      "actions": [
+        {
+          "name": "search",
+          "description": "",
+          "params": [
+            {
+              "name": "query",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "maxResults",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "results": "array"
+          }
+        }
+      ],
+      "credentials": [
+        {
+          "envVar": "ARXIV_TIMEOUT_MS",
+          "required": false,
+          "description": "Per-request timeout (ms)"
+        }
+      ]
+    },
+    "calendar-ical": {
+      "name": "calendar-ical",
+      "description": "Host-provided .ics generation service (std-service-calendar-ical)",
+      "category": "infrastructure",
+      "package": "(host-injected)",
+      "backend": "host-injected",
+      "actions": [],
+      "credentials": []
+    },
+    "custom-bearer-api": {
+      "name": "custom-bearer-api",
+      "description": "Caller-configured bearer-token HTTP API (std-service-custom-bearer)",
+      "category": "infrastructure",
+      "package": "(host-injected)",
+      "backend": "host-injected",
+      "actions": [],
+      "credentials": []
+    },
+    "customBearer": {
+      "name": "customBearer",
+      "description": "Caller-configured bearer-token HTTP API (std-service-custom-bearer, unquoted spelling)",
+      "category": "infrastructure",
+      "package": "(host-injected)",
+      "backend": "host-injected",
+      "actions": [],
+      "credentials": []
+    },
+    "knowledge": {
+      "name": "knowledge",
+      "description": "Host-provided knowledge/research service",
+      "category": "ai",
+      "package": "(host-injected)",
+      "backend": "host-injected",
+      "actions": [],
+      "credentials": []
+    },
+    "maps": {
+      "name": "maps",
+      "description": "Host-provided maps service (std-service-maps)",
+      "category": "infrastructure",
+      "package": "(host-injected)",
+      "backend": "host-injected",
+      "actions": [],
+      "credentials": []
+    },
+    "print": {
+      "name": "print",
+      "description": "Host-provided print service (std-service-print)",
+      "category": "infrastructure",
+      "package": "(host-injected)",
+      "backend": "host-injected",
+      "actions": [],
+      "credentials": []
+    },
+    "builder": {
+      "name": "builder",
+      "description": "Rabit-internal agent service (rabit.lolo)",
+      "category": "ai",
+      "package": "(host-injected)",
+      "backend": "host-injected",
+      "actions": [],
+      "credentials": []
+    },
+    "composer": {
+      "name": "composer",
+      "description": "Rabit-internal agent service (rabit.lolo)",
+      "category": "ai",
+      "package": "(host-injected)",
+      "backend": "host-injected",
+      "actions": [],
+      "credentials": []
+    },
+    "coordinator": {
+      "name": "coordinator",
+      "description": "Rabit-internal agent service (rabit.lolo)",
+      "category": "ai",
+      "package": "(host-injected)",
+      "backend": "host-injected",
+      "actions": [],
+      "credentials": []
+    },
+    "planner": {
+      "name": "planner",
+      "description": "Rabit-internal agent service (rabit.lolo)",
+      "category": "ai",
+      "package": "(host-injected)",
+      "backend": "host-injected",
+      "actions": [],
+      "credentials": []
+    },
+    "repair": {
+      "name": "repair",
+      "description": "Rabit-internal agent service (rabit.lolo)",
+      "category": "ai",
+      "package": "(host-injected)",
+      "backend": "host-injected",
+      "actions": [],
+      "credentials": []
+    },
+    "validator": {
+      "name": "validator",
+      "description": "Rabit-internal agent service (rabit.lolo)",
+      "category": "ai",
+      "package": "(host-injected)",
+      "backend": "host-injected",
+      "actions": [],
+      "credentials": []
     }
   },
   "categories": [
     "ai",
     "auth",
     "devtools",
+    "finance",
     "infrastructure",
+    "marketing",
     "media",
     "messaging",
-    "payment"
+    "payment",
+    "reference"
   ]
 }

@@ -148,8 +148,10 @@ function sampleText(field: EntityField, ctx: SampleContext): string {
   if (IMAGE_FIELD_NAMES.has(fieldName.toLowerCase())) {
     return sampleImageUrl(ctx.entityName, fieldName, ctx);
   }
+  // Seeded strings are display text (titles, names, labels) — title-case
+  // them so a seeded record reads "Harbor Summit", not "harbor summit".
   return ctx.strategy === 'seeded'
-    ? randomWords(2)
+    ? titleCase(randomWords(2))
     : `${titleCase(fieldName)} ${ctx.index}`;
 }
 
@@ -251,17 +253,20 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
     case 'number': {
       // A declared range constrains the value; an UNdeclared one must not, or
       // the index ladder silently flattens once it passes an invented ceiling.
+      // Seeded fallback floors at 1 (declared min still wins): all-zero
+      // counts/metrics made every mock-seeded page read as broken data.
       if (ctx.strategy === 'seeded') {
-        return randomInt({ min: field.min ?? 0, max: field.max ?? 100 });
+        return randomInt({ min: field.min ?? 1, max: field.max ?? 250 });
       }
       const stepped = (field.min ?? 0) + ctx.index * 10;
       return field.max !== undefined && stepped > field.max ? field.max : stepped;
     }
     // Money is numeric at rest — same sampling as `number` (index strategy
-    // mirrors the Rust seeder for the shared parity fixture).
+    // mirrors the Rust seeder for the shared parity fixture). Seeded fallback
+    // avoids $0.00 amounts for the same reason as `number`.
     case 'money': {
       if (ctx.strategy === 'seeded') {
-        return randomInt({ min: field.min ?? 0, max: field.max ?? 100 });
+        return randomInt({ min: field.min ?? 10, max: field.max ?? 900 });
       }
       const steppedMoney = (field.min ?? 0) + ctx.index * 10;
       return field.max !== undefined && steppedMoney > field.max ? field.max : steppedMoney;

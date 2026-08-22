@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-08-21T17:33:36.142Z",
+  "exportedAt": "2026-08-22T08:33:22.708Z",
   "contracts": {
     "form": {
       "emits": [
@@ -220,13 +220,6 @@
       "emits": [
         {
           "event": "NAVIGATE",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        },
-        {
-          "event": "CLOSE",
           "trigger": "action",
           "payload": {
             "type": "object"

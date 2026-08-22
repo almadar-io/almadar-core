@@ -1,75 +1,317 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-01-25T00:58:14.172Z",
+  "exportedAt": "2026-08-22T11:31:33.279Z",
   "integrators": {
-    "youtube": {
-      "name": "youtube",
-      "description": "YouTube Data API - search videos, get video/channel details",
-      "category": "media",
+    "github": {
+      "name": "github",
+      "description": "GitHub integration - Git operations and GitHub REST API",
+      "category": "devtools",
       "actions": [
         {
-          "name": "search",
-          "description": "Search for videos",
+          "name": "cloneRepo",
+          "description": "",
           "params": [
             {
-              "name": "query",
+              "name": "repoUrl",
               "type": "string",
               "required": true,
-              "description": "Search query"
+              "description": ""
             },
             {
-              "name": "maxResults",
+              "name": "targetDir",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "branch",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "message": "string"
+          }
+        },
+        {
+          "name": "createBranch",
+          "description": "",
+          "params": [
+            {
+              "name": "branchName",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "baseBranch",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "message": "string"
+          }
+        },
+        {
+          "name": "commit",
+          "description": "",
+          "params": [
+            {
+              "name": "message",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "files",
+              "type": "string[]",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "message": "string"
+          }
+        },
+        {
+          "name": "push",
+          "description": "",
+          "params": [
+            {
+              "name": "branchName",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "force",
+              "type": "boolean",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "message": "string"
+          }
+        },
+        {
+          "name": "createPR",
+          "description": "",
+          "params": [
+            {
+              "name": "title",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "body",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "baseBranch",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "headBranch",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "draft",
+              "type": "boolean",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "number": "number",
+            "url": "string",
+            "title": "string"
+          }
+        },
+        {
+          "name": "getPRComments",
+          "description": "",
+          "params": [
+            {
+              "name": "prNumber",
+              "type": "number",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "comments": "array"
+          }
+        },
+        {
+          "name": "listIssues",
+          "description": "",
+          "params": [
+            {
+              "name": "state",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "labels",
+              "type": "string[]",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "per_page",
               "type": "number",
               "required": false,
-              "description": "Max results (1-50)"
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "issues": "array"
+          }
+        },
+        {
+          "name": "getIssue",
+          "description": "",
+          "params": [
+            {
+              "name": "issueNumber",
+              "type": "number",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "number": "number",
+            "title": "string",
+            "body": "string",
+            "state": "string"
+          }
+        },
+        {
+          "name": "getFile",
+          "description": "",
+          "params": [
+            {
+              "name": "owner",
+              "type": "string",
+              "required": true,
+              "description": ""
             },
             {
-              "name": "type",
+              "name": "repo",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "path",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "ref",
               "type": "string",
               "required": false,
-              "description": "video, channel, or playlist"
+              "description": ""
             }
           ],
           "responseShape": {
-            "videoId": "string",
-            "title": "string",
-            "thumbnail": "string",
-            "description": "string"
+            "path": "string",
+            "content": "string",
+            "sha": "string",
+            "size": "number"
           }
         },
         {
-          "name": "getVideo",
-          "description": "Get video details by ID",
+          "name": "listCommits",
+          "description": "",
           "params": [
             {
-              "name": "videoId",
+              "name": "owner",
               "type": "string",
               "required": true,
-              "description": "YouTube video ID"
+              "description": ""
+            },
+            {
+              "name": "repo",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "path",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "ref",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "per_page",
+              "type": "number",
+              "required": false,
+              "description": ""
             }
           ],
           "responseShape": {
-            "title": "string",
-            "description": "string",
-            "viewCount": "number",
-            "likeCount": "number"
+            "commits": "array"
           }
         },
         {
-          "name": "getChannel",
-          "description": "Get channel details by ID",
+          "name": "createIssue",
+          "description": "",
           "params": [
             {
-              "name": "channelId",
+              "name": "owner",
               "type": "string",
               "required": true,
-              "description": "YouTube channel ID"
+              "description": ""
+            },
+            {
+              "name": "repo",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "title",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "body",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "labels",
+              "type": "string[]",
+              "required": false,
+              "description": ""
             }
           ],
           "responseShape": {
-            "name": "string",
-            "description": "string",
-            "subscriberCount": "number"
+            "number": "number",
+            "title": "string",
+            "url": "string"
           }
         }
       ]
@@ -81,70 +323,325 @@
       "actions": [
         {
           "name": "createPaymentIntent",
-          "description": "Create a payment intent for collecting payment",
+          "description": "",
           "params": [
             {
               "name": "amount",
               "type": "number",
               "required": true,
-              "description": "Amount in cents"
+              "description": ""
             },
             {
               "name": "currency",
               "type": "string",
               "required": true,
-              "description": "ISO currency code (e.g., usd)"
+              "description": ""
             },
             {
               "name": "metadata",
               "type": "object",
               "required": false,
-              "description": "Custom metadata"
+              "description": ""
             }
           ],
           "responseShape": {
             "id": "string",
             "clientSecret": "string",
-            "status": "string"
+            "status": "string",
+            "amount": "number",
+            "currency": "string"
           }
         },
         {
           "name": "confirmPayment",
-          "description": "Confirm a payment intent",
+          "description": "",
           "params": [
             {
               "name": "paymentIntentId",
               "type": "string",
               "required": true,
-              "description": "Payment intent ID"
+              "description": ""
             }
           ],
           "responseShape": {
-            "status": "string",
-            "amount": "number"
+            "id": "string",
+            "status": "string"
           }
         },
         {
           "name": "refund",
-          "description": "Refund a payment",
+          "description": "",
           "params": [
             {
               "name": "paymentIntentId",
               "type": "string",
               "required": true,
-              "description": "Payment intent ID"
+              "description": ""
             },
             {
               "name": "amount",
               "type": "number",
               "required": false,
-              "description": "Amount to refund (partial)"
+              "description": ""
             }
           ],
           "responseShape": {
             "id": "string",
             "status": "string",
             "amount": "number"
+          }
+        }
+      ]
+    },
+    "llm": {
+      "name": "llm",
+      "description": "LLM service for content generation, classification, and structured extraction",
+      "category": "ai",
+      "actions": [
+        {
+          "name": "generate",
+          "description": "",
+          "params": [
+            {
+              "name": "userPrompt",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "systemPrompt",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "temperature",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "maxTokens",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "content": "string",
+            "usage": "object"
+          }
+        },
+        {
+          "name": "classify",
+          "description": "",
+          "params": [
+            {
+              "name": "text",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "categories",
+              "type": "string[]",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "category": "string",
+            "confidence": "number",
+            "reasoning": "string"
+          }
+        },
+        {
+          "name": "extract",
+          "description": "",
+          "params": [
+            {
+              "name": "text",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "schema",
+              "type": "IntegrationParams",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {}
+        },
+        {
+          "name": "summarize",
+          "description": "",
+          "params": [
+            {
+              "name": "text",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "maxLength",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "style",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "summary": "string",
+            "keyPoints": "string[]"
+          }
+        },
+        {
+          "name": "embed",
+          "description": "",
+          "params": [
+            {
+              "name": "texts",
+              "type": "string[]",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "embeddings": "number[][]"
+          }
+        }
+      ]
+    },
+    "ml": {
+      "name": "ml",
+      "description": "ML service - model inference on a trained or off-the-shelf checkpoint, reached via a deployed serving orbital",
+      "category": "ai",
+      "actions": [
+        {
+          "name": "infer",
+          "description": "",
+          "params": [
+            {
+              "name": "model",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "input",
+              "type": "ServiceParamsValue",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "output": "ServiceParamsValue",
+            "confidence": "number",
+            "violations": "ServiceParamsValue[]"
+          }
+        }
+      ]
+    },
+    "youtube": {
+      "name": "youtube",
+      "description": "YouTube Data API - search videos, get video/channel details",
+      "category": "media",
+      "actions": [
+        {
+          "name": "search",
+          "description": "",
+          "params": [
+            {
+              "name": "query",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "maxResults",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "type",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {}
+        },
+        {
+          "name": "getVideo",
+          "description": "",
+          "params": [
+            {
+              "name": "videoId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "title": "string",
+            "description": "string",
+            "viewCount": "string",
+            "likeCount": "string"
+          }
+        },
+        {
+          "name": "getChannel",
+          "description": "",
+          "params": [
+            {
+              "name": "channelId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "name": "string",
+            "description": "string",
+            "subscriberCount": "string"
           }
         }
       ]
@@ -156,19 +653,19 @@
       "actions": [
         {
           "name": "sendSMS",
-          "description": "Send an SMS message",
+          "description": "",
           "params": [
             {
               "name": "to",
               "type": "string",
               "required": true,
-              "description": "Recipient phone number"
+              "description": ""
             },
             {
               "name": "body",
               "type": "string",
               "required": true,
-              "description": "Message body"
+              "description": ""
             }
           ],
           "responseShape": {
@@ -178,19 +675,19 @@
         },
         {
           "name": "sendWhatsApp",
-          "description": "Send a WhatsApp message",
+          "description": "",
           "params": [
             {
               "name": "to",
               "type": "string",
               "required": true,
-              "description": "Recipient phone number"
+              "description": ""
             },
             {
               "name": "body",
               "type": "string",
               "required": true,
-              "description": "Message body"
+              "description": ""
             }
           ],
           "responseShape": {
@@ -207,31 +704,31 @@
       "actions": [
         {
           "name": "send",
-          "description": "Send a transactional email",
+          "description": "",
           "params": [
             {
               "name": "to",
               "type": "string",
               "required": true,
-              "description": "Recipient email"
+              "description": ""
             },
             {
               "name": "subject",
               "type": "string",
               "required": true,
-              "description": "Email subject"
+              "description": ""
             },
             {
               "name": "body",
               "type": "string",
               "required": true,
-              "description": "Email body (HTML or text)"
+              "description": ""
             },
             {
               "name": "from",
               "type": "string",
               "required": false,
-              "description": "Sender email (uses default if omitted)"
+              "description": ""
             }
           ],
           "responseShape": {
@@ -241,191 +738,1832 @@
         }
       ]
     },
-    "llm": {
-      "name": "llm",
-      "description": "LLM service for content generation, classification, and structured extraction",
-      "category": "ai",
+    "webhook": {
+      "name": "webhook",
+      "description": "Outbound webhook - signed HTTP POST notifications to external endpoints",
+      "category": "messaging",
       "actions": [
         {
-          "name": "generate",
-          "description": "Generate content from a prompt",
+          "name": "send",
+          "description": "",
           "params": [
             {
-              "name": "systemPrompt",
-              "type": "string",
-              "required": false,
-              "description": "System instructions for the LLM"
-            },
-            {
-              "name": "userPrompt",
+              "name": "url",
               "type": "string",
               "required": true,
-              "description": "User prompt/question"
+              "description": ""
             },
             {
-              "name": "model",
-              "type": "string",
-              "required": false,
-              "description": "Model ID (default: claude-sonnet-4-5-20250929)"
-            },
-            {
-              "name": "temperature",
-              "type": "number",
-              "required": false,
-              "description": "Sampling temperature (0-1, default: 0.7)"
-            },
-            {
-              "name": "maxTokens",
-              "type": "number",
-              "required": false,
-              "description": "Max response tokens (default: 1024)"
-            }
-          ],
-          "responseShape": {
-            "content": "string",
-            "usage": "object"
-          }
-        },
-        {
-          "name": "classify",
-          "description": "Classify text into predefined categories",
-          "params": [
-            {
-              "name": "text",
+              "name": "event",
               "type": "string",
               "required": true,
-              "description": "Text to classify"
+              "description": ""
             },
             {
-              "name": "categories",
-              "type": "array",
-              "required": true,
-              "description": "List of category labels"
-            },
-            {
-              "name": "model",
-              "type": "string",
-              "required": false,
-              "description": "Model ID"
-            }
-          ],
-          "responseShape": {
-            "category": "string",
-            "confidence": "number",
-            "reasoning": "string"
-          }
-        },
-        {
-          "name": "extract",
-          "description": "Extract structured data from text using a schema",
-          "params": [
-            {
-              "name": "text",
-              "type": "string",
-              "required": true,
-              "description": "Text to extract from"
-            },
-            {
-              "name": "schema",
+              "name": "payload",
               "type": "object",
-              "required": true,
-              "description": "JSON schema defining fields to extract"
+              "required": false,
+              "description": ""
             },
             {
-              "name": "model",
+              "name": "secret",
               "type": "string",
               "required": false,
-              "description": "Model ID"
+              "description": ""
             }
           ],
           "responseShape": {
-            "data": "object",
-            "confidence": "number"
-          }
-        },
-        {
-          "name": "summarize",
-          "description": "Summarize long text content",
-          "params": [
-            {
-              "name": "text",
-              "type": "string",
-              "required": true,
-              "description": "Text to summarize"
-            },
-            {
-              "name": "maxLength",
-              "type": "number",
-              "required": false,
-              "description": "Target summary length in words"
-            },
-            {
-              "name": "style",
-              "type": "string",
-              "required": false,
-              "description": "Summary style: brief, detailed, bullet"
-            },
-            {
-              "name": "model",
-              "type": "string",
-              "required": false,
-              "description": "Model ID"
-            }
-          ],
-          "responseShape": {
-            "summary": "string",
-            "keyPoints": "array"
-          }
-        },
-        {
-          "name": "embed",
-          "description": "Generate embeddings for an array of texts",
-          "params": [
-            {
-              "name": "texts",
-              "type": "string[]",
-              "required": true,
-              "description": "Texts to embed"
-            },
-            {
-              "name": "model",
-              "type": "string",
-              "required": false,
-              "description": "Embedding model ID"
-            }
-          ],
-          "responseShape": {
-            "embeddings": "array"
+            "status": "number",
+            "ok": "boolean",
+            "durationMs": "number"
           }
         }
       ]
     },
-    "ml": {
-      "name": "ml",
-      "description": "ML service - model inference on a trained or off-the-shelf checkpoint, reached via a deployed serving orbital",
-      "category": "ai",
+    "push": {
+      "name": "push",
+      "description": "Web Push - VAPID-signed browser push notifications",
+      "category": "messaging",
       "actions": [
         {
-          "name": "infer",
-          "description": "Run inference against a deployed model checkpoint",
+          "name": "send",
+          "description": "",
           "params": [
             {
-              "name": "model",
-              "type": "string",
+              "name": "subscription",
+              "type": "object",
               "required": true,
-              "description": "hf:<id> for off-the-shelf weights, or a masar checkpoint id"
+              "description": ""
             },
             {
-              "name": "input",
-              "type": "any",
+              "name": "title",
+              "type": "string",
               "required": true,
-              "description": "JSON-safe model input (object, array, or primitive tensor payload)"
+              "description": ""
+            },
+            {
+              "name": "body",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "url",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "icon",
+              "type": "string",
+              "required": false,
+              "description": ""
             }
           ],
           "responseShape": {
-            "output": "object",
-            "confidence": "number",
-            "violations": "string[]"
+            "statusCode": "number",
+            "ok": "boolean",
+            "expired": "boolean"
+          }
+        }
+      ]
+    },
+    "calendar": {
+      "name": "calendar",
+      "description": "Google Calendar - events, free-busy, watch channels (service account / domain-wide delegation)",
+      "category": "infrastructure",
+      "actions": [
+        {
+          "name": "listEvents",
+          "description": "",
+          "params": [
+            {
+              "name": "calendarId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "timeMin",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "timeMax",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "syncToken",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "maxResults",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "events": "array",
+            "nextSyncToken": "string | null"
+          }
+        },
+        {
+          "name": "createEvent",
+          "description": "",
+          "params": [
+            {
+              "name": "calendarId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "summary",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "location",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "start",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "end",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "durationMinutes",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "status": "string",
+            "htmlLink": "string"
+          }
+        },
+        {
+          "name": "updateEvent",
+          "description": "",
+          "params": [
+            {
+              "name": "calendarId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "eventId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "summary",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "location",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "start",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "end",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "status": "string"
+          }
+        },
+        {
+          "name": "deleteEvent",
+          "description": "",
+          "params": [
+            {
+              "name": "calendarId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "eventId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "deleted": "boolean"
+          }
+        },
+        {
+          "name": "freeBusy",
+          "description": "",
+          "params": [
+            {
+              "name": "calendarId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "timeMin",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "timeMax",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "busy": "array"
+          }
+        },
+        {
+          "name": "watch",
+          "description": "",
+          "params": [
+            {
+              "name": "calendarId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "channelId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "address",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "ttlSeconds",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "channelId": "string",
+            "resourceId": "string",
+            "expiration": "string"
+          }
+        },
+        {
+          "name": "stopWatch",
+          "description": "",
+          "params": [
+            {
+              "name": "channelId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "resourceId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "stopped": "boolean"
+          }
+        }
+      ]
+    },
+    "drive": {
+      "name": "drive",
+      "description": "Google Drive - files, folders, sharing (service account / domain-wide delegation)",
+      "category": "infrastructure",
+      "actions": [
+        {
+          "name": "listFiles",
+          "description": "",
+          "params": [
+            {
+              "name": "folderId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "query",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "maxResults",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "files": "array"
+          }
+        },
+        {
+          "name": "getFile",
+          "description": "",
+          "params": [
+            {
+              "name": "fileId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "name": "string",
+            "mimeType": "string",
+            "content": "string",
+            "size": "number"
+          }
+        },
+        {
+          "name": "uploadFile",
+          "description": "",
+          "params": [
+            {
+              "name": "name",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "content",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "mimeType",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "folderId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "name": "string",
+            "webViewLink": "string"
+          }
+        },
+        {
+          "name": "createFolder",
+          "description": "",
+          "params": [
+            {
+              "name": "name",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "parentId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "id": "string",
+            "name": "string"
+          }
+        },
+        {
+          "name": "shareFile",
+          "description": "",
+          "params": [
+            {
+              "name": "fileId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "email",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "role",
+              "type": "'reader' | 'writer' | 'commenter'",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "shared": "boolean",
+            "permissionId": "string"
+          }
+        }
+      ]
+    },
+    "metaAds": {
+      "name": "metaAds",
+      "description": "Meta Ads - read-only Marketing Insights (spend, campaigns)",
+      "category": "marketing",
+      "actions": [
+        {
+          "name": "getSpend",
+          "description": "",
+          "params": [
+            {
+              "name": "accountId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "since",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "until",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "clientTag",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "spend": "number",
+            "currency": "string",
+            "impressions": "number",
+            "clicks": "number"
+          }
+        },
+        {
+          "name": "listCampaigns",
+          "description": "",
+          "params": [
+            {
+              "name": "accountId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "campaigns": "array"
+          }
+        }
+      ]
+    },
+    "accounting": {
+      "name": "accounting",
+      "description": "Accounting export - invoice/journal rows to import-ready CSV",
+      "category": "finance",
+      "actions": [
+        {
+          "name": "exportInvoices",
+          "description": "",
+          "params": [
+            {
+              "name": "invoices",
+              "type": "array",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "format",
+              "type": "'csv'",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "content": "string",
+            "filename": "string",
+            "count": "number"
+          }
+        },
+        {
+          "name": "exportJournal",
+          "description": "",
+          "params": [
+            {
+              "name": "entries",
+              "type": "array",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "format",
+              "type": "'csv'",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "content": "string",
+            "filename": "string",
+            "count": "number"
+          }
+        }
+      ]
+    },
+    "banking": {
+      "name": "banking",
+      "description": "Banking - GoCardless Bank Account Data (requisitions, accounts, transactions)",
+      "category": "finance",
+      "actions": [
+        {
+          "name": "createRequisition",
+          "description": "",
+          "params": [
+            {
+              "name": "institutionId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "redirectUrl",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "reference",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "requisitionId": "string",
+            "link": "string"
+          }
+        },
+        {
+          "name": "listAccounts",
+          "description": "",
+          "params": [
+            {
+              "name": "requisitionId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "accounts": "string[]"
+          }
+        },
+        {
+          "name": "listTransactions",
+          "description": "",
+          "params": [
+            {
+              "name": "accountId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "dateFrom",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "dateTo",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "transactions": "array"
+          }
+        }
+      ]
+    },
+    "esign": {
+      "name": "esign",
+      "description": "E-signature - send/track/download envelopes (DocuSign)",
+      "category": "infrastructure",
+      "actions": [
+        {
+          "name": "sendEnvelope",
+          "description": "",
+          "params": [
+            {
+              "name": "recipientEmail",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "recipientName",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "documentName",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "documentContent",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "emailSubject",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "envelopeId": "string",
+            "status": "string"
+          }
+        },
+        {
+          "name": "getEnvelopeStatus",
+          "description": "",
+          "params": [
+            {
+              "name": "envelopeId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "status": "string",
+            "completedAt": "string"
+          }
+        },
+        {
+          "name": "downloadDocument",
+          "description": "",
+          "params": [
+            {
+              "name": "envelopeId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "content": "string",
+            "documentName": "string"
+          }
+        }
+      ]
+    },
+    "docker": {
+      "name": "docker",
+      "description": "Docker — container and image management",
+      "category": "devtools",
+      "actions": [
+        {
+          "name": "build",
+          "description": "",
+          "params": [
+            {
+              "name": "tag",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "dockerfile",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "context",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "buildArgs",
+              "type": "object",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "imageId": "string",
+            "tag": "string",
+            "size": "number",
+            "buildTime": "number"
+          }
+        },
+        {
+          "name": "run",
+          "description": "",
+          "params": [
+            {
+              "name": "image",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "ports",
+              "type": "array",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "env",
+              "type": "object",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "volumes",
+              "type": "array",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "command",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "containerId": "string",
+            "name": "string",
+            "status": "string",
+            "ports": "array"
+          }
+        },
+        {
+          "name": "stop",
+          "description": "",
+          "params": [
+            {
+              "name": "containerId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "containerId": "string",
+            "status": "string",
+            "stoppedAt": "number"
+          }
+        },
+        {
+          "name": "remove",
+          "description": "",
+          "params": [
+            {
+              "name": "containerId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "force",
+              "type": "boolean",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "containerId": "string",
+            "removed": "boolean"
+          }
+        },
+        {
+          "name": "logs",
+          "description": "",
+          "params": [
+            {
+              "name": "containerId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "tail",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "since",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "containerId": "string",
+            "logs": "string[]",
+            "lineCount": "number"
+          }
+        },
+        {
+          "name": "status",
+          "description": "",
+          "params": [
+            {
+              "name": "containerId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "containerId": "string",
+            "name": "string",
+            "image": "string",
+            "status": "string",
+            "ports": "array",
+            "createdAt": "number",
+            "startedAt": "number | null",
+            "stoppedAt": "number | null"
+          }
+        },
+        {
+          "name": "list",
+          "description": "",
+          "params": [
+            {
+              "name": "all",
+              "type": "boolean",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "filterByLabel",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "containers": "array",
+            "total": "number"
+          }
+        }
+      ]
+    },
+    "storage": {
+      "name": "storage",
+      "description": "Object storage — upload, download, delete, list files",
+      "category": "infrastructure",
+      "actions": [
+        {
+          "name": "upload",
+          "description": "",
+          "params": [
+            {
+              "name": "bucket",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "key",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "content",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "contentType",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "file",
+              "type": "object",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "acl",
+              "type": "'public' | 'private'",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "maxSize",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "metadata",
+              "type": "IntegrationParams",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "key": "string",
+            "bucket": "string",
+            "size": "number",
+            "etag": "string",
+            "id": "string",
+            "url": "string"
+          }
+        },
+        {
+          "name": "download",
+          "description": "",
+          "params": [
+            {
+              "name": "bucket",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "content": "string",
+            "contentType": "string",
+            "size": "number",
+            "metadata": "IntegrationParams"
+          }
+        },
+        {
+          "name": "list",
+          "description": "",
+          "params": [
+            {
+              "name": "bucket",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "prefix",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "maxKeys",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "keys": "array",
+            "truncated": "boolean"
+          }
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "params": [
+            {
+              "name": "bucket",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "deleted": "boolean"
+          }
+        },
+        {
+          "name": "getSignedUrl",
+          "description": "",
+          "params": [
+            {
+              "name": "bucket",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "expiresIn",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "operation",
+              "type": "'get' | 'put'",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "url": "string",
+            "expiresAt": "number"
+          }
+        }
+      ]
+    },
+    "queue": {
+      "name": "queue",
+      "description": "Message queue — publish, subscribe, acknowledge messages",
+      "category": "infrastructure",
+      "actions": [
+        {
+          "name": "enqueue",
+          "description": "",
+          "params": [
+            {
+              "name": "queue",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "payload",
+              "type": "ServiceParams",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "delay",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "priority",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "jobId": "string",
+            "position": "number"
+          }
+        },
+        {
+          "name": "dequeue",
+          "description": "",
+          "params": [
+            {
+              "name": "queue",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "job": "object | null"
+          }
+        },
+        {
+          "name": "status",
+          "description": "",
+          "params": [
+            {
+              "name": "jobId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "status": "'pending' | 'processing' | 'completed' | 'failed'",
+            "job": "object | null"
+          }
+        },
+        {
+          "name": "complete",
+          "description": "",
+          "params": [
+            {
+              "name": "jobId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "result",
+              "type": "ServiceParams",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "completed": "boolean"
+          }
+        },
+        {
+          "name": "fail",
+          "description": "",
+          "params": [
+            {
+              "name": "jobId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "error",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "failed": "boolean"
+          }
+        },
+        {
+          "name": "cancel",
+          "description": "",
+          "params": [
+            {
+              "name": "jobId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "cancelled": "boolean"
+          }
+        },
+        {
+          "name": "size",
+          "description": "",
+          "params": [
+            {
+              "name": "queue",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "size": "number",
+            "pending": "number",
+            "processing": "number"
+          }
+        }
+      ]
+    },
+    "redis": {
+      "name": "redis",
+      "description": "Redis — cache get/set/delete, pub/sub",
+      "category": "infrastructure",
+      "actions": [
+        {
+          "name": "get",
+          "description": "",
+          "params": [
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "value": "ServiceParams"
+          }
+        },
+        {
+          "name": "set",
+          "description": "",
+          "params": [
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "value",
+              "type": "ServiceParams",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "ttl",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "ok": "boolean"
+          }
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "params": [
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "deleted": "boolean"
+          }
+        },
+        {
+          "name": "lock",
+          "description": "",
+          "params": [
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "ttl",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "acquired": "boolean",
+            "lockId": "string"
+          }
+        },
+        {
+          "name": "unlock",
+          "description": "",
+          "params": [
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "lockId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "released": "boolean"
+          }
+        },
+        {
+          "name": "increment",
+          "description": "",
+          "params": [
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "by",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "value": "number"
+          }
+        },
+        {
+          "name": "expire",
+          "description": "",
+          "params": [
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "ttl",
+              "type": "number",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "set": "boolean"
+          }
+        },
+        {
+          "name": "publish",
+          "description": "",
+          "params": [
+            {
+              "name": "channel",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "message",
+              "type": "ServiceParams",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "receivers": "number"
+          }
+        },
+        {
+          "name": "subscribe",
+          "description": "",
+          "params": [
+            {
+              "name": "channel",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "subscribed": "boolean"
+          }
+        }
+      ]
+    },
+    "oauth": {
+      "name": "oauth",
+      "description": "OAuth/OIDC — authorization-code + PKCE flow, token management, userinfo",
+      "category": "auth",
+      "actions": [
+        {
+          "name": "authorize",
+          "description": "",
+          "params": [
+            {
+              "name": "provider",
+              "type": "'google' | 'github' | 'auth0'",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "scopes",
+              "type": "string[]",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "redirectUri",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "authUrl": "string",
+            "state": "string"
+          }
+        },
+        {
+          "name": "token",
+          "description": "",
+          "params": [
+            {
+              "name": "code",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "state",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "accessToken": "string",
+            "refreshToken": "string",
+            "expiresIn": "number",
+            "tokenType": "'bearer'"
+          }
+        },
+        {
+          "name": "refresh",
+          "description": "",
+          "params": [
+            {
+              "name": "refreshToken",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "accessToken": "string",
+            "expiresIn": "number"
+          }
+        },
+        {
+          "name": "revoke",
+          "description": "",
+          "params": [
+            {
+              "name": "token",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "revoked": "boolean"
+          }
+        },
+        {
+          "name": "userinfo",
+          "description": "",
+          "params": [
+            {
+              "name": "accessToken",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "sub": "string",
+            "email": "string",
+            "name": "string",
+            "picture": "string"
+          }
+        }
+      ]
+    },
+    "credentials": {
+      "name": "credentials",
+      "description": "Tenant credential store — masked list, set/remove, test connection (settings-page backend)",
+      "category": "auth",
+      "actions": [
+        {
+          "name": "list",
+          "description": "",
+          "params": [
+            {
+              "name": "service",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "enabled": "boolean",
+            "entries": "array"
+          }
+        },
+        {
+          "name": "set",
+          "description": "",
+          "params": [
+            {
+              "name": "service",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "envVar",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "value",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "saved": "boolean",
+            "service": "string",
+            "envVar": "string",
+            "last4": "string"
+          }
+        },
+        {
+          "name": "remove",
+          "description": "",
+          "params": [
+            {
+              "name": "service",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "envVar",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "removed": "boolean"
+          }
+        },
+        {
+          "name": "test",
+          "description": "",
+          "params": [
+            {
+              "name": "service",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "service": "string",
+            "configured": "boolean",
+            "missing": "string[]",
+            "probed": "boolean",
+            "ok": "boolean",
+            "message": "string"
+          }
+        }
+      ]
+    },
+    "otel": {
+      "name": "otel",
+      "description": "OpenTelemetry — spans, metrics, logs",
+      "category": "infrastructure",
+      "actions": [
+        {
+          "name": "startSpan",
+          "description": "",
+          "params": [
+            {
+              "name": "name",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "attributes",
+              "type": "IntegrationParams",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "traceId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "spanId": "string",
+            "traceId": "string"
+          }
+        },
+        {
+          "name": "endSpan",
+          "description": "",
+          "params": [
+            {
+              "name": "spanId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "status",
+              "type": "'ok' | 'error'",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "ended": "boolean"
+          }
+        },
+        {
+          "name": "addEvent",
+          "description": "",
+          "params": [
+            {
+              "name": "spanId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "attributes",
+              "type": "IntegrationParams",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "added": "boolean"
+          }
+        },
+        {
+          "name": "recordMetric",
+          "description": "",
+          "params": [
+            {
+              "name": "name",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "value",
+              "type": "number",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "type",
+              "type": "'counter' | 'gauge' | 'histogram'",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "labels",
+              "type": "IntegrationParams",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "recorded": "boolean"
+          }
+        },
+        {
+          "name": "getSpan",
+          "description": "",
+          "params": [
+            {
+              "name": "spanId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {}
+        },
+        {
+          "name": "getMetrics",
+          "description": "",
+          "params": [],
+          "responseShape": {}
+        }
+      ]
+    },
+    "cli": {
+      "name": "cli",
+      "description": "Almadar CLI integration - schema validation and compilation",
+      "category": "devtools",
+      "actions": [
+        {
+          "name": "validate",
+          "description": "",
+          "params": [
+            {
+              "name": "schema",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "valid": "boolean",
+            "errors": "string[]",
+            "warnings": "string[]",
+            "summary": "string"
           }
         }
       ]
@@ -437,322 +2575,104 @@
       "actions": [
         {
           "name": "sendMessage",
-          "description": "Send a message to the AI agent and get a response with tool calls",
+          "description": "",
           "params": [
             {
               "name": "message",
               "type": "string",
               "required": true,
-              "description": "User message to the agent"
+              "description": ""
             },
             {
               "name": "threadId",
               "type": "string",
               "required": false,
-              "description": "Thread ID for conversation continuity"
+              "description": ""
             },
             {
               "name": "skill",
               "type": "string",
               "required": false,
-              "description": "Skill to use: almadar-orbitals, almadar-fixing, etc."
+              "description": ""
             },
             {
               "name": "context",
-              "type": "object",
+              "type": "IntegrationParams",
               "required": false,
-              "description": "Additional context (current schema, project info)"
+              "description": ""
             }
           ],
           "responseShape": {
             "response": "string",
-            "threadId": "string",
-            "toolCalls": "array",
-            "todos": "array",
-            "schemaDiffs": "array"
+            "threadId": "string"
           }
         },
         {
           "name": "cancelGeneration",
-          "description": "Cancel an ongoing generation",
+          "description": "",
           "params": [
             {
               "name": "threadId",
               "type": "string",
               "required": true,
-              "description": "Thread ID to cancel"
+              "description": ""
             }
           ],
           "responseShape": {
-            "success": "boolean"
+            "cancelled": "boolean"
           }
         },
         {
           "name": "validateSchema",
-          "description": "Validate an orbital schema",
+          "description": "",
           "params": [
             {
               "name": "schema",
               "type": "string",
               "required": true,
-              "description": "Schema content to validate"
+              "description": ""
             }
           ],
           "responseShape": {
             "valid": "boolean",
-            "errors": "array",
-            "warnings": "array"
+            "errors": "string[]"
           }
         },
         {
           "name": "compileSchema",
-          "description": "Compile an orbital schema to target shell",
+          "description": "",
           "params": [
             {
               "name": "schema",
               "type": "string",
               "required": true,
-              "description": "Schema content to compile"
+              "description": ""
             },
             {
               "name": "shell",
               "type": "string",
               "required": false,
-              "description": "Target shell: typescript, python (default: typescript)"
+              "description": ""
             }
           ],
           "responseShape": {
-            "success": "boolean",
-            "outputPath": "string",
-            "errors": "array"
+            "output": "string",
+            "files": "string[]"
           }
         },
         {
           "name": "getThreadHistory",
-          "description": "Get conversation history for a thread",
+          "description": "",
           "params": [
             {
               "name": "threadId",
               "type": "string",
               "required": true,
-              "description": "Thread ID to get history for"
+              "description": ""
             }
           ],
           "responseShape": {
-            "messages": "array",
-            "todos": "array",
-            "schemaDiffs": "array"
-          }
-        }
-      ]
-    },
-    "github": {
-      "name": "github",
-      "description": "GitHub integration - Git operations and GitHub REST API",
-      "category": "devtools",
-      "actions": [
-        {
-          "name": "cloneRepo",
-          "description": "Clone a repository",
-          "params": [
-            {
-              "name": "repo",
-              "type": "string",
-              "required": true,
-              "description": "Repository URL or owner/repo"
-            },
-            {
-              "name": "branch",
-              "type": "string",
-              "required": false,
-              "description": "Branch to clone"
-            }
-          ],
-          "responseShape": {
-            "path": "string",
-            "branch": "string"
-          }
-        },
-        {
-          "name": "createBranch",
-          "description": "Create a new branch",
-          "params": [
-            {
-              "name": "repo",
-              "type": "string",
-              "required": true,
-              "description": "Local repo path"
-            },
-            {
-              "name": "branch",
-              "type": "string",
-              "required": true,
-              "description": "Branch name"
-            }
-          ],
-          "responseShape": {
-            "branch": "string"
-          }
-        },
-        {
-          "name": "commit",
-          "description": "Commit changes",
-          "params": [
-            {
-              "name": "repo",
-              "type": "string",
-              "required": true,
-              "description": "Local repo path"
-            },
-            {
-              "name": "message",
-              "type": "string",
-              "required": true,
-              "description": "Commit message"
-            },
-            {
-              "name": "files",
-              "type": "array",
-              "required": false,
-              "description": "Files to stage"
-            }
-          ],
-          "responseShape": {
-            "hash": "string",
-            "message": "string"
-          }
-        },
-        {
-          "name": "push",
-          "description": "Push commits to remote",
-          "params": [
-            {
-              "name": "repo",
-              "type": "string",
-              "required": true,
-              "description": "Local repo path"
-            },
-            {
-              "name": "branch",
-              "type": "string",
-              "required": false,
-              "description": "Branch to push"
-            }
-          ],
-          "responseShape": {
-            "success": "boolean"
-          }
-        },
-        {
-          "name": "createPR",
-          "description": "Create a pull request",
-          "params": [
-            {
-              "name": "title",
-              "type": "string",
-              "required": true,
-              "description": "PR title"
-            },
-            {
-              "name": "body",
-              "type": "string",
-              "required": false,
-              "description": "PR description"
-            },
-            {
-              "name": "head",
-              "type": "string",
-              "required": true,
-              "description": "Head branch"
-            },
-            {
-              "name": "base",
-              "type": "string",
-              "required": false,
-              "description": "Base branch (default: main)"
-            }
-          ],
-          "responseShape": {
-            "number": "number",
-            "url": "string"
-          }
-        },
-        {
-          "name": "getPRComments",
-          "description": "Fetch pull request comments",
-          "params": [
-            {
-              "name": "prNumber",
-              "type": "number",
-              "required": true,
-              "description": "PR number"
-            }
-          ],
-          "responseShape": {
-            "comments": "array"
-          }
-        },
-        {
-          "name": "listIssues",
-          "description": "List issues with optional filters",
-          "params": [
-            {
-              "name": "state",
-              "type": "string",
-              "required": false,
-              "description": "Issue state: open, closed, all"
-            },
-            {
-              "name": "labels",
-              "type": "string",
-              "required": false,
-              "description": "Comma-separated label names"
-            }
-          ],
-          "responseShape": {
-            "issues": "array"
-          }
-        },
-        {
-          "name": "getIssue",
-          "description": "Get a single issue",
-          "params": [
-            {
-              "name": "issueNumber",
-              "type": "number",
-              "required": true,
-              "description": "Issue number"
-            }
-          ],
-          "responseShape": {
-            "title": "string",
-            "body": "string",
-            "state": "string"
-          }
-        }
-      ]
-    },
-    "cli": {
-      "name": "cli",
-      "description": "Almadar CLI integration - schema validation and compilation",
-      "category": "devtools",
-      "actions": [
-        {
-          "name": "validate",
-          "description": "Validate an orbital schema",
-          "params": [
-            {
-              "name": "schema",
-              "type": "string",
-              "required": true,
-              "description": "Schema content to validate"
-            }
-          ],
-          "responseShape": {
-            "valid": "boolean",
-            "errors": "array",
-            "warnings": "array",
-            "summary": "string"
+            "messages": "array"
           }
         }
       ]
@@ -764,29 +2684,29 @@
       "actions": [
         {
           "name": "query",
-          "description": "Run a single read-only SELECT against a connection referenced by env var name",
+          "description": "",
           "params": [
             {
               "name": "connectionRef",
               "type": "string",
               "required": true,
-              "description": "Name of the environment variable holding the connection string (never the secret itself)"
+              "description": ""
             },
             {
               "name": "sql",
               "type": "string",
               "required": true,
-              "description": "Single SELECT statement (read-only enforced)"
+              "description": ""
             },
             {
               "name": "params",
-              "type": "array",
+              "type": "DatabaseQueryParamValue[]",
               "required": false,
-              "description": "Bind parameters for the query"
+              "description": ""
             }
           ],
           "responseShape": {
-            "rows": "array",
+            "rows": "DatabaseRow[]",
             "rowCount": "number"
           }
         }
@@ -799,13 +2719,13 @@
       "actions": [
         {
           "name": "getPage",
-          "description": "Look up a title on Wikipedia",
+          "description": "",
           "params": [
             {
               "name": "title",
               "type": "string",
               "required": true,
-              "description": "Page title (human-readable name)"
+              "description": ""
             }
           ],
           "responseShape": {
@@ -824,13 +2744,13 @@
       "actions": [
         {
           "name": "svgExists",
-          "description": "Check whether an SVG path exists",
+          "description": "",
           "params": [
             {
               "name": "path",
               "type": "string",
               "required": true,
-              "description": "Path under api.iconify.design (e.g. devicon/typescript.svg)"
+              "description": ""
             }
           ],
           "responseShape": {
@@ -839,19 +2759,19 @@
         },
         {
           "name": "search",
-          "description": "Relevance search for icons",
+          "description": "",
           "params": [
             {
               "name": "query",
               "type": "string",
               "required": true,
-              "description": "Search term"
+              "description": ""
             },
             {
               "name": "limit",
               "type": "number",
               "required": false,
-              "description": "Max results"
+              "description": ""
             }
           ],
           "responseShape": {
@@ -860,17 +2780,17 @@
         },
         {
           "name": "getIconBody",
-          "description": "Fetch an icon SVG body for color-tone classification",
+          "description": "",
           "params": [
             {
               "name": "iconId",
               "type": "string",
               "required": true,
-              "description": "Icon id (prefix:name)"
+              "description": ""
             }
           ],
           "responseShape": {
-            "body": "string"
+            "body": "string | null"
           }
         }
       ]
@@ -882,76 +2802,38 @@
       "actions": [
         {
           "name": "search",
-          "description": "Search arXiv preprints by relevance",
+          "description": "",
           "params": [
             {
               "name": "query",
               "type": "string",
               "required": true,
-              "description": "Search query"
+              "description": ""
             },
             {
               "name": "maxResults",
               "type": "number",
               "required": false,
-              "description": "Max results (default 8)"
+              "description": ""
             }
           ],
           "responseShape": {
-            "results": "ArxivResult[]"
-          }
-        }
-      ]
-    },
-    "webhook": {
-      "name": "webhook",
-      "description": "Outbound webhook - signed HTTP POST notifications to external endpoints",
-      "category": "messaging",
-      "actions": [
-        {
-          "name": "send",
-          "description": "POST a JSON event envelope to an external URL, HMAC-SHA256 signed when a secret is configured",
-          "params": [
-            {
-              "name": "url",
-              "type": "string",
-              "required": true,
-              "description": "Target endpoint URL"
-            },
-            {
-              "name": "event",
-              "type": "string",
-              "required": true,
-              "description": "Event name carried in the envelope and X-Almadar-Event header"
-            },
-            {
-              "name": "payload",
-              "type": "object",
-              "required": false,
-              "description": "Event payload fields (string map)"
-            },
-            {
-              "name": "secret",
-              "type": "string",
-              "required": false,
-              "description": "Per-call HMAC signing secret (overrides WEBHOOK_SIGNING_SECRET)"
-            }
-          ],
-          "responseShape": {
-            "status": "number",
-            "ok": "boolean",
-            "durationMs": "number"
+            "results": "array"
           }
         }
       ]
     }
   },
   "categories": [
-    "media",
-    "payment",
-    "messaging",
     "ai",
+    "auth",
     "devtools",
-    "infrastructure"
+    "finance",
+    "infrastructure",
+    "marketing",
+    "media",
+    "messaging",
+    "payment",
+    "reference"
   ]
 }

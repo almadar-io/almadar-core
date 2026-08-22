@@ -96,15 +96,20 @@ export function randomAnytimeDate(): Date {
   return new Date(now - age);
 }
 
+// Neutral English words, not lorem: seeded titles/labels read like plausible
+// product data ("harbor summit", "quarterly ledger") instead of latin filler
+// that made every mock-seeded screen look broken (2026-08-22 detail survey:
+// "aute ut" titles were the single most-reported raw-value defect). Same
+// seeded-LCG determinism — only the corpus changed.
 const LOREM_WORDS = [
-  'lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit',
-  'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'dolore',
-  'magna', 'aliqua', 'enim', 'ad', 'minim', 'veniam', 'quis', 'nostrud',
-  'exercitation', 'ullamco', 'laboris', 'nisi', 'aliquip', 'ex', 'ea', 'commodo',
-  'consequat', 'duis', 'aute', 'irure', 'in', 'reprehenderit', 'voluptate',
-  'velit', 'esse', 'cillum', 'fugiat', 'nulla', 'pariatur', 'excepteur', 'sint',
-  'occaecat', 'cupidatat', 'non', 'proident', 'sunt', 'culpa', 'qui', 'officia',
-  'deserunt', 'mollit', 'anim', 'id', 'est', 'laborum',
+  'harbor', 'summit', 'meridian', 'atlas', 'beacon', 'cedar', 'delta', 'ember',
+  'falcon', 'garnet', 'horizon', 'indigo', 'juniper', 'keystone', 'lantern',
+  'meadow', 'nimbus', 'orchard', 'pioneer', 'quarry', 'redwood', 'sierra',
+  'timber', 'umber', 'vista', 'willow', 'zenith', 'anchor', 'basalt', 'canyon',
+  'drift', 'estuary', 'fjord', 'grove', 'heath', 'inlet', 'jade', 'knoll',
+  'lagoon', 'mesa', 'north', 'onyx', 'prairie', 'quartz', 'ridge', 'slate',
+  'terrace', 'upland', 'valley', 'wharf', 'yonder', 'aspen', 'brook', 'cove',
+  'dune', 'elm', 'fern', 'glen', 'haven', 'isle',
 ];
 
 /** A few random words. */
