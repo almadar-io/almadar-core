@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-08-22T11:31:33.279Z",
+  "exportedAt": "2026-08-23T09:11:28.111Z",
   "services": {
     "llm": {
       "name": "llm",
@@ -173,7 +173,8 @@
           "required": false,
           "description": "OpenAI API key (use this OR ANTHROPIC_API_KEY)"
         }
-      ]
+      ],
+      "hooks": []
     },
     "ml": {
       "name": "ml",
@@ -217,7 +218,8 @@
           "required": true,
           "description": "Kebab-case trait name the serving orbital exposes its /events route under"
         }
-      ]
+      ],
+      "hooks": []
     },
     "data": {
       "name": "data",
@@ -332,7 +334,8 @@
           }
         }
       ],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "eventbus": {
       "name": "eventbus",
@@ -371,7 +374,8 @@
           }
         }
       ],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "discovery": {
       "name": "discovery",
@@ -456,7 +460,8 @@
           }
         }
       ],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "migration": {
       "name": "migration",
@@ -548,7 +553,8 @@
           }
         }
       ],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "skills": {
       "name": "skills",
@@ -623,7 +629,8 @@
           }
         }
       ],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "github": {
       "name": "github",
@@ -956,7 +963,8 @@
           "required": false,
           "description": "Default repository name"
         }
-      ]
+      ],
+      "hooks": []
     },
     "stripe": {
       "name": "stripe",
@@ -1047,7 +1055,8 @@
           "required": false,
           "description": "Webhook endpoint signing secret"
         }
-      ]
+      ],
+      "hooks": []
     },
     "llm-integration": {
       "name": "llm-integration",
@@ -1217,7 +1226,8 @@
           "required": false,
           "description": "OpenAI API key"
         }
-      ]
+      ],
+      "hooks": []
     },
     "youtube": {
       "name": "youtube",
@@ -1293,7 +1303,8 @@
           "required": true,
           "description": "YouTube Data API key"
         }
-      ]
+      ],
+      "hooks": []
     },
     "twilio": {
       "name": "twilio",
@@ -1316,6 +1327,12 @@
               "name": "body",
               "type": "string",
               "required": true,
+              "description": ""
+            },
+            {
+              "name": "from",
+              "type": "string",
+              "required": false,
               "description": ""
             }
           ],
@@ -1363,7 +1380,8 @@
           "required": false,
           "description": "Default sender phone number"
         }
-      ]
+      ],
+      "hooks": []
     },
     "email": {
       "name": "email",
@@ -1399,6 +1417,24 @@
               "type": "string",
               "required": false,
               "description": ""
+            },
+            {
+              "name": "htmlBody",
+              "type": "string",
+              "required": false,
+              "description": "HTML content; when present `body` becomes the plain-text alternative."
+            },
+            {
+              "name": "replyTo",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "templateId",
+              "type": "string",
+              "required": false,
+              "description": "Provider template reference (SendGrid dynamic templates; Resend rejects it loudly)."
             }
           ],
           "responseShape": {
@@ -1423,7 +1459,8 @@
           "required": false,
           "description": "Default sender email address"
         }
-      ]
+      ],
+      "hooks": []
     },
     "webhook": {
       "name": "webhook",
@@ -1479,7 +1516,8 @@
           "required": false,
           "description": "Per-request timeout (ms, default 10000)"
         }
-      ]
+      ],
+      "hooks": []
     },
     "push": {
       "name": "push",
@@ -1546,7 +1584,8 @@
           "required": true,
           "description": "VAPID subject (mailto: or https: contact URI)"
         }
-      ]
+      ],
+      "hooks": []
     },
     "calendar": {
       "name": "calendar",
@@ -1821,6 +1860,19 @@
           "envVar": "GOOGLE_CALENDAR_ID",
           "required": false,
           "description": "Default calendar id (default: primary)"
+        },
+        {
+          "envVar": "GOOGLE_CALENDAR_CHANNEL_TOKEN",
+          "required": false,
+          "description": "Watch-channel verification token — required to receive inbound calendar hooks (two-way sync)"
+        }
+      ],
+      "hooks": [
+        {
+          "provider": "google-calendar",
+          "event": "CAL_REMOTE_CHANGED",
+          "credentialEnv": "GOOGLE_CALENDAR_CHANNEL_TOKEN",
+          "providerExport": "googleCalendarHookProvider"
         }
       ]
     },
@@ -1966,15 +2018,26 @@
       "credentials": [
         {
           "envVar": "GOOGLE_DRIVE_SA_KEY",
-          "required": true,
-          "description": "Google service-account key JSON (raw or base64) with drive scope; store in Secret Manager, bind as env"
+          "required": false,
+          "description": "Google service-account key JSON (raw or base64) with drive scope — serves reads; store in Secret Manager, bind as env"
         },
         {
           "envVar": "GOOGLE_DRIVE_SUBJECT",
           "required": false,
           "description": "Workspace user to impersonate (domain-wide delegation); empty = act as the service account"
+        },
+        {
+          "envVar": "GOOGLE_DRIVE_REFRESH_TOKEN",
+          "required": false,
+          "description": "User OAuth refresh token (drive-consent.mjs) — serves writes; SA uploads are impossible on personal accounts (no SA storage quota)"
+        },
+        {
+          "envVar": "GOOGLE_DRIVE_FOLDER_ID",
+          "required": false,
+          "description": "Default parent folder for uploads/new folders when the call names none"
         }
-      ]
+      ],
+      "hooks": []
     },
     "metaAds": {
       "name": "metaAds",
@@ -2052,7 +2115,8 @@
           "required": false,
           "description": "Default ad account id (act_…); per-call accountId overrides"
         }
-      ]
+      ],
+      "hooks": []
     },
     "accounting": {
       "name": "accounting",
@@ -2108,7 +2172,8 @@
           }
         }
       ],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "banking": {
       "name": "banking",
@@ -2199,7 +2264,8 @@
           "required": true,
           "description": "GoCardless Bank Account Data secret key"
         }
-      ]
+      ],
+      "hooks": []
     },
     "esign": {
       "name": "esign",
@@ -2292,7 +2358,8 @@
           "required": true,
           "description": "DocuSign OAuth access token (JWT grant rotation is the deployment concern)"
         }
-      ]
+      ],
+      "hooks": []
     },
     "docker": {
       "name": "docker",
@@ -2504,7 +2571,8 @@
           "required": false,
           "description": "Docker daemon host URL"
         }
-      ]
+      ],
+      "hooks": []
     },
     "database": {
       "name": "database",
@@ -2542,7 +2610,8 @@
           }
         }
       ],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "storage": {
       "name": "storage",
@@ -2658,11 +2727,18 @@
               "type": "number",
               "required": false,
               "description": ""
+            },
+            {
+              "name": "continuationToken",
+              "type": "string",
+              "required": false,
+              "description": ""
             }
           ],
           "responseShape": {
             "keys": "array",
-            "truncated": "boolean"
+            "truncated": "boolean",
+            "nextToken": "string"
           }
         },
         {
@@ -2752,7 +2828,8 @@
           "required": false,
           "description": "Base URL for public-acl object links; empty = endpoint-derived"
         }
-      ]
+      ],
+      "hooks": []
     },
     "queue": {
       "name": "queue",
@@ -2907,7 +2984,8 @@
           "required": true,
           "description": "Message queue connection URL"
         }
-      ]
+      ],
+      "hooks": []
     },
     "redis": {
       "name": "redis",
@@ -3101,7 +3179,8 @@
           "required": true,
           "description": "Redis connection URL"
         }
-      ]
+      ],
+      "hooks": []
     },
     "oauth": {
       "name": "oauth",
@@ -3233,11 +3312,12 @@
           "required": false,
           "description": "OIDC issuer URL (default https://accounts.google.com)"
         }
-      ]
+      ],
+      "hooks": []
     },
     "credentials": {
       "name": "credentials",
-      "description": "Tenant credential store — masked list, set/remove, test connection (settings-page backend)",
+      "description": "Tenant credential store — masked list, set/remove, test connection, master-key rotation (settings-page backend)",
       "category": "auth",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -3328,6 +3408,16 @@
             "ok": "boolean",
             "message": "string"
           }
+        },
+        {
+          "name": "rotate",
+          "description": "",
+          "params": [],
+          "responseShape": {
+            "rotated": "number",
+            "alreadyCurrent": "number",
+            "unreadable": "number"
+          }
         }
       ],
       "credentials": [
@@ -3335,8 +3425,14 @@
           "envVar": "ALMADAR_CREDENTIAL_MASTER_KEY",
           "required": false,
           "description": "AES-256 master key (64-char hex) enabling the hosted credential store — hold it alone in the platform secret store"
+        },
+        {
+          "envVar": "ALMADAR_CREDENTIAL_MASTER_KEY_PREVIOUS",
+          "required": false,
+          "description": "Previous master key, present only during a rotation window — decrypts old rows until `credentials.rotate` re-encrypts them"
         }
-      ]
+      ],
+      "hooks": []
     },
     "otel": {
       "name": "otel",
@@ -3485,7 +3581,8 @@
           "required": false,
           "description": "Service name for traces"
         }
-      ]
+      ],
+      "hooks": []
     },
     "cli": {
       "name": "cli",
@@ -3513,7 +3610,8 @@
           }
         }
       ],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "deepagent": {
       "name": "deepagent",
@@ -3636,7 +3734,8 @@
           "required": false,
           "description": "DeepAgent API key"
         }
-      ]
+      ],
+      "hooks": []
     },
     "wikimedia": {
       "name": "wikimedia",
@@ -3675,7 +3774,8 @@
           "required": false,
           "description": "Per-request timeout (ms)"
         }
-      ]
+      ],
+      "hooks": []
     },
     "iconify": {
       "name": "iconify",
@@ -3747,7 +3847,8 @@
           "required": false,
           "description": "Per-request timeout (ms)"
         }
-      ]
+      ],
+      "hooks": []
     },
     "arxiv": {
       "name": "arxiv",
@@ -3784,7 +3885,8 @@
           "required": false,
           "description": "Per-request timeout (ms)"
         }
-      ]
+      ],
+      "hooks": []
     },
     "calendar-ical": {
       "name": "calendar-ical",
@@ -3793,7 +3895,8 @@
       "package": "(host-injected)",
       "backend": "host-injected",
       "actions": [],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "custom-bearer-api": {
       "name": "custom-bearer-api",
@@ -3802,7 +3905,8 @@
       "package": "(host-injected)",
       "backend": "host-injected",
       "actions": [],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "customBearer": {
       "name": "customBearer",
@@ -3811,7 +3915,8 @@
       "package": "(host-injected)",
       "backend": "host-injected",
       "actions": [],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "knowledge": {
       "name": "knowledge",
@@ -3820,7 +3925,8 @@
       "package": "(host-injected)",
       "backend": "host-injected",
       "actions": [],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "maps": {
       "name": "maps",
@@ -3829,7 +3935,8 @@
       "package": "(host-injected)",
       "backend": "host-injected",
       "actions": [],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "print": {
       "name": "print",
@@ -3838,7 +3945,8 @@
       "package": "(host-injected)",
       "backend": "host-injected",
       "actions": [],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "builder": {
       "name": "builder",
@@ -3847,7 +3955,8 @@
       "package": "(host-injected)",
       "backend": "host-injected",
       "actions": [],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "composer": {
       "name": "composer",
@@ -3856,7 +3965,8 @@
       "package": "(host-injected)",
       "backend": "host-injected",
       "actions": [],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "coordinator": {
       "name": "coordinator",
@@ -3865,7 +3975,8 @@
       "package": "(host-injected)",
       "backend": "host-injected",
       "actions": [],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "planner": {
       "name": "planner",
@@ -3874,7 +3985,8 @@
       "package": "(host-injected)",
       "backend": "host-injected",
       "actions": [],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "repair": {
       "name": "repair",
@@ -3883,7 +3995,8 @@
       "package": "(host-injected)",
       "backend": "host-injected",
       "actions": [],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     },
     "validator": {
       "name": "validator",
@@ -3892,7 +4005,8 @@
       "package": "(host-injected)",
       "backend": "host-injected",
       "actions": [],
-      "credentials": []
+      "credentials": [],
+      "hooks": []
     }
   },
   "categories": [

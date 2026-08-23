@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-08-22T11:31:33.279Z",
+  "exportedAt": "2026-08-23T09:11:28.111Z",
   "integrators": {
     "github": {
       "name": "github",
@@ -666,6 +666,12 @@
               "type": "string",
               "required": true,
               "description": ""
+            },
+            {
+              "name": "from",
+              "type": "string",
+              "required": false,
+              "description": ""
             }
           ],
           "responseShape": {
@@ -729,6 +735,24 @@
               "type": "string",
               "required": false,
               "description": ""
+            },
+            {
+              "name": "htmlBody",
+              "type": "string",
+              "required": false,
+              "description": "HTML content; when present `body` becomes the plain-text alternative."
+            },
+            {
+              "name": "replyTo",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "templateId",
+              "type": "string",
+              "required": false,
+              "description": "Provider template reference (SendGrid dynamic templates; Resend rejects it loudly)."
             }
           ],
           "responseShape": {
@@ -1811,11 +1835,18 @@
               "type": "number",
               "required": false,
               "description": ""
+            },
+            {
+              "name": "continuationToken",
+              "type": "string",
+              "required": false,
+              "description": ""
             }
           ],
           "responseShape": {
             "keys": "array",
-            "truncated": "boolean"
+            "truncated": "boolean",
+            "nextToken": "string"
           }
         },
         {
@@ -2404,6 +2435,16 @@
             "probed": "boolean",
             "ok": "boolean",
             "message": "string"
+          }
+        },
+        {
+          "name": "rotate",
+          "description": "",
+          "params": [],
+          "responseShape": {
+            "rotated": "number",
+            "alreadyCurrent": "number",
+            "unreadable": "number"
           }
         }
       ]

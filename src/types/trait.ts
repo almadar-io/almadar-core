@@ -197,14 +197,14 @@ export function isReferenceConfigType(type: string): type is ReferenceConfigType
 
 /**
  * The secret config-field types. A config knob typed `secret` holds a
- * CREDENTIAL (or a reference to one): it must never flow into spec.json,
- * traces, plan snapshots, or factory bakes in cleartext — consumers mask it
- * in UI (password-rendered input) and exclude it from serialization. The
- * `.lolo` language does not yet accept `secret` as a config-field type
- * (orbital-lolo parser gate); this contract is the single deterministic
- * source downstream consumers (studio, verifiers, rabit bakes) key on once
- * it lands — until then hosts use a `string` knob plus a password-rendered
- * `ui-input` (the std-service-custom-bearer pattern).
+ * credential REFERENCE (an env-var key name for `resolveCredentialRef`) —
+ * and, as defense-in-depth against a host wrongly inlining material, its
+ * VALUE must never flow into spec.json, traces, plan snapshots, or factory
+ * bakes in cleartext: consumers mask it (see `maskSecretConfigValues`) and
+ * UI password-renders the knob. `.lolo` accepts `: secret` as a config-field
+ * type (I-29, 2026-08-23 — previously the parser silently read it as a
+ * meaningless named type); this contract is the single deterministic source
+ * downstream consumers (studio, verifiers, rabit bakes) key on.
  */
 export const SECRET_CONFIG_TYPES = ['secret'] as const;
 export type SecretConfigType = (typeof SECRET_CONFIG_TYPES)[number];
@@ -212,6 +212,28 @@ export type SecretConfigType = (typeof SECRET_CONFIG_TYPES)[number];
 /** True when a config field's `type` marks its value as a credential to be masked. */
 export function isSecretConfigType(type: string): type is SecretConfigType {
     return (SECRET_CONFIG_TYPES as readonly string[]).includes(type);
+}
+
+/**
+ * Return `values` with every `secret`-declared field's string value masked to
+ * its last 4 characters (shorter values fully masked). Non-secret fields and
+ * non-string values pass through untouched. Use before echoing call-site
+ * config into traces, spec snapshots, or logs.
+ */
+export function maskSecretConfigValues(
+    config: DeclaredTraitConfig,
+    values: TraitConfig,
+): TraitConfig {
+    const masked: Record<string, TraitConfigValue> = {};
+    for (const [key, value] of Object.entries(values)) {
+        const decl = config[key];
+        if (decl !== undefined && isSecretConfigType(decl.type) && typeof value === 'string' && value.length > 0) {
+            masked[key] = value.length > 4 ? `••••${value.slice(-4)}` : '••••';
+        } else {
+            masked[key] = value;
+        }
+    }
+    return masked;
 }
 
 export type ConfigFieldDeclaration = {

@@ -498,6 +498,7 @@ export {
   SECRET_CONFIG_TYPES,
   type SecretConfigType,
   isSecretConfigType,
+  maskSecretConfigValues,
   type CallSiteConfigEntry,
   type CallSiteConfig,
   isCallSiteConfigDeclaration,
