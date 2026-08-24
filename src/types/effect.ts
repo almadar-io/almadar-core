@@ -388,8 +388,10 @@ export type FetchOptions = {
     limit?: number | RenderBinding | SExpr[];
     /** Number of entities to skip — same template-layer forms as `limit`. */
     offset?: number | RenderBinding | SExpr[];
-    /** Relations to populate (entity field names) */
-    include?: string[];
+    /** Relations to populate (entity field names). The template layer may
+     *  carry a binding (`'@config.include'`) — same as `limit`/`offset`, the
+     *  compiler's inline phase resolves it to the concrete list. */
+    include?: string[] | RenderBinding;
     /** Lifecycle events to emit on resolve / reject */
     emit?: { success?: string; failure?: string };
 };
