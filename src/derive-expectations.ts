@@ -123,7 +123,23 @@ export function deriveExpectations(
         ownerByEntity.set(def.name, o.name);
         defByEntity.set(def.name, def);
       }
-      if (def.identity === true && identityDef === undefined) identityDef = def;
+    }
+  }
+  // A PRIMARY `[identity]` roster shadows one an import dragged in as an
+  // auxiliary copy — the composing app decides who `@user` is. Same rule as
+  // `identityEntityName` and the compiled path's `identity_entities`.
+  for (const o of schema.orbitals) {
+    const primary = o.entity;
+    if (typeof primary === 'object' && primary !== null && 'fields' in primary
+      && (primary as OrbitalEntity).identity === true) {
+      identityDef = primary as OrbitalEntity;
+      break;
+    }
+  }
+  if (identityDef === undefined) {
+    for (const o of schema.orbitals) {
+      identityDef = inlineEntitiesOf(o).find((def) => def.identity === true);
+      if (identityDef !== undefined) break;
     }
   }
 

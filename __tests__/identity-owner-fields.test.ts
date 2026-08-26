@@ -126,3 +126,52 @@ describe('ownerFieldsFromSchema', () => {
         ]);
     });
 });
+
+/**
+ * An imported roster yields to the host's own — the JS twin of
+ * `identity_entities` in `orbital-compiler/.../user_identity.rs`.
+ *
+ * Composing a behavior never imports the orbital that owns its roster, but a
+ * trait bound to one of its siblings drags that roster in as an auxiliary copy,
+ * tag and all. The composing app decides who `@user` is, so a PRIMARY roster
+ * shadows the copy — while the copy's name keeps counting for owner columns,
+ * or the imported behavior's rows go unscoped here and scoped when compiled.
+ */
+describe('an imported roster copy', () => {
+    const hostAndImportedRoster = (hostIsRoster: boolean): OrbitalSchema =>
+        schemaOf([
+            orbital(
+                'HostOrbital',
+                hostIsRoster ? identityEntity('Staff', [ID_FIELD]) : entity('Staff', [ID_FIELD]),
+            ),
+            orbital(
+                'TimesheetOrbital',
+                entity('Timesheet', [ID_FIELD, relation('employeeId', 'Employee')]),
+                [identityEntity('Employee', [ID_FIELD])],
+            ),
+        ]);
+
+    it('yields to the host roster for @user', () => {
+        expect(identityEntityName(hostAndImportedRoster(true))).toBe('Staff');
+    });
+
+    it('is still the viewer when the host declares no roster of its own', () => {
+        expect(identityEntityName(hostAndImportedRoster(false))).toBe('Employee');
+    });
+
+    it('keeps its owner columns after being shadowed', () => {
+        expect(ownerFieldsFromSchema(hostAndImportedRoster(true))).toContain('Timesheet.employeeId');
+    });
+
+    it('contributes no owner column when it was never a roster', () => {
+        const schema = schemaOf([
+            orbital('HostOrbital', identityEntity('Staff', [ID_FIELD])),
+            orbital(
+                'TimesheetOrbital',
+                entity('Timesheet', [ID_FIELD, relation('employeeId', 'Employee')]),
+                [entity('Employee', [ID_FIELD])],
+            ),
+        ]);
+        expect(ownerFieldsFromSchema(schema)).not.toContain('Timesheet.employeeId');
+    });
+});

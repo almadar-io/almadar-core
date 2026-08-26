@@ -29,24 +29,71 @@ function inlineEntities(schema: OrbitalSchema): OrbitalEntity[] {
 }
 
 /**
- * The name of the schema's `[identity]` entity, if it declares one.
- *
- * At most one per composed program (`ORB_S_IDENTITY_NOT_UNIQUE`); same-name
- * duplicates across orbitals are rejected upstream by `validate_entity_uniqueness`,
- * so the first match is the only match.
+ * Every `[identity]`-tagged entity, primaries first, paired with whether it is
+ * an orbital's PRIMARY entity or an auxiliary copy an import brought along.
  */
-export function identityEntityName(schema: OrbitalSchema): string | undefined {
-  return inlineEntities(schema).find((def) => def.identity === true)?.name;
+function identityEntitiesTagged(schema: OrbitalSchema): Array<{ def: OrbitalEntity; primary: boolean }> {
+  const out: Array<{ def: OrbitalEntity; primary: boolean }> = [];
+  for (const orbital of schema.orbitals ?? []) {
+    const ref = orbital.entity;
+    if (typeof ref === 'object' && ref !== null && 'fields' in ref && (ref as OrbitalEntity).identity === true) {
+      out.push({ def: ref as OrbitalEntity, primary: true });
+    }
+  }
+  for (const orbital of schema.orbitals ?? []) {
+    for (const ref of orbital.auxiliaryEntities ?? []) {
+      if (typeof ref === 'object' && ref !== null && 'fields' in ref && (ref as OrbitalEntity).identity === true) {
+        out.push({ def: ref as OrbitalEntity, primary: false });
+      }
+    }
+  }
+  return out;
 }
 
 /**
- * Owner columns as `Entity.field` pairs — every relation field pointing at the
- * `[identity]` entity. Empty when the program declares no identity, which keeps
- * every unmigrated app behaving exactly as before.
+ * The name of the schema's `[identity]` entity, if it declares one.
+ *
+ * A behavior declares its own roster so it runs standalone. Composing it never
+ * imports that orbital, but a trait bound to one of its siblings drags the
+ * roster in as an auxiliary copy, tag and all — so a PRIMARY roster shadows
+ * every imported copy: the composing app decides who `@user` is. With no
+ * primary roster the copies still count, which is what lets a thin app that
+ * wraps one behavior inherit that behavior's roster.
+ *
+ * Compiled-path twin: `identity_entities` in
+ * `orbital-compiler/src/phases/validation/user_identity.rs`.
+ */
+export function identityEntityName(schema: OrbitalSchema): string | undefined {
+  const tagged = identityEntitiesTagged(schema);
+  return (tagged.find((e) => e.primary) ?? tagged[0])?.def.name;
+}
+
+/**
+ * Every `[identity]`-tagged name, shadowed copies included.
+ *
+ * Owner-column derivation asks whether a relation targets *a* roster, not *the*
+ * one: `Timesheet.employeeId : Employee` is an owner column whether or not
+ * `Employee` won the `@user` binding. Dropping the shadowed names here would
+ * leave an imported behavior's rows unscoped at runtime while the compiled path
+ * treats the very same column as an owner column.
+ */
+export function identityEntityNames(schema: OrbitalSchema): string[] {
+  const out: string[] = [];
+  for (const { def } of identityEntitiesTagged(schema)) {
+    if (!out.includes(def.name)) out.push(def.name);
+  }
+  return out;
+}
+
+/**
+ * Owner columns as `Entity.field` pairs — every relation field pointing at an
+ * `[identity]`-tagged entity, shadowed imported rosters included. Empty when the
+ * program declares no identity, which keeps every unmigrated app behaving
+ * exactly as before.
  */
 export function ownerFieldsFromSchema(schema: OrbitalSchema): string[] {
-  const identity = identityEntityName(schema);
-  if (identity === undefined) return [];
+  const identities = identityEntityNames(schema);
+  if (identities.length === 0) return [];
 
   const out: string[] = [];
   const defs = inlineEntities(schema);
@@ -55,7 +102,7 @@ export function ownerFieldsFromSchema(schema: OrbitalSchema): string[] {
     for (const field of def.fields ?? []) {
       // Cardinality-one only: an owner column holds ONE viewer id. A
       // `[Person]` array is a participant list, not ownership.
-      if (field.name && field.type === 'relation' && field.relation.entity === identity) {
+      if (field.name && field.type === 'relation' && identities.includes(field.relation.entity)) {
         out.push(`${def.name}.${field.name}`);
         if (def.collection) {
           const cols = declaredByCollection.get(def.collection) ?? [];
