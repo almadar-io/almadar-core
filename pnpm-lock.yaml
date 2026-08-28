@@ -13,8 +13,8 @@ importers:
         version: 3.25.76
     devDependencies:
       '@almadar/eslint-plugin':
-        specifier: ^2.15.0
-        version: 2.15.0(eslint@10.0.0)
+        specifier: ^2.16.0
+        version: 2.16.0(eslint@10.0.0)
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.0
@@ -42,8 +42,8 @@ importers:
 
 packages:
 
-  '@almadar/eslint-plugin@2.15.0':
-    resolution: {integrity: sha512-8mQTnuU7eHOSpCgAag5VEywVce9iWFNC2j6cKvrwjOH/cbak+6Akgnp/zjK3bvy6xoVp6k/4H6bIh/WkRhbfSg==}
+  '@almadar/eslint-plugin@2.16.0':
+    resolution: {integrity: sha512-7/F3SzZFjOPSspnV2KxrfuJ17WDYv5/GKUkGJl+aiTHlmXMUu9QN+FmL0fGFbAQRrDwzG/feovSmHbYRouUEsQ==}
     peerDependencies:
       eslint: '>=8.0.0'
 
@@ -1415,7 +1415,7 @@ packages:
 
 snapshots:
 
-  '@almadar/eslint-plugin@2.15.0(eslint@10.0.0)':
+  '@almadar/eslint-plugin@2.16.0(eslint@10.0.0)':
     dependencies:
       eslint: 10.0.0
       jsonc-eslint-parser: 3.1.0

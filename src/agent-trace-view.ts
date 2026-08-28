@@ -95,10 +95,11 @@ export type TraceActivityItem =
       label?: string;
     }
   | { type: 'tool_call'; tool: string; args: ToolArgs; timestamp: number; isExecuting?: boolean }
-  | { type: 'tool_result'; tool: string; result: JsonValue; success: boolean; timestamp: number }
+  | { type: 'tool_result'; tool: string; result: JsonValue; success: boolean; timestamp: number; durationMs?: number }
   | { type: 'file_operation'; operation: TraceFileOperation; path: string; success?: boolean; timestamp: number }
   | { type: 'schema_diff'; filePath: string; hunks: TraceDiffHunk[]; timestamp: number }
-  | { type: 'error'; message: string; code?: string; timestamp: number };
+  | { type: 'error'; message: string; code?: string; timestamp: number }
+  | { type: 'milestone'; milestone: string; summary?: string; timestamp: number };
 
 // ----------------------------------------------------------------------------
 // TraceSubagent — the `SubagentState` panel model
@@ -126,6 +127,10 @@ export interface TraceSubagent {
   task: string;
   messages: TraceSubagentMessage[];
   durationMs?: number;
+  /** Full nested activity (tool calls, messages, milestones) for a rich
+   *  per-subagent detail view — additive, optional; `messages` remains the
+   *  flat progress-log shape for consumers that only need that. */
+  timeline?: ReadonlyArray<TraceActivityItem>;
 }
 
 // ----------------------------------------------------------------------------

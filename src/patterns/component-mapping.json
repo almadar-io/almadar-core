@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-08-25T01:35:07.912Z",
+  "exportedAt": "2026-08-28T09:02:57.076Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -914,11 +914,6 @@
       "importPath": "@/components/core/molecules/ReplyTree",
       "category": "display"
     },
-    "rich-block-editor": {
-      "component": "RichBlockEditor",
-      "importPath": "@/components/core/molecules/RichBlockEditor",
-      "category": "display"
-    },
     "version-diff": {
       "component": "VersionDiff",
       "importPath": "@/components/core/molecules/VersionDiff",
@@ -1403,6 +1398,21 @@
       "component": "DrawFxLayer",
       "importPath": "@/components/game/molecules/DrawFxLayer",
       "category": "game"
+    },
+    "rich-text-editor": {
+      "component": "RichTextEditor",
+      "importPath": "@/components/core/molecules/RichTextEditor",
+      "category": "component"
+    },
+    "document-panel": {
+      "component": "DocumentPanel",
+      "importPath": "@/components/core/molecules/DocumentPanel",
+      "category": "component"
+    },
+    "document-details": {
+      "component": "DocumentDetails",
+      "importPath": "@/components/core/molecules/DocumentDetails",
+      "category": "display"
     }
   }
 }
