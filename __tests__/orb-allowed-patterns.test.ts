@@ -52,19 +52,25 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
   //   container +1  fx-overlay
   // Nothing was removed or recategorised. A pin bumped without naming the drift
   // is how a real regression gets papered over — keep this list current.
+  // Re-pinned 2026-08-29 from 104/40/242 — drift verified PRE-EXISTING at
+  // HEAD (identical counts with the HEAD registry), introduced by the
+  // 2026-08-28 document-look pass without a pin bump:
+  //   component +2  document-panel, rich-text-editor   (the writing surface)
+  //   display   -1  document-details                   (left the allowed
+  //                 display set when it gained its entity binding)
   it('pins the per-category allowed counts', () => {
     const counts = Object.fromEntries(
       Object.entries(grouped).map(([cat, items]) => [cat, items.length]),
     );
     expect(counts).toMatchObject({
-      component: 104,
-      display: 40,
+      component: 106,
+      display: 39,
       filter: 4,
       form: 10,
       game: 34,
       media: 1,
     });
-    expect(names.length).toBe(242);
+    expect(names.length).toBe(243);
   });
 
   it('admits the drifted patterns by name, not just by count', () => {

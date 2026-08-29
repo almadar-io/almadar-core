@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-08-23T09:11:28.111Z",
+  "exportedAt": "2026-08-29T08:09:09.100Z",
   "services": {
     "llm": {
       "name": "llm",
@@ -2680,6 +2680,40 @@
             "etag": "string",
             "id": "string",
             "url": "string"
+          }
+        },
+        {
+          "name": "uploadMany",
+          "description": "",
+          "params": [
+            {
+              "name": "bucket",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "files",
+              "type": "array",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "acl",
+              "type": "'public' | 'private'",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "maxSize",
+              "type": "number",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "items": "array",
+            "count": "number"
           }
         },
         {

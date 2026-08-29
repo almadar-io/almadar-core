@@ -30,8 +30,17 @@ export interface JsonSchema {
   additionalProperties?: boolean | JsonSchema;
   items?: JsonSchema;
   enum?: ReadonlyArray<string | number | boolean>;
+  /** Single-value pin — JSON Schema 2020-12 `const` (an `enum` of one). */
+  const?: string | number | boolean;
   oneOf?: ReadonlyArray<JsonSchema>;
   anyOf?: ReadonlyArray<JsonSchema>;
+  allOf?: ReadonlyArray<JsonSchema>;
+  /** Conditional subschemas — JSON Schema 2020-12 `if`/`then`/`else`. Used
+   *  e.g. to pin `orbitalName` to an organism's exact roster per anchored
+   *  organism (rabit set_roster, SCAN-ROSTER-RETRY-1). */
+  if?: JsonSchema;
+  then?: JsonSchema;
+  else?: JsonSchema;
   default?: JsonValue;
   /**
    * Reference to a shared definition under `$defs` at the schema root.
