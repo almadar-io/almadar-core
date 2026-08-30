@@ -79,7 +79,7 @@ const TIER_D_NAMED_PRIMITIVES = new Set([
   'contentTrait',
 ]);
 
-const TIER_D_TYPES = new Set(['trait', 'slot', 'pattern']);
+const TIER_D_TYPES = new Set(['trait', 'slot', 'pattern', 'event']);
 
 function configKeyQuestions(
   call: FactoryCallSite,
@@ -90,7 +90,6 @@ function configKeyQuestions(
     for (const param of trait.overridableConfigKeys) {
       if (param.tier === 'internal') continue;
       if (TIER_D_TYPES.has(param.type)) continue;
-      if (param.key.endsWith('Event')) continue;
       if (TIER_D_NAMED_PRIMITIVES.has(param.key)) continue;
       out.push(buildConfigKeyQuestion(call, trait, param));
     }
@@ -420,6 +419,16 @@ function signatureFieldToEntityField(f: FactorySignatureEntityField): EntityFiel
       // Renderable content is computed by the trait's effects, never asked
       // for in a questionnaire — no question payload beyond the tag.
       return { ...base, type: 'node' };
+    case 'event':
+      // Event-name reference (struct-alias member, e.g. `ItemAction.event`)
+      // — authored by the trait, never asked for in a questionnaire, same
+      // posture as `node`.
+      return { ...base, type: 'event' };
+    case 'money':
+    case 'file':
+      // No type-dependent payload — same posture as the semantic string
+      // domains above.
+      return { ...base, type: f.type };
     default: {
       const _exhaustive: never = f.type;
       return { ...base, type: 'string' };

@@ -113,3 +113,29 @@ export function entityAccessPolicies(
 ): EntityAccessPolicies | undefined {
   return entityAccessTable(schema).get(entityName);
 }
+
+/**
+ * Access policies keyed the way the mock store keys its tables: the declared
+ * `persistent:` collection, else the lowercased entity name. The mock
+ * adapter's owner-restamp consults this map to decide whether a persona the
+ * dev host switches to could have CREATED a row before re-pointing its owner
+ * column — a reader persona must not inherit authorship of a draft just
+ * because the demo store follows the viewer (the `@create` directive is the
+ * single authority on who authors; no role heuristics here). First declared
+ * policy per collection wins, the same collection-inheritance rule as
+ * `entityAccessTable`.
+ */
+export function entityAccessPoliciesByStoreKey(
+  schema: OrbitalSchema,
+): Map<string, EntityAccessPolicies> {
+  const collectionOf = new Map<string, string>();
+  for (const def of inlineEntities(schema)) {
+    if (def.collection) collectionOf.set(def.name, def.collection);
+  }
+  const byKey = new Map<string, EntityAccessPolicies>();
+  for (const [name, policies] of entityAccessTable(schema)) {
+    const key = collectionOf.get(name) ?? name.toLowerCase();
+    if (!byKey.has(key) && isDeclared(policies)) byKey.set(key, policies);
+  }
+  return byKey;
+}

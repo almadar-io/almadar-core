@@ -63,6 +63,10 @@ export interface JsonSchema {
   'x-label'?: string;
   /** Knob's `@tier` from the source `.lolo` (`domain`/`presentation`/`internal`). */
   'x-tier'?: string;
+  /** Prompt-facing role hint for an `event`-typed knob wired in a DEFINER
+   *  position (A-UNIFY) — its value CREATES the event name rather than
+   *  referencing one, so it deliberately carries no enum pin. */
+  'x-role'?: 'definer';
 }
 
 export type JsonSchemaType =
@@ -91,11 +95,14 @@ export type SchemaFieldType =
   | 'phone'
   | 'uuid'
   | 'image'
+  | 'money'
+  | 'file'
   | 'array'
   | 'object'
   | 'enum'
   | 'relation'
-  | 'node';
+  | 'node'
+  | 'event';
 
 export interface FactorySignatureEntityField {
   name: string;
@@ -305,6 +312,16 @@ export interface FactoryTraitSignature {
    *  (`docs/Almadar_Studio_Failures_2026-08-04.md` §N). Absent = topology
    *  unknown (legacy catalogs), same convention as `transitionEvents`. */
   effectEntityRefs?: ReadonlyArray<string>;
+  /** Config knobs wired in a DEFINER position — named by `emits { @config.<k> }`,
+   *  a stateMachine `events[].key` sentinel, or a transition `event` sentinel
+   *  (A-UNIFY; mirrors the Rust `trait_event_ctx`/`definer_knobs_for_trait`
+   *  rule, declaration positions only, no cross-trait resolution). A
+   *  DEFINER knob's value CREATES the event name rather than referencing an
+   *  existing one, so the fill-schema enum pin (`schema.ts` `knobToSchema`)
+   *  skips it — any name is valid by construction, it cannot go stale.
+   *  Source-derived, never authored; absent = topology unknown (legacy
+   *  catalogs), same convention as `transitionEvents`. */
+  definerKnobs?: ReadonlyArray<string>;
 }
 
 /** One event a trait emits or listens for, with its authored annotations — the

@@ -9,6 +9,7 @@ export { identityEntityName, ownerFieldsFromSchema } from './identityOwners.js';
 export {
   type EntityAccessPolicies,
   entityAccessPolicies,
+  entityAccessPoliciesByStoreKey,
   entityAccessTable,
 } from '../access/entityAccess.js';
 export {

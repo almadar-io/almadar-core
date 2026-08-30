@@ -57,7 +57,11 @@ export type FieldType =
     // Renderable UI content — a pattern node (or array of them), the same
     // shape `render-ui` effects carry (`PatternNode` in render-ui-edit.ts).
     // First-class so view-fragment fields stop hiding behind `object`/`json`.
-    | 'node';
+    | 'node'
+    // Event-name reference — a string at rest, but the TYPE marks it as an
+    // event key rather than free text (Phase B / SCAN-EVENT-KNOB-2). Legal
+    // on struct-alias fields consumed by config knobs (e.g. `ItemAction.event`).
+    | 'event';
 
 /** Every `FieldType`, as a runtime array. Downstream imports this instead of
  *  re-listing the union — five copies had already drifted apart. */
@@ -83,6 +87,7 @@ export const FIELD_TYPES = [
     'slot',
     'pattern',
     'node',
+    'event',
 ] as const satisfies readonly FieldType[];
 
 /** The semantic string domains — constrained strings, validatable by value. */
@@ -282,7 +287,8 @@ type ScalarFieldType =
     | 'trait'
     | 'slot'
     | 'pattern'
-    | 'node';
+    | 'node'
+    | 'event';
 
 /** Fields shared across every variant. */
 type EntityFieldBase = {
@@ -472,6 +478,7 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
             scalarVariant('slot'),
             scalarVariant('pattern'),
             scalarVariant('node'),
+            scalarVariant('event'),
             scalarVariant('money'),
             scalarVariant('file'),
             // Enum variant — REQUIRES non-empty values.

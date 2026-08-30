@@ -357,7 +357,7 @@ export const TraitCategorySchema = z.enum([
 // `trait` / `slot` / `pattern` mirror Rust's `FieldType::{Trait, Slot, Pattern}`
 // (orbital-core schema/types.rs) — config-field-only types: a `@trait.X`
 // embed slot, a UI slot name, a pattern type name.
-export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum' | 'email' | 'url' | 'phone' | 'uuid' | 'image' | 'trait' | 'slot' | 'pattern' | 'node';
+export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum' | 'email' | 'url' | 'phone' | 'uuid' | 'image' | 'trait' | 'slot' | 'pattern' | 'node' | 'event';
 
 /**
  * Simplified field for trait data entities
@@ -395,6 +395,10 @@ export const TraitEntityFieldSchema: z.ZodType<TraitEntityField> = z.object({
         'trait',
         'slot',
         'pattern',
+        // `node` was missing here while being a real `TraitFieldType` member
+        // — the same latent-drift trap `event` would otherwise repeat.
+        'node',
+        'event',
     ]),
     required: z.boolean().optional(),
     default: TraitConfigValueSchema.optional(),
@@ -604,8 +608,9 @@ export type TraitEventContract = {
 /**
  * `@config.<knob>` is the only legal reference form for an emit/listen
  * event name (Option B — the declared event name resolves to a
- * string-typed config knob's value at inline/resolve time). Matches the
- * Rust lexer's dotted-sigil body (`config.<ident>`, no further dots).
+ * `string`- or `event`-typed config knob's value at inline/resolve time).
+ * Matches the Rust lexer's dotted-sigil body (`config.<ident>`, no further
+ * dots).
  */
 export const CONFIG_REF_EVENT_PATTERN = /^@config\.[A-Za-z_][A-Za-z0-9_]*$/;
 
@@ -635,7 +640,10 @@ export function resolveConfigRefEventName(
     if (knob === undefined) return { ok: false, error: 'unknown-knob' };
     const field = declaredConfig?.[knob];
     if (field === undefined) return { ok: false, error: 'unknown-knob' };
-    if (field.type !== 'string') return { ok: false, error: 'not-string' };
+    // A-UNIFY: definer knobs (whose value CREATES the event name) spell
+    // `: event` same as reference knobs — the declared field type is
+    // `'string' | 'event'`, the VALUE still must be a plain string literal.
+    if (field.type !== 'string' && field.type !== 'event') return { ok: false, error: 'not-string' };
     if (field.default === undefined) return { ok: false, error: 'no-default' };
     const value = effectiveConfig[knob];
     if (typeof value !== 'string') return { ok: false, error: 'not-string' };
@@ -786,7 +794,8 @@ export type RequiredField = {
 
 export const RequiredFieldSchema = z.object({
     name: z.string().min(1),
-    type: z.enum(['string', 'number', 'boolean', 'date', 'array', 'object', 'timestamp', 'datetime', 'enum', 'email', 'url', 'phone', 'uuid', 'image', 'trait', 'slot', 'pattern']),
+    // `node` was missing here too (same drift as TraitEntityFieldSchema above).
+    type: z.enum(['string', 'number', 'boolean', 'date', 'array', 'object', 'timestamp', 'datetime', 'enum', 'email', 'url', 'phone', 'uuid', 'image', 'trait', 'slot', 'pattern', 'node', 'event']),
     description: z.string().optional(),
 });
 
