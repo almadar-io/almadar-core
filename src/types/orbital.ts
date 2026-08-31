@@ -135,7 +135,41 @@ export type ExpectDeclaration =
       kind: "event";
       traitName: string;
       event: string;
+    }
+  | {
+      /**
+       * `expects page "/articles/:slug"` — a route a sibling orbital declares
+       * and this one navigates to. The one cross-boundary edge a `navigate`
+       * effect cannot state for itself: the effect carries a static prefix
+       * (`/articles/`), the provider a pattern (`/articles/:slug`), and the
+       * parameterisation is information the usage does not hold. Derived, not
+       * hand-authored — see `deriveExpectations`.
+       */
+      kind: "page";
+      path: string;
     };
+
+/**
+ * The entity name an expectation is ABOUT, or undefined when it is not about
+ * an entity at all (`event` names a trait's event, `page` a route, and a bare
+ * `expects identity` defers to whoever is tagged `[identity]`).
+ *
+ * TS counterpart of the compiler's `expectations::expected_entity_names` and
+ * L1's `types::expected_entity_names`. Exists so callers stop reaching for
+ * `kind !== "event"` as a stand-in for "has a name" — a proxy that silently
+ * became wrong the moment a second nameless kind was added.
+ */
+export function expectedEntityName(decl: ExpectDeclaration): string | undefined {
+  switch (decl.kind) {
+    case "entity":
+      return decl.name;
+    case "identity":
+      return decl.name;
+    case "event":
+    case "page":
+      return undefined;
+  }
+}
 
 export const ExpectDeclarationSchema = z.discriminatedUnion("kind", [
   z.object({
@@ -152,6 +186,10 @@ export const ExpectDeclarationSchema = z.discriminatedUnion("kind", [
     kind: z.literal("event"),
     traitName: z.string().min(1, "Expected event trait name is required"),
     event: z.string().min(1, "Expected event name is required"),
+  }),
+  z.object({
+    kind: z.literal("page"),
+    path: z.string().min(1, "Expected page path is required"),
   }),
 ]);
 

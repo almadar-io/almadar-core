@@ -7,7 +7,8 @@
  * same cross-boundary edge families the organism declares — `@user.<field>`
  * reads in access directives/guards/effects (→ `expects identity`), relation
  * fields, `persist`/`fetch` effect targets, and cross-orbital `linkedEntity`
- * bindings (→ `expects entity`). Shape field types are copied verbatim from
+ * bindings (→ `expects entity`), and `navigate` targets resolving to a
+ * sibling's page (→ `expects page`). Shape field types are copied verbatim from
  * the provider's declared fields in the golden schema — full fidelity, zero
  * guessing; a usage naming a field the provider never declared is reported in
  * `diagnostics` and omitted from the shape.
@@ -99,6 +100,74 @@ function isPlainString(value: WalkableData): value is string {
 }
 
 /**
+ * Mirror of the compiler's `path_matches_pattern`
+ * (`validation/effect/navigate.rs`): equal segment count, and every pattern
+ * segment either a `:param` or an exact match.
+ */
+function pathMatchesPattern(path: string, pattern: string): boolean {
+  const pathParts = path.split('/').filter((s) => s.length > 0);
+  const patternParts = pattern.split('/').filter((s) => s.length > 0);
+  if (pathParts.length !== patternParts.length) return false;
+  return patternParts.every((seg, i) => seg.startsWith(':') || seg === pathParts[i]);
+}
+
+/**
+ * Mirror of the compiler's `find_matching_page_path`: exact → `:param`
+ * pattern → declared-path-extends-target prefix (the arm that resolves the
+ * static prefix of a dynamic navigate). Deterministic tie-break by sorted
+ * path, because the compiler iterates a HashMap and we must not depend on
+ * its order to pick a different winner than it would accept.
+ */
+function findMatchingPagePath(navPath: string, pagePaths: ReadonlySet<string>): string | null {
+  if (pagePaths.has(navPath)) return navPath;
+  const sorted = [...pagePaths].sort();
+
+  // A trailing slash means the effect was `(str/concat "/articles/" <dynamic>)`
+  // — the runtime path has ONE MORE segment than the prefix, so the provider is
+  // the route that adds exactly one `:param` segment. Both `/articles` and
+  // `/articles/:slug` satisfy the compiler here (its first arm drops empty
+  // segments, making `/articles/` and `/articles` look identical), but only
+  // `/articles/:slug` is the route actually being navigated to — and a
+  // declaration is only worth having if it names the right thing.
+  if (navPath.endsWith('/')) {
+    const prefixParts = navPath.split('/').filter((s) => s.length > 0);
+    const parameterised = sorted.find((p) => {
+      const parts = p.split('/').filter((s) => s.length > 0);
+      return (
+        parts.length === prefixParts.length + 1 &&
+        parts[parts.length - 1]?.startsWith(':') === true &&
+        prefixParts.every((seg, i) => parts[i] === seg)
+      );
+    });
+    if (parameterised !== undefined) return parameterised;
+  }
+
+  return (
+    sorted.find((p) => pathMatchesPattern(navPath, p)) ??
+    sorted.find((p) => p.startsWith(navPath.replace(/\/+$/, ''))) ??
+    null
+  );
+}
+
+/**
+ * Mirror of the compiler's `extract_static_path_prefix`: a navigate target is
+ * either a literal path, or a `str/concat`/`concat` whose FIRST argument is a
+ * literal prefix (`(str/concat "/articles/" @payload.data.slug)` → `/articles/`).
+ * Anything else is runtime-resolved and undecidable statically.
+ */
+function navigateTargetOf(node: WalkableData): string | null {
+  if (!Array.isArray(node) || node.length < 2 || node[0] !== 'navigate') return null;
+  const target = node[1];
+  if (typeof target === 'string') return target.startsWith('@') ? null : target;
+  if (Array.isArray(target) && target.length >= 2) {
+    const op = target[0];
+    const first = target[1];
+    if ((op === 'str/concat' || op === 'concat') && typeof first === 'string') return first;
+  }
+  return null;
+}
+
+/**
  * Derive the `expects` declarations for one orbital of a full schema.
  * Pure; never mutates the input schema.
  */
@@ -149,6 +218,33 @@ export function deriveExpectations(
   const userFields = new Set<string>();
   /** Sibling entity name → field names the orbital actually references. */
   const entityRefs = new Map<string, Set<string>>();
+  /** Route patterns a SIBLING orbital declares and this one navigates to. */
+  const pageRefs = new Set<string>();
+
+  // Every page the organism declares, and who owns it — the two halves a
+  // slice does not have, which is exactly why derivation (not the effect) is
+  // the place that can resolve a navigate prefix to a provider's pattern.
+  const ownerByPagePath = new Map<string, string>();
+  for (const o of schema.orbitals) {
+    for (const page of o.pages ?? []) {
+      if (typeof page === 'string') continue;
+      const path = page.path;
+      if (typeof path === 'string' && path.length > 0 && !ownerByPagePath.has(path)) {
+        ownerByPagePath.set(path, o.name);
+      }
+    }
+  }
+  const organismPagePaths = new Set(ownerByPagePath.keys());
+
+  const addPageRef = (navPath: string): void => {
+    const matched = findMatchingPagePath(navPath, organismPagePaths);
+    // No page in the whole organism matches → a genuine dead route. Derive
+    // nothing, so the slice still reports it and a typo stays an error.
+    if (matched === null) return;
+    // Ours already: the slice declares it, nothing to expect.
+    if (ownerByPagePath.get(matched) === orbitalName) return;
+    pageRefs.add(matched);
+  };
 
   const addEntityRef = (name: string, field?: string): void => {
     if (ownEntityNames.has(name)) return; // never expect your own entity
@@ -188,6 +284,11 @@ export function deriveExpectations(
         // `@EntityName.<field>` — a direct cross-entity read.
         addEntityRef(parsed.root, parsed.path[0]);
       }
+      return;
+    }
+    const navTarget = navigateTargetOf(node);
+    if (navTarget !== null) {
+      addPageRef(navTarget);
       return;
     }
     if (Array.isArray(node) && node.length > 0 && node[0] === 'persist') {
@@ -324,6 +425,10 @@ export function deriveExpectations(
       ...(identityDef !== undefined ? { name: identityDef.name } : {}),
       ...(shape.length > 0 ? { shape } : {}),
     });
+  }
+
+  for (const path of [...pageRefs].sort()) {
+    expectations.push({ kind: 'page', path });
   }
 
   for (const name of [...entityRefs.keys()].sort()) {

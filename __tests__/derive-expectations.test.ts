@@ -257,4 +257,72 @@ describe('deriveExpectations', () => {
                 : undefined;
         expect(roleField?.name).toBe('role');
     });
+    // `expects page` — the route arm. Derivation is the only place with both
+    // halves: the consumer's navigate PREFIX and the provider's page PATTERN.
+    describe('page expectations', () => {
+        function schemaWithRoutes(navTarget: unknown): OrbitalSchema {
+            const schema = buildSchema();
+            const orderRecord = schema.orbitals.find((o) => o.name === 'OrderRecordOrbital');
+            const checkout = schema.orbitals.find((o) => o.name === 'CheckoutOrbital');
+            if (orderRecord === undefined || checkout === undefined) throw new Error('fixture');
+            orderRecord.pages = [{ name: 'OrderDetailPage', path: '/orders/:id', traits: [] }];
+            checkout.pages = [{ name: 'CheckoutPage', path: '/checkout', traits: [] }];
+            const trait = checkout.traits[0];
+            if (trait === undefined || typeof trait === 'string' || !('stateMachine' in trait)) {
+                throw new Error('fixture must carry an inline trait');
+            }
+            const transition = trait.stateMachine?.transitions?.[0];
+            if (transition === undefined) throw new Error('fixture must carry a transition');
+            transition.effects = [['navigate', navTarget] as never];
+            return schema;
+        }
+
+        function pagePaths(schema: OrbitalSchema, orbital: string): string[] {
+            return deriveExpectations(schema, orbital)
+                .expectations.filter((e) => e.kind === 'page')
+                .map((e) => (e.kind === 'page' ? e.path : ''));
+        }
+
+        it("resolves a dynamic navigate's static prefix to the sibling's route pattern", () => {
+            // `/orders/` is all the effect carries; `/orders/:id` is what the
+            // provider declares. Supplying the pattern is the whole point.
+            const schema = schemaWithRoutes(['str/concat', '/orders/', '@payload.data.id']);
+            expect(pagePaths(schema, 'CheckoutOrbital')).toEqual(['/orders/:id']);
+        });
+
+        it('prefers the parameterised route over its collection page', () => {
+            // Both `/orders` and `/orders/:id` are declared and both satisfy the
+            // compiler (its matcher drops empty segments, so `/orders/` and
+            // `/orders` look identical). Only `/orders/:id` is the route the
+            // navigate actually reaches, and a declaration that names the wrong
+            // route is worse than useless.
+            const schema = schemaWithRoutes(['str/concat', '/orders/', '@payload.data.id']);
+            const orderRecord = schema.orbitals.find((o) => o.name === 'OrderRecordOrbital');
+            if (orderRecord === undefined) throw new Error('fixture');
+            orderRecord.pages = [
+                { name: 'OrdersPage', path: '/orders', traits: [] },
+                { name: 'OrderDetailPage', path: '/orders/:id', traits: [] },
+            ];
+            expect(pagePaths(schema, 'CheckoutOrbital')).toEqual(['/orders/:id']);
+        });
+
+        it('derives nothing for a route the organism does not declare', () => {
+            // Keeps a genuine typo an error rather than laundering it into a
+            // deferral.
+            const schema = schemaWithRoutes(['str/concat', '/ordrs/', '@payload.data.id']);
+            expect(pagePaths(schema, 'CheckoutOrbital')).toEqual([]);
+        });
+
+        it('derives nothing for a route the orbital declares itself', () => {
+            const schema = schemaWithRoutes('/checkout');
+            expect(pagePaths(schema, 'CheckoutOrbital')).toEqual([]);
+        });
+
+        it('derives nothing for a fully dynamic target', () => {
+            // `@payload.href` is runtime data — undecidable statically, and the
+            // compiler skips it too.
+            const schema = schemaWithRoutes('@payload.href');
+            expect(pagePaths(schema, 'CheckoutOrbital')).toEqual([]);
+        });
+    });
 });

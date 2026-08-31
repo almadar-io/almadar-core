@@ -60,6 +60,8 @@ export {
   parsePageRef,
   parseImportedTraitRef,
   isImportedTraitRef,
+  // Expectation accessors
+  expectedEntityName,
 } from "./orbital.js";
 
 // OrbitalSchema - top-level app definition
