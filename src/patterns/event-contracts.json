@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-08-31T09:49:17.624Z",
+  "exportedAt": "2026-08-31T14:55:54.846Z",
   "contracts": {
     "form": {
       "emits": [
@@ -1150,6 +1150,19 @@
       ],
       "requires": [],
       "entityAware": true
+    },
+    "dashboard-layout": {
+      "emits": [
+        {
+          "event": "NAVIGATE",
+          "trigger": "action",
+          "payload": {
+            "type": "object"
+          }
+        }
+      ],
+      "requires": [],
+      "entityAware": false
     }
   }
 }

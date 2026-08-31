@@ -57,8 +57,32 @@ export interface PatternPropTypeSchema {
   types: string[];
   enumValues?: string[];
   items?: PatternPropTypeSchema;
-  properties?: Record<string, PatternPropTypeSchema>;
+  /** For a dynamic-key typed map (`Record<string, V>` with a CONCRETE value
+   *  type): the schema of the uniform value V, which the generator lowers to
+   *  `.lolo` `Map string V`. Mirrors `items` for arrays; unset for opaque
+   *  `Record<string, unknown>` maps. pattern-sync has always written this
+   *  (`PropTypeSchema.mapValue`); the public type omitted it, so any registry
+   *  carrying a resolved typed-map inside a nested schema failed to satisfy
+   *  this interface. Surfaced when widening the interface registry made those
+   *  nested value types resolvable for the first time. */
+  mapValue?: PatternPropTypeSchema;
+  /** Value is `| undefined` because this record is populated from an IMPORTED
+   *  JSON literal: where a heterogeneous union of element shapes appears (one
+   *  `callbackArgs` arm carrying state fields, another carrying config fields),
+   *  TypeScript synthesizes `key?: undefined` on the arm that lacks a key. The
+   *  optional value models the record honestly — a lookup on a key this arm
+   *  does not carry really is absent — rather than casting the mismatch away. */
+  properties?: Record<string, PatternPropTypeSchema | undefined>;
   required?: string[];
+  /** Numeric-literal-union members (`1 | 2 | 3`). The type stays `number`; the
+   *  members are kept so a generator can seed a valid default. */
+  numericEnumValues?: number[];
+  /** Self-referential tree-node child — the shape is captured at the parent
+   *  level, so recursing here would not terminate. */
+  cyclic?: boolean;
+  /** Genuinely unshapeable source (`Record`/generic/`ReactNode`/opaque brand):
+   *  the shapeless fallback is the CORRECT type here, not an unresolved gap. */
+  freeform?: boolean;
   /** Set when the value's source type is core `ScenePos` — the type-identity
    *  signal that grounds a pattern's `drawable` capability. */
   scenePos?: boolean;
@@ -154,7 +178,13 @@ export interface PatternPropDef {
    */
   items?: PatternPropTypeSchema;
   /** Per-key schemas for object-typed props sourced from a declared interface. */
-  properties?: Record<string, PatternPropTypeSchema>;
+  /** Value is `| undefined` because this record is populated from an IMPORTED
+   *  JSON literal: where a heterogeneous union of element shapes appears (one
+   *  `callbackArgs` arm carrying state fields, another carrying config fields),
+   *  TypeScript synthesizes `key?: undefined` on the arm that lacks a key. The
+   *  optional value models the record honestly — a lookup on a key this arm
+   *  does not carry really is absent — rather than casting the mismatch away. */
+  properties?: Record<string, PatternPropTypeSchema | undefined>;
   /** Required keys for object-typed props sourced from a declared interface. */
   propertyRequired?: string[];
   /** Set when the prop's source type is core `ScenePos` — the type-identity signal
@@ -163,6 +193,38 @@ export interface PatternPropDef {
   /** Set when the prop's source type is the `DrawableNode` union — the type-identity
    *  signal that grounds the pattern's `drawHost` capability (see {@link isDrawHostPattern}). */
   drawableSlot?: boolean;
+  /* ---------------------------------------------------------------------
+   * Fields pattern-sync has always written into `patterns-registry.json`
+   * that this public type never declared. They were tolerated only by
+   * TypeScript's cast-overlap heuristic, which stopped tolerating them once
+   * the registry grew a resolved typed-map; the honest fix is to declare
+   * what the artifact actually carries. Same class as `callbackArgs.schema`
+   * (Gate B) — a generated artifact carrying more than its type admits.
+   * ------------------------------------------------------------------- */
+  /** For a dynamic-key typed map (`Record<string, V>`): schema of the uniform
+   *  value V, lowered to `.lolo` `Map string V`. Mirrors `items` for arrays. */
+  mapValue?: PatternPropTypeSchema;
+  /** Numeric-literal-union members (`1 | 2 | 3`); the type stays `number`. */
+  numericEnumValues?: number[];
+  /** Genuinely unshapeable source (`Record`/generic/`ReactNode`/opaque brand):
+   *  the shapeless fallback is CORRECT here, not an unresolved gap. */
+  freeform?: boolean;
+  /** For `kind: "entity"`: fields the component declared REQUIRED via
+   *  `EntityWith<K>`. `ORB_X_ENTITY_PROP_CONTRACT` rejects a behavior binding
+   *  an entity that does not provide them. */
+  requiredFields?: string[];
+  /** A `kind: "callback"` prop that RETURNS a value (render-prop / compute-prop)
+   *  rather than `=> void` — called to render or compute, never a bus outlet, so
+   *  the factory generator mints no emit for it. */
+  renderCallback?: boolean;
+  /** A `=> void` callback whose argument is non-serializable (DOM `File[]` /
+   *  `Event` / `Blob` / element), so it cannot become a bus payload. The
+   *  component's own `action`/`actionPayload` carries any serializable signal. */
+  nonEmittable?: boolean;
+  /** A prop non-authorable as a `.lolo` config knob (injected bus context,
+   *  structural `OrbitalSchema`/`Trait`, native `Map`/`Set`). Distinct from
+   *  `freeform`, which IS a JSON object an app can supply. */
+  nonAuthorable?: boolean;
   /**
    * For `kind: "event-ref"` whose source is `EventEmit<P>`: the
    * structural shape of `P` — the bus payload the component fires when

@@ -258,7 +258,7 @@ interface ScenePosProbe {
   scenePos?: boolean;
   items?: ScenePosProbe;
   mapValue?: ScenePosProbe;
-  properties?: Record<string, ScenePosProbe>;
+  properties?: Record<string, ScenePosProbe | undefined>;
 }
 
 /** True when a prop def is (or transitively contains) a core-`ScenePos`-typed value. */
@@ -268,7 +268,7 @@ function propGroundsDrawable(schema: ScenePosProbe): boolean {
   if (schema.mapValue && propGroundsDrawable(schema.mapValue)) return true;
   if (schema.properties) {
     for (const v of Object.values(schema.properties)) {
-      if (propGroundsDrawable(v)) return true;
+      if (v && propGroundsDrawable(v)) return true;
     }
   }
   return false;
@@ -310,7 +310,7 @@ interface DrawableSlotProbe {
   drawableSlot?: boolean;
   items?: DrawableSlotProbe;
   mapValue?: DrawableSlotProbe;
-  properties?: Record<string, DrawableSlotProbe>;
+  properties?: Record<string, DrawableSlotProbe | undefined>;
 }
 
 /** True when a prop def is (or transitively contains) a `DrawableNode`-typed slot. */
@@ -320,7 +320,7 @@ function propHostsDrawables(schema: DrawableSlotProbe): boolean {
   if (schema.mapValue && propHostsDrawables(schema.mapValue)) return true;
   if (schema.properties) {
     for (const v of Object.values(schema.properties)) {
-      if (propHostsDrawables(v)) return true;
+      if (v && propHostsDrawables(v)) return true;
     }
   }
   return false;
