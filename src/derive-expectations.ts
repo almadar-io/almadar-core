@@ -20,6 +20,7 @@
 
 import type { OrbitalSchema } from './types/schema.js';
 import type { EntityRef, ExpectDeclaration } from './types/orbital.js';
+import { parseImportedTraitRef } from './types/orbital.js';
 import type { OrbitalEntity } from './types/entity.js';
 import type { EntityField } from './types/field.js';
 import type { TraitRef } from './types/trait.js';
@@ -168,12 +169,71 @@ function navigateTargetOf(node: WalkableData): string | null {
 }
 
 /**
+ * Resolve a behavior by the trailing segment of a `uses` import path
+ * (`std/behaviors/std-mod-queue` → `std-mod-queue`). Supplied by the caller
+ * because `@almadar/core` does no IO; every consumer already holds a loader.
+ */
+export type DeriveExpectationsOptions = {
+  loadBehavior?: (behaviorName: string) => OrbitalSchema | null;
+};
+
+/** Trailing path segment of a `uses` import — the behavior's registry name. */
+function behaviorNameOf(from: string): string {
+  const segments = from.split('/');
+  return (segments[segments.length - 1] ?? from).replace(/\.orb$/, '');
+}
+
+/** The `ref` string of a trait reference, or undefined for an inline trait. */
+function traitRefString(t: TraitRef): string | undefined {
+  if (typeof t === 'string') return t;
+  return isInlineTrait(t) ? undefined : t.ref;
+}
+
+/**
+ * Entities an imported behavior contributes when one of its traits is
+ * composed — the derivation-side mirror of the compiler's Gap #22 synthesis
+ * (`orbital-compiler/src/phases/inline/mod.rs:863-894`).
+ *
+ * `bound` is the trait's own entity, contributed ONLY when the call site does
+ * not rebind `linkedEntity` (the gate at `inline/mod.rs:872`). `aux` is the
+ * owning orbital's auxiliary entities, which travel whether or not the call
+ * site rebinds (`:888-894`).
+ */
+function contributedEntitiesOf(
+  behavior: OrbitalSchema,
+  traitName: string,
+): { bound?: string; aux: string[] } | undefined {
+  for (const o of behavior.orbitals) {
+    for (const t of o.traits ?? []) {
+      if (typeof t !== 'object' || t === null || !isInlineTrait(t)) continue;
+      if (t.name !== traitName) continue;
+      const primary = asOrbitalEntity(o.entity);
+      const bound = t.linkedEntity ?? primary?.name;
+      const aux: string[] = [];
+      for (const ref of o.auxiliaryEntities ?? []) {
+        const def = asOrbitalEntity(ref);
+        if (def !== undefined) aux.push(def.name);
+      }
+      return { ...(bound !== undefined ? { bound } : {}), aux };
+    }
+  }
+  return undefined;
+}
+
+/** Narrow an `EntityRef` to its inline definition, or undefined for a string ref. */
+function asOrbitalEntity(ref: EntityRef | undefined): OrbitalEntity | undefined {
+  if (typeof ref === 'object' && ref !== null && 'fields' in ref) return ref as OrbitalEntity;
+  return undefined;
+}
+
+/**
  * Derive the `expects` declarations for one orbital of a full schema.
  * Pure; never mutates the input schema.
  */
 export function deriveExpectations(
   schema: OrbitalSchema,
   orbitalName: string,
+  options: DeriveExpectationsOptions = {},
 ): DeriveExpectationsResult {
   const diagnostics: ExpectationDiagnostic[] = [];
   const orbital = schema.orbitals.find((o) => o.name === orbitalName);
@@ -191,6 +251,52 @@ export function deriveExpectations(
       if (!ownerByEntity.has(def.name)) {
         ownerByEntity.set(def.name, o.name);
         defByEntity.set(def.name, def);
+      }
+    }
+  }
+
+  // Entities an IMPORTED ATOM contributes. These are real entities of the
+  // composed program — the compiler surfaces them into the composing
+  // orbital's `auxiliaryEntities` during inline (Gap #22,
+  // `inline/mod.rs:863-894`) — but they are absent from the pre-inline
+  // schema, so without this pass a sibling that persists/fetches one reads
+  // as naming an entity nobody declares and `addEntityRef` drops it.
+  //
+  // Runs strictly AFTER every real declaration is collected, and never
+  // overwrites one: a contributed name is the weakest claim of ownership.
+  // (Same ordering invariant the compiled path learned the hard way in
+  // `phases/validate.rs collect_names` — declarations before anything derived.)
+  //
+  // Recorded WITHOUT a definition: an entity here is licensed to exist, not
+  // described. Attaching a shape would opt the expectation into payload
+  // checking against a provider the slice cannot see.
+  const contributedNames = new Set<string>();
+  const { loadBehavior } = options;
+  if (loadBehavior !== undefined) {
+    for (const o of schema.orbitals) {
+      const behaviorByAlias = new Map<string, string>();
+      for (const use of o.uses ?? []) behaviorByAlias.set(use.as, behaviorNameOf(use.from));
+      if (behaviorByAlias.size === 0) continue;
+      for (const t of o.traits ?? []) {
+        const ref = traitRefString(t);
+        if (ref === undefined) continue;
+        const parsed = parseImportedTraitRef(ref);
+        if (parsed === null) continue;
+        const behaviorName = behaviorByAlias.get(parsed.alias);
+        if (behaviorName === undefined) continue;
+        const behavior = loadBehavior(behaviorName);
+        if (behavior === null) continue;
+        const contributed = contributedEntitiesOf(behavior, parsed.traitName);
+        if (contributed === undefined) continue;
+        const rebound = typeof t === 'object' && t !== null && !isInlineTrait(t)
+          ? t.linkedEntity !== undefined
+          : false;
+        const names = rebound ? contributed.aux : [...(contributed.bound !== undefined ? [contributed.bound] : []), ...contributed.aux];
+        for (const name of names) {
+          if (ownerByEntity.has(name)) continue;
+          ownerByEntity.set(name, o.name);
+          contributedNames.add(name);
+        }
       }
     }
   }
@@ -435,11 +541,16 @@ export function deriveExpectations(
     const referenced = entityRefs.get(name) ?? new Set<string>();
     const provider = defByEntity.get(name);
     const shape: EntityField[] = [];
+    // An atom-contributed entity has no definition in this schema by
+    // construction, so every field would report as undeclared. That is not a
+    // finding — the provider exists, just not until inline — and the
+    // expectation stays existence-only either way.
+    const contributed = contributedNames.has(name);
     for (const field of [...referenced].sort()) {
       const declared = provider?.fields.find((f) => f.name === field);
       if (declared !== undefined) {
         shape.push({ ...declared });
-      } else {
+      } else if (!contributed) {
         diagnostics.push({
           kind: 'entity-field-not-declared',
           orbital: orbitalName,

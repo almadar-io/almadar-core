@@ -326,3 +326,169 @@ describe('deriveExpectations', () => {
         });
     });
 });
+
+/**
+ * Atom-contributed entities (SCAN-FETCH-INVALID-ENTITY-1).
+ *
+ * An imported atom's entity is a real entity of the COMPOSED program — the
+ * compiler surfaces it into the composing orbital's `auxiliaryEntities` during
+ * inline (Gap #22, `inline/mod.rs:863-894`) — but it is absent from the
+ * pre-inline schema. A sibling that persists/fetches one must still be able to
+ * declare the dependency, or its slice cannot validate alone.
+ */
+describe('deriveExpectations — atom-contributed entities', () => {
+    /** A stand-in for `std-mod-queue`: one orbital, one trait, one aux entity. */
+    const modQueueBehavior: OrbitalSchema = {
+        name: 'std-mod-queue',
+        orbitals: [
+            {
+                name: 'ModQueueItemOrbital',
+                entity: {
+                    name: 'ModQueueItem',
+                    fields: [{ name: 'id', type: 'string', required: true }],
+                },
+                auxiliaryEntities: [
+                    { name: 'ModQueueAudit', fields: [{ name: 'id', type: 'string', required: true }] },
+                ],
+                traits: [
+                    {
+                        name: 'ModQueueItemReview',
+                        scope: 'instance',
+                        linkedEntity: 'ModQueueItem',
+                        stateMachine: {
+                            states: [{ name: 'idle', isInitial: true }],
+                            events: [{ key: 'OPEN', name: 'Open' }],
+                            transitions: [{ from: 'idle', to: 'idle', event: 'OPEN' }],
+                        },
+                    },
+                ],
+                pages: [],
+            },
+        ],
+    };
+
+    const loadBehavior = (name: string): OrbitalSchema | null =>
+        name === 'std-mod-queue' ? modQueueBehavior : null;
+
+    /**
+     * `WriterOrbital` persists `ModQueueItem` but declares no such entity.
+     * `HostOrbital` composes the atom's trait — `rebindTo` decides whether it
+     * rebinds `linkedEntity`, which is the exact gate `inline/mod.rs:872` uses.
+     */
+    function schemaComposing(rebindTo?: string): OrbitalSchema {
+        return {
+            name: 'fixture-forum',
+            orbitals: [
+                {
+                    name: 'WriterOrbital',
+                    entity: { name: 'Thread', fields: [{ name: 'id', type: 'string', required: true }] },
+                    traits: [
+                        {
+                            name: 'FlagBridge',
+                            scope: 'instance',
+                            linkedEntity: 'Thread',
+                            stateMachine: {
+                                states: [{ name: 'idle', isInitial: true }],
+                                events: [{ key: 'FLAG', name: 'Flag' }],
+                                transitions: [
+                                    {
+                                        from: 'idle',
+                                        to: 'idle',
+                                        event: 'FLAG',
+                                        effects: [['persist', 'create', 'ModQueueItem', { status: 'pending' }]],
+                                    },
+                                ],
+                            },
+                        },
+                    ],
+                    pages: [],
+                },
+                {
+                    name: 'HostOrbital',
+                    entity: { name: 'Decision', fields: [{ name: 'id', type: 'string', required: true }] },
+                    uses: [{ as: 'ModQueue', from: 'std/behaviors/std-mod-queue' }],
+                    traits: [
+                        {
+                            ref: 'ModQueue.traits.ModQueueItemReview',
+                            name: 'ThreadModQueue',
+                            ...(rebindTo !== undefined ? { linkedEntity: rebindTo } : {}),
+                        },
+                    ],
+                    pages: [],
+                },
+            ],
+        };
+    }
+
+    const entityNames = (schema: OrbitalSchema, orbital: string, opts = {}): string[] =>
+        deriveExpectations(schema, orbital, opts)
+            .expectations.filter((e) => e.kind === 'entity')
+            .map((e) => (e.kind === 'entity' ? e.name : ''))
+            .sort();
+
+    it('derives an expectation for an entity a BARE-composed atom contributes', () => {
+        expect(entityNames(schemaComposing(), 'WriterOrbital', { loadBehavior })).toContain('ModQueueItem');
+    });
+
+    it('does NOT contribute the bound entity when the call site rebinds linkedEntity', () => {
+        // Mirrors `inline/mod.rs:872` — a rebind merges the atom's FIELDS into
+        // the rebind target instead of surfacing its entity.
+        expect(entityNames(schemaComposing('Decision'), 'WriterOrbital', { loadBehavior })).not.toContain(
+            'ModQueueItem',
+        );
+    });
+
+    it("carries the imported orbital's OWN auxiliary entities whether or not the call site rebinds", () => {
+        // `inline/mod.rs:888-894` — a multi-entity atom's trait body fetches its
+        // sibling entities by name, so those travel unconditionally. Prove it by
+        // having the WRITER fetch the aux entity: it must become expectable in
+        // BOTH the bare and the rebound case, unlike the bound entity above.
+        const fetchingAux = (rebindTo?: string): OrbitalSchema => {
+            const schema = schemaComposing(rebindTo);
+            const t = schema.orbitals[0].traits[0];
+            if (typeof t === 'object' && 'stateMachine' in t && t.stateMachine) {
+                t.stateMachine.transitions[0].effects = [['fetch', 'ModQueueAudit']];
+            }
+            return schema;
+        };
+        expect(entityNames(fetchingAux(), 'WriterOrbital', { loadBehavior })).toContain('ModQueueAudit');
+        expect(entityNames(fetchingAux('Decision'), 'WriterOrbital', { loadBehavior })).toContain('ModQueueAudit');
+    });
+
+    it('is inert without a loader — byte-identical to the pre-change behavior', () => {
+        expect(entityNames(schemaComposing(), 'WriterOrbital')).not.toContain('ModQueueItem');
+    });
+
+    it('emits the expectation EXISTENCE-ONLY, with no shape and no field diagnostics', () => {
+        // A shape would opt the expectation into payload checking against a
+        // provider the slice cannot see (`expectations_validation.rs:280-282`),
+        // and the atom's declared shape legitimately differs from what the
+        // consumer delivers.
+        const result = deriveExpectations(schemaComposing(), 'WriterOrbital', { loadBehavior });
+        const decl = result.expectations.find((e) => e.kind === 'entity' && e.name === 'ModQueueItem');
+        expect(decl).toBeDefined();
+        expect(decl && 'shape' in decl ? decl.shape : undefined).toBeUndefined();
+        expect(result.diagnostics.filter((d) => d.entity === 'ModQueueItem')).toEqual([]);
+    });
+
+    it('never lets a contributed name outrank a real declaration', () => {
+        // The ordering invariant the compiled path learned the hard way in
+        // `collect_names`: all real declarations, THEN anything derived.
+        const schema = schemaComposing();
+        schema.orbitals[0].auxiliaryEntities = [
+            { name: 'ModQueueItem', fields: [{ name: 'id', type: 'string', required: true }] },
+        ];
+        // WriterOrbital now declares it itself → never expect your own entity.
+        expect(entityNames(schema, 'WriterOrbital', { loadBehavior })).not.toContain('ModQueueItem');
+    });
+
+    it('leaves a name nothing declares and no atom contributes underivable', () => {
+        // A genuine typo must stay an error, not be laundered into a deferral.
+        const schema = schemaComposing();
+        const t = schema.orbitals[0].traits[0];
+        if (typeof t === 'object' && 'stateMachine' in t && t.stateMachine) {
+            t.stateMachine.transitions[0].effects = [['persist', 'create', 'ModQueueItm', { status: 'pending' }]];
+        }
+        expect(entityNames(schema, 'WriterOrbital', { loadBehavior })).not.toContain('ModQueueItm');
+    });
+});
