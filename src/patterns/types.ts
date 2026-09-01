@@ -162,6 +162,30 @@ export interface PatternPropDef {
    */
   eventField?: string;
   /**
+   * The name of the SIBLING prop whose value is the event this prop is the
+   * payload for — e.g. `actionPayload` declares `payloadFor: "action"`.
+   * Set from a `@payloadFor <prop>` JSDoc tag on the component.
+   *
+   * The pairing was previously naming convention only, which left the payload
+   * prop with no describable type: its shape is whatever the call site sends
+   * to whichever event `action` names. Declaring the pairing lets the `.lolo`
+   * generator emit the dependent type `@payload @config.<sibling>` instead of
+   * a shapeless `json`, and the compiler resolve it per call site.
+   */
+  payloadFor?: string;
+  /**
+   * Names the field of THIS event prop's payload that carries the bound
+   * entity's full ROW — e.g. `data-list`'s `itemClickEvent` declares
+   * `entityRowField: "row"`. Set from an `@entityRow <field>` JSDoc tag.
+   *
+   * Exists because the row's type is unknowable from TypeScript alone:
+   * `ItemActionPayload.row` is an unconstrained generic, so the generator has
+   * nothing to emit but `object`. The component KNOWS it hands over the bound
+   * entity's row; this records that so `lolo-ui` can emit `@entity` instead of
+   * a shapeless object.
+   */
+  entityRowField?: string;
+  /**
    * For `kind: "entity"` (the data inlet): whether the prop binds a single
    * entity record (`"record"`) or a collection of records (`"collection"`).
    * Source: `EntityRecord<T>` vs `EntityCollection<T>` from `@almadar/core`.

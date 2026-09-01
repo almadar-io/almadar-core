@@ -274,6 +274,21 @@ export interface FactoryTraitSignature {
    *  Each entry carries the key name plus the typed declaration lifted
    *  from the source `.lolo` `config { }` block. */
   overridableConfigKeys: ReadonlyArray<FactoryConfigParam>;
+  /**
+   * WIRE FORMAT ONLY — indices into `FactorySignatureCatalog.knobDefs`.
+   *
+   * Measured on the io catalog: 113,848 knob instances but only 16,067
+   * DISTINCT ones (the same `align` knob is written out once per Typography
+   * trait), so 26.2 MB — 66.3% of the catalog — was byte-identical
+   * duplication. When a catalog carries `knobDefs`, each trait serialises
+   * these refs INSTEAD of `overridableConfigKeys`, and the loader rehydrates
+   * the field from the table before any consumer sees the signature.
+   *
+   * So this is absent in memory and `overridableConfigKeys` is always
+   * populated — no consumer reads this. Rehydration substitutes SHARED
+   * references, which is why it cuts heap and not merely disk.
+   */
+  overridableConfigKeyRefs?: ReadonlyArray<number>;
   /** Capability tags lifted directly from the source `.lolo` trait's
    *  header annotations. Free-form strings — the translator overlay
    *  matches rules to traits by exact set membership. */
@@ -464,7 +479,32 @@ export interface FactorySignatureCatalog {
   generatedFromStdVersion: string;
   /** Sorted list of factory signatures. */
   signatures: ReadonlyArray<FactorySignature>;
+  /**
+   * Built-in theme keys harvested from `@almadar-ui/themes/*.css`, carried
+   * ONCE for the whole catalog rather than per signature.
+   *
+   * `signatureToParamsSchema` needs them for the `theme` enum but lives here
+   * in core, which is UPSTREAM of `@almadar/ui` and so cannot read the CSS
+   * itself — the harvester injects them. Catalog-level because the list is
+   * a property of the build, not of any one orbital: every signature's
+   * `theme` enum was already identical, which is exactly why rabit's
+   * `catalogThemeNames` could take "the first hit is canonical" as its rule.
+   *
+   * Optional so a catalog written before this field still loads; consumers
+   * degrade to no theme enum (no constraint) rather than failing.
+   */
+  themeNames?: ReadonlyArray<string>;
+  /**
+   * Deduplicated knob table. Each trait's `overridableConfigKeyRefs` indexes
+   * into this; the loader rehydrates `overridableConfigKeys` from it, sharing
+   * one object per distinct knob across every trait that declares it.
+   *
+   * Absent on catalogs written before dedupe, in which case traits carry
+   * their `overridableConfigKeys` inline as before and no rehydration runs.
+   */
+  knobDefs?: ReadonlyArray<FactoryConfigParam>;
 }
+
 
 /**
  * A single factory invocation, as the typed result of the translator.

@@ -81,7 +81,7 @@ export const AssetAspectSchema = z.enum(ASSET_ASPECTS);
  * rather than redeclaring, so board `.lolo` config and the render library
  * agree on one enum.
  */
-export const ANIMATION_NAMES = ['idle', 'walk', 'attack', 'hit', 'death'] as const;
+export const ANIMATION_NAMES = ['idle', 'walk', 'skate', 'jump', 'fall', 'attack', 'hit', 'death'] as const;
 
 export type AnimationName = (typeof ANIMATION_NAMES)[number];
 
@@ -171,8 +171,8 @@ export interface SpriteSheetAtlas {
     directions: SpriteDirection[];
     /** Relative PNG sheet paths per direction. */
     sheets: Partial<Record<SpriteDirection, string>>;
-    /** Animation row layout keyed by animation name. */
-    animations: Partial<Record<AnimationName, AnimationDef>>;
+    /** Animation row layout keyed by animation name. Unit sheets use the canonical `AnimationName` rows; one-shot fx sheets declare their own names (e.g. `burst`) — the manifest is authoritative for its rows. */
+    animations: Partial<Record<string, AnimationDef>>;
     /**
      * Per-projection sheet PNGs (additive; absent on legacy atlases). `iso`
      * mirrors `sheets` (directional se/sw); the fixed cameras carry one sheet
@@ -196,7 +196,7 @@ export const SpriteSheetAtlasSchema = z.object({
     rows: z.number().int().positive(),
     directions: z.array(SpriteDirectionSchema),
     sheets: z.record(SpriteDirectionSchema, z.string()),
-    animations: z.record(AnimationNameSchema, AnimationDefSchema),
+    animations: z.record(z.string(), AnimationDefSchema),
     projections: z
         .object({
             iso: z.record(SpriteDirectionSchema, z.string()).optional(),

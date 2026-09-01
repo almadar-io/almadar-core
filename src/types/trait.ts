@@ -357,7 +357,11 @@ export const TraitCategorySchema = z.enum([
 // `trait` / `slot` / `pattern` mirror Rust's `FieldType::{Trait, Slot, Pattern}`
 // (orbital-core schema/types.rs) — config-field-only types: a `@trait.X`
 // embed slot, a UI slot name, a pattern type name.
-export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum' | 'email' | 'url' | 'phone' | 'uuid' | 'image' | 'trait' | 'slot' | 'pattern' | 'node' | 'event';
+// `opaque` = deliberately open data (see `FieldType` in types/field.ts); `scalar`
+// and `union` are the closed transport/variant types. All three are real
+// .lolo/.orb types, so the trait-side mirror must carry them or generated
+// factories fail DTS.
+export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum' | 'email' | 'url' | 'phone' | 'uuid' | 'image' | 'trait' | 'slot' | 'pattern' | 'node' | 'event' | 'scalar' | 'union' | 'opaque';
 
 /**
  * Simplified field for trait data entities
@@ -593,6 +597,18 @@ export type TraitEventContract = {
     synonyms?: string;
     /** Authoring tier (`essential`/`customization`/`advanced`/`internal`). */
     tier?: string;
+    /**
+     * The config knob whose value DEFINES this event's name, when the emit was
+     * authored as `emits { @config.<knob> }`. Captured at L1, where the
+     * `@config.X` spelling still exists — after inlining, `event` holds the
+     * resolved literal and the fact that it came from a knob is otherwise
+     * unrecoverable.
+     *
+     * A definer knob CREATES an event name rather than referencing one, which
+     * is why consumers must not pin such a knob to the trait's existing event
+     * vocabulary: doing so forbids the very name it exists to introduce.
+     */
+    definerKnob?: string;
     /** Payload schema — declarative type info for the event's payload.
      *  Distinct from the runtime payload value (`@payload.X` bindings,
      *  `EventPayload`) which is a separate concept. */
@@ -668,6 +684,7 @@ export const TraitEventContractSchema = z.object({
     description: z.string().optional(),
     synonyms: z.string().optional(),
     tier: z.string().optional(),
+    definerKnob: z.string().optional(),
     payloadSchema: z.array(EventPayloadFieldSchema).optional(),
     scope: EventScopeSchema.optional(),
 });

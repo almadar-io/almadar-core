@@ -19,6 +19,8 @@ export type {
   JsonValue,
 } from './types.js';
 
+export { rehydrateKnobDefs } from './knob-defs.js';
+
 export type {
   DomainQuestion,
   DomainQuestionAnswer,
@@ -62,3 +64,8 @@ export type {
   FactoryCallPlanState,
   OrbitalCallInput,
 } from './mutate.js';
+
+export {
+  signatureToParamsSchema,
+  assertNoUnsatisfiableEnum,
+} from './params-schema.js';

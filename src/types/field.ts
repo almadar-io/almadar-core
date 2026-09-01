@@ -61,7 +61,20 @@ export type FieldType =
     // Event-name reference — a string at rest, but the TYPE marks it as an
     // event key rather than free text (Phase B / SCAN-EVENT-KNOB-2). Legal
     // on struct-alias fields consumed by config knobs (e.g. `ItemAction.event`).
-    | 'event';
+    | 'event'
+    // Closed scalar transport union (`ControlValue`) and tagged struct union
+    // (`type DrawItem = DrawShape | DrawText`) — real .lolo/.orb types the
+    // Rust compiler accepts; the TS mirror must carry them or generated
+    // factories fail DTS (docs/Almadar_LOLO_Gaps.md L-6).
+    | 'scalar'
+    | 'union'
+    // Deliberately OPEN data — same wire shape as `json`, opposite intent.
+    // `json` means "not typed yet" (the debt `ORB_T_GENERIC_TYPE_DEPRECATED`
+    // rejects); `opaque` means "not closeable, and a struct here would be a
+    // lie": an audit snapshot of an arbitrary row, a third-party response body,
+    // an upstream event's payload at a generic wiring atom, or content storage
+    // the behavior never inspects (docs/Almadar_LOLO_Gaps.md L-7).
+    | 'opaque';
 
 /** Every `FieldType`, as a runtime array. Downstream imports this instead of
  *  re-listing the union — five copies had already drifted apart. */
@@ -88,6 +101,8 @@ export const FIELD_TYPES = [
     'pattern',
     'node',
     'event',
+    'scalar',
+    'union',
 ] as const satisfies readonly FieldType[];
 
 /** The semantic string domains — constrained strings, validatable by value. */
@@ -226,12 +241,12 @@ export function isUuidValue(value: string): boolean {
 /** The value a `file`-typed entity field holds: an uploaded artifact.
  *  `url` is a `data:` URI in mock/playground mode (size-ceilinged by the
  *  mock adapter) or an object-storage URL in production. */
-export interface FileValue {
+export type FileValue = {
     name: string;
     url: string;
     mimeType: string;
     sizeBytes: number;
-}
+};
 
 /** Zod schema for {@link FileValue}. */
 export const FileValueSchema = z.object({
@@ -288,7 +303,18 @@ type ScalarFieldType =
     | 'slot'
     | 'pattern'
     | 'node'
-    | 'event';
+    | 'event'
+    // Closed scalar transport union (`ControlValue`) — a real .lolo/.orb type
+    // the compiler accepts in payloads and map values; the TS mirror must carry
+    // it or generated factories fail DTS (docs/Almadar_LOLO_Gaps.md L-6).
+    | 'scalar'
+    // Deliberately OPEN data — same wire shape as `json`, opposite intent.
+    // `json` means "not typed yet" (the debt `ORB_T_GENERIC_TYPE_DEPRECATED`
+    // rejects); `opaque` means "not closeable, and a struct here would be a
+    // lie": an audit snapshot of an arbitrary row, a third-party response body,
+    // an upstream event's payload at a generic wiring atom, or content storage
+    // the behavior never inspects (docs/Almadar_LOLO_Gaps.md L-7).
+    | 'opaque';
 
 /** Fields shared across every variant. */
 type EntityFieldBase = {
@@ -354,6 +380,21 @@ export type RelationEntityField = EntityFieldBase & {
     relation: RelationConfig;
 };
 
+/**
+ * `type: 'union'` — a TAGGED union of struct variants (`.lolo`
+ * `type DrawItem = DrawShape | DrawText`). `values` carries the variant NAMES
+ * in declaration order; `properties` (from the base shape) carries each
+ * variant's shape keyed by that name. The discriminator is the variant's own
+ * literal-typed tag field, so selection is data-driven. Recursion is carried
+ * BY NAME: a variant referring back to the union gets `values` with no
+ * `properties` (mirrors `FieldType::Union` in orbital-core).
+ */
+export type UnionEntityField = EntityFieldBase & {
+    type: 'union';
+    /** Variant type names in declaration order. */
+    values: string[];
+};
+
 /** `type: 'array'` — element schema in `items` strongly preferred but
  *  optional for legacy compatibility with codegen-emitted scalar-array
  *  fields (e.g. `{type: 'array', default: []}`). The lolo lowerer + Rust
@@ -391,6 +432,7 @@ export type EntityField =
     | ScalarEntityField
     | EnumEntityField
     | RelationEntityField
+    | UnionEntityField
     | ArrayEntityField
     | ObjectEntityField;
 
@@ -481,11 +523,19 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
             scalarVariant('event'),
             scalarVariant('money'),
             scalarVariant('file'),
+            scalarVariant('scalar'),
             // Enum variant — REQUIRES non-empty values.
             z.object({
                 ...baseFieldShape,
                 type: z.literal('enum'),
                 values: z.array(z.string()).min(1, 'Enum field requires a non-empty `values` array'),
+            }),
+            // Union variant — tagged struct union; values = variant names,
+            // per-variant shapes in `properties` (absent on named recursion).
+            z.object({
+                ...baseFieldShape,
+                type: z.literal('union'),
+                values: z.array(z.string()).min(1, 'Union field requires a non-empty `values` array'),
             }),
             // Relation variant — REQUIRES relation config.
             z.object({

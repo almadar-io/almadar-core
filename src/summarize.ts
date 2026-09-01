@@ -113,6 +113,14 @@ function summarizeField(f: EntityField): EntityField {
       ...(f.required ? { required: true } : {}),
     };
   }
+  if (f.type === 'union') {
+    return {
+      ...(f.name !== undefined ? { name: f.name } : {}),
+      type: 'union',
+      values: f.values,
+      ...(f.required ? { required: true } : {}),
+    };
+  }
   if (f.type === 'relation') {
     return {
       ...(f.name !== undefined ? { name: f.name } : {}),

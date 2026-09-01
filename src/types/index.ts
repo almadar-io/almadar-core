@@ -149,6 +149,7 @@ export {
   persistenceModeAllowsOverrides,
   isFieldValue,
   type FieldValue,
+  type ControlValue,
   type EntityRow,
   type EntityWith,
   type EntityData,

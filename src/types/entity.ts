@@ -8,7 +8,7 @@
 
 import { z } from 'zod';
 import type { EntityId } from './identity.js';
-import { EntityFieldSchema, type EntityField } from './field.js';
+import { EntityFieldSchema, type EntityField, type FileValue } from './field.js';
 import { SemanticAssetRefSchema, type SemanticAssetRef } from './asset.js';
 import { JsonValueSchema, type RuntimeValue } from './json.js';
 import { SExprSchema, type SExpr } from './expression.js';
@@ -248,6 +248,30 @@ export function persistenceModeAllowsOverrides(
  * wire; the inclusion here is a pure type-surface accommodation.
  */
 export type FieldValue = string | number | boolean | Date | null | string[] | FieldValue[] | { [key: string]: FieldValue | undefined };
+
+/**
+ * What a FORM CONTROL puts on the event bus — the closed set of shapes an
+ * Input / Select / Checkbox / Date / multi-select / file field actually
+ * produces.
+ *
+ * A TRANSPORT type, deliberately distinct from `FieldValue`, and the separation
+ * is the point. `FieldValue` conflated two jobs: what a control emits, and what
+ * an entity field holds. The second never needed it — an entity field always
+ * has one declared type (`email : email!`, `age : number`) — so the openness
+ * only travelled outward, degrading every generated `.lolo` payload to a
+ * shapeless `object`.
+ *
+ * NOT recursive, and the variants are enumerated from what is actually emitted
+ * rather than guessed. `FileValue` is here because the compiler put it here: a
+ * scalar-only draft failed against the file field, which hands
+ * `Form.handleChange` a `{ name, url, mimeType, sizeBytes }` record.
+ *
+ * The rule is Aeson's — enumerate the shapes that occur, keep the open type at
+ * the boundary, convert on the way in. In `.lolo` that boundary is the
+ * `(set @entity.X ?value)` of the receiving transition, where the entity
+ * field's own declared type does the checking.
+ */
+export type ControlValue = string | number | boolean | null | string[] | FileValue;
 
 /**
  * Runtime guard for `FieldValue` — narrows interpreter-produced `unknown`
