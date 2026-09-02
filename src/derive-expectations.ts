@@ -152,8 +152,8 @@ function findMatchingPagePath(navPath: string, pagePaths: ReadonlySet<string>): 
 
 /**
  * Mirror of the compiler's `extract_static_path_prefix`: a navigate target is
- * either a literal path, or a `str/concat`/`concat` whose FIRST argument is a
- * literal prefix (`(str/concat "/articles/" @payload.data.slug)` → `/articles/`).
+ * either a literal path, or a `str/concat` whose FIRST argument is a literal
+ * prefix (`(str/concat "/articles/" @payload.data.slug)` → `/articles/`).
  * Anything else is runtime-resolved and undecidable statically.
  */
 function navigateTargetOf(node: WalkableData): string | null {
@@ -163,7 +163,7 @@ function navigateTargetOf(node: WalkableData): string | null {
   if (Array.isArray(target) && target.length >= 2) {
     const op = target[0];
     const first = target[1];
-    if ((op === 'str/concat' || op === 'concat') && typeof first === 'string') return first;
+    if (op === 'str/concat' && typeof first === 'string') return first;
   }
   return null;
 }

@@ -309,6 +309,7 @@ export {
   type Transition,
   type StateMachine,
   type PayloadField,
+  type PayloadTypeWhen,
   type StateInput,
   type EventInput,
   type GuardInput,
@@ -320,6 +321,7 @@ export {
   TransitionSchema,
   StateMachineSchema,
   PayloadFieldSchema,
+  PayloadTypeWhenSchema,
   // Event utilities
   isCircuitEvent,
 } from "./state-machine.js";

@@ -56,6 +56,27 @@ export const StateSchema = z.object({
 /**
  * Payload field definition for events
  */
+/**
+ * One condition of a payload field's `typeWhen` conditional list: "when
+ * config knob `knob` resolves to the literal whose string spelling is
+ * `equals`, this field's type is `type`". Declared DATA — authored in
+ * `.lolo` as a type-level `match` block (§25 — REPLACED the `@typeWhen`
+ * annotation spelling outright) — never a compiler-side predicate over a
+ * specific knob name. This wire shape is `match`'s lowered form, unchanged.
+ * Mirrors Rust `PayloadTypeWhen`.
+ */
+export type PayloadTypeWhen = {
+  knob: string;
+  equals: string;
+  type: string;
+};
+
+export const PayloadTypeWhenSchema: z.ZodType<PayloadTypeWhen> = z.object({
+  knob: z.string().min(1),
+  equals: z.string().min(1),
+  type: z.string().min(1),
+});
+
 export type PayloadField = {
   name: string;
   /**
@@ -69,6 +90,12 @@ export type PayloadField = {
   required?: boolean;
   /** Structured property schema for object-typed payload fields (recursive). */
   properties?: ReadonlyArray<PayloadField>;
+  /**
+   * Declared knob-conditional type list (`match` in `.lolo`, §25). Resolved
+   * and cleared once composed — the emitted `.orb` carries only the
+   * resolved truth, never the conditional.
+   */
+  typeWhen?: ReadonlyArray<PayloadTypeWhen>;
 };
 
 export const PayloadFieldSchema: z.ZodType<PayloadField> = z.object({
@@ -76,6 +103,7 @@ export const PayloadFieldSchema: z.ZodType<PayloadField> = z.object({
   type: z.string().min(1),
   required: z.boolean().optional(),
   properties: z.lazy(() => z.array(PayloadFieldSchema)).optional(),
+  typeWhen: z.array(PayloadTypeWhenSchema).optional(),
 });
 
 /**

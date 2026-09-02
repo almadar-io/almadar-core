@@ -10,8 +10,8 @@
 import { z } from 'zod';
 import type { TraitId, EntityId, EventId, PageId, OrbitalId } from './identity.js';
 import { TraitIdSchema, EntityIdSchema, EventIdSchema, PageIdSchema, OrbitalIdSchema } from './identity.js';
-import type { StateMachine } from './state-machine.js';
-import { StateMachineSchema } from './state-machine.js';
+import type { StateMachine, PayloadTypeWhen } from './state-machine.js';
+import { StateMachineSchema, PayloadTypeWhenSchema } from './state-machine.js';
 import type { Effect } from './effect.js';
 import { EffectSchema } from './effect.js';
 import type { Entity } from './entity.js';
@@ -270,6 +270,8 @@ export type ConfigFieldItemsDeclaration = {
     readonly properties?: Readonly<Record<string, TraitEntityField>>;
     /** Nested per-item schema for arrays of arrays (recursive). */
     readonly items?: ConfigFieldItemsDeclaration;
+    /** Union member names when the item type is a union — including a by-name recursive back-reference. */
+    readonly values?: ReadonlyArray<string>;
 };
 
 export const ConfigFieldItemsDeclarationSchema: z.ZodType<ConfigFieldItemsDeclaration> = z.lazy(() =>
@@ -277,6 +279,7 @@ export const ConfigFieldItemsDeclarationSchema: z.ZodType<ConfigFieldItemsDeclar
         type: z.string().optional(),
         properties: z.record(TraitEntityFieldSchema).optional(),
         items: ConfigFieldItemsDeclarationSchema.optional(),
+        values: z.array(z.string()).optional(),
     }),
 );
 
@@ -556,6 +559,13 @@ export type EventPayloadField = {
     entityType?: string;
     /** Structured property schema for object-typed payload fields (recursive). */
     properties?: ReadonlyArray<EventPayloadField>;
+    /**
+     * Declared knob-conditional type list (`match` in `.lolo`, §25 —
+     * REPLACED the `@typeWhen` annotation spelling outright) — see
+     * `PayloadTypeWhen` in `state-machine.ts`. Resolved and cleared once
+     * composed; the emitted `.orb` carries only the resolved truth.
+     */
+    typeWhen?: ReadonlyArray<PayloadTypeWhen>;
 };
 
 export const EventPayloadFieldSchema: z.ZodType<EventPayloadField> = z.object({
@@ -575,6 +585,7 @@ export const EventPayloadFieldSchema: z.ZodType<EventPayloadField> = z.object({
     description: z.string().optional(),
     entityType: z.string().optional(),
     properties: z.lazy(() => z.array(EventPayloadFieldSchema)).optional(),
+    typeWhen: z.array(PayloadTypeWhenSchema).optional(),
 });
 
 // ============================================================================
