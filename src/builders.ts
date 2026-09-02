@@ -186,6 +186,11 @@ export interface MakeTraitRefOpts {
   /** Per-key rename map, e.g. `{ OPEN: "ADD_ITEM" }`. */
   events?: Record<string, string>;
   /**
+   * 3-II trait type-parameter arguments (`:: p SomeType`): declared-param
+   * name → type-vocabulary name. Mirrors {@link TraitReference.typeArgs}.
+   */
+  typeArgs?: Record<string, string>;
+  /**
    * Entity-field remap, e.g. `{ name: "title", folder: "parentId" }`. Rewrites
    * the inlined trait's canonical `@entity.X` / `@payload.row.X` references to
    * the consumer entity's field names. Mirrors {@link TraitReference.fields}.
@@ -271,6 +276,7 @@ export function makeTraitRef(opts: MakeTraitRefOpts): TraitReference {
   if (opts.linkedEntity !== undefined) ref.linkedEntity = opts.linkedEntity;
   if (opts.linkedEntityId !== undefined) ref.linkedEntityId = opts.linkedEntityId;
   if (opts.events !== undefined) ref.events = opts.events;
+  if (opts.typeArgs !== undefined) ref.typeArgs = opts.typeArgs;
   if (opts.fields !== undefined) ref.fields = opts.fields;
   if (opts.effects !== undefined) ref.effects = opts.effects;
   if (opts.listens !== undefined) ref.listens = opts.listens;

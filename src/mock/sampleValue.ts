@@ -13,6 +13,7 @@ import type {
   EntityField,
   ObjectEntityField,
   RelationEntityField,
+  UnionEntityField,
 } from '../types/field.js';
 import type { EntityPersistence, EntityRow, FieldValue } from '../types/entity.js';
 import { isFieldValue } from '../types/entity.js';
@@ -111,8 +112,18 @@ function indexUuid(index: number): string {
   return `00000000-0000-4000-8000-${index.toString(16).padStart(12, '0').slice(-12)}`;
 }
 
-/** The closed vocabulary a field declares, if any. */
+/**
+ * The closed VOCABULARY a field declares, if any — literal strings the field
+ * legally holds. Deliberately EXCLUDES `type: 'union'`: its `values` carries
+ * variant NAMES (a tagged struct union) or a single by-name recursive
+ * back-reference (`type MenuItem = { subMenu : [MenuItem] }`), never legal
+ * literal values — reading either as an enum vocabulary would sample the
+ * variant/alias NAME itself as the field's value (mirrors the same skip on
+ * the Rust side, `orbital-core/src/type_compat.rs`'s `enum_value_is_member`
+ * callers and `runtime/seed.rs`'s dedicated `FieldType::Union` arm).
+ */
 function declaredValues(field: EntityField): readonly string[] | undefined {
+  if (field.type === 'union') return undefined;
   const values = 'values' in field ? field.values : undefined;
   return values && values.length > 0 ? values : undefined;
 }
@@ -197,6 +208,25 @@ function sampleObject(field: ObjectEntityField, ctx: SampleContext): FieldValue 
     out[propName] = sampleFieldValue(child, { ...ctx, depth: depth + 1 }) ?? null;
   }
   return out;
+}
+
+/**
+ * Seed the FIRST declared variant of a tagged union — picking by declaration
+ * order is deterministic and any other choice would be arbitrary (mirrors
+ * `orbital-core/src/runtime/seed.rs`'s `FieldType::Union` arm byte-for-byte).
+ * A by-name recursive back-reference (`values` non-empty, `properties`
+ * absent) has nothing to sample — `undefined` omits the key, same as an
+ * array/object hitting the depth cap.
+ */
+function sampleUnion(field: UnionEntityField, ctx: SampleContext): FieldValue | undefined {
+  const depth = ctx.depth ?? 0;
+  if (!field.properties || field.values.length === 0 || depth >= MAX_NESTED_DEPTH) {
+    return undefined;
+  }
+  const firstVariant = field.properties[field.values[0]!];
+  if (!firstVariant) return undefined;
+  const child: EntityField = { ...firstVariant, name: field.name };
+  return sampleFieldValue(child, { ...ctx, depth: depth + 1 });
 }
 
 /**
@@ -298,6 +328,8 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
       return sampleArray(field, ctx);
     case 'object':
       return sampleObject(field, ctx);
+    case 'union':
+      return sampleUnion(field, ctx);
     case 'trait':
     case 'slot':
     case 'pattern':

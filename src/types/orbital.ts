@@ -920,6 +920,16 @@ export type OrbitalDefinition = {
    * Removed after generation - guards live in traits.
    */
   suggestedGuards?: SuggestedGuard[];
+
+  /**
+   * This orbital's own named STRUCT aliases (`type X = { ... }`), each
+   * flattened to the same payload-field tree emit/listen payloads use.
+   * The `.orb`'s only record of a struct alias post-L1 — a Type-kind trait
+   * type-param arg (`:: p SomeStructAlias`) resolves against this map.
+   * Enum/primitive/entity aliases are NOT carried here (not legal `::`
+   * args).
+   */
+  types?: Record<string, EventPayloadField[]>;
 };
 
 export const OrbitalDefinitionSchema = z.object({
@@ -947,6 +957,7 @@ export const OrbitalDefinitionSchema = z.object({
   domainContext: DomainContextSchema.optional(),
   design: DesignPreferencesSchema.optional(),
   suggestedGuards: z.array(SuggestedGuardSchema).optional(),
+  types: z.record(z.string(), z.array(EventPayloadFieldSchema)).optional(),
 });
 
 export const OrbitalSchema = OrbitalDefinitionSchema;

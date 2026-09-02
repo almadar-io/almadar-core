@@ -269,3 +269,60 @@ describe('reserved keys are the caller\'s to stamp', () => {
     expect(row).toHaveProperty('name');
   });
 });
+
+// Recursive named struct types: `type: 'union'` carries variant NAMES (a
+// tagged struct union) or a by-name recursive back-reference — never a real
+// enum vocabulary. Mirrors the Rust-side fix and the dedicated
+// `FieldType::Union` arm in `orbital-core/src/runtime/seed.rs`.
+describe.each(STRATEGIES)('union fields are never read as an enum vocabulary [%s]', (strategy) => {
+  it('a genuine string enum still samples from its declared values', () => {
+    const f: EntityField = { name: 'status', type: 'string', values: ['open', 'closed'] };
+    expect(['open', 'closed']).toContain(sampleFieldValue(f, ctx(strategy)));
+  });
+
+  it('a tagged union samples the FIRST declared variant, never the variant name', () => {
+    const f: EntityField = {
+      name: 'shape',
+      type: 'union',
+      values: ['DrawCircle', 'DrawSquare'],
+      properties: {
+        DrawCircle: { type: 'object', properties: { radius: { type: 'number' } } },
+        DrawSquare: { type: 'object', properties: { side: { type: 'number' } } },
+      },
+    };
+    const value = sampleFieldValue(f, ctx(strategy));
+    expect(value).not.toBe('DrawCircle');
+    expect(value).not.toBe('DrawSquare');
+    expect(value).toEqual(expect.objectContaining({ radius: expect.anything() }));
+  });
+
+  it('a by-name recursive back-reference (values, no properties) is omitted, not sampled as its own name', () => {
+    // The shape a self-referential struct alias's recursion point carries
+    // (`type MenuItem = { subMenu : [MenuItem] }`): `values: ['MenuItem']`,
+    // NO `properties`.
+    const f: EntityField = { name: 'subMenu', type: 'union', values: ['MenuItem'] };
+    expect(sampleFieldValue(f, ctx(strategy))).toBeUndefined();
+  });
+
+  it('a recursive struct field samples its own properties, and the back-reference child is omitted', () => {
+    const e = entity([
+      {
+        name: 'root',
+        type: 'object',
+        properties: {
+          label: { type: 'string', required: true },
+          subMenu: {
+            type: 'array',
+            items: { type: 'union', values: ['MenuItem'] },
+          },
+        },
+      },
+    ]);
+    const row = sampleRows(e, 1, strategy)[0]! as Record<string, unknown>;
+    const root = row.root as Record<string, unknown>;
+    expect(typeof root.label).toBe('string');
+    // The array itself samples fine (empty items are fine); each element, if
+    // any were seeded, must never be the literal string "MenuItem".
+    expect(root.subMenu).not.toBe('MenuItem');
+  });
+});

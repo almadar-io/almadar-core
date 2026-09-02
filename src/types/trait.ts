@@ -609,6 +609,15 @@ export type TraitEventContract = {
      * vocabulary: doing so forbids the very name it exists to introduce.
      */
     definerKnob?: string;
+    /**
+     * `true` when `scope` was set by a CALL-SITE `emitsScope` override (the
+     * inline phase applies it), not by the source atom's own `-> external`
+     * declaration. An atom declaring its emits external is an unexamined
+     * default (nearly every atom does), while a composition restating it is
+     * the consumer's own deferral — the dead-control check honours it as an
+     * exemption. See ORB-X-EXTERNAL-EMIT-EXEMPTION.
+     */
+    scopeOverridden?: boolean;
     /** Payload schema — declarative type info for the event's payload.
      *  Distinct from the runtime payload value (`@payload.X` bindings,
      *  `EventPayload`) which is a separate concept. */
@@ -685,6 +694,7 @@ export const TraitEventContractSchema = z.object({
     synonyms: z.string().optional(),
     tier: z.string().optional(),
     definerKnob: z.string().optional(),
+    scopeOverridden: z.boolean().optional(),
     payloadSchema: z.array(EventPayloadFieldSchema).optional(),
     scope: EventScopeSchema.optional(),
 });
@@ -855,6 +865,15 @@ export type TraitReference = {
     name?: string;
     /** Phase F: rename atom event keys at the call site, e.g. {OPEN: "ADD_ITEM"} */
     events?: Record<string, string>;
+    /**
+     * 3-II trait type-parameter arguments (`:: p SomeType` in `.lolo`):
+     * declared-param name → type-vocabulary name (an entity, a primitive incl.
+     * `scalar`, or a struct alias from the AUTHORING file's `types` map).
+     * Present on pre-inline registry references only — the inline phase
+     * consumes it while resolving `$<name>` payload sentinels and it never
+     * appears in a final composed `.orb`.
+     */
+    typeArgs?: Record<string, string>;
     /** V4 dual-carry id sibling of `events` (keys = baked event names resolved to ids) — optional until the Phase-7 flip. */
     eventIds?: Record<string, EventId>;
     /**
@@ -938,6 +957,13 @@ export const TraitReferenceSchema = z
             )
             .optional(),
         eventIds: z.record(z.string().min(1), EventIdSchema).optional(),
+        // 3-II type-parameter arguments (see `TraitReference.typeArgs`).
+        typeArgs: z
+            .record(
+                z.string().min(1, "typeArgs key (declared param name) must be non-empty"),
+                z.string().min(1, "typeArgs value (type name) must be non-empty"),
+            )
+            .optional(),
         fields: z
             .record(
                 z.string().min(1, "fields key (canonical field name) must be non-empty"),
@@ -1216,6 +1242,12 @@ export type Trait = {
      * `linkedEntity` without re-walking the import graph at runtime.
      */
     sourceEntityDefinition?: Entity;
+    /**
+     * Increment 3-II: this trait's own declared type parameters. Present
+     * only on an atom's DECLARING inline trait (never authored on a
+     * reference); survives cloning into a consumer's composed schema.
+     */
+    typeParams?: TraitTypeParamDef[];
 };
 
 /**
@@ -1239,6 +1271,35 @@ export const SourceBehaviorMetadataSchema = z.object({
     behavior: z.string().min(1),
     alias: z.string().min(1),
     originalName: z.string().min(1),
+});
+
+/**
+ * One trait-level type parameter — `(V : Type, R : Type)` in
+ * `trait Name (V : Type, R : Type) -> Entity { ... }`. Present only on an
+ * atom's DECLARING inline trait; survives cloning into a consumer's composed
+ * schema so the inline phase can read each param's `kind` when resolving a
+ * surviving `"$<name>"` payload sentinel. `kind` is one of the six alias
+ * type-parameter kind names (`Type`, `Entity`, `Trait`, `Page`, `Orbital`,
+ * `Event`) — in practice `Type` and `Entity` are the two meaningful kinds
+ * for a trait param today.
+ */
+export type TraitTypeParamDef = {
+    name: string;
+    kind: string;
+    /**
+     * Declaration default (`(r : Type = <name>)`) — a primitive name (incl.
+     * `scalar`), an entity name, or a struct-alias name, all resolved in
+     * the atom's own file. Consulted only when no call-site `::` arg was
+     * supplied (and, for Entity-kind, only when `linkedEntity` also gave no
+     * default).
+     */
+    default?: string;
+};
+
+export const TraitTypeParamDefSchema: z.ZodType<TraitTypeParamDef> = z.object({
+    name: z.string().min(1),
+    kind: z.string().min(1),
+    default: z.string().optional(),
 });
 
 export const TraitSchema = z.object({
@@ -1268,6 +1329,7 @@ export const TraitSchema = z.object({
     config: DeclaredTraitConfigSchema.optional(),
     sourceBehavior: SourceBehaviorMetadataSchema.optional(),
     sourceEntityDefinition: EntitySchema.optional(),
+    typeParams: z.array(TraitTypeParamDefSchema).optional(),
 });
 
 // TraitRefSchema defined here after TraitSchema to avoid forward reference.

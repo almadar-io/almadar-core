@@ -138,9 +138,15 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
           required: field.required ?? false,
           // lolo string unions lower to `type:'string'` + a `values` sidecar
           // (FieldType::Enum is never emitted) — read values off any variant
-          // that carries them, not just `enum`.
-          values: 'values' in field && field.values?.length ? field.values : undefined,
-          enumValues: 'values' in field && field.values?.length ? field.values : undefined,
+          // that carries them, not just `enum`. EXCLUDES `type:'union'`
+          // deliberately: its `values` carries tagged-union variant NAMES or a
+          // by-name recursive back-reference (`type MenuItem = { subMenu :
+          // [MenuItem] }`), never legal literal values — treating either as
+          // an enum vocabulary would let a downstream option-list render the
+          // variant/alias NAME as if it were a selectable value (mirrors the
+          // Rust-side skip in `orbital-core/src/type_compat.rs`).
+          values: field.type !== 'union' && 'values' in field && field.values?.length ? field.values : undefined,
+          enumValues: field.type !== 'union' && 'values' in field && field.values?.length ? field.values : undefined,
           relation: field.type === 'relation' ? field.relation : undefined,
         })),
         runtime: entityDef.persistence === 'runtime',

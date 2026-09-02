@@ -296,7 +296,11 @@ export function buildRecommendationContext(options: {
     slot: options.slot,
     domainCategory: options.domainCategory,
     entityFieldTypes: fieldTypes,
-    hasEnumFields: fields.some(f => f.type === 'enum' || (f.values && f.values.length > 0)),
+    // Excludes `type: 'union'`: its `values` carries tagged-union variant
+    // NAMES or a by-name recursive back-reference, never a real enum
+    // vocabulary — counting it here would recommend enum-oriented patterns
+    // (filter-group/tabs/badge) for a struct union or recursive struct field.
+    hasEnumFields: fields.some(f => f.type === 'enum' || (f.type !== 'union' && f.values && f.values.length > 0)),
     hasDateFields: fields.some(f => ['date', 'datetime', 'timestamp'].includes(f.type)),
     hasNumericFields: fields.some(f => ['number', 'integer', 'float', 'decimal', 'currency'].includes(f.type)),
     hasRelationFields: fields.some(f => f.type === 'relation'),
