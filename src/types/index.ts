@@ -802,6 +802,14 @@ export {
   type AnimationDefInput,
   type AssetCatalogEntryInput,
   type SpriteSheetAtlasInput,
+  type SpriteSheetLayout,
+  type ManifestEntryKind,
+  type ManifestCanvasAffinity,
+  type ManifestSourceCatalog,
+  type ManifestAssetLicense,
+  type ManifestFrameSpec,
+  type ManifestEntry,
+  type ManifestEntryInput,
   // Schemas
   EntityRoleSchema,
   VisualStyleSchema,
@@ -822,11 +830,28 @@ export {
   CameraSchema,
   AssetCatalogEntrySchema,
   AssetCatalogSchema,
+  ManifestEntryKindSchema,
+  ManifestCanvasAffinitySchema,
+  ManifestSourceCatalogSchema,
+  ManifestAssetLicenseSchema,
+  ManifestFrameSpecSchema,
+  ManifestEntrySchema,
+  // Constants
+  SPRITE_SHEET_LAYOUT,
+  DEFAULT_UNIT_ANIMATION_ROWS,
+  MANIFEST_ENTRY_KINDS,
+  MANIFEST_CANVAS_AFFINITIES,
+  MANIFEST_SOURCE_CATALOGS,
+  MANIFEST_ASSET_LICENSES,
   // Helpers
   createAssetKey,
   parseAssetKey,
   getDefaultAnimationsForRole,
   validateAssetAnimations,
+  defaultUnitAtlas,
+  manifestToAssetCatalog,
+  parseAssetQuery,
+  matchAssetQuery,
 } from "./asset.js";
 
 // ============================================================================

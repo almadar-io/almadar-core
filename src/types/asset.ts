@@ -620,3 +620,314 @@ export function validateAssetAnimations(
     const missing = requiredAnimations.filter((anim) => !provided.includes(anim));
     return { valid: missing.length === 0, missing };
 }
+
+// ============================================================================
+// Sprite Sheet Layout — the canonical unit sheet convention (owner-approved
+// "Sheet convergence": 8 cols x 5 rows @ 256px, dark charcoal background).
+// `tools/asset-workflow`'s `spritesheet-bake.ts` (SPRITE_LAYOUT) and
+// `prompt-composer.ts` derive from this; this is the single source.
+// ============================================================================
+
+export const SPRITE_SHEET_LAYOUT = {
+    frameWidth: 256,
+    frameHeight: 256,
+    columns: 8,
+    rows: 5,
+    background: '#20202E',
+} as const;
+
+export type SpriteSheetLayout = typeof SPRITE_SHEET_LAYOUT;
+
+/**
+ * The canonical unit animation row table (idle/walk/attack/hit/death), one
+ * row per `AnimationName`, in sheet-row order. Mirrors
+ * `tools/asset-workflow/src/spritesheet-bake.ts`'s `SPRITE_LAYOUT`.
+ */
+export const DEFAULT_UNIT_ANIMATION_ROWS: ReadonlyArray<{ name: AnimationName } & AnimationDef> = [
+    { name: 'idle', row: 0, frames: 4, loop: true, frameRate: 6 },
+    { name: 'walk', row: 1, frames: 8, loop: true, frameRate: 10 },
+    { name: 'attack', row: 2, frames: 6, loop: false, frameRate: 12 },
+    { name: 'hit', row: 3, frames: 3, loop: false, frameRate: 8 },
+    { name: 'death', row: 4, frames: 6, loop: false, frameRate: 8 },
+] as const;
+
+/**
+ * Builds the canonical unit `SpriteSheetAtlas` from `SPRITE_SHEET_LAYOUT` +
+ * `DEFAULT_UNIT_ANIMATION_ROWS` for a given set of direction sheets. Directions
+ * default to whichever keys `sheets` actually carries (legacy se/sw-only packs
+ * included), or the caller can force a specific set via `opts.directions`.
+ */
+export function defaultUnitAtlas(
+    sheets: SpriteSheetAtlas['sheets'],
+    opts?: { directions?: SpriteDirection[] }
+): SpriteSheetAtlas {
+    const directions = opts?.directions ?? SPRITE_DIRECTIONS.filter((direction) => sheets[direction] !== undefined);
+    const animations: Partial<Record<string, AnimationDef>> = {};
+    for (const { name, ...def } of DEFAULT_UNIT_ANIMATION_ROWS) {
+        animations[name] = def;
+    }
+    return {
+        frameWidth: SPRITE_SHEET_LAYOUT.frameWidth,
+        frameHeight: SPRITE_SHEET_LAYOUT.frameHeight,
+        columns: SPRITE_SHEET_LAYOUT.columns,
+        rows: SPRITE_SHEET_LAYOUT.rows,
+        directions,
+        sheets,
+        animations,
+    };
+}
+
+// ============================================================================
+// Manifest Entry — the kflow-assets `manifest.json` row shape. Core is the
+// owner; `tools/asset-workflow`'s `ExtendedManifestEntry` converges onto this
+// (mirrors `tools/asset-workflow/src/asset-schema.ts`'s `CanvasAffinity`,
+// `FrameSpec`, `AssetLicense`, `SourceCatalog` literal unions).
+// ============================================================================
+
+export const MANIFEST_ENTRY_KINDS = ['model', 'image', 'spritesheet', 'audio', 'json'] as const;
+
+export type ManifestEntryKind = (typeof MANIFEST_ENTRY_KINDS)[number];
+
+export const ManifestEntryKindSchema = z.enum(MANIFEST_ENTRY_KINDS);
+
+export const MANIFEST_CANVAS_AFFINITIES = ['isometric', 'hex', 'flat', 'side', '3d', 'none'] as const;
+
+export type ManifestCanvasAffinity = (typeof MANIFEST_CANVAS_AFFINITIES)[number];
+
+export const ManifestCanvasAffinitySchema = z.enum(MANIFEST_CANVAS_AFFINITIES);
+
+export const MANIFEST_SOURCE_CATALOGS = ['kenny', 'kekec-assets', 'iram-assets', 'trait-wars-assets', 'kflow-assets'] as const;
+
+export type ManifestSourceCatalog = (typeof MANIFEST_SOURCE_CATALOGS)[number];
+
+export const ManifestSourceCatalogSchema = z.enum(MANIFEST_SOURCE_CATALOGS);
+
+export const MANIFEST_ASSET_LICENSES = ['CC0', 'proprietary'] as const;
+
+export type ManifestAssetLicense = (typeof MANIFEST_ASSET_LICENSES)[number];
+
+export const ManifestAssetLicenseSchema = z.enum(MANIFEST_ASSET_LICENSES);
+
+/**
+ * Path of the sheet's `atlas.json` relative to the pack's `shared/` root
+ * (`riya-platformer/units/riya/atlas.json`) — the executable frame truth for
+ * unit sheets whose rows are not uniform.
+ */
+export type ManifestAtlasRef = string;
+
+/** Tile/sprite-sheet frame layout for a manifest row, an atlas reference, else `null`. */
+export type ManifestFrameSpec =
+    | { kind: 'iso-tile'; w: number; h: number }
+    | { kind: 'sprite-sheet'; frame: number; cols: number; rows: number }
+    | ManifestAtlasRef
+    | null;
+
+export const ManifestFrameSpecSchema = z.union([
+    z.object({ kind: z.literal('iso-tile'), w: z.number(), h: z.number() }),
+    z.object({ kind: z.literal('sprite-sheet'), frame: z.number(), cols: z.number(), rows: z.number() }),
+    z.string().min(1),
+    z.null(),
+]);
+
+/**
+ * One row of `almadar-assets/kflow-assets/manifest.json`. Core owns this
+ * shape; `tools/asset-workflow`'s `ExtendedManifestEntry` converges onto it.
+ */
+export interface ManifestEntry {
+    url: string;
+    name: string;
+    category: string;
+    kind: ManifestEntryKind;
+    width: number;
+    height: number;
+    canvasAffinity: ManifestCanvasAffinity;
+    genreAffinity: string[];
+    swapClass: string;
+    sourceCatalog: ManifestSourceCatalog;
+    frameSpec: ManifestFrameSpec;
+    /** Provenance-extended field: present on the promote/register path only. */
+    license?: ManifestAssetLicense;
+}
+
+export const ManifestEntrySchema = z.object({
+    url: z.string(),
+    name: z.string(),
+    category: z.string(),
+    kind: ManifestEntryKindSchema,
+    width: z.number(),
+    height: z.number(),
+    canvasAffinity: ManifestCanvasAffinitySchema,
+    genreAffinity: z.array(z.string()),
+    swapClass: z.string(),
+    sourceCatalog: ManifestSourceCatalogSchema,
+    frameSpec: ManifestFrameSpecSchema,
+    license: ManifestAssetLicenseSchema.optional(),
+});
+
+export type ManifestEntryInput = z.input<typeof ManifestEntrySchema>;
+
+// ============================================================================
+// Manifest -> Asset Catalog adapter
+// ============================================================================
+
+const ASSET_CATALOG_ENTRY_KINDS: readonly AssetCatalogEntry['kind'][] = [
+    'image',
+    'spritesheet',
+    'audio',
+    'scene',
+    'portrait',
+    'model',
+    'other',
+];
+
+const MODEL_URL_EXTENSIONS = ['.glb', '.gltf'];
+const AUDIO_URL_EXTENSIONS = ['.mp3', '.ogg', '.wav'];
+
+function urlEndsWithAny(url: string, extensions: readonly string[]): boolean {
+    const lower = url.toLowerCase();
+    return extensions.some((extension) => lower.endsWith(extension));
+}
+
+/**
+ * Declared, order-sensitive rule for deriving the catalog `kind` from a
+ * manifest row: `frameSpec`/`kind==='spritesheet'` beats extension, which
+ * beats the manifest's own `kind`. No filename-keyword guessing.
+ */
+function deriveManifestAssetKind(entry: ManifestEntry): AssetCatalogEntry['kind'] {
+    if (typeof entry.frameSpec === 'string' || entry.frameSpec?.kind === 'sprite-sheet' || entry.kind === 'spritesheet') return 'spritesheet';
+    if (entry.kind === 'model' || urlEndsWithAny(entry.url, MODEL_URL_EXTENSIONS)) return 'model';
+    if (entry.kind === 'audio' || urlEndsWithAny(entry.url, AUDIO_URL_EXTENSIONS)) return 'audio';
+    if (entry.kind === 'image') return 'image';
+    return 'other';
+}
+
+function parseAssetAspectRatio(aspect: AssetAspect): number {
+    const [w, h] = aspect.split(':').map(Number);
+    return w / h;
+}
+
+const ASSET_ASPECT_RATIO_TOLERANCE = 0.01;
+
+/**
+ * The asset's aspect only when width/height are both known (> 0) and their
+ * ratio matches exactly one `ASSET_ASPECTS` entry within 1%; otherwise
+ * omitted (never guessed).
+ */
+function deriveManifestAssetAspect(width: number, height: number): AssetAspect | undefined {
+    if (width <= 0 || height <= 0) return undefined;
+    const ratio = width / height;
+    for (const aspect of ASSET_ASPECTS) {
+        const expected = parseAssetAspectRatio(aspect);
+        if (Math.abs(ratio / expected - 1) <= ASSET_ASPECT_RATIO_TOLERANCE) return aspect;
+    }
+    return undefined;
+}
+
+const ABSOLUTE_URL_PATTERN = /^[a-z][a-z0-9+.-]*:\/\//i;
+
+/** Prefixes a relative manifest url with `cdnPrefix`; leaves an absolute url untouched. */
+function resolveManifestUrl(url: string, cdnPrefix?: string): string {
+    if (!cdnPrefix || ABSOLUTE_URL_PATTERN.test(url)) return url;
+    const prefix = cdnPrefix.endsWith('/') ? cdnPrefix : `${cdnPrefix}/`;
+    const rest = url.startsWith('/') ? url.slice(1) : url;
+    return `${prefix}${rest}`;
+}
+
+/**
+ * Adapts kflow-assets manifest rows into the inspector picker's
+ * `AssetCatalog`. The ONE deterministic derivation the Kura assets server
+ * route (`GET /api/assets/catalog`) and any other manifest consumer share.
+ */
+export function manifestToAssetCatalog(entries: ReadonlyArray<ManifestEntry>, opts?: { cdnPrefix?: string }): AssetCatalog {
+    return entries.map((entry) => {
+        const kind = deriveManifestAssetKind(entry);
+        const dimension: AssetDimension = entry.canvasAffinity === '3d' ? '3d' : '2d';
+        const aspect = deriveManifestAssetAspect(entry.width, entry.height);
+        const url = resolveManifestUrl(entry.url, opts?.cdnPrefix);
+        const catalogEntry: AssetCatalogEntry = {
+            url,
+            name: entry.name,
+            category: entry.category,
+            kind,
+            dimension,
+        };
+        if (aspect !== undefined) catalogEntry.aspect = aspect;
+        if (kind === 'image' || kind === 'spritesheet') catalogEntry.thumbnailUrl = url;
+        return catalogEntry;
+    });
+}
+
+// ============================================================================
+// Asset query grammar — Unity-style `t:<kind>` / `l:<label>` + free text.
+// The ONE grammar `parseAssetQuery`/`matchAssetQuery` implement; every
+// consumer (the Kura assets server route, the client's `asset-query.ts`)
+// imports these instead of re-parsing.
+// ============================================================================
+
+const ASSET_QUERY_TYPE_PREFIX = 't:';
+const ASSET_QUERY_LABEL_PREFIX = 'l:';
+
+function isAssetCatalogEntryKind(value: string): value is AssetCatalogEntry['kind'] {
+    return ASSET_CATALOG_ENTRY_KINDS.some((kind) => kind === value);
+}
+
+interface ParsedAssetQuery {
+    text: string;
+    kind?: AssetCatalogEntry['kind'];
+    labels: string[];
+    /** A `t:` token whose value is not a known `AssetCatalogEntry['kind']` — the query matches nothing. */
+    unknownKind: boolean;
+}
+
+function parseAssetQueryTokens(q: string): ParsedAssetQuery {
+    const tokens = q.trim().length > 0 ? q.trim().split(/\s+/) : [];
+    const textParts: string[] = [];
+    const labels: string[] = [];
+    let kind: AssetCatalogEntry['kind'] | undefined;
+    let unknownKind = false;
+    for (const token of tokens) {
+        if (token.startsWith(ASSET_QUERY_TYPE_PREFIX)) {
+            const value = token.slice(ASSET_QUERY_TYPE_PREFIX.length);
+            if (isAssetCatalogEntryKind(value)) kind = value;
+            else unknownKind = true;
+        } else if (token.startsWith(ASSET_QUERY_LABEL_PREFIX)) {
+            const value = token.slice(ASSET_QUERY_LABEL_PREFIX.length);
+            if (value.length > 0) labels.push(value);
+        } else {
+            textParts.push(token);
+        }
+    }
+    return { text: textParts.join(' '), kind, labels, unknownKind };
+}
+
+/**
+ * Parses a `t:<kind>` / `l:<label>` / free-text asset search query. An
+ * unrecognized `t:` value is dropped from the returned `kind` (there is no
+ * value of `AssetCatalogEntry['kind']` to report) — `matchAssetQuery`, which
+ * shares this same tokenizer internally, is the authority that turns it into
+ * "matches nothing".
+ */
+export function parseAssetQuery(q: string): { text: string; kind?: AssetCatalogEntry['kind']; labels: string[] } {
+    const parsed = parseAssetQueryTokens(q);
+    return parsed.kind === undefined ? { text: parsed.text, labels: parsed.labels } : { text: parsed.text, kind: parsed.kind, labels: parsed.labels };
+}
+
+/**
+ * Matches one catalog entry against a `t:`/`l:`/free-text query. `l:` labels
+ * are ANDed against `entry.category` (exact, case-insensitive); free text is
+ * an ANDed case-insensitive substring over `name`+`category`. An unrecognized
+ * `t:` kind matches nothing.
+ */
+export function matchAssetQuery(entry: AssetCatalogEntry, q: string): boolean {
+    const parsed = parseAssetQueryTokens(q);
+    if (parsed.unknownKind) return false;
+    if (parsed.kind !== undefined && entry.kind !== parsed.kind) return false;
+    for (const label of parsed.labels) {
+        if (entry.category.toLowerCase() !== label.toLowerCase()) return false;
+    }
+    if (parsed.text.length > 0) {
+        const haystack = `${entry.name} ${entry.category}`.toLowerCase();
+        if (!haystack.includes(parsed.text.toLowerCase())) return false;
+    }
+    return true;
+}

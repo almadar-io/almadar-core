@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-08-29T08:09:09.100Z",
+  "exportedAt": "2026-09-03T08:33:38.850Z",
   "services": {
     "llm": {
       "name": "llm",
@@ -17,36 +17,52 @@
               "name": "systemPrompt",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "System prompt steering the model's behavior."
             },
             {
               "name": "userPrompt",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "The user/task prompt sent to the model."
             },
             {
               "name": "model",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Model id override."
             },
             {
               "name": "temperature",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Sampling temperature; higher is more random."
             },
             {
               "name": "maxTokens",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Maximum tokens to generate."
             }
           ],
           "responseShape": {
             "content": "string",
-            "usage": "object"
+            "usage": {
+              "type": "object",
+              "properties": {
+                "promptTokens": {
+                  "type": "number",
+                  "required": true
+                },
+                "completionTokens": {
+                  "type": "number",
+                  "required": true
+                },
+                "totalTokens": {
+                  "type": "number",
+                  "required": true
+                }
+              }
+            }
           }
         },
         {
@@ -57,19 +73,19 @@
               "name": "text",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Text to classify."
             },
             {
               "name": "categories",
               "type": "string[]",
               "required": true,
-              "description": ""
+              "description": "Closed set of category labels the model must choose from."
             },
             {
               "name": "model",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Model id override."
             }
           ],
           "responseShape": {
@@ -86,25 +102,57 @@
               "name": "text",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Source text to extract data from."
             },
             {
               "name": "schema",
               "type": "JsonSchemaDefinition",
               "required": true,
-              "description": ""
+              "description": "JSON Schema describing the fields to extract.",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "required": false
+                },
+                "properties": {
+                  "type": "JsonSchemaDefinition",
+                  "required": false
+                },
+                "required": {
+                  "type": "string[]",
+                  "required": false
+                },
+                "items": {
+                  "type": "JsonSchemaDefinition",
+                  "required": false
+                },
+                "additionalProperties": {
+                  "type": "JsonSchemaDefinition",
+                  "required": false
+                },
+                "description": {
+                  "type": "string",
+                  "required": false
+                },
+                "enum": {
+                  "type": "string[]",
+                  "required": false,
+                  "description": "Enum values are serialized to strings on the wire — pass `[\"a\",\"b\"]` even for non-string enums."
+                }
+              }
             },
             {
               "name": "model",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Model id override."
             }
           ],
           "responseShape": {
             "data": "ExtractedData",
             "confidence": "number"
-          }
+          },
+          "synonyms": "parse, structure"
         },
         {
           "name": "summarize",
@@ -114,25 +162,25 @@
               "name": "text",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Text to summarize."
             },
             {
               "name": "maxLength",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Target maximum summary length in words."
             },
             {
               "name": "style",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Summary style, e.g. 'bullet' or 'detailed'."
             },
             {
               "name": "model",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Model id override."
             }
           ],
           "responseShape": {
@@ -148,13 +196,13 @@
               "name": "texts",
               "type": "string[]",
               "required": true,
-              "description": ""
+              "description": "Texts to embed, one vector per entry, in order."
             },
             {
               "name": "model",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Embedding model id override."
             }
           ],
           "responseShape": {
@@ -441,7 +489,30 @@
             }
           ],
           "responseShape": {
-            "services": "DiscoveredService[]"
+            "services": {
+              "type": "DiscoveredService[]",
+              "items": {
+                "type": "DiscoveredService",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "instanceId": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "host": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "port": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            }
           }
         },
         {
@@ -456,7 +527,30 @@
             }
           ],
           "responseShape": {
-            "services": "DiscoveredService[]"
+            "services": {
+              "type": "DiscoveredService[]",
+              "items": {
+                "type": "DiscoveredService",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "instanceId": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "host": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "port": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            }
           }
         }
       ],
@@ -581,7 +675,19 @@
             }
           ],
           "responseShape": {
-            "skill": "object"
+            "skill": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "content": {
+                  "type": "string",
+                  "required": true
+                }
+              }
+            }
           }
         },
         {
@@ -602,7 +708,19 @@
             }
           ],
           "responseShape": {
-            "skill": "object"
+            "skill": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "content": {
+                  "type": "string",
+                  "required": true
+                }
+              }
+            }
           }
         },
         {
@@ -617,7 +735,19 @@
             }
           ],
           "responseShape": {
-            "skill": "object"
+            "skill": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "content": {
+                  "type": "string",
+                  "required": true
+                }
+              }
+            }
           }
         },
         {
@@ -625,7 +755,22 @@
           "description": "Generate all available skills.",
           "params": [],
           "responseShape": {
-            "skills": "array"
+            "skills": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "content": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
           }
         }
       ],
@@ -641,25 +786,25 @@
       "actions": [
         {
           "name": "cloneRepo",
-          "description": "",
+          "description": "Clone a repository via the git CLI into a local target directory, using the configured token for auth.",
           "params": [
             {
               "name": "repoUrl",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "HTTPS clone URL, e.g. https://github.com/owner/repo. Owner/repo are parsed from it when not preconfigured."
             },
             {
               "name": "targetDir",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Local directory to clone into."
             },
             {
               "name": "branch",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Branch to check out after cloning; defaults to the repo's default branch."
             }
           ],
           "responseShape": {
@@ -668,19 +813,19 @@
         },
         {
           "name": "createBranch",
-          "description": "",
+          "description": "Create a new local branch via the git CLI in the configured working directory.",
           "params": [
             {
               "name": "branchName",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Name of the branch to create."
             },
             {
               "name": "baseBranch",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Branch to branch from; defaults to the current branch."
             }
           ],
           "responseShape": {
@@ -689,19 +834,19 @@
         },
         {
           "name": "commit",
-          "description": "",
+          "description": "Commit staged (or given) changes via the git CLI in the configured working directory.",
           "params": [
             {
               "name": "message",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Commit message."
             },
             {
               "name": "files",
               "type": "string[]",
               "required": false,
-              "description": ""
+              "description": "Specific files to commit; when omitted, all changes are committed."
             }
           ],
           "responseShape": {
@@ -710,19 +855,19 @@
         },
         {
           "name": "push",
-          "description": "",
+          "description": "Push a local branch to the remote via the git CLI, using the configured token for auth.",
           "params": [
             {
               "name": "branchName",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Branch name to push."
             },
             {
               "name": "force",
               "type": "boolean",
               "required": false,
-              "description": ""
+              "description": "Force-push (overwrites remote history); never set true in an agent context."
             }
           ],
           "responseShape": {
@@ -731,37 +876,37 @@
         },
         {
           "name": "createPR",
-          "description": "",
+          "description": "Open a pull request via the GitHub REST API.",
           "params": [
             {
               "name": "title",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Pull request title."
             },
             {
               "name": "body",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Pull request description body."
             },
             {
               "name": "baseBranch",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Branch the PR merges into, e.g. main."
             },
             {
               "name": "headBranch",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Branch the PR merges from (the feature branch)."
             },
             {
               "name": "draft",
               "type": "boolean",
               "required": false,
-              "description": ""
+              "description": "Open as a draft PR instead of ready-for-review."
             }
           ],
           "responseShape": {
@@ -772,55 +917,93 @@
         },
         {
           "name": "getPRComments",
-          "description": "",
+          "description": "List review comments on a pull request via the GitHub REST API.",
           "params": [
             {
               "name": "prNumber",
               "type": "number",
               "required": true,
-              "description": ""
+              "description": "Pull request number."
             }
           ],
           "responseShape": {
-            "comments": "array"
+            "comments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "body": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "user": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
           }
         },
         {
           "name": "listIssues",
-          "description": "",
+          "description": "List issues on the configured repository via the GitHub REST API.",
           "params": [
             {
               "name": "state",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Issue state filter: 'open', 'closed', or 'all'; defaults to open."
             },
             {
               "name": "labels",
               "type": "string[]",
               "required": false,
-              "description": ""
+              "description": "Only issues carrying all of these labels."
             },
             {
               "name": "per_page",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Page size for the GitHub API request."
             }
           ],
           "responseShape": {
-            "issues": "array"
+            "issues": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "title": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "state": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
           }
         },
         {
           "name": "getIssue",
-          "description": "",
+          "description": "Fetch a single issue's details via the GitHub REST API.",
           "params": [
             {
               "name": "issueNumber",
               "type": "number",
               "required": true,
-              "description": ""
+              "description": "Issue number."
             }
           ],
           "responseShape": {
@@ -832,31 +1015,31 @@
         },
         {
           "name": "getFile",
-          "description": "",
+          "description": "Read a file's content from a repository at a given ref (declared intent — dispatch is being wired).",
           "params": [
             {
               "name": "owner",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Repository owner (user or org)."
             },
             {
               "name": "repo",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Repository name."
             },
             {
               "name": "path",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "File path within the repository."
             },
             {
               "name": "ref",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Branch, tag, or commit SHA to read from; defaults to the default branch."
             }
           ],
           "responseShape": {
@@ -868,76 +1051,99 @@
         },
         {
           "name": "listCommits",
-          "description": "",
+          "description": "List commits on a repository, optionally filtered by file path (declared intent — dispatch is being wired).",
           "params": [
             {
               "name": "owner",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Repository owner (user or org)."
             },
             {
               "name": "repo",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Repository name."
             },
             {
               "name": "path",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Only commits touching this file path."
             },
             {
               "name": "ref",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Branch, tag, or commit SHA to start from; defaults to the default branch."
             },
             {
               "name": "per_page",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Page size for the GitHub API request."
             }
           ],
           "responseShape": {
-            "commits": "array"
+            "commits": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "sha": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "message": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "author": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "date": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
           }
         },
         {
           "name": "createIssue",
-          "description": "",
+          "description": "Open a new issue on a repository (declared intent — dispatch is being wired).",
           "params": [
             {
               "name": "owner",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Repository owner (user or org)."
             },
             {
               "name": "repo",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Repository name."
             },
             {
               "name": "title",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Issue title."
             },
             {
               "name": "body",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Issue body/description."
             },
             {
               "name": "labels",
               "type": "string[]",
               "required": false,
-              "description": ""
+              "description": "Labels to apply to the new issue."
             }
           ],
           "responseShape": {
@@ -975,25 +1181,25 @@
       "actions": [
         {
           "name": "createPaymentIntent",
-          "description": "",
+          "description": "Create a Stripe PaymentIntent for a one-off charge.",
           "params": [
             {
               "name": "amount",
               "type": "number",
               "required": true,
-              "description": ""
+              "description": "Charge amount in the currency's smallest unit (e.g. cents for USD)."
             },
             {
               "name": "currency",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "ISO 4217 currency code, e.g. usd."
             },
             {
               "name": "metadata",
               "type": "object",
               "required": false,
-              "description": ""
+              "description": "Arbitrary key-value tags attached to the PaymentIntent (string values only)."
             }
           ],
           "responseShape": {
@@ -1002,17 +1208,18 @@
             "status": "string",
             "amount": "number",
             "currency": "string"
-          }
+          },
+          "synonyms": "charge, pay"
         },
         {
           "name": "confirmPayment",
-          "description": "",
+          "description": "Confirm a previously created PaymentIntent, attempting to complete the charge.",
           "params": [
             {
               "name": "paymentIntentId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "The PaymentIntent id returned by createPaymentIntent."
             }
           ],
           "responseShape": {
@@ -1022,19 +1229,19 @@
         },
         {
           "name": "refund",
-          "description": "",
+          "description": "Refund a charged PaymentIntent, in full or in part.",
           "params": [
             {
               "name": "paymentIntentId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "The PaymentIntent id to refund."
             },
             {
               "name": "amount",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Amount to refund in the currency's smallest unit; omit for a full refund."
             }
           ],
           "responseShape": {
@@ -1067,65 +1274,85 @@
       "actions": [
         {
           "name": "generate",
-          "description": "",
+          "description": "Generate free-form text from a prompt via the configured LLM provider (default 'You are a helpful assistant.' system prompt).",
           "params": [
             {
               "name": "userPrompt",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "The user/task prompt sent to the model."
             },
             {
               "name": "systemPrompt",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "System prompt steering the model's behavior; defaults to a generic assistant prompt."
             },
             {
               "name": "model",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Model id override; when set, a fresh client is built for this call instead of the shared one."
             },
             {
               "name": "temperature",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Sampling temperature (0-1ish, provider-dependent); higher is more random."
             },
             {
               "name": "maxTokens",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Maximum tokens to generate; defaults to 1024."
             }
           ],
           "responseShape": {
             "content": "string",
-            "usage": "object"
+            "usage": {
+              "type": "object",
+              "properties": {
+                "promptTokens": {
+                  "type": "number",
+                  "required": false
+                },
+                "completionTokens": {
+                  "type": "number",
+                  "required": false
+                },
+                "totalTokens": {
+                  "type": "number",
+                  "required": false
+                },
+                "tokens": {
+                  "type": "number",
+                  "required": false
+                }
+              }
+            }
           }
         },
         {
           "name": "classify",
-          "description": "",
+          "description": "Classify text into exactly one of a caller-supplied category list, with a confidence score and reasoning.",
           "params": [
             {
               "name": "text",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Text to classify."
             },
             {
               "name": "categories",
               "type": "string[]",
               "required": true,
-              "description": ""
+              "description": "Closed set of category labels the model must choose from."
             },
             {
               "name": "model",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Model id override."
             }
           ],
           "responseShape": {
@@ -1136,56 +1363,56 @@
         },
         {
           "name": "extract",
-          "description": "",
+          "description": "Extract structured data from text according to a JSON-schema-shaped description; returned data is not validated against the schema.",
           "params": [
             {
               "name": "text",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Source text to extract data from."
             },
             {
               "name": "schema",
               "type": "IntegrationParams",
               "required": true,
-              "description": ""
+              "description": "JSON-schema-like description of the fields to extract; passed to the model as a prompt, not enforced structurally."
             },
             {
               "name": "model",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Model id override."
             }
           ],
           "responseShape": {}
         },
         {
           "name": "summarize",
-          "description": "",
+          "description": "Summarize text, optionally constrained by length and style, returning a summary plus key points.",
           "params": [
             {
               "name": "text",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Text to summarize."
             },
             {
               "name": "maxLength",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Target maximum summary length in words."
             },
             {
               "name": "style",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Summary style: 'bullet' for bullet points, 'detailed' for thorough, otherwise concise."
             },
             {
               "name": "model",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Model id override."
             }
           ],
           "responseShape": {
@@ -1195,19 +1422,19 @@
         },
         {
           "name": "embed",
-          "description": "",
+          "description": "Generate embedding vectors for an array of texts via the configured embedding model (default baai/bge-base-en-v1.5 on OpenRouter, independent of the chat provider).",
           "params": [
             {
               "name": "texts",
               "type": "string[]",
               "required": true,
-              "description": ""
+              "description": "Texts to embed, one vector per entry, in order."
             },
             {
               "name": "model",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Embedding model id override."
             }
           ],
           "responseShape": {
@@ -1238,38 +1465,38 @@
       "actions": [
         {
           "name": "search",
-          "description": "",
+          "description": "Search YouTube via the Data API and return matching video snippets.",
           "params": [
             {
               "name": "query",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Search query text."
             },
             {
               "name": "maxResults",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Maximum number of results; defaults to 10."
             },
             {
               "name": "type",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Resource type filter passed to the Data API (e.g. 'video', 'channel', 'playlist')."
             }
           ],
           "responseShape": {}
         },
         {
           "name": "getVideo",
-          "description": "",
+          "description": "Fetch a video's snippet and statistics via the YouTube Data API.",
           "params": [
             {
               "name": "videoId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "YouTube video id."
             }
           ],
           "responseShape": {
@@ -1281,13 +1508,13 @@
         },
         {
           "name": "getChannel",
-          "description": "",
+          "description": "Fetch a channel's snippet and statistics via the YouTube Data API.",
           "params": [
             {
               "name": "channelId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "YouTube channel id."
             }
           ],
           "responseShape": {
@@ -1315,47 +1542,48 @@
       "actions": [
         {
           "name": "sendSMS",
-          "description": "",
+          "description": "Send an SMS message via Twilio.",
           "params": [
             {
               "name": "to",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Destination phone number, E.164 format."
             },
             {
               "name": "body",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Message text."
             },
             {
               "name": "from",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Sender phone number; defaults to TWILIO_PHONE_NUMBER."
             }
           ],
           "responseShape": {
             "sid": "string",
             "status": "string"
-          }
+          },
+          "synonyms": "text message, text"
         },
         {
           "name": "sendWhatsApp",
-          "description": "",
+          "description": "Send a WhatsApp message via Twilio, using the configured phone number as sender on both ends.",
           "params": [
             {
               "name": "to",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Destination phone number, E.164 format (sent as whatsapp:number)."
             },
             {
               "name": "body",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Message text."
             }
           ],
           "responseShape": {
@@ -1392,31 +1620,31 @@
       "actions": [
         {
           "name": "send",
-          "description": "",
+          "description": "Send a transactional email via the configured provider (SendGrid or Resend).",
           "params": [
             {
               "name": "to",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Recipient email address."
             },
             {
               "name": "subject",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Email subject line."
             },
             {
               "name": "body",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Plain-text (or HTML, if `htmlBody` is absent) body content."
             },
             {
               "name": "from",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Sender address; defaults to FROM_EMAIL."
             },
             {
               "name": "htmlBody",
@@ -1428,7 +1656,7 @@
               "name": "replyTo",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Reply-To address."
             },
             {
               "name": "templateId",
@@ -1471,31 +1699,31 @@
       "actions": [
         {
           "name": "send",
-          "description": "",
+          "description": "POST a JSON event notification to an external URL, HMAC-SHA256-signed when a secret is configured; 5xx responses retry, 4xx do not.",
           "params": [
             {
               "name": "url",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Destination URL to POST to."
             },
             {
               "name": "event",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Event name, carried in the body and the X-Almadar-Event header."
             },
             {
               "name": "payload",
               "type": "object",
               "required": false,
-              "description": ""
+              "description": "Event payload; defaults to an empty object."
             },
             {
               "name": "secret",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Per-call HMAC signing secret, overriding WEBHOOK_SIGNING_SECRET."
             }
           ],
           "responseShape": {
@@ -1528,37 +1756,57 @@
       "actions": [
         {
           "name": "send",
-          "description": "",
+          "description": "Send a VAPID-signed Web Push notification to a browser PushSubscription endpoint.",
           "params": [
             {
               "name": "subscription",
               "type": "object",
               "required": true,
-              "description": ""
+              "description": "Browser PushSubscription: endpoint URL plus the p256dh/auth encryption keys.",
+              "properties": {
+                "endpoint": {
+                  "type": "string",
+                  "required": true
+                },
+                "keys": {
+                  "type": "object",
+                  "required": true,
+                  "properties": {
+                    "p256dh": {
+                      "type": "string",
+                      "required": true
+                    },
+                    "auth": {
+                      "type": "string",
+                      "required": true
+                    }
+                  }
+                }
+              }
             },
             {
               "name": "title",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Notification title."
             },
             {
               "name": "body",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Notification body text."
             },
             {
               "name": "url",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "URL to open when the notification is clicked."
             },
             {
               "name": "icon",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Notification icon URL."
             }
           ],
           "responseShape": {
@@ -1596,89 +1844,128 @@
       "actions": [
         {
           "name": "listEvents",
-          "description": "",
+          "description": "List events on a Google Calendar; pass `syncToken` for incremental sync instead of a time window (the API rejects combining them).",
           "params": [
             {
               "name": "calendarId",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Calendar id; defaults to GOOGLE_CALENDAR_ID (or 'primary')."
             },
             {
               "name": "timeMin",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "ISO start of the time window (ignored when `syncToken` is set)."
             },
             {
               "name": "timeMax",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "ISO end of the time window (ignored when `syncToken` is set)."
             },
             {
               "name": "syncToken",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Incremental-sync token from a previous call's `nextSyncToken`; supersedes timeMin/timeMax."
             },
             {
               "name": "maxResults",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Maximum events to return; defaults to 250."
             }
           ],
           "responseShape": {
-            "events": "array",
+            "events": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "summary": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "description": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "location": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "start": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "end": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "status": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "updated": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            },
             "nextSyncToken": "string | null"
           }
         },
         {
           "name": "createEvent",
-          "description": "",
+          "description": "Create a calendar event; an all-day event uses a 10-char (YYYY-MM-DD) start with no `end`/`durationMinutes`, defaulting to the next day.",
           "params": [
             {
               "name": "calendarId",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Calendar id; defaults to GOOGLE_CALENDAR_ID."
             },
             {
               "name": "summary",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Event title."
             },
             {
               "name": "description",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Event description."
             },
             {
               "name": "location",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Event location text."
             },
             {
               "name": "start",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "ISO start (10 chars = all-day date, longer = dateTime)."
             },
             {
               "name": "end",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "ISO end; if omitted, derived from `durationMinutes` or the all-day next-day convention."
             },
             {
               "name": "durationMinutes",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Duration in minutes used to derive `end` when `end` is omitted (non-all-day events only)."
             }
           ],
           "responseShape": {
@@ -1689,49 +1976,49 @@
         },
         {
           "name": "updateEvent",
-          "description": "",
+          "description": "Patch an existing event's fields; only fields present in params are changed.",
           "params": [
             {
               "name": "calendarId",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Calendar id; defaults to GOOGLE_CALENDAR_ID."
             },
             {
               "name": "eventId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Id of the event to update."
             },
             {
               "name": "summary",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "New event title."
             },
             {
               "name": "description",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "New event description."
             },
             {
               "name": "location",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "New event location text."
             },
             {
               "name": "start",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "New ISO start."
             },
             {
               "name": "end",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "New ISO end."
             }
           ],
           "responseShape": {
@@ -1741,19 +2028,19 @@
         },
         {
           "name": "deleteEvent",
-          "description": "",
+          "description": "Delete a calendar event.",
           "params": [
             {
               "name": "calendarId",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Calendar id; defaults to GOOGLE_CALENDAR_ID."
             },
             {
               "name": "eventId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Id of the event to delete."
             }
           ],
           "responseShape": {
@@ -1763,58 +2050,73 @@
         },
         {
           "name": "freeBusy",
-          "description": "",
+          "description": "Query busy time blocks on a calendar within a window.",
           "params": [
             {
               "name": "calendarId",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Calendar id; defaults to GOOGLE_CALENDAR_ID."
             },
             {
               "name": "timeMin",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "ISO start of the query window."
             },
             {
               "name": "timeMax",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "ISO end of the query window."
             }
           ],
           "responseShape": {
-            "busy": "array"
+            "busy": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "start": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "end": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
           }
         },
         {
           "name": "watch",
-          "description": "",
+          "description": "Register a push-notification channel for calendar change events (Google Calendar API watch).",
           "params": [
             {
               "name": "calendarId",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Calendar id; defaults to GOOGLE_CALENDAR_ID."
             },
             {
               "name": "channelId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Caller-chosen id identifying this notification channel."
             },
             {
               "name": "address",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "HTTPS callback URL Google POSTs change notifications to."
             },
             {
               "name": "ttlSeconds",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Requested channel time-to-live in seconds."
             }
           ],
           "responseShape": {
@@ -1825,19 +2127,19 @@
         },
         {
           "name": "stopWatch",
-          "description": "",
+          "description": "Stop an active watch channel, ending calendar change notifications.",
           "params": [
             {
               "name": "channelId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "The channel id from the corresponding `watch` call."
             },
             {
               "name": "resourceId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "The resourceId returned by the corresponding `watch` call."
             }
           ],
           "responseShape": {
@@ -1885,40 +2187,71 @@
       "actions": [
         {
           "name": "listFiles",
-          "description": "",
+          "description": "List non-trashed files in a Google Drive folder, optionally filtered by a Drive API query clause.",
           "params": [
             {
               "name": "folderId",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Restrict to files whose parents include this folder id."
             },
             {
               "name": "query",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Extra Drive API query clause, ANDed with the folder/trashed filters."
             },
             {
               "name": "maxResults",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Maximum files to return; defaults to 100."
             }
           ],
           "responseShape": {
-            "files": "array"
+            "files": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "mimeType": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "size": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "modifiedTime": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "webViewLink": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
           }
         },
         {
           "name": "getFile",
-          "description": "",
+          "description": "Download a file's content, base64-encoded.",
           "params": [
             {
               "name": "fileId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Drive file id."
             }
           ],
           "responseShape": {
@@ -1931,54 +2264,55 @@
         },
         {
           "name": "uploadFile",
-          "description": "",
+          "description": "Upload a file to Drive; writes go through the user OAuth client when configured (service-account uploads have no storage quota on personal accounts).",
           "params": [
             {
               "name": "name",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "File name to create."
             },
             {
               "name": "content",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "File content as a base64 data URL (data:mime;base64,...) or raw base64/plain text."
             },
             {
               "name": "mimeType",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "MIME type; inferred from a data URL when omitted."
             },
             {
               "name": "folderId",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Parent folder id; defaults to GOOGLE_DRIVE_FOLDER_ID."
             }
           ],
           "responseShape": {
             "id": "string",
             "name": "string",
             "webViewLink": "string"
-          }
+          },
+          "synonyms": "upload file"
         },
         {
           "name": "createFolder",
-          "description": "",
+          "description": "Create a new Drive folder.",
           "params": [
             {
               "name": "name",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Folder name to create."
             },
             {
               "name": "parentId",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Parent folder id; defaults to GOOGLE_DRIVE_FOLDER_ID."
             }
           ],
           "responseShape": {
@@ -1988,25 +2322,25 @@
         },
         {
           "name": "shareFile",
-          "description": "",
+          "description": "Grant a user permission on a Drive file.",
           "params": [
             {
               "name": "fileId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Drive file id."
             },
             {
               "name": "email",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Email address of the grantee."
             },
             {
               "name": "role",
               "type": "'reader' | 'writer' | 'commenter'",
               "required": false,
-              "description": ""
+              "description": "Permission level; defaults to 'reader'."
             }
           ],
           "responseShape": {
@@ -2048,31 +2382,25 @@
       "actions": [
         {
           "name": "getSpend",
-          "description": "",
+          "description": "Fetch total ad spend, impressions, and clicks for an account over a date range via the Meta Graph API Marketing Insights endpoint (read-only).",
           "params": [
             {
               "name": "accountId",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Ad account id (with or without the `act_` prefix); defaults to META_AD_ACCOUNT_ID."
             },
             {
               "name": "since",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Range start date (YYYY-MM-DD)."
             },
             {
               "name": "until",
               "type": "string",
               "required": true,
-              "description": ""
-            },
-            {
-              "name": "clientTag",
-              "type": "string",
-              "required": false,
-              "description": ""
+              "description": "Range end date (YYYY-MM-DD)."
             }
           ],
           "responseShape": {
@@ -2084,23 +2412,46 @@
         },
         {
           "name": "listCampaigns",
-          "description": "",
+          "description": "List campaigns on an ad account via the Meta Graph API (read-only); dailyBudget is converted from Meta's minor-unit reporting.",
           "params": [
             {
               "name": "accountId",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Ad account id (with or without the `act_` prefix); defaults to META_AD_ACCOUNT_ID."
             },
             {
               "name": "status",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Filter by campaign effective_status (e.g. 'ACTIVE', 'PAUSED')."
             }
           ],
           "responseShape": {
-            "campaigns": "array"
+            "campaigns": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "status": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "dailyBudget": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            }
           }
         }
       ],
@@ -2127,19 +2478,64 @@
       "actions": [
         {
           "name": "exportInvoices",
-          "description": "",
+          "description": "Shape invoice rows into an import-ready CSV export (no accounting-vendor connection — generic column set).",
           "params": [
             {
               "name": "invoices",
               "type": "array",
               "required": true,
-              "description": ""
+              "description": "Invoice rows to export, in column order id/number/customer/issuedAt/dueAt/currency/net/tax/gross/status.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "number": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "customer": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "issuedAt": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "dueAt": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "currency": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "net": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "tax": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "gross": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "status": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
             },
             {
               "name": "format",
               "type": "'csv'",
               "required": false,
-              "description": ""
+              "description": "Export format; only 'csv' is currently supported."
             }
           ],
           "responseShape": {
@@ -2150,19 +2546,48 @@
         },
         {
           "name": "exportJournal",
-          "description": "",
+          "description": "Shape journal entry rows into an import-ready CSV export.",
           "params": [
             {
               "name": "entries",
               "type": "array",
               "required": true,
-              "description": ""
+              "description": "Journal entry rows to export, in column order date/account/description/debit/credit/reference.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "account": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "description": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "debit": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "credit": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "reference": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
             },
             {
               "name": "format",
               "type": "'csv'",
               "required": false,
-              "description": ""
+              "description": "Export format; only 'csv' is currently supported."
             }
           ],
           "responseShape": {
@@ -2184,25 +2609,25 @@
       "actions": [
         {
           "name": "createRequisition",
-          "description": "",
+          "description": "Start a GoCardless Bank Account Data requisition (bank-connection consent flow); the returned `link` is where the end user authorizes access.",
           "params": [
             {
               "name": "institutionId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "GoCardless institution id (the bank to connect)."
             },
             {
               "name": "redirectUrl",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "URL GoCardless redirects the user to after consent."
             },
             {
               "name": "reference",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Caller-chosen reference to correlate the requisition."
             }
           ],
           "responseShape": {
@@ -2212,13 +2637,13 @@
         },
         {
           "name": "listAccounts",
-          "description": "",
+          "description": "List account ids linked under a completed requisition.",
           "params": [
             {
               "name": "requisitionId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Requisition id from createRequisition."
             }
           ],
           "responseShape": {
@@ -2227,29 +2652,60 @@
         },
         {
           "name": "listTransactions",
-          "description": "",
+          "description": "List booked transactions on a linked bank account, optionally filtered by date range.",
           "params": [
             {
               "name": "accountId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "GoCardless account id."
             },
             {
               "name": "dateFrom",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Only transactions booked on/after this date (YYYY-MM-DD)."
             },
             {
               "name": "dateTo",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Only transactions booked on/before this date (YYYY-MM-DD)."
             }
           ],
           "responseShape": {
-            "transactions": "array"
+            "transactions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "amount": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "currency": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "date": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "description": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "counterparty": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
           }
         }
       ],
@@ -2276,37 +2732,37 @@
       "actions": [
         {
           "name": "sendEnvelope",
-          "description": "",
+          "description": "Send a document for e-signature via DocuSign; accepts the document content as a data URL or raw base64.",
           "params": [
             {
               "name": "recipientEmail",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Signer's email address."
             },
             {
               "name": "recipientName",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Signer's display name."
             },
             {
               "name": "documentName",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Document file name (its extension also picks the DocuSign fileExtension)."
             },
             {
               "name": "documentContent",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Document content as a base64 data URL or raw base64."
             },
             {
               "name": "emailSubject",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Envelope email subject; defaults to \"Please sign: \" + documentName."
             }
           ],
           "responseShape": {
@@ -2316,13 +2772,13 @@
         },
         {
           "name": "getEnvelopeStatus",
-          "description": "",
+          "description": "Poll a DocuSign envelope's signing status.",
           "params": [
             {
               "name": "envelopeId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "DocuSign envelope id from sendEnvelope."
             }
           ],
           "responseShape": {
@@ -2332,13 +2788,13 @@
         },
         {
           "name": "downloadDocument",
-          "description": "",
+          "description": "Download the combined signed document(s) for a completed envelope, base64-encoded PDF.",
           "params": [
             {
               "name": "envelopeId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "DocuSign envelope id."
             }
           ],
           "responseShape": {
@@ -2370,31 +2826,31 @@
       "actions": [
         {
           "name": "build",
-          "description": "",
+          "description": "Simulate building a container image (in-memory backend — no real Docker daemon/SDK; a real build is not yet implemented).",
           "params": [
             {
               "name": "tag",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Image tag to build, e.g. myapp:latest."
             },
             {
               "name": "dockerfile",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Dockerfile path; defaults to 'Dockerfile'."
             },
             {
               "name": "context",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Build context directory; defaults to '.'."
             },
             {
               "name": "buildArgs",
               "type": "object",
               "required": false,
-              "description": ""
+              "description": "Build-time --build-arg values."
             }
           ],
           "responseShape": {
@@ -2406,61 +2862,110 @@
         },
         {
           "name": "run",
-          "description": "",
+          "description": "Simulate starting a container from an image (in-memory backend).",
           "params": [
             {
               "name": "image",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Image to run (as built/tagged by the `build` action, or an arbitrary name)."
             },
             {
               "name": "name",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Container name; auto-generated when omitted."
             },
             {
               "name": "ports",
               "type": "array",
               "required": false,
-              "description": ""
+              "description": "Host/container port mappings.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "host": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "container": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "protocol": {
+                    "type": "string",
+                    "required": false
+                  }
+                }
+              }
             },
             {
               "name": "env",
               "type": "object",
               "required": false,
-              "description": ""
+              "description": "Environment variables set inside the container."
             },
             {
               "name": "volumes",
               "type": "array",
               "required": false,
-              "description": ""
+              "description": "Host/container path mounts.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "host": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "container": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
             },
             {
               "name": "command",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Override command run inside the container."
             }
           ],
           "responseShape": {
             "containerId": "string",
             "name": "string",
             "status": "string",
-            "ports": "array"
+            "ports": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "host": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "container": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "protocol": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
           }
         },
         {
           "name": "stop",
-          "description": "",
+          "description": "Stop a running (or paused) simulated container.",
           "params": [
             {
               "name": "containerId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Container id, or a unique id prefix."
             }
           ],
           "responseShape": {
@@ -2471,19 +2976,19 @@
         },
         {
           "name": "remove",
-          "description": "",
+          "description": "Remove a simulated container; fails if it is running unless `force` is set.",
           "params": [
             {
               "name": "containerId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Container id, or a unique id prefix."
             },
             {
               "name": "force",
               "type": "boolean",
               "required": false,
-              "description": ""
+              "description": "Remove even if the container is currently running."
             }
           ],
           "responseShape": {
@@ -2493,25 +2998,25 @@
         },
         {
           "name": "logs",
-          "description": "",
+          "description": "Fetch generated log lines for a simulated container.",
           "params": [
             {
               "name": "containerId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Container id, or a unique id prefix."
             },
             {
               "name": "tail",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Number of most-recent lines to return; defaults to 100."
             },
             {
               "name": "since",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Only lines timestamped at/after this ISO time."
             }
           ],
           "responseShape": {
@@ -2522,13 +3027,13 @@
         },
         {
           "name": "status",
-          "description": "",
+          "description": "Fetch a simulated container's current status and metadata.",
           "params": [
             {
               "name": "containerId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Container id, or a unique id prefix."
             }
           ],
           "responseShape": {
@@ -2536,7 +3041,26 @@
             "name": "string",
             "image": "string",
             "status": "string",
-            "ports": "array",
+            "ports": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "host": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "container": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "protocol": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            },
             "createdAt": "number",
             "startedAt": "number | null",
             "stoppedAt": "number | null"
@@ -2544,23 +3068,71 @@
         },
         {
           "name": "list",
-          "description": "",
+          "description": "List simulated containers; by default only running ones (like `docker ps`).",
           "params": [
             {
               "name": "all",
               "type": "boolean",
               "required": false,
-              "description": ""
+              "description": "Include stopped/exited containers, not just running ones."
             },
             {
               "name": "filterByLabel",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Filter by a `key` or `key=value` label match."
             }
           ],
           "responseShape": {
-            "containers": "array",
+            "containers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "image": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "status": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "ports": {
+                    "type": "array",
+                    "required": true,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "host": {
+                          "type": "number",
+                          "required": true
+                        },
+                        "container": {
+                          "type": "number",
+                          "required": true
+                        },
+                        "protocol": {
+                          "type": "string",
+                          "required": true
+                        }
+                      }
+                    }
+                  },
+                  "createdAt": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            },
             "total": "number"
           }
         }
@@ -2583,25 +3155,25 @@
       "actions": [
         {
           "name": "query",
-          "description": "",
+          "description": "Run a single read-only SELECT against a Postgres connection (write statements and multi-statement SQL are rejected before execution).",
           "params": [
             {
               "name": "connectionRef",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Env-var NAME whose value is the Postgres connection string — never the secret itself; resolved from the credential store/environment at run time."
             },
             {
               "name": "sql",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "SQL text; must be exactly one SELECT statement."
             },
             {
               "name": "params",
               "type": "DatabaseQueryParamValue[]",
               "required": false,
-              "description": ""
+              "description": "Positional bind parameters for the query."
             }
           ],
           "responseShape": {
@@ -2622,55 +3194,73 @@
       "actions": [
         {
           "name": "upload",
-          "description": "",
+          "description": "Upload an object to an S3-compatible bucket (real S3/R2/MinIO backend when storage credentials are configured, in-memory dev fallback otherwise — refused in production). Admits either the canonical `key`+`content` pair or the file-form `file` payload (UploadDropZone's `{ name, size, type, content }` shape); when `file` is present its `key`/`content` are derived from it.",
           "params": [
             {
               "name": "bucket",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Target bucket; defaults to STORAGE_BUCKET."
             },
             {
               "name": "key",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Object key to store under (canonical shape); ignored when `file` is present."
             },
             {
               "name": "content",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Object content as a base64 data URL, raw base64, or plain text (canonical shape); ignored when `file` is present."
             },
             {
               "name": "contentType",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "MIME type override for the canonical shape; inferred from a data URL when omitted."
             },
             {
               "name": "file",
               "type": "object",
               "required": false,
-              "description": ""
+              "description": "File-form upload payload (as emitted by UploadDropZone); `content` is a base64 data URL.",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "size": {
+                  "type": "number",
+                  "required": true
+                },
+                "type": {
+                  "type": "string",
+                  "required": true
+                },
+                "content": {
+                  "type": "string",
+                  "required": false
+                }
+              }
             },
             {
               "name": "acl",
               "type": "'public' | 'private'",
               "required": false,
-              "description": ""
+              "description": "Object ACL — 'public' produces a public URL, otherwise the URL is signed/private."
             },
             {
               "name": "maxSize",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Reject the upload if the file-form payload's declared size exceeds this many bytes."
             },
             {
               "name": "metadata",
               "type": "IntegrationParams",
               "required": false,
-              "description": ""
+              "description": "Arbitrary metadata stored alongside the object (in-memory backend only)."
             }
           ],
           "responseShape": {
@@ -2680,57 +3270,110 @@
             "etag": "string",
             "id": "string",
             "url": "string"
-          }
+          },
+          "synonyms": "upload file, upload object"
         },
         {
           "name": "uploadMany",
-          "description": "",
+          "description": "Upload a whole UploadDropZone batch in one call, one item per file — the FSM-friendly shape for bulk-persisting uploaded-file rows.",
           "params": [
             {
               "name": "bucket",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Target bucket; defaults to STORAGE_BUCKET."
             },
             {
               "name": "files",
               "type": "array",
               "required": true,
-              "description": ""
+              "description": "Files to upload, in UploadDropZone's `{ name, size, type, content }` shape.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "size": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "type": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "content": {
+                    "type": "string",
+                    "required": false
+                  }
+                }
+              }
             },
             {
               "name": "acl",
               "type": "'public' | 'private'",
               "required": false,
-              "description": ""
+              "description": "Object ACL applied to every file in the batch."
             },
             {
               "name": "maxSize",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Reject any file whose declared size exceeds this many bytes."
             }
           ],
           "responseShape": {
-            "items": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "key": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "url": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "sizeBytes": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "mimeType": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            },
             "count": "number"
           }
         },
         {
           "name": "download",
-          "description": "",
+          "description": "Download an object's content, base64-encoded.",
           "params": [
             {
               "name": "bucket",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Bucket the object lives in; defaults to STORAGE_BUCKET."
             },
             {
               "name": "key",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Object key."
             }
           ],
           "responseShape": {
@@ -2742,54 +3385,73 @@
         },
         {
           "name": "list",
-          "description": "",
+          "description": "List object keys in a bucket, optionally prefix-filtered, one page at a time.",
           "params": [
             {
               "name": "bucket",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Bucket to list; defaults to STORAGE_BUCKET."
             },
             {
               "name": "prefix",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Only keys starting with this prefix."
             },
             {
               "name": "maxKeys",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Maximum keys per page; defaults to 1000."
             },
             {
               "name": "continuationToken",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Pagination token from a previous call's `nextToken`."
             }
           ],
           "responseShape": {
-            "keys": "array",
+            "keys": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "size": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "lastModified": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            },
             "truncated": "boolean",
             "nextToken": "string"
           }
         },
         {
           "name": "delete",
-          "description": "",
+          "description": "Delete an object from a bucket.",
           "params": [
             {
               "name": "bucket",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Bucket the object lives in; defaults to STORAGE_BUCKET."
             },
             {
               "name": "key",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Object key to delete."
             }
           ],
           "responseShape": {
@@ -2798,31 +3460,31 @@
         },
         {
           "name": "getSignedUrl",
-          "description": "",
+          "description": "Generate a time-limited pre-signed URL for direct GET or PUT access to an object.",
           "params": [
             {
               "name": "bucket",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Bucket the object lives in; defaults to STORAGE_BUCKET."
             },
             {
               "name": "key",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Object key."
             },
             {
               "name": "expiresIn",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "URL validity window in seconds; defaults to 3600."
             },
             {
               "name": "operation",
               "type": "'get' | 'put'",
               "required": false,
-              "description": ""
+              "description": "Whether the URL authorizes a read or a write; defaults to 'get'."
             }
           ],
           "responseShape": {
@@ -2874,31 +3536,31 @@
       "actions": [
         {
           "name": "enqueue",
-          "description": "",
+          "description": "Add a job to an in-memory job queue, ordered by priority (higher first) among ready jobs.",
           "params": [
             {
               "name": "queue",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Queue name."
             },
             {
               "name": "payload",
               "type": "ServiceParams",
               "required": true,
-              "description": ""
+              "description": "Arbitrary job payload."
             },
             {
               "name": "delay",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Delay before the job becomes eligible for dequeue, in milliseconds."
             },
             {
               "name": "priority",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Priority — higher values are dequeued before lower ones."
             }
           ],
           "responseShape": {
@@ -2908,13 +3570,13 @@
         },
         {
           "name": "dequeue",
-          "description": "",
+          "description": "Pop the highest-priority pending job whose delay has elapsed, marking it 'processing'; returns null if none is ready.",
           "params": [
             {
               "name": "queue",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Queue name."
             }
           ],
           "responseShape": {
@@ -2923,13 +3585,13 @@
         },
         {
           "name": "status",
-          "description": "",
+          "description": "Look up a job's current status by id.",
           "params": [
             {
               "name": "jobId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Job id from enqueue."
             }
           ],
           "responseShape": {
@@ -2939,19 +3601,19 @@
         },
         {
           "name": "complete",
-          "description": "",
+          "description": "Mark a 'processing' job completed and store its result; no-op (returns false) if the job isn't in 'processing' state.",
           "params": [
             {
               "name": "jobId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Job id."
             },
             {
               "name": "result",
               "type": "ServiceParams",
               "required": false,
-              "description": ""
+              "description": "Result payload to attach to the job."
             }
           ],
           "responseShape": {
@@ -2960,19 +3622,19 @@
         },
         {
           "name": "fail",
-          "description": "",
+          "description": "Mark a 'processing' job failed; no-op (returns false) if the job isn't in 'processing' state.",
           "params": [
             {
               "name": "jobId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Job id."
             },
             {
               "name": "error",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Failure reason to attach to the job."
             }
           ],
           "responseShape": {
@@ -2981,13 +3643,13 @@
         },
         {
           "name": "cancel",
-          "description": "",
+          "description": "Remove a 'pending' job from its queue; no-op (returns false) once it has been dequeued.",
           "params": [
             {
               "name": "jobId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Job id."
             }
           ],
           "responseShape": {
@@ -2996,13 +3658,13 @@
         },
         {
           "name": "size",
-          "description": "",
+          "description": "Count pending and processing jobs in a queue.",
           "params": [
             {
               "name": "queue",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Queue name."
             }
           ],
           "responseShape": {
@@ -3030,13 +3692,13 @@
       "actions": [
         {
           "name": "get",
-          "description": "",
+          "description": "Read a key's value from the in-memory cache; returns null (as `value`) if absent or expired.",
           "params": [
             {
               "name": "key",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Cache key."
             }
           ],
           "responseShape": {
@@ -3045,25 +3707,25 @@
         },
         {
           "name": "set",
-          "description": "",
+          "description": "Write a key's value, optionally with an expiry.",
           "params": [
             {
               "name": "key",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Cache key."
             },
             {
               "name": "value",
               "type": "ServiceParams",
               "required": true,
-              "description": ""
+              "description": "Value to store."
             },
             {
               "name": "ttl",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Time-to-live in seconds; omit for no expiry."
             }
           ],
           "responseShape": {
@@ -3072,13 +3734,13 @@
         },
         {
           "name": "delete",
-          "description": "",
+          "description": "Delete a key.",
           "params": [
             {
               "name": "key",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Cache key."
             }
           ],
           "responseShape": {
@@ -3087,19 +3749,19 @@
         },
         {
           "name": "lock",
-          "description": "",
+          "description": "Acquire a mutex on a key; fails (returns acquired:false) if another lock on the key is still alive.",
           "params": [
             {
               "name": "key",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Lock key."
             },
             {
               "name": "ttl",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Lock time-to-live in milliseconds; defaults to 30000 (30s)."
             }
           ],
           "responseShape": {
@@ -3109,19 +3771,19 @@
         },
         {
           "name": "unlock",
-          "description": "",
+          "description": "Release a lock; only succeeds when `lockId` matches the current holder.",
           "params": [
             {
               "name": "key",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Lock key."
             },
             {
               "name": "lockId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Lock id returned by the corresponding `lock` call."
             }
           ],
           "responseShape": {
@@ -3130,19 +3792,19 @@
         },
         {
           "name": "increment",
-          "description": "",
+          "description": "Atomically add to a numeric key's value (creating it at 0 if absent), preserving any existing TTL.",
           "params": [
             {
               "name": "key",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Cache key."
             },
             {
               "name": "by",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Amount to add; defaults to 1 (can be negative to decrement)."
             }
           ],
           "responseShape": {
@@ -3151,19 +3813,19 @@
         },
         {
           "name": "expire",
-          "description": "",
+          "description": "Set (or reset) a key's expiry; no-op (returns set:false) if the key doesn't exist or is already expired.",
           "params": [
             {
               "name": "key",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Cache key."
             },
             {
               "name": "ttl",
               "type": "number",
               "required": true,
-              "description": ""
+              "description": "New time-to-live in seconds."
             }
           ],
           "responseShape": {
@@ -3172,19 +3834,19 @@
         },
         {
           "name": "publish",
-          "description": "",
+          "description": "Publish a message to a channel; delivered synchronously to in-process subscriber callbacks only.",
           "params": [
             {
               "name": "channel",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Channel name."
             },
             {
               "name": "message",
               "type": "ServiceParams",
               "required": true,
-              "description": ""
+              "description": "Message payload."
             }
           ],
           "responseShape": {
@@ -3193,13 +3855,13 @@
         },
         {
           "name": "subscribe",
-          "description": "",
+          "description": "Register interest in a channel; does not itself wire a callback (that happens at a higher-level API).",
           "params": [
             {
               "name": "channel",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Channel name."
             }
           ],
           "responseShape": {
@@ -3225,25 +3887,25 @@
       "actions": [
         {
           "name": "authorize",
-          "description": "",
+          "description": "Build the provider authorization URL (PKCE + state) for an OAuth/OIDC login redirect; real OIDC discovery when OAUTH_CLIENT_ID/SECRET are configured, an in-memory mock otherwise.",
           "params": [
             {
               "name": "provider",
               "type": "'google' | 'github' | 'auth0'",
               "required": true,
-              "description": ""
+              "description": "Identity provider; OIDC issuer defaults to Google unless OIDC_ISSUER_URL overrides it."
             },
             {
               "name": "scopes",
               "type": "string[]",
               "required": true,
-              "description": ""
+              "description": "OAuth scopes to request."
             },
             {
               "name": "redirectUri",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Callback URL the provider redirects back to after consent."
             }
           ],
           "responseShape": {
@@ -3253,19 +3915,19 @@
         },
         {
           "name": "token",
-          "description": "",
+          "description": "Exchange an authorization code for tokens, consuming the one-time-use `state` from the matching `authorize` call.",
           "params": [
             {
               "name": "code",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Authorization code from the provider's redirect callback."
             },
             {
               "name": "state",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "The `state` value returned by `authorize`."
             }
           ],
           "responseShape": {
@@ -3277,13 +3939,13 @@
         },
         {
           "name": "refresh",
-          "description": "",
+          "description": "Exchange a refresh token for a new access token.",
           "params": [
             {
               "name": "refreshToken",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Refresh token from a prior `token` call."
             }
           ],
           "responseShape": {
@@ -3293,13 +3955,13 @@
         },
         {
           "name": "revoke",
-          "description": "",
+          "description": "Revoke an access or refresh token.",
           "params": [
             {
               "name": "token",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "The access or refresh token to revoke."
             }
           ],
           "responseShape": {
@@ -3308,13 +3970,13 @@
         },
         {
           "name": "userinfo",
-          "description": "",
+          "description": "Fetch the authenticated user's profile claims for an access token.",
           "params": [
             {
               "name": "accessToken",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Access token from a prior `token`/`refresh` call."
             }
           ],
           "responseShape": {
@@ -3358,41 +4020,76 @@
       "actions": [
         {
           "name": "list",
-          "description": "",
+          "description": "List declared credentials and their masked (last-4) configuration status; open to any caller.",
           "params": [
             {
               "name": "service",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Restrict the listing to one service's declared credentials; omit for all services."
             }
           ],
           "responseShape": {
             "enabled": "boolean",
-            "entries": "array"
+            "entries": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "service": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "envVar": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "required": {
+                    "type": "boolean",
+                    "required": true
+                  },
+                  "description": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "configured": {
+                    "type": "boolean",
+                    "required": true
+                  },
+                  "source": {
+                    "type": "'store' | 'env' | 'none'",
+                    "required": true
+                  },
+                  "last4": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
           }
         },
         {
           "name": "set",
-          "description": "",
+          "description": "Save a credential value into the hosted store; the env var must be one declared for the service (or a well-formed connection-ref name for `database`). Admin/owner role required.",
           "params": [
             {
               "name": "service",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Integration name the credential belongs to."
             },
             {
               "name": "envVar",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Declared env-var name being set."
             },
             {
               "name": "value",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Secret value to store; never logged."
             }
           ],
           "responseShape": {
@@ -3404,19 +4101,19 @@
         },
         {
           "name": "remove",
-          "description": "",
+          "description": "Delete a stored credential from the hosted store. Admin/owner role required.",
           "params": [
             {
               "name": "service",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Integration name the credential belongs to."
             },
             {
               "name": "envVar",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Env-var name to remove."
             }
           ],
           "responseShape": {
@@ -3425,13 +4122,13 @@
         },
         {
           "name": "test",
-          "description": "",
+          "description": "Check whether a service's required credentials are present and, if a live probe is declared for it, exercise the service to confirm they actually work. Admin/owner role required.",
           "params": [
             {
               "name": "service",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Integration name to test."
             }
           ],
           "responseShape": {
@@ -3445,7 +4142,7 @@
         },
         {
           "name": "rotate",
-          "description": "",
+          "description": "Re-encrypt all stored credentials under the current master key (ALMADAR_CREDENTIAL_MASTER_KEY), retiring ALMADAR_CREDENTIAL_MASTER_KEY_PREVIOUS. Admin/owner role required.",
           "params": [],
           "responseShape": {
             "rotated": "number",
@@ -3477,25 +4174,25 @@
       "actions": [
         {
           "name": "startSpan",
-          "description": "",
+          "description": "Start a trace span (in-memory backend — no OpenTelemetry SDK/exporter).",
           "params": [
             {
               "name": "name",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Span name."
             },
             {
               "name": "attributes",
               "type": "IntegrationParams",
               "required": false,
-              "description": ""
+              "description": "Key-value attributes attached to the span."
             },
             {
               "name": "traceId",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Existing trace id to attach this span to; a new one is generated when omitted."
             }
           ],
           "responseShape": {
@@ -3505,19 +4202,19 @@
         },
         {
           "name": "endSpan",
-          "description": "",
+          "description": "Mark a span ended, optionally recording its final status; no-op (returns ended:false) for an unknown span id.",
           "params": [
             {
               "name": "spanId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Span id from startSpan."
             },
             {
               "name": "status",
               "type": "'ok' | 'error'",
               "required": false,
-              "description": ""
+              "description": "Final span status."
             }
           ],
           "responseShape": {
@@ -3526,25 +4223,25 @@
         },
         {
           "name": "addEvent",
-          "description": "",
+          "description": "Attach a timestamped event to an open span; no-op (returns added:false) for an unknown span id.",
           "params": [
             {
               "name": "spanId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Span id from startSpan."
             },
             {
               "name": "name",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Event name."
             },
             {
               "name": "attributes",
               "type": "IntegrationParams",
               "required": false,
-              "description": ""
+              "description": "Key-value attributes attached to the event."
             }
           ],
           "responseShape": {
@@ -3553,31 +4250,31 @@
         },
         {
           "name": "recordMetric",
-          "description": "",
+          "description": "Record a metric sample: counters accumulate, gauges overwrite, histograms append to the sample list.",
           "params": [
             {
               "name": "name",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Metric name."
             },
             {
               "name": "value",
               "type": "number",
               "required": true,
-              "description": ""
+              "description": "Sample value."
             },
             {
               "name": "type",
               "type": "'counter' | 'gauge' | 'histogram'",
               "required": false,
-              "description": ""
+              "description": "Aggregation kind; defaults to 'counter'."
             },
             {
               "name": "labels",
               "type": "IntegrationParams",
               "required": false,
-              "description": ""
+              "description": "Key-value labels attached to the metric (replaces prior labels on the same name)."
             }
           ],
           "responseShape": {
@@ -3586,20 +4283,20 @@
         },
         {
           "name": "getSpan",
-          "description": "",
+          "description": "Fetch a stored span's full record by id; null if unknown.",
           "params": [
             {
               "name": "spanId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Span id from startSpan."
             }
           ],
           "responseShape": {}
         },
         {
           "name": "getMetrics",
-          "description": "",
+          "description": "Fetch all recorded metrics, keyed by metric name.",
           "params": [],
           "responseShape": {}
         }
@@ -3627,13 +4324,13 @@
       "actions": [
         {
           "name": "validate",
-          "description": "",
+          "description": "Validate an orbital schema by writing it to a temp file and shelling out to `npx",
           "params": [
             {
               "name": "schema",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Raw .orb schema content to validate."
             }
           ],
           "responseShape": {
@@ -3656,31 +4353,31 @@
       "actions": [
         {
           "name": "sendMessage",
-          "description": "",
+          "description": "Send a chat message to the DeepAgent server (POST /api/agent/message), continuing an existing thread or starting one.",
           "params": [
             {
               "name": "message",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Message text."
             },
             {
               "name": "threadId",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Existing thread id to continue; a new thread starts when omitted."
             },
             {
               "name": "skill",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Named skill to invoke for this message."
             },
             {
               "name": "context",
               "type": "IntegrationParams",
               "required": false,
-              "description": ""
+              "description": "Extra context passed through to the agent."
             }
           ],
           "responseShape": {
@@ -3690,13 +4387,13 @@
         },
         {
           "name": "cancelGeneration",
-          "description": "",
+          "description": "Cancel an in-flight generation on a DeepAgent thread (POST /api/agent/cancel).",
           "params": [
             {
               "name": "threadId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Thread whose generation to cancel."
             }
           ],
           "responseShape": {
@@ -3705,13 +4402,13 @@
         },
         {
           "name": "validateSchema",
-          "description": "",
+          "description": "Validate a schema via the DeepAgent server (POST /api/schema/validate).",
           "params": [
             {
               "name": "schema",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Schema content to validate."
             }
           ],
           "responseShape": {
@@ -3721,19 +4418,19 @@
         },
         {
           "name": "compileSchema",
-          "description": "",
+          "description": "Compile a schema to a target shell via the DeepAgent server (POST /api/schema/compile).",
           "params": [
             {
               "name": "schema",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Schema content to compile."
             },
             {
               "name": "shell",
               "type": "string",
               "required": false,
-              "description": ""
+              "description": "Target codegen shell (e.g. 'typescript')."
             }
           ],
           "responseShape": {
@@ -3743,17 +4440,36 @@
         },
         {
           "name": "getThreadHistory",
-          "description": "",
+          "description": "Fetch a thread's message history via the DeepAgent server (POST /api/agent/history).",
           "params": [
             {
               "name": "threadId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Thread id."
             }
           ],
           "responseShape": {
-            "messages": "array"
+            "messages": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "role": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "content": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "timestamp": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            }
           }
         }
       ],
@@ -3780,13 +4496,13 @@
       "actions": [
         {
           "name": "getPage",
-          "description": "",
+          "description": "Look up a Wikipedia page (redirect-resolved): a one-line description, a Commons thumbnail, and the lead-section extract; empty fields on a miss.",
           "params": [
             {
               "name": "title",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Page title to look up."
             }
           ],
           "responseShape": {
@@ -3820,13 +4536,13 @@
       "actions": [
         {
           "name": "svgExists",
-          "description": "",
+          "description": "Check whether an icon exists at the given Iconify API path (a GET, not a HEAD, despite the name).",
           "params": [
             {
               "name": "path",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Iconify API path segment to probe, e.g. 'prefix/name.svg'."
             }
           ],
           "responseShape": {
@@ -3835,19 +4551,19 @@
         },
         {
           "name": "search",
-          "description": "",
+          "description": "Search Iconify's icon sets by relevance.",
           "params": [
             {
               "name": "query",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Search query text."
             },
             {
               "name": "limit",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Maximum icon ids to return; defaults to 1."
             }
           ],
           "responseShape": {
@@ -3856,13 +4572,13 @@
         },
         {
           "name": "getIconBody",
-          "description": "",
+          "description": "Fetch an icon's raw SVG body (for color-tone classification); null if the icon or its collection isn't found.",
           "params": [
             {
               "name": "iconId",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Icon id in \"prefix:name\" form."
             }
           ],
           "responseShape": {
@@ -3893,23 +4609,54 @@
       "actions": [
         {
           "name": "search",
-          "description": "",
+          "description": "Search arXiv's public Atom API by relevance.",
           "params": [
             {
               "name": "query",
               "type": "string",
               "required": true,
-              "description": ""
+              "description": "Search query text (matched across all fields)."
             },
             {
               "name": "maxResults",
               "type": "number",
               "required": false,
-              "description": ""
+              "description": "Maximum results to return; defaults to 8."
             }
           ],
           "responseShape": {
-            "results": "array"
+            "results": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "title": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "summary": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "authors": {
+                    "type": "string[]",
+                    "required": true
+                  },
+                  "published": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "url": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
           }
         }
       ],
