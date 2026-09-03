@@ -337,6 +337,7 @@ export {
   type TypedEffect,
   type UISlot,
   type PatternConfig,
+  type TemplatePatternConfig,
   type CallServiceConfig,
   type EmitConfig,
   // Typed effect tuples (per-operator tuple shapes)

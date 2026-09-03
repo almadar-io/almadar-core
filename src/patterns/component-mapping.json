@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-02T20:03:03.703Z",
+  "exportedAt": "2026-09-03T03:26:05.097Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -1413,6 +1413,16 @@
       "component": "DocumentDetails",
       "importPath": "@/components/core/molecules/DocumentDetails",
       "category": "display"
+    },
+    "floating-toolbar": {
+      "component": "FloatingToolbar",
+      "importPath": "@/components/core/molecules/FloatingToolbar",
+      "category": "component"
+    },
+    "dock-layout": {
+      "component": "DockLayout",
+      "importPath": "@/components/core/organisms/DockLayout",
+      "category": "layout"
     }
   }
 }
