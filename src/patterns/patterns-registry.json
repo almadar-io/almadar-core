@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-03T18:48:23.816Z",
+  "exportedAt": "2026-09-04T01:22:12.367Z",
   "patterns": {
     "entity-table": {
       "type": "entity-table",
@@ -39289,6 +39289,7 @@
                   "string"
                 ],
                 "enumValues": [
+                  "solid",
                   "dashed",
                   "dotted"
                 ]
@@ -40666,6 +40667,7 @@
                   "string"
                 ],
                 "enumValues": [
+                  "solid",
                   "dashed",
                   "dotted"
                 ]
@@ -41946,6 +41948,7 @@
                   "string"
                 ],
                 "enumValues": [
+                  "solid",
                   "dashed",
                   "dotted"
                 ]
@@ -42417,6 +42420,7 @@
                   "string"
                 ],
                 "enumValues": [
+                  "solid",
                   "dashed",
                   "dotted"
                 ]
@@ -42702,6 +42706,7 @@
                   "string"
                 ],
                 "enumValues": [
+                  "solid",
                   "dashed",
                   "dotted"
                 ]
@@ -43010,6 +43015,7 @@
                   "string"
                 ],
                 "enumValues": [
+                  "solid",
                   "dashed",
                   "dotted"
                 ]
@@ -44550,6 +44556,7 @@
                   "string"
                 ],
                 "enumValues": [
+                  "solid",
                   "dashed",
                   "dotted"
                 ]
@@ -45764,6 +45771,7 @@
                   "string"
                 ],
                 "enumValues": [
+                  "solid",
                   "dashed",
                   "dotted"
                 ]
@@ -50663,6 +50671,7 @@
                   "string"
                 ],
                 "enumValues": [
+                  "solid",
                   "dashed",
                   "dotted"
                 ]
