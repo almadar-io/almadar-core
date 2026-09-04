@@ -101,6 +101,10 @@ export interface PatternPayloadField {
   name: string;
   type: string;
   required?: boolean;
+  /** Allowed literal values when the field's TS type is a string-literal
+   *  union (directly, or via a type alias) — `type` stays `"string"`.
+   *  Mirrors {@link PatternPropTypeSchema.enumValues}. */
+  enumValues?: string[];
 }
 
 /**
