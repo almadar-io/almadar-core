@@ -690,6 +690,49 @@ export type ManifestEntryKind = (typeof MANIFEST_ENTRY_KINDS)[number];
 
 export const ManifestEntryKindSchema = z.enum(MANIFEST_ENTRY_KINDS);
 
+// ============================================================================
+// Game audio
+// ============================================================================
+
+/**
+ * One entry of a game's sound manifest, keyed by logical cue name. Core owns
+ * the shape so both the render substrate (`useGameAudio` / the `game-audio-cue`
+ * pattern) and the generated `.lolo` factories resolve the SAME declaration —
+ * a hook-local interface is invisible to the pattern extractor and lowers to a
+ * shapeless `object`, which the `.lolo` type system rejects outright.
+ */
+export interface SoundEntry {
+    /** Single path, or several to pick from at random on each play. */
+    path: string | string[];
+    /** Volume 0-1, multiplied by the master volume. */
+    volume?: number;
+    /** Whether this sound loops (background music). */
+    loop?: boolean;
+    /** Concurrent Audio instances kept in the pool. */
+    poolSize?: number;
+    /** Start automatically on the first user interaction. */
+    autostart?: boolean;
+    /** Use crossfade transitions when played as music. */
+    crossfade?: boolean;
+    /** Crossfade duration in milliseconds. */
+    crossfadeDurationMs?: number;
+}
+
+export const SoundEntrySchema = z.object({
+    path: z.union([z.string(), z.array(z.string())]),
+    volume: z.number().optional(),
+    loop: z.boolean().optional(),
+    poolSize: z.number().optional(),
+    autostart: z.boolean().optional(),
+    crossfade: z.boolean().optional(),
+    crossfadeDurationMs: z.number().optional(),
+});
+
+/** A game's sound manifest: logical cue name → its definition. */
+export type AudioManifest = Record<string, SoundEntry>;
+
+export const AudioManifestSchema = z.record(z.string(), SoundEntrySchema);
+
 export const MANIFEST_CANVAS_AFFINITIES = ['isometric', 'hex', 'flat', 'side', '3d', 'none'] as const;
 
 export type ManifestCanvasAffinity = (typeof MANIFEST_CANVAS_AFFINITIES)[number];

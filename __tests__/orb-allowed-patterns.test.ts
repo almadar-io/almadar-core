@@ -23,10 +23,10 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
     }
   });
 
-  it('admits the 2D game category (game-shell present, 34 entries)', () => {
+  it('admits the 2D game category (game-shell present, 35 entries)', () => {
     expect(grouped.game).toBeDefined();
     expect(grouped.game.map((p) => p.name)).toContain('game-shell');
-    expect(grouped.game.length).toBe(34);
+    expect(grouped.game.length).toBe(35);
   });
 
   it('excludes debug and template categories', () => {
@@ -63,14 +63,14 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
       Object.entries(grouped).map(([cat, items]) => [cat, items.length]),
     );
     expect(counts).toMatchObject({
-      component: 106,
+      component: 108,
       display: 39,
       filter: 4,
       form: 10,
-      game: 34,
+      game: 35,
       media: 1,
     });
-    expect(names.length).toBe(243);
+    expect(names.length).toBe(247);
   });
 
   it('admits the drifted patterns by name, not just by count', () => {

@@ -810,6 +810,8 @@ export {
   type ManifestFrameSpec,
   type ManifestEntry,
   type ManifestEntryInput,
+  type SoundEntry,
+  type AudioManifest,
   // Schemas
   EntityRoleSchema,
   VisualStyleSchema,
@@ -820,6 +822,8 @@ export {
   SheetProjectionSchema,
   AnimationDefSchema,
   SpriteSheetAtlasSchema,
+  SoundEntrySchema,
+  AudioManifestSchema,
   SubTextureSchema,
   TextureAtlasSchema,
   TilesheetSchema,

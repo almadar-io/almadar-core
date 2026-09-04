@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-03T03:26:05.097Z",
+  "exportedAt": "2026-09-03T18:48:23.816Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -1423,6 +1423,16 @@
       "component": "DockLayout",
       "importPath": "@/components/core/organisms/DockLayout",
       "category": "layout"
+    },
+    "command-palette": {
+      "component": "CommandPalette",
+      "importPath": "@/components/core/molecules/CommandPalette",
+      "category": "component"
+    },
+    "game-audio-cue": {
+      "component": "GameAudioCue",
+      "importPath": "@/components/game/atoms/GameAudioCue",
+      "category": "game"
     }
   }
 }
