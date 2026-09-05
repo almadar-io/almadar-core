@@ -1,8 +1,11 @@
 /**
  * The JS half of the shared mock-seed parity vector.
  *
- * `packages/almadar-parity/fixtures/mock-seed/*.json` is read by BOTH this test
- * and `orbital-core/tests/mock_seed_parity.rs`. One file, not a per-language
+ * Canonical source: `@almadar-io/parity` `fixtures/mock-seed/*.json`, read by
+ * BOTH this test and `orbital-core/tests/mock_seed_parity.rs`. The
+ * `almadar-sync rust` bake mirrors them into `__tests__/baked/mock-seed/` (and
+ * into the crate) so each repo stays hermetic — CI is a standalone checkout
+ * with no monorepo sibling to climb to. One authored file, not a per-language
  * pair — the whole point is that both implementations produce the same bytes.
  * Regenerating it is a deliberate spec change on both paths.
  *
@@ -19,14 +22,7 @@ import { sampleRows, type SampleEntity } from '../src/mock/index.js';
 import { resolvePersonaSpec, type UserContext } from '../src/types/user.js';
 import type { EntityRow } from '../src/types/entity.js';
 
-const FIXTURE_DIR = join(
-  import.meta.dirname,
-  '..',
-  '..',
-  'almadar-parity',
-  'fixtures',
-  'mock-seed',
-);
+const FIXTURE_DIR = join(import.meta.dirname, 'baked', 'mock-seed');
 
 interface Vector {
   entity: SampleEntity;

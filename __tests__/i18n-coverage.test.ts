@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   checkI18nCoverage,
@@ -190,26 +188,15 @@ describe('checkI18nCoverage — one failing case per problem kind', () => {
 });
 
 // ---------------------------------------------------------------------------
-// The real checked-in tables. ar.json/sl.json are being rewritten in parallel
-// by other agents (W1-AR / W1-SL) — a failure here while that's in flight is
-// expected; the assertion message lists every problem so the current gap is
-// visible rather than silently swallowed.
+// The real checked-in core tables. Operators live in @almadar/std, which
+// depends on this package: std's own i18n-operators test runs the full
+// core+operators gate, and the pattern-sync `i18n` step gates the monorepo.
+// This repo's CI is a standalone checkout, so no sibling package is read here.
 // ---------------------------------------------------------------------------
 
 describe('checkI18nCoverage — real checked-in tables', () => {
-  it('core + std tables pass the coverage gate', () => {
-    const stdDir = join(import.meta.dirname, '..', '..', 'almadar-std', 'i18n');
-    const std: Record<LanguageCode, OperatorTables> = {
-      en: JSON.parse(readFileSync(join(stdDir, 'en.json'), 'utf8')) as OperatorTables,
-      ar: JSON.parse(readFileSync(join(stdDir, 'ar.json'), 'utf8')) as OperatorTables,
-      sl: JSON.parse(readFileSync(join(stdDir, 'sl.json'), 'utf8')) as OperatorTables,
-    };
-    const canonicalOperatorsFile = JSON.parse(
-      readFileSync(join(import.meta.dirname, '..', '..', 'almadar-std', 'canonical-operators.json'), 'utf8'),
-    ) as { operators: Record<string, unknown> };
-    const canonicalOps = Object.keys(canonicalOperatorsFile.operators);
-
-    const result = checkI18nCoverage({ core: coreTables, std, canonicalOperators: canonicalOps });
+  it('core tables pass the coverage gate', () => {
+    const result = checkI18nCoverage({ core: coreTables });
 
     if (!result.ok) {
       const byKind = new Map<string, number>();
