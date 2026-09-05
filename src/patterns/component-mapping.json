@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-04T03:53:29.561Z",
+  "exportedAt": "2026-09-05T01:37:56.135Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -1433,6 +1433,11 @@
       "component": "GameAudioCue",
       "importPath": "@/components/game/atoms/GameAudioCue",
       "category": "game"
+    },
+    "ui-slot-component": {
+      "component": "UISlotComponent",
+      "importPath": "@/components/core/organisms/UISlotRenderer",
+      "category": "layout"
     }
   }
 }

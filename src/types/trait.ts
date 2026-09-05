@@ -1138,6 +1138,52 @@ export const EntityFieldContractSchema = z.object({
     provides: z.array(z.string()),
 });
 
+/**
+ * Where in a trait an effect is declared. The distinction is load-bearing: a
+ * `render-ui` in a transition fires when that transition fires, but one inside a
+ * `ticks` block repaints every frame, so two tick writers on one slot paint
+ * together where two transition writers routinely alternate.
+ */
+export type EffectSite = 'transition' | 'tick';
+
+export const EffectSiteSchema = z.enum(['transition', 'tick']);
+
+/**
+ * One effect a trait produces, with the resource it acts on — the slot for
+ * `render-ui`, the entity for `persist`/`fetch`, the event for `emit`, the
+ * binding path for `set`. `resource` is recorded verbatim as authored; when the
+ * author deferred it to a call site (`@config.surface`) the reference is kept as
+ * written and `resolved` is false. Mirrors the Rust `EffectUse` serde shape.
+ */
+export type EffectUse = {
+    kind: string;
+    resource?: string;
+    /** Absent means true — only an unresolved `@config.*` resource sets it. */
+    resolved?: boolean;
+    /** Absent means `'transition'`. */
+    site?: EffectSite;
+};
+
+export const EffectUseSchema = z.object({
+    kind: z.string(),
+    resource: z.string().optional(),
+    resolved: z.boolean().optional(),
+    site: EffectSiteSchema.optional(),
+});
+
+/**
+ * Every effect a trait produces — what composing it actually brings along.
+ *
+ * Inferred by the lolo lowerer from the trait's own effects (never authored, the
+ * way {@link EntityFieldContract} is never authored), then re-derived
+ * post-inline once call-site config makes `@config.*` resources concrete. A
+ * trait's type used to say nothing about its effects, which is why "is this safe
+ * to compose?" could only be answered by reading the atom.
+ */
+export type EffectRow = EffectUse[];
+
+export const EffectRowSchema = z.array(EffectUseSchema);
+
 export type Trait = {
     /** V4 dual-carry id sibling of `name` — optional until the Phase-7 flip. */
     id?: TraitId;
@@ -1158,6 +1204,11 @@ export type Trait = {
      * alongside `entityRebindable: true`. See {@link EntityFieldContract}.
      */
     entityContract?: EntityFieldContract;
+    /**
+     * Inferred effect surface. Absent on traits that produce no effects at all.
+     * See {@link EffectRow}.
+     */
+    effectRow?: EffectRow;
     /**
      * `@description "..."` authored on the `@rebindable` binding in `.lolo`.
      * Surfaced to catalog prose + knob-embeddings so the LLM can reach for the
@@ -1321,6 +1372,7 @@ export const TraitSchema = z.object({
     category: TraitCategorySchema.optional(),
     entityRebindable: z.boolean().optional(),
     entityContract: EntityFieldContractSchema.optional(),
+    effectRow: EffectRowSchema.optional(),
     entityBindingDescription: z.string().optional(),
     entityBindingSynonyms: z.string().optional(),
     capabilities: z.array(z.string()).optional(),

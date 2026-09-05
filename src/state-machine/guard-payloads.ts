@@ -171,8 +171,155 @@ function mergePayloads(a: EventPayload, b: EventPayload): EventPayload {
 }
 
 /**
+ * `(object/get <mapLiteral> <payloadRef>)` used as one side of an `=` /
+ * `==` / `!=` comparison — e.g. `["=", (object/get MAP ?key), "change"]`
+ * (std-modal-editor's `vim-mode` motion-key guard). Detects the operand
+ * regardless of which comparison side it's on, matching `splitPayloadArg`'s
+ * either-order convention.
+ */
+function extractObjectGetOperand(x: unknown): { path: string[]; map: SExprObject } | null {
+  if (!Array.isArray(x) || x[0] !== 'object/get') return null;
+  const split = splitPayloadArg(x[1], x[2]);
+  if (split && isPlainRecord(split.collection)) {
+    return { path: split.path, map: split.collection };
+  }
+  return null;
+}
+
+/** `["=", a, b]` / `["!=", a, b]` where exactly one side is `object/get(map, ?field)`
+ * and the other is a literal — resolves to the field path, the map, and the literal
+ * regardless of which side carries the `object/get`. */
+function resolveObjectGetComparison(
+  a: unknown,
+  b: unknown,
+): { path: string[]; map: SExprObject; literal: unknown } | null {
+  const getA = extractObjectGetOperand(a);
+  if (getA) return { path: getA.path, map: getA.map, literal: b };
+  const getB = extractObjectGetOperand(b);
+  if (getB) return { path: getB.path, map: getB.map, literal: a };
+  return null;
+}
+
+/**
+ * `["=" | "==", (object/get MAP ?field), literal]` (either operand order)
+ * checks whether the map value the payload field NAMES equals `literal` —
+ * `object/has` alone can't tell `?field` apart from any other key that
+ * also happens to be present, so `(and (object/has MAP ?field) ["=",
+ * (object/get MAP ?field), "change"])` needs this refinement or the `and`
+ * merge falls back to `object/has`'s first-key guess (vim-mode / std-
+ * modal-editor motion guard: `?key` synthesized as "d" instead of a key
+ * whose command is actually "change"). `negate` swaps pass/fail for `!=`.
+ * Pass binds the FIRST (map order) key whose value satisfies the
+ * comparison; fail the first key whose value doesn't, else a synthesized
+ * absent key. No satisfying key on the pass side is left unbound — do not
+ * invent a value the real guard would reject.
+ */
+function buildObjectGetComparisonPayload(a: unknown, b: unknown, negate: boolean): GuardPayload | null {
+  const resolved = resolveObjectGetComparison(a, b);
+  if (!resolved) return null;
+  const { path, map, literal } = resolved;
+  const keys = Object.keys(map);
+  const passKey = keys.find((k) => (negate ? map[k] !== literal : map[k] === literal));
+  const failKey = keys.find((k) => (negate ? map[k] === literal : map[k] !== literal));
+  return {
+    pass: passKey !== undefined ? nestedPayload(path, passKey) : {},
+    fail: failKey !== undefined ? nestedPayload(path, failKey) : nestedPayload(path, absentKey(keys)),
+  };
+}
+
+/**
+ * Finite set of `?field` values that satisfy `guard`'s PASS branch, for
+ * conjuncts whose pass condition bounds one field to a known set of
+ * candidates: `object/has MAP ?f` (the map's keys), an `object/get`
+ * equality/inequality comparison against a map literal (the matching
+ * keys), or a bare `["=", ?f, literal]` (the singleton `{literal}`).
+ * Returns null for every other shape — most guards don't bound a field
+ * this way, and this is used only to reconcile two conjuncts that name
+ * the SAME field (see `applyFieldIntersections`), not as general synthesis.
+ */
+function guardPassCandidateSet(guard: unknown): { path: string[]; values: string[] } | null {
+  if (!Array.isArray(guard) || guard.length === 0) return null;
+  const op = String(guard[0]);
+
+  if (op === 'object/has') {
+    const split = splitPayloadArg(guard[1], guard[2]);
+    if (split && isPlainRecord(split.collection)) {
+      return { path: split.path, values: Object.keys(split.collection) };
+    }
+    return null;
+  }
+
+  if (op === 'eq' || op === '==' || op === '=' || op === 'not-eq' || op === '!=' || op === 'neq') {
+    const negate = op === 'not-eq' || op === '!=' || op === 'neq';
+    const resolved = resolveObjectGetComparison(guard[1], guard[2]);
+    if (resolved) {
+      const values = Object.keys(resolved.map).filter((k) =>
+        negate ? resolved.map[k] !== resolved.literal : resolved.map[k] === resolved.literal,
+      );
+      return { path: resolved.path, values };
+    }
+    if (!negate) {
+      const path = extractPayloadFieldPath(guard[1]);
+      if (path && typeof guard[2] === 'string') return { path, values: [guard[2]] };
+    }
+    return null;
+  }
+
+  return null;
+}
+
+/** Removes one (possibly nested) field from a synthesized payload — used
+ * when two `and` conjuncts constrain the same field to disjoint candidate
+ * sets, so no single value satisfies both and inventing one would fail
+ * whichever conjunct it doesn't come from. */
+function withoutField(payload: EventPayload, path: string[]): EventPayload {
+  const [head, ...tail] = path;
+  if (tail.length === 0) {
+    const rest: EventPayload = {};
+    for (const k of Object.keys(payload)) {
+      if (k !== head) rest[k] = payload[k];
+    }
+    return rest;
+  }
+  const nested = payload[head];
+  if (!isPayloadObject(nested)) return payload;
+  return { ...payload, [head]: withoutField(nested, tail) };
+}
+
+/**
+ * `and` merges each conjunct's pass payload independently (last conjunct
+ * wins on a shared field, via `mergePayloads`), so two conjuncts
+ * constraining the SAME field raced on merge ORDER instead of agreeing on
+ * a value that satisfies both: `(and (object/has MAP ?key) ["=",
+ * (object/get MAP ?key), "change"])` picked `object/has`'s first key
+ * whenever it merged last, ignoring the `=` conjunct's refinement.
+ * Intersects every conjunct's candidate set for each field that has one,
+ * in the first conjunct's own key order, and rebinds to the first
+ * surviving value; a field left with no shared candidate is unsatisfiable
+ * and is unbound rather than guessed.
+ */
+function applyFieldIntersections(subs: unknown[], pass: EventPayload): EventPayload {
+  const byField = new Map<string, { path: string[]; sets: string[][] }>();
+  for (const sub of subs) {
+    const candidate = guardPassCandidateSet(sub);
+    if (!candidate) continue;
+    const key = JSON.stringify(candidate.path);
+    const entry = byField.get(key);
+    if (entry) entry.sets.push(candidate.values);
+    else byField.set(key, { path: candidate.path, sets: [candidate.values] });
+  }
+  let out = pass;
+  for (const { path, sets } of byField.values()) {
+    if (sets.length < 2) continue;
+    const intersection = sets.reduce((acc, set) => acc.filter((v) => set.includes(v)));
+    out = intersection.length > 0 ? mergePayloads(out, nestedPayload(path, intersection[0])) : withoutField(out, path);
+  }
+  return out;
+}
+
+/**
  * Builds test payloads that satisfy or violate guard conditions.
- * 
+ *
  * Generates pass/fail test data for guard s-expressions used in state machine
  * transitions. Pass payloads satisfy the guard condition (allowing transition),
  * fail payloads violate it (blocking transition). Used for automated testing
@@ -299,6 +446,8 @@ export function buildGuardPayloads(guard: unknown): GuardPayload {
         : null;
       return { pass: nestedPayload(path, val), fail: nestedPayload(path, failVal) };
     }
+    const objectGetPayload = buildObjectGetComparisonPayload(guard[1], guard[2], false);
+    if (objectGetPayload) return objectGetPayload;
   }
 
   if (op === 'not-eq' || op === '!=' || op === 'neq') {
@@ -311,6 +460,8 @@ export function buildGuardPayloads(guard: unknown): GuardPayload {
         : 'other';
       return { pass: nestedPayload(path, passVal), fail: nestedPayload(path, val) };
     }
+    const objectGetPayload = buildObjectGetComparisonPayload(guard[1], guard[2], true);
+    if (objectGetPayload) return objectGetPayload;
   }
 
   if (op === 'gt' || op === '>') {
@@ -347,7 +498,8 @@ export function buildGuardPayloads(guard: unknown): GuardPayload {
     const subs = guard.slice(1) as unknown[];
     if (subs.length >= 2) {
       const built = subs.map(buildGuardPayloads);
-      const pass = built.reduce<GuardPayload['pass']>((acc, b) => mergePayloads(acc, b.pass), {});
+      const merged = built.reduce<GuardPayload['pass']>((acc, b) => mergePayloads(acc, b.pass), {});
+      const pass = applyFieldIntersections(subs, merged);
       return { pass, fail: built[0].fail };
     }
     if (subs.length === 1) return buildGuardPayloads(subs[0]);

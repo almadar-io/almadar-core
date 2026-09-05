@@ -310,6 +310,16 @@ export interface FactoryTraitSignature {
    *  fields the trait reads via `@entity.X`; `provides` = fields it writes.
    *  Present only alongside `entityRebindable`. */
   entityContract?: { requires: ReadonlyArray<string>; provides: ReadonlyArray<string> };
+  /** Inferred effect surface — every effect the trait produces, with its
+   *  resource and whether it sits in a transition or a `ticks` block. Answers
+   *  "what does composing this trait bring along?" without reading the atom.
+   *  Absent on traits that produce no effects. */
+  effectRow?: ReadonlyArray<{
+    kind: string;
+    resource?: string;
+    resolved?: boolean;
+    site?: 'transition' | 'tick';
+  }>;
   /** `@description` / `@synonyms` authored on the `@rebindable` binding —
    *  fed to catalog prose + knob-embeddings for binding-discovery. */
   entityBindingDescription?: string;

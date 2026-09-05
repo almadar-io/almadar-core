@@ -92,6 +92,72 @@ describe('buildGuardPayloads — str/startsWith', () => {
   });
 });
 
+describe('buildGuardPayloads — object/get equality comparison (either operand order)', () => {
+  const KEY_MAP = { d: 'delete', y: 'yank', c: 'change', '>': 'indent', '<': 'dedent' };
+
+  it('passes with the first key whose mapped value equals the literal', () => {
+    const { pass } = buildGuardPayloads(['=', ['object/get', KEY_MAP, '@payload.key'], 'change']);
+    expect(pass).toEqual({ key: 'c' });
+  });
+
+  it('resolves the object/get operand regardless of comparison side', () => {
+    const { pass } = buildGuardPayloads(['=', 'change', ['object/get', KEY_MAP, '@payload.key']]);
+    expect(pass).toEqual({ key: 'c' });
+  });
+
+  it('leaves the field unbound when no key maps to the literal', () => {
+    const { pass } = buildGuardPayloads(['=', ['object/get', KEY_MAP, '@payload.key'], 'zzz']);
+    expect(pass).toEqual({});
+  });
+
+  it('!= swaps pass/fail roles', () => {
+    const { pass } = buildGuardPayloads(['!=', ['object/get', KEY_MAP, '@payload.key'], 'change']);
+    expect(Object.keys(KEY_MAP)).toContain(pass.key);
+    expect(pass.key).not.toBe('c');
+  });
+});
+
+describe('buildGuardPayloads — and-conjunct field-candidate intersection', () => {
+  const KEY_MAP = { d: 'delete', y: 'yank', c: 'change', '>': 'indent', '<': 'dedent' };
+
+  it('reconciles object/has (any key) with an object/get equality refinement (same field)', () => {
+    const { pass } = buildGuardPayloads([
+      'and',
+      ['object/has', KEY_MAP, '@payload.key'],
+      ['=', ['object/get', KEY_MAP, '@payload.key'], 'change'],
+    ]);
+    expect(pass).toEqual({ key: 'c' });
+  });
+
+  it('the sibling != guard picks a key other than "c"', () => {
+    const { pass } = buildGuardPayloads([
+      'and',
+      ['object/has', KEY_MAP, '@payload.key'],
+      ['!=', ['object/get', KEY_MAP, '@payload.key'], 'change'],
+    ]);
+    expect(Object.keys(KEY_MAP)).toContain(pass.key);
+    expect(pass.key).not.toBe('c');
+  });
+
+  it('reconciles object/has with a bare-field equality literal (same field)', () => {
+    const { pass } = buildGuardPayloads([
+      'and',
+      ['object/has', KEY_MAP, '@payload.key'],
+      ['=', '@payload.key', 'y'],
+    ]);
+    expect(pass).toEqual({ key: 'y' });
+  });
+
+  it('is order-independent — the refining conjunct first still wins', () => {
+    const { pass } = buildGuardPayloads([
+      'and',
+      ['=', ['object/get', KEY_MAP, '@payload.key'], 'change'],
+      ['object/has', KEY_MAP, '@payload.key'],
+    ]);
+    expect(pass).toEqual({ key: 'c' });
+  });
+});
+
 describe('buildGuardPayloads — unrecognized operator is loud, not silent', () => {
   it('records a genuinely unknown operator exactly once', () => {
     const before = unhandledGuardOperators.length;
