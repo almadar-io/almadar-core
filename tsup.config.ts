@@ -12,6 +12,7 @@ export default defineConfig({
     'builders': 'src/builders.ts',
     'patterns/index': 'src/patterns/index.ts',
     'mock/index': 'src/mock/index.ts',
+    'i18n/index': 'src/i18n/index.ts',
   },
   format: ['esm'],
   dts: true,

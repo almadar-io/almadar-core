@@ -170,3 +170,7 @@ export {
 // Pattern registry, component mappings, and pattern utilities (merged from
 // the former @almadar/patterns package to break the core ↔ patterns cycle).
 export * from './src/patterns/index';
+
+// i18n vocabulary tables for the `.lolo`/`.orb` language (English, Arabic,
+// Slovenian) and the coverage gate (pattern-sync's `i18n` step imports this).
+export * from './src/i18n/index';
