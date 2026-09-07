@@ -230,10 +230,26 @@ function sampleUnion(field: UnionEntityField, ctx: SampleContext): FieldValue | 
 }
 
 /**
+ * Does row `ctx.index` leave undefaulted OPTIONAL fields unset?
+ *
+ * `seeded` only — the `index` strategy also backs the verifier's synthesized
+ * PAYLOADS, which must stay complete regardless. Deterministic on the row
+ * index, never on randomness: every EVEN row (2, 4, 6…) omits them, every ODD
+ * row (starting at row 1) fills them in as before. A row-count-1 entity (a
+ * `[runtime]` singleton, or any collection seeded with exactly one row)
+ * always lands on row 1 and is therefore never affected — singleton state
+ * stays fully populated with no separate carve-out needed.
+ */
+function omitsUndefaultedOptionalFields(ctx: SampleContext): boolean {
+  return ctx.strategy === 'seeded' && ctx.index % 2 === 0;
+}
+
+/**
  * One sample value for one field. `undefined` means OMIT the key.
  *
- * Order matters — see the three gates in the plan. Gates 1 and 2 read declared
- * schema properties (`persistence`, `intrinsic`), never field names.
+ * Order matters — see the four gates in the plan. Gates 1, 2 and 3 read
+ * declared schema properties (`persistence`, `intrinsic`, `required`,
+ * `default`, `type`), never field names.
  */
 export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldValue | undefined {
   const honoredDefault =
@@ -250,6 +266,25 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
 
   if (!isRuntime && isDeclaredDefaultHonored(field) && honoredDefault !== undefined) {
     return honoredDefault;
+  }
+
+  // Gate 3: an undefaulted OPTIONAL field (no `required`, no declared
+  // `default` at all — honored or not, the two gates above already routed a
+  // defaulted field past here) is left UNSET on every other seeded row. Every
+  // mock-seeded row previously carried every field, so an affordance gated on
+  // "this field is not yet set" (e.g. a survey button disabled until
+  // `csatScore` is absent) could never be exercised by any runtime walk, on
+  // any organism. Relation fields are excluded — they always seed a
+  // placeholder (`''` / `[]`) for the caller's relation-linking post-pass,
+  // never a domain-data absence. Enum/vocabulary fields are NOT excluded —
+  // they follow the same rule as any other optional field.
+  if (
+    !field.required &&
+    field.default === undefined &&
+    field.type !== 'relation' &&
+    omitsUndefaultedOptionalFields(ctx)
+  ) {
+    return undefined;
   }
 
   const values = declaredValues(field);
@@ -342,7 +377,12 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
   }
 }
 
-/** One row. Reserved keys are left to the caller. */
+/**
+ * One row. Reserved keys are left to the caller. Under `strategy: 'seeded'`,
+ * every other row (see {@link omitsUndefaultedOptionalFields}) omits its
+ * undefaulted optional fields — required/defaulted/relation fields are
+ * always present.
+ */
 export function sampleRow(
   entity: SampleEntity,
   ctx: Omit<SampleContext, 'entityName' | 'depth'>,

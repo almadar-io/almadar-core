@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { collectTraitConfigRefAdjacency } from '../src/embedded-trait-config';
 import { isContentMainWriter, resolvePageContentOwner } from '../src/page-content-owner';
-import type { OrbitalDefinition, OrbitalPage, Trait } from '../src/types/index';
+import type { DeclaredTraitConfig, OrbitalDefinition, OrbitalPage, Trait } from '../src/types/index';
 
 /**
  * The slot-outlet contract pinned against the four shapes the corpus actually
@@ -13,33 +13,46 @@ import type { OrbitalDefinition, OrbitalPage, Trait } from '../src/types/index';
 
 const list = (name: string): Trait => ({
   name,
+  scope: 'instance',
   stateMachine: {
-    initial: 'browsing',
-    states: ['browsing'],
+    states: [{ name: 'browsing', isInitial: true }],
+    events: [],
     transitions: [
       { from: 'browsing', event: 'INIT', to: 'browsing', effects: [['render-ui', 'main', { type: 'data-grid', entity: '?data' }]] },
     ],
   },
-} as unknown as Trait);
+});
 
-const chrome = (name: string, config?: Record<string, unknown>): Trait => ({
+const chrome = (name: string, config?: DeclaredTraitConfig): Trait => ({
   name,
+  scope: 'instance',
   ...(config ? { config } : {}),
   stateMachine: {
-    initial: 'idle',
-    states: ['idle'],
+    states: [{ name: 'idle', isInitial: true }],
+    events: [],
     transitions: [
       { from: 'idle', event: 'INIT', to: 'idle', effects: [['render-ui', 'modal', null]] },
     ],
   },
-} as unknown as Trait);
+});
+
+/** A `@config.<knob>` naming another trait — the only config shape this
+ *  suite exercises (a channel's `contentTrait`/`body` forward). */
+const traitRefConfig = (knob: string, traitName: string): DeclaredTraitConfig => ({
+  [knob]: { type: 'trait', default: `@trait.${traitName}` },
+});
 
 function orbitalOf(traits: Trait[]): OrbitalDefinition {
-  return { name: 'O', traits } as unknown as OrbitalDefinition;
+  return {
+    name: 'O',
+    entity: { name: 'OItem', fields: [{ name: 'id', type: 'string' }] },
+    traits,
+    pages: [],
+  };
 }
 
 function pageOf(...refs: string[]): OrbitalPage {
-  return { name: 'P', path: '/p', traits: refs.map((ref) => ({ ref })) } as unknown as OrbitalPage;
+  return { name: 'P', path: '/p', traits: refs.map((ref) => ({ ref })) };
 }
 
 function resolve(traits: Trait[], page: OrbitalPage) {
@@ -58,7 +71,7 @@ describe('isContentMainWriter', () => {
 describe('resolvePageContentOwner', () => {
   it('prefers the CHANNEL — the shell designating a body through config', () => {
     // The shell writes nothing itself; it names Catalog via `contentTrait`.
-    const shell = chrome('AppLayout', { contentTrait: { default: '@trait.Catalog' } });
+    const shell = chrome('AppLayout', traitRefConfig('contentTrait', 'Catalog'));
     const owner = resolve([shell, list('Catalog')], pageOf('AppLayout', 'Catalog'));
     expect(owner).toEqual({ kind: 'channel', trait: 'Catalog' });
   });
@@ -81,13 +94,13 @@ describe('resolvePageContentOwner', () => {
   });
 
   it('reports NONE for a page with no declared traits', () => {
-    const page = { name: 'P', path: '/p', traits: [] } as unknown as OrbitalPage;
+    const page: OrbitalPage = { name: 'P', path: '/p', traits: [] };
     expect(resolve([list('Catalog')], page)).toEqual({ kind: 'none' });
   });
 
   it('follows the channel transitively through a wrapper', () => {
-    const shell = chrome('AppLayout', { contentTrait: { default: '@trait.Wrapper' } });
-    const wrapper = chrome('Wrapper', { body: { default: '@trait.Catalog' } });
+    const shell = chrome('AppLayout', traitRefConfig('contentTrait', 'Wrapper'));
+    const wrapper = chrome('Wrapper', traitRefConfig('body', 'Catalog'));
     const owner = resolve([shell, wrapper, list('Catalog')], pageOf('AppLayout'));
     expect(owner).toEqual({ kind: 'channel', trait: 'Catalog' });
   });

@@ -20,4 +20,12 @@ export interface OrbitalParamsManifest {
   paramFields: readonly ParamFieldDescriptor[];
   traitNames: readonly string[];
   inlineTraitNames: readonly string[];
+  /**
+   * The orbital's own declared config knob names (`Orbital.config`), the
+   * `config` param's allow-list. Present only when the orbital declares at
+   * least one knob of its own — mirrors `paramFields`' persistence-style
+   * gate (see `extractManifest`). Absent means `config` is not a valid
+   * top-level param for this orbital at all.
+   */
+  configKeys?: readonly string[];
 }

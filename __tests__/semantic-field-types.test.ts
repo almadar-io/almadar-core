@@ -93,7 +93,11 @@ describe.each<SampleStrategy>(['seeded', 'index'])(
   (strategy) => {
     it.each(SEMANTIC_STRING_TYPES)('synthesizes a valid %s', (type) => {
       for (const index of [1, 2, 3, 7, 12]) {
-        const field: EntityField = { name: `contact${type}`, type };
+        // `required: true` so the undefaulted-optional-field omission gate
+        // (Gate 3 in `sampleValue.ts`, seeded strategy, even index) never
+        // suppresses the value this test asserts on — that gate is a
+        // separate, already-covered concern from validator/seeder parity.
+        const field: EntityField = { name: `contact${type}`, type, required: true };
         const value = sampleFieldValue(field, {
           entityName: 'Member',
           index,

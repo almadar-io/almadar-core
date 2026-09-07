@@ -12,7 +12,7 @@
  * @packageDocumentation
  */
 
-export { extractManifest } from './extract-manifest.js';
+export { extractManifest, paramFieldsFor } from './extract-manifest.js';
 export {
   applyParamsToOrb,
   applyDeclarationTraitRenames,

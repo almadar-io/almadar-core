@@ -437,3 +437,16 @@ export function reportIdenticalToEnglish(input: I18nCoverageInput): I18nProblem[
   }
   return problems;
 }
+
+// ---------------------------------------------------------------------------
+// Forward direction (English → native) — see ./localize.ts
+// ---------------------------------------------------------------------------
+
+export { lexLolo } from './lolo-lexer.js';
+export type { LoloToken, LoloTokenKind } from './lolo-lexer.js';
+export {
+  localizeMap,
+  localizeLoloSource,
+  localizeOrbValue,
+} from './localize.js';
+export type { LocalizeLoloOptions } from './localize.js';

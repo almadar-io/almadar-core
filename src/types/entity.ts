@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod';
+import { EntityIdSchema } from './identity.js';
 import type { EntityId } from './identity.js';
 import { EntityFieldSchema, type EntityField, type FileValue } from './field.js';
 import { SemanticAssetRefSchema, type SemanticAssetRef } from './asset.js';
@@ -121,6 +122,9 @@ export type OrbitalEntity = {
 
 export const OrbitalEntitySchema = z.object({
     name: z.string().min(1, 'Entity name is required'),
+    // V4 arena id (`EntityDefinition.id`); declared so the strip-mode zod gate
+    // carries an imported entity's id through instead of erasing it.
+    id: EntityIdSchema.optional(),
     persistence: EntityPersistenceSchema.default('persistent'),
     shared: z.boolean().optional(),
     // Must stay in step with the Rust serde field (`EntityDefinition.identity`,

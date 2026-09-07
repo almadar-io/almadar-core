@@ -5,7 +5,16 @@
  */
 
 export * from './random.js';
-export { identityEntityName, ownerFieldsFromSchema } from './identityOwners.js';
+export {
+  collectUserFieldLiterals,
+  identityEntitiesOf,
+  identityEntityName,
+  identityEntityNames,
+  ownerColumnsFromPolicy,
+  ownerFieldsFromSchema,
+  roleSatisfyingPolicy,
+  roleVocabularyOf,
+} from './identityOwners.js';
 export {
   type EntityAccessPolicies,
   entityAccessPolicies,

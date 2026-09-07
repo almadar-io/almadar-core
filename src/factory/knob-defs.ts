@@ -33,6 +33,21 @@ export function rehydrateKnobDefs(catalog: FactorySignatureCatalog): FactorySign
       mutable.overridableConfigKeys = knobs;
       delete mutable.overridableConfigKeyRefs;
     }
+    // Orbital-level `config` — same table, same ref/rehydrate shape as the
+    // per-trait `overridableConfigKeyRefs` above.
+    const configRefs = sig.configRefs;
+    if (configRefs === undefined) continue;
+    const configKnobs: FactoryConfigParam[] = [];
+    for (const i of configRefs) {
+      const knob = table[i];
+      if (knob !== undefined) configKnobs.push(knob);
+    }
+    const mutableSig = sig as {
+      config?: ReadonlyArray<FactoryConfigParam>;
+      configRefs?: ReadonlyArray<number>;
+    };
+    mutableSig.config = configKnobs;
+    delete mutableSig.configRefs;
   }
   return catalog;
 }

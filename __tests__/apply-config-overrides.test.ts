@@ -83,4 +83,18 @@ describe('ConfigFieldDeclaration metadata round-trips through Zod', () => {
         expect(parsed.values).toEqual(['hearts', 'bar', 'numeric']);
         expect(parsed.synonyms).toBe('style, look');
     });
+
+    it('preserves forwardedFrom on a collapsed knob forward', () => {
+        const parsed = ConfigFieldDeclarationSchema.parse({
+            type: 'number',
+            default: 50,
+            forwardedFrom: '@config.pageSize',
+        });
+        expect(parsed.forwardedFrom).toBe('@config.pageSize');
+    });
+
+    it('leaves forwardedFrom absent when not declared (no key invented)', () => {
+        const parsed = ConfigFieldDeclarationSchema.parse({ type: 'number', default: 50 });
+        expect('forwardedFrom' in parsed).toBe(false);
+    });
 });

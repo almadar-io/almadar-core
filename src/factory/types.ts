@@ -408,6 +408,22 @@ export interface FactorySignature {
   /** Union of all `traits[].listenedEvents`. */
   listenedEvents: ReadonlyArray<string>;
   /**
+   * This orbital's OWN declared knobs (`Orbital.config`) — distinct from
+   * `traits[].overridableConfigKeys`, which are per-TRAIT. Same shape and
+   * semantics as a trait's config surface: type/default/label/description/
+   * synonyms/tier lifted from the source `.lolo` `config { }` block
+   * authored directly on the orbital. Omitted when the orbital declares no
+   * config of its own.
+   */
+  config?: ReadonlyArray<FactoryConfigParam>;
+  /**
+   * WIRE FORMAT ONLY — indices into `FactorySignatureCatalog.knobDefs`, the
+   * orbital-config sibling of `FactoryTraitSignature.overridableConfigKeyRefs`.
+   * Absent in memory — `config` is always populated instead; `rehydrateKnobDefs`
+   * substitutes it from this table before any consumer sees the signature.
+   */
+  configRefs?: ReadonlyArray<number>;
+  /**
    * JSON Schema for the orbital's `AnalysisOrbitalParams` shape. Walks
    * `traitOverrides.<TraitName>.config.<knob>` with the exact type
    * (string/number/boolean/array/object) lifted from each knob's

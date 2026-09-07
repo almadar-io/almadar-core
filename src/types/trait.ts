@@ -236,6 +236,36 @@ export function maskSecretConfigValues(
     return masked;
 }
 
+/**
+ * Fold an override value map onto a `DeclaredTraitConfig`'s per-knob
+ * `default`, mirroring the compiler's `ORB_O_CONFIG_UNKNOWN_KEY` check.
+ * Single owner for the factory-runtime overlay (`applyParamsToOrb` folding
+ * `OrbitalFactoryParams.config`) and the runtime's `OrbitalRefObject.config`
+ * fold (`reference-resolver.ts`) — same operation, two call sites.
+ *
+ * Throws when `overrides` names a key `declared` does not declare. Callers
+ * validate the override keys against the manifest / upstream config first
+ * (`validateOrbitalFactoryParams`, the resolver's own pre-check), so this is
+ * a should-never-happen guard, not a user-facing error path.
+ */
+export function overrideDeclaredKnobs(
+    declared: DeclaredTraitConfig,
+    overrides: Readonly<Record<string, TraitConfigValue>>,
+): DeclaredTraitConfig {
+    const out: Record<string, ConfigFieldDeclaration> = { ...declared };
+    for (const key of Object.keys(overrides)) {
+        const field = declared[key];
+        if (field === undefined) {
+            throw new Error(
+                `overrideDeclaredKnobs: config override "${key}" is not a declared knob ` +
+                    `(ORB_O_CONFIG_UNKNOWN_KEY). Declared: ${Object.keys(declared).join(', ') || '(none)'}`,
+            );
+        }
+        out[key] = { ...field, default: overrides[key] };
+    }
+    return out;
+}
+
 export type ConfigFieldDeclaration = {
     readonly type: string;
     readonly default?: TraitConfigValue;
@@ -262,6 +292,20 @@ export type ConfigFieldDeclaration = {
     readonly items?: ConfigFieldItemsDeclaration;
     /** Structured property schema for object-typed config fields (no items wrapper). */
     readonly properties?: Readonly<Record<string, TraitEntityField>>;
+    /**
+     * Provenance for a collapsed knob forward. The L2 inline phase (and the
+     * runtime resolver) fold a trait's `default: "@config.<knob>"` (or a
+     * call-site override of the same shape) down to the resolved value, so
+     * the resolved schema no longer carries the literal `@config.<knob>`
+     * token anywhere. `forwardedFrom` records that token — the original
+     * app/orbital-level knob name this field's value came from — so a
+     * dead-knob check (`ORB_O_CONFIG_DEAD_KNOB` / `orbital-config-knob-unforwarded`)
+     * can still recognize the knob as forwarded on an already-resolved
+     * schema. Absent when the field's `default`/value was authored directly
+     * (not a forward), or on an unresolved schema where the `@config.<knob>`
+     * token itself is still present.
+     */
+    readonly forwardedFrom?: string;
 };
 
 export type ConfigFieldItemsDeclaration = {
@@ -295,6 +339,7 @@ export const ConfigFieldDeclarationSchema: z.ZodType<ConfigFieldDeclaration> = z
     synonyms: z.string().optional(),
     items: ConfigFieldItemsDeclarationSchema.optional(),
     properties: z.lazy(() => z.record(TraitEntityFieldSchema)).optional(),
+    forwardedFrom: z.string().optional(),
 });
 
 /**
@@ -360,11 +405,38 @@ export const TraitCategorySchema = z.enum([
 // `trait` / `slot` / `pattern` mirror Rust's `FieldType::{Trait, Slot, Pattern}`
 // (orbital-core schema/types.rs) — config-field-only types: a `@trait.X`
 // embed slot, a UI slot name, a pattern type name.
-// `opaque` = deliberately open data (see `FieldType` in types/field.ts); `scalar`
-// and `union` are the closed transport/variant types. All three are real
+// `scalar` and `union` are the closed transport/variant types — real
 // .lolo/.orb types, so the trait-side mirror must carry them or generated
 // factories fail DTS.
-export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum' | 'email' | 'url' | 'phone' | 'uuid' | 'image' | 'trait' | 'slot' | 'pattern' | 'node' | 'event' | 'scalar' | 'union' | 'opaque';
+export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum' | 'email' | 'url' | 'phone' | 'uuid' | 'image' | 'trait' | 'slot' | 'pattern' | 'node' | 'event' | 'scalar' | 'union';
+
+/** Every `TraitFieldType`, as a runtime array — the ONE list `TraitEntityFieldSchema`
+ *  and `RequiredFieldSchema` both read. Two separate inline copies of this enum had
+ *  already fallen behind the TS type twice (`node` missing, then `scalar`/`union`
+ *  missing) — mirrors the `FIELD_TYPES` fix for `FieldType` in `field.ts`. */
+export const TRAIT_FIELD_TYPES = [
+    'string',
+    'number',
+    'boolean',
+    'date',
+    'array',
+    'object',
+    'timestamp',
+    'datetime',
+    'enum',
+    'email',
+    'url',
+    'phone',
+    'uuid',
+    'image',
+    'trait',
+    'slot',
+    'pattern',
+    'node',
+    'event',
+    'scalar',
+    'union',
+] as const satisfies readonly TraitFieldType[];
 
 /**
  * Simplified field for trait data entities
@@ -384,29 +456,7 @@ export type TraitEntityField = {
 
 export const TraitEntityFieldSchema: z.ZodType<TraitEntityField> = z.object({
     name: z.string().min(1),
-    type: z.enum([
-        'string',
-        'number',
-        'boolean',
-        'date',
-        'array',
-        'object',
-        'timestamp',
-        'datetime',
-        'enum',
-        'email',
-        'url',
-        'phone',
-        'uuid',
-        'image',
-        'trait',
-        'slot',
-        'pattern',
-        // `node` was missing here while being a real `TraitFieldType` member
-        // — the same latent-drift trap `event` would otherwise repeat.
-        'node',
-        'event',
-    ]),
+    type: z.enum(TRAIT_FIELD_TYPES),
     required: z.boolean().optional(),
     default: TraitConfigValueSchema.optional(),
     values: z.array(z.string()).optional(),
@@ -556,7 +606,7 @@ export type EventPayloadField = {
     /** Human-readable description */
     description?: string;
     /** For 'entity' type: the entity type name */
-    entityType?: string;
+    entity?: string;
     /** Structured property schema for object-typed payload fields (recursive). */
     properties?: ReadonlyArray<EventPayloadField>;
     /**
@@ -583,7 +633,7 @@ export const EventPayloadFieldSchema: z.ZodType<EventPayloadField> = z.object({
     type: z.string().min(1),
     required: z.boolean().optional(),
     description: z.string().optional(),
-    entityType: z.string().optional(),
+    entity: z.string().optional(),
     properties: z.lazy(() => z.array(EventPayloadFieldSchema)).optional(),
     typeWhen: z.array(PayloadTypeWhenSchema).optional(),
 });
@@ -832,8 +882,7 @@ export type RequiredField = {
 
 export const RequiredFieldSchema = z.object({
     name: z.string().min(1),
-    // `node` was missing here too (same drift as TraitEntityFieldSchema above).
-    type: z.enum(['string', 'number', 'boolean', 'date', 'array', 'object', 'timestamp', 'datetime', 'enum', 'email', 'url', 'phone', 'uuid', 'image', 'trait', 'slot', 'pattern', 'node', 'event']),
+    type: z.enum(TRAIT_FIELD_TYPES),
     description: z.string().optional(),
 });
 
@@ -885,6 +934,9 @@ export type TraitReference = {
      * appears in a final composed `.orb`.
      */
     typeArgs?: Record<string, string>;
+    /** Preprocess-output carrier: the fully resolved trait this reference stands
+     *  for (`@almadar/runtime` `preprocessSchema` output only; never in a `.orb`). */
+    _resolved?: Trait;
     /** V4 dual-carry id sibling of `events` (keys = baked event names resolved to ids) — optional until the Phase-7 flip. */
     eventIds?: Record<string, EventId>;
     /**
@@ -968,6 +1020,7 @@ export const TraitReferenceSchema = z
             )
             .optional(),
         eventIds: z.record(z.string().min(1), EventIdSchema).optional(),
+        _resolved: z.lazy(() => TraitSchema).optional(),
         // 3-II type-parameter arguments (see `TraitReference.typeArgs`).
         typeArgs: z
             .record(
@@ -1039,6 +1092,8 @@ export type TraitRef =
         linkedEntity?: string;
         name?: string;
         events?: Record<string, string>;
+        /** Preprocess-output carrier (`preprocessSchema` only, never in a `.orb`). */
+        _resolved?: Trait;
     }
     | Trait;
 

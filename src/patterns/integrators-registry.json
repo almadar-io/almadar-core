@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-03T18:48:24.308Z",
+  "exportedAt": "2026-09-07T01:58:57.916Z",
   "integrators": {
     "github": {
       "name": "github",
@@ -402,7 +402,10 @@
               "name": "metadata",
               "type": "object",
               "required": false,
-              "description": "Arbitrary key-value tags attached to the PaymentIntent (string values only)."
+              "description": "Arbitrary key-value tags attached to the PaymentIntent (string values only).",
+              "mapValue": {
+                "type": "string"
+              }
             }
           ],
           "responseShape": {
@@ -870,7 +873,10 @@
               "name": "payload",
               "type": "object",
               "required": false,
-              "description": "Event payload; defaults to an empty object."
+              "description": "Event payload; defaults to an empty object.",
+              "mapValue": {
+                "type": "string"
+              }
             },
             {
               "name": "secret",
@@ -1862,7 +1868,10 @@
               "name": "buildArgs",
               "type": "object",
               "required": false,
-              "description": "Build-time --build-arg values."
+              "description": "Build-time --build-arg values.",
+              "mapValue": {
+                "type": "string"
+              }
             }
           ],
           "responseShape": {
@@ -1915,7 +1924,10 @@
               "name": "env",
               "type": "object",
               "required": false,
-              "description": "Environment variables set inside the container."
+              "description": "Environment variables set inside the container.",
+              "mapValue": {
+                "type": "string"
+              }
             },
             {
               "name": "volumes",
@@ -2221,9 +2233,12 @@
             },
             {
               "name": "metadata",
-              "type": "IntegrationParams",
+              "type": "object",
               "required": false,
-              "description": "Arbitrary metadata stored alongside the object (in-memory backend only)."
+              "description": "Object metadata stored alongside the content (S3-compatible object stores carry metadata as string headers — never structured values).",
+              "mapValue": {
+                "type": "string"
+              }
             }
           ],
           "responseShape": {
@@ -2343,7 +2358,12 @@
             "content": "string",
             "contentType": "string",
             "size": "number",
-            "metadata": "IntegrationParams"
+            "metadata": {
+              "type": "object",
+              "mapValue": {
+                "type": "string"
+              }
+            }
           }
         },
         {
@@ -2476,7 +2496,8 @@
               "name": "payload",
               "type": "ServiceParams",
               "required": true,
-              "description": "Arbitrary job payload."
+              "description": "Job payload — the caller declares its own shape.",
+              "shapedBy": "payload"
             },
             {
               "name": "delay",
@@ -2508,7 +2529,29 @@
             }
           ],
           "responseShape": {
-            "job": "object | null"
+            "job": {
+              "type": "QueueJob | null",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "required": true
+                },
+                "payload": {
+                  "type": "ServiceParams",
+                  "required": true,
+                  "description": "Whatever `enqueue` was given — the caller declares its own shape.",
+                  "shapedBy": "payload"
+                },
+                "enqueuedAt": {
+                  "type": "number",
+                  "required": true
+                },
+                "priority": {
+                  "type": "number",
+                  "required": true
+                }
+              }
+            }
           }
         },
         {
@@ -2524,7 +2567,29 @@
           ],
           "responseShape": {
             "status": "'pending' | 'processing' | 'completed' | 'failed'",
-            "job": "object | null"
+            "job": {
+              "type": "QueueJob | null",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "required": true
+                },
+                "payload": {
+                  "type": "ServiceParams",
+                  "required": true,
+                  "description": "Whatever `enqueue` was given — the caller declares its own shape.",
+                  "shapedBy": "payload"
+                },
+                "enqueuedAt": {
+                  "type": "number",
+                  "required": true
+                },
+                "priority": {
+                  "type": "number",
+                  "required": true
+                }
+              }
+            }
           }
         },
         {
@@ -2541,7 +2606,8 @@
               "name": "result",
               "type": "ServiceParams",
               "required": false,
-              "description": "Result payload to attach to the job."
+              "description": "Result payload to attach to the job — the caller declares its own shape (not necessarily the same shape as the job's `payload`).",
+              "shapedBy": "result"
             }
           ],
           "responseShape": {
@@ -2620,7 +2686,10 @@
             }
           ],
           "responseShape": {
-            "value": "ServiceParams"
+            "value": {
+              "type": "ServiceParams",
+              "shapedBy": "value"
+            }
           }
         },
         {
@@ -2637,7 +2706,8 @@
               "name": "value",
               "type": "ServiceParams",
               "required": true,
-              "description": "Value to store."
+              "description": "Value to store — the caller declares its own shape.",
+              "shapedBy": "value"
             },
             {
               "name": "ttl",
@@ -2764,7 +2834,8 @@
               "name": "message",
               "type": "ServiceParams",
               "required": true,
-              "description": "Message payload."
+              "description": "Message payload — the caller declares its own shape.",
+              "shapedBy": "message"
             }
           ],
           "responseShape": {
@@ -3052,9 +3123,12 @@
             },
             {
               "name": "attributes",
-              "type": "IntegrationParams",
+              "type": "object",
               "required": false,
-              "description": "Key-value attributes attached to the span."
+              "description": "Key-value attributes attached to the span (OTel attribute values are scalar).",
+              "mapValue": {
+                "type": "string | number | boolean"
+              }
             },
             {
               "name": "traceId",
@@ -3107,9 +3181,12 @@
             },
             {
               "name": "attributes",
-              "type": "IntegrationParams",
+              "type": "object",
               "required": false,
-              "description": "Key-value attributes attached to the event."
+              "description": "Key-value attributes attached to the event (OTel attribute values are scalar).",
+              "mapValue": {
+                "type": "string | number | boolean"
+              }
             }
           ],
           "responseShape": {
@@ -3140,9 +3217,12 @@
             },
             {
               "name": "labels",
-              "type": "IntegrationParams",
+              "type": "object",
               "required": false,
-              "description": "Key-value labels attached to the metric (replaces prior labels on the same name)."
+              "description": "Key-value labels attached to the metric (replaces prior labels on the same name; OTel label values are scalar).",
+              "mapValue": {
+                "type": "string | number | boolean"
+              }
             }
           ],
           "responseShape": {
@@ -3226,7 +3306,8 @@
               "name": "context",
               "type": "IntegrationParams",
               "required": false,
-              "description": "Extra context passed through to the agent."
+              "description": "Extra context passed through to the agent — the caller declares its own shape.",
+              "shapedBy": "context"
             }
           ],
           "responseShape": {
@@ -3352,7 +3433,10 @@
             }
           ],
           "responseShape": {
-            "rows": "DatabaseRow[]",
+            "rows": {
+              "type": "DatabaseRow[]",
+              "shapedBy": "rows"
+            },
             "rowCount": "number"
           }
         }

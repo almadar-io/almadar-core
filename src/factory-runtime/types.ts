@@ -12,7 +12,7 @@
  * @packageDocumentation
  */
 
-import type { EntityField, EntityPersistence } from '../types/index.js';
+import type { EntityField, EntityPersistence, TraitConfigValue } from '../types/index.js';
 import type { MakeTraitRefOpts } from '../builders.js';
 
 /**
@@ -47,6 +47,13 @@ export interface OrbitalFactoryParams {
   readonly collection?: string;
   /** Per-imported-trait overrides, keyed on the trait's canonical `name`. */
   readonly traitOverrides?: Readonly<Record<string, OrbitalTraitOverride | undefined>>;
+  /**
+   * Override this orbital's OWN declared config knobs (`Orbital.config`) by
+   * key. Only present when the manifest carries `configKeys` (the orbital
+   * declares at least one knob of its own); every key must be a member of
+   * `configKeys` or validation rejects it.
+   */
+  readonly config?: Readonly<Record<string, TraitConfigValue>>;
 }
 
 /**
@@ -62,7 +69,13 @@ export type ParamValidationError =
       readonly allowed: readonly string[];
     }
   | { readonly kind: 'not-object'; readonly received: string }
-  | { readonly kind: 'trait-overrides-not-object'; readonly received: string };
+  | { readonly kind: 'trait-overrides-not-object'; readonly received: string }
+  | { readonly kind: 'config-not-object'; readonly received: string }
+  | {
+      readonly kind: 'unknown-config-key';
+      readonly key: string;
+      readonly allowed: readonly string[];
+    };
 
 /** Discriminated result type for validation. Caller never widens. */
 export type ParamValidationResult =

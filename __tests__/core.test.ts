@@ -412,11 +412,11 @@ describe('PageSchema', () => {
 describe('schemaToIR', () => {
     it('resolves a minimal schema to IR', () => {
         clearSchemaCache();
-        const schema = {
+        const schema = parseOrbitalSchema({
             name: 'test-app',
             orbitals: [VALID_ORBITAL],
-        };
-        const ir = schemaToIR(schema as any);
+        });
+        const ir = schemaToIR(schema);
         expect(ir).toBeDefined();
     });
 });

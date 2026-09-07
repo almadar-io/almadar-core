@@ -35,7 +35,13 @@ export {
   collectTraitConfigRefAdjacency,
   traitDeclaresConfigForward,
   buildResolvedTraitConfigs,
+  traitReferencesCallsitePayload,
+  collectCallsiteCaptureChildren,
 } from './src/embedded-trait-config';
+
+// Dot-notation nested value lookup — shared by `@almadar/ui` and emitted
+// SERVER code (which cannot import the UI render substrate).
+export { getNestedValue } from './src/lib/get-nested-value';
 
 // The slot-outlet contract — which single trait owns a page's content region.
 // Two wiring-lint classes were stuck (one at warning-only, one withdrawn after

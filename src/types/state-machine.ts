@@ -96,6 +96,15 @@ export type PayloadField = {
    * resolved truth, never the conditional.
    */
   typeWhen?: ReadonlyArray<PayloadTypeWhen>;
+  /**
+   * The declared entity this field's value IS an instance of — stamped by
+   * lowering when an entity-typed payload field (`row: Note`, scalar or
+   * `[Note]` array — the array form names the element entity) is flattened
+   * into `type: "object"`/`"[object]"` + `properties`. Mirrors Rust
+   * `PayloadField.entity`. Absent for an anonymous struct/object field with
+   * no declared entity — never inferred from shape or name.
+   */
+  entity?: string;
 };
 
 export const PayloadFieldSchema: z.ZodType<PayloadField> = z.object({
@@ -104,6 +113,7 @@ export const PayloadFieldSchema: z.ZodType<PayloadField> = z.object({
   required: z.boolean().optional(),
   properties: z.lazy(() => z.array(PayloadFieldSchema)).optional(),
   typeWhen: z.array(PayloadTypeWhenSchema).optional(),
+  entity: z.string().min(1).optional(),
 });
 
 /**

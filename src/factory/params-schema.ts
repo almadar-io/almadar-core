@@ -115,6 +115,19 @@ export function signatureToParamsSchema(
     },
   };
 
+  if (signature.config && signature.config.length > 0) {
+    const configProps: { [key: string]: JsonSchema } = {};
+    for (const knob of signature.config) {
+      configProps[knob.key] = knobToSchema(knob, undefined, traitRefValues);
+    }
+    properties.config = {
+      type: 'object',
+      additionalProperties: false,
+      description: "This orbital's own declared knobs (Orbital.config). Only the keys shown are valid.",
+      properties: configProps,
+    };
+  }
+
   if (allowPersistenceOverride) {
     properties.collection = {
       type: 'string',

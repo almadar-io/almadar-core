@@ -50,6 +50,18 @@ export interface EffectTrace {
   type: string;
   /** For fetch/persist effects: the entity the effect addresses. */
   entityName?: string;
+  /** For persist effects: the mutation performed. */
+  action?: "create" | "update" | "delete" | "batch";
+  /** For a persist that wrote a row: its id. */
+  resultId?: string;
+  /**
+   * The effect's real outcome, distinct from `status`. `denied` means the
+   * write was rejected by an access policy or resolved no row key —
+   * `status` reports `"failed"` for it too (kept for back-compat with
+   * consumers that only branch on `status`); `outcome` is the one field
+   * that tells a denial apart from any other kind of failure.
+   */
+  outcome?: "success" | "denied" | "failed";
   args: SExpr[];
   status: "executed" | "failed" | "skipped";
   error?: string;

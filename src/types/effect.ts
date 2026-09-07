@@ -1121,7 +1121,15 @@ export function atomic(...effects: SExpr[]): AtomicEffect {
 
 /** Resolved pattern props for render-ui effects at runtime. Recursive for nested pattern configs. */
 export type ResolvedPatternProps = {
-  [prop: string]: string | number | boolean | null | undefined | ResolvedPatternProps | ResolvedPatternProps[];
+  [prop: string]:
+    | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | ResolvedPatternProps
+    | RenderChildrenMap
+    | Array<ResolvedPatternProps | RenderChildrenMap>;
 };
 
 /** A node in a render-ui effect tree. */

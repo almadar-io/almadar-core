@@ -27,12 +27,14 @@ import type {
   EventPayloadField,
   EventScope,
   Trait,
+  DeclaredTraitConfig,
 } from "./trait.js";
 import {
   TraitRefSchema,
   EventPayloadFieldSchema,
   EventScopeSchema,
   TraitSchema,
+  DeclaredTraitConfigSchema,
 } from "./trait.js";
 import type {
   DomainContext,
@@ -88,6 +90,9 @@ export type UseDeclaration = {
    * Used as namespace: Alias.entity, Alias.traits.X, Alias.pages.X
    */
   as: string;
+
+  /** `uses A from "…" { config { … } }` override of the upstream schema's declared `config {}` — keys must exist in `OrbitalSchema.config`. */
+  config?: DeclaredTraitConfig;
 };
 
 export const UseDeclarationSchema = z.object({
@@ -99,6 +104,7 @@ export const UseDeclarationSchema = z.object({
       /^[A-Z][a-zA-Z0-9]*$/,
       'Alias must be PascalCase (e.g., "Health", "GameCore")',
     ),
+  config: DeclaredTraitConfigSchema.optional(),
 });
 
 // ============================================================================
@@ -532,6 +538,136 @@ export const PageRefSchema = z.union([
 ]);
 
 // ============================================================================
+// Orbital Reference
+// ============================================================================
+
+/**
+ * OrbitalRefObject - Reference to an imported orbital ("Alias.orbitals.OrbitalName"),
+ * mirroring PageRefObject/TraitRef's reference-with-overrides shape.
+ *
+ * Set on `OrbitalDefinition.reference` by lowering and cleared by the
+ * compiler's inline phase / runtime's resolver — transient, never present on
+ * a fully resolved orbital.
+ */
+export type OrbitalRefObject = {
+  /** Reference to imported orbital: "Alias.orbitals.OrbitalName" */
+  ref: string;
+
+  /** V4 dual-carry id sibling of `ref` — optional until the Phase-7 flip. */
+  refId?: OrbitalId;
+
+  /** `entity E` — rebind the primary entity (bare name). */
+  entity?: string;
+
+  /** `fields { up: local }` — primary-entity field renames. */
+  fields?: Readonly<Record<string, string>>;
+
+  /** `pages { "/up": "/local" }` — route remap; unmapped paths keep the upstream value. */
+  pages?: Readonly<Record<string, string>>;
+
+  /** Trim the imported trait set to everything but these. */
+  omit?: readonly string[];
+
+  /** Trim the imported trait set to only these. */
+  only?: readonly string[];
+
+  /** Overrides of the upstream orbital's DECLARED knobs only. */
+  config?: DeclaredTraitConfig;
+
+  /** `events { UP: LOCAL }` — orbital-scope rename over every trait's emits + listen keys. */
+  events?: Readonly<Record<string, string>>;
+
+  /**
+   * `roles { approver: [owner, project_manager]  employee: team_member }` —
+   * remap the upstream's role literals to the consumer roster. Values are
+   * ALWAYS arrays, even for a single target: one target is a literal swap
+   * (`(= @user.role "approver")` → `(= @user.role "owner")`); a list rewrites
+   * an equality comparison into `(array/includes [...] @user.role)` (and
+   * wraps `!=`/`neq` in `not`), and expands the literals of an existing
+   * `array/includes` haystack. Every target must be a member of the
+   * consumer's `[identity]` role vocabulary.
+   */
+  roles?: Readonly<Record<string, readonly string[]>>;
+
+  /**
+   * `entities { Employee: Person }` — retarget an out-of-orbital relation
+   * (an entity named by the imported closure but declared by another
+   * orbital of the same upstream alias) to a consumer entity. Applied to
+   * relation targets, `@Entity` tokens, fetch/persist targets, policy
+   * comparisons, and page `primaryEntity` / `sourceEntityDefinition`.
+   * `entity E` (the primary rebind) is a separate field, not part of this map.
+   */
+  entities?: Readonly<Record<string, string>>;
+
+  /**
+   * `pages { "/up": "/local" -> TraitA, TraitB }` — sibling traits mounted
+   * onto the remapped page, keyed by the UPSTREAM page path. These traits
+   * ride the reference body unprefixed; `omit`/`only` never apply to them.
+   */
+  mounts?: Readonly<Record<string, readonly string[]>>;
+
+  /**
+   * `extend { field : type = default }` — ADD fields to the upstream primary
+   * entity (full entity-field syntax; `fields {}` stays rename-only). Applied
+   * after `fields {}` renames; a name colliding with the upstream primary
+   * (post-rename) or a `fields {}` rename target refuses resolution
+   * (`ORB_O_EXTEND_FIELD_COLLISION`). A relation-typed added field's target
+   * resolves in the CONSUMER's own scope, never upstream's. An added field
+   * no trait of the materialized orbital ever reads/sets/renders/forwards is
+   * a `orb validate` WARNING (`ORB_O_EXTEND_FIELD_UNREAD`), not a JS-resolve
+   * concern.
+   */
+  extend?: readonly EntityField[];
+};
+
+/**
+ * Validate orbital reference format: "Alias.orbitals.OrbitalName"
+ */
+export const OrbitalRefStringSchema = z
+  .string()
+  .regex(
+    /^[A-Z][a-zA-Z0-9]*\.orbitals\.[A-Z][a-zA-Z0-9]*$/,
+    'Orbital reference must be "Alias.orbitals.OrbitalName"',
+  );
+
+export const OrbitalRefObjectSchema = z.object({
+  ref: OrbitalRefStringSchema,
+  refId: OrbitalIdSchema.optional(),
+  entity: z.string().optional(),
+  fields: z.record(z.string()).optional(),
+  pages: z.record(z.string()).optional(),
+  omit: z.array(z.string()).optional(),
+  only: z.array(z.string()).optional(),
+  config: DeclaredTraitConfigSchema.optional(),
+  events: z.record(z.string()).optional(),
+  roles: z.record(z.string(), z.array(z.string())).optional(),
+  entities: z.record(z.string(), z.string()).optional(),
+  mounts: z.record(z.string(), z.array(z.string())).optional(),
+  extend: z.array(EntityFieldSchema).optional(),
+});
+
+/**
+ * Parses an orbital reference.
+ *
+ * Extracts the alias and orbital name from an orbital reference
+ * in format "Alias.orbitals.OrbitalName". Returns null if not a valid orbital reference.
+ *
+ * @param {string} ref - Orbital reference to parse
+ * @returns {{ alias: string; orbitalName: string } | null} Parsed reference or null
+ *
+ * @example
+ * parseOrbitalRef("TimeTracking.orbitals.TimesheetPanelOrbital"); // returns { alias: "TimeTracking", orbitalName: "TimesheetPanelOrbital" }
+ * parseOrbitalRef("TimeTracking.traits.X"); // returns null
+ */
+export function parseOrbitalRef(
+  ref: string,
+): { alias: string; orbitalName: string } | null {
+  const match = ref.match(/^([A-Z][a-zA-Z0-9]*)\.orbitals\.([A-Z][a-zA-Z0-9]*)$/);
+  if (!match) return null;
+  return { alias: match[1], orbitalName: match[2] };
+}
+
+// ============================================================================
 // Trait Reference Extensions
 // ============================================================================
 
@@ -904,6 +1040,22 @@ export type OrbitalDefinition = {
    */
   exposes?: string[];
 
+  /**
+   * This orbital's own DECLARED knobs (§4.5) — distinct from `OrbitalSchema.config`,
+   * which declares organism-wide knobs shared by every orbital. Traits publish a
+   * knob by forwarding `@config.<knob>`; an importer overrides via
+   * `OrbitalRefObject.config` or `UseDeclaration.config`.
+   */
+  config?: DeclaredTraitConfig;
+
+  /**
+   * TRANSIENT — set by lowering when this orbital is authored as
+   * `orbital X = Alias.orbitals.Y { ... }` (the reference form). Cleared by
+   * the compiler's inline phase / runtime's resolver during flattening; must
+   * never reach validation, codegen, or a committed `.orb`.
+   */
+  reference?: OrbitalRefObject;
+
   // ========================================================================
   // Context fields - persisted throughout orbital lifecycle
   // ========================================================================
@@ -946,6 +1098,15 @@ export const OrbitalDefinitionSchema = z.object({
   services: z.array(ServiceRefSchema).optional(),
   // Components (inline or reference)
   entity: EntityRefSchema,
+  // Mirrors the `OrbitalDefinition.auxiliaryEntities` type field — WAS
+  // undeclared here, so `OrbitalSchemaSchema.safeParse` (every load through
+  // `external-loader.ts`) silently stripped it on every externally-loaded
+  // orbital (zod drops unrecognized keys by default), while a schema parsed
+  // directly via `JSON.parse` kept it. Found via the entity-field auto-merge
+  // rebind-target fallback landing on the wrong entity for any RECURSIVELY
+  // loaded `uses` file (`packages/almadar-runtime/src/resolver/
+  // reference-resolver.ts`'s `mergeImportedEntityFieldsIntoOrbital`).
+  auxiliaryEntities: z.array(EntityRefSchema).optional(),
   traits: z.array(TraitRefSchema),
   pages: z.array(PageRefSchema),
   // Event interface (trait-centric model) - computed by resolver
@@ -953,6 +1114,10 @@ export const OrbitalDefinitionSchema = z.object({
   listens: z.array(ComputedEventListenerSchema).optional(),
   // Filter for exposed events (trait-centric model)
   exposes: z.array(z.string()).optional(),
+  // This orbital's own declared knobs (§4.5)
+  config: DeclaredTraitConfigSchema.optional(),
+  // Transient — set by lowering, cleared by inline/resolve
+  reference: OrbitalRefObjectSchema.optional(),
   // Context fields - persisted throughout orbital lifecycle
   domainContext: DomainContextSchema.optional(),
   design: DesignPreferencesSchema.optional(),

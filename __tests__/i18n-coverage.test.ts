@@ -201,13 +201,11 @@ describe('checkI18nCoverage — real checked-in tables', () => {
     if (!result.ok) {
       const byKind = new Map<string, number>();
       for (const p of result.problems) byKind.set(p.kind, (byKind.get(p.kind) ?? 0) + 1);
-      // eslint-disable-next-line no-console
       console.error(
         `i18n coverage: ${result.problems.length} problem(s) — ` +
           [...byKind.entries()].map(([kind, count]) => `${kind}=${count}`).join(', '),
       );
       for (const p of result.problems) {
-        // eslint-disable-next-line no-console
         console.error(`  [${p.lang}] ${p.section}.${p.kind}: ${p.key}${p.detail ? ' — ' + p.detail : ''}`);
       }
     }

@@ -8,6 +8,7 @@
  */
 
 import type {
+  DeclaredTraitConfig,
   EntityPersistence,
   OrbitalEntity,
   OrbitalSchema,
@@ -50,6 +51,12 @@ const STATIC_PARAM_FIELDS: readonly ParamFieldDescriptor[] = [
     description:
       ".lolo's native trait-composition surface 1:1: per-imported-trait config, linkedEntity, events, name, emitsScope, listens. effects is excluded (atom-owned; use listens via a sibling trait).",
   },
+  {
+    name: 'config',
+    type: 'Readonly<Record<string, TraitConfigValue>>',
+    description:
+      "Override this orbital's own declared config knobs (Orbital.config) by key.",
+  },
 ] as const;
 
 interface SplitTraits {
@@ -66,13 +73,31 @@ function entityPersistence(
   return undefined;
 }
 
-function paramFieldsForPersistence(
-  persistence: EntityPersistence | undefined,
+function declaredConfigKeys(config: DeclaredTraitConfig | undefined): readonly string[] | undefined {
+  if (config === undefined) return undefined;
+  const keys = Object.keys(config).sort();
+  return keys.length > 0 ? keys : undefined;
+}
+
+/**
+ * The param descriptors this orbital actually accepts — the closed L1 delta
+ * allow-list, gated per orbital exactly like `persistence`/`collection`
+ * (dropped when the entity's persistence mode disallows overrides): `config`
+ * is dropped when the orbital declares no config knobs of its own.
+ */
+export function paramFieldsFor(
+  _orb: OrbitalSchema,
+  orbital: OrbitalSchema['orbitals'][number],
 ): readonly ParamFieldDescriptor[] {
-  if (persistenceModeAllowsOverrides(persistence)) {
-    return STATIC_PARAM_FIELDS;
-  }
-  return STATIC_PARAM_FIELDS.filter((f) => f.name !== 'persistence' && f.name !== 'collection');
+  const allowPersistenceOverride = persistenceModeAllowsOverrides(entityPersistence(orbital.entity));
+  const hasConfig = declaredConfigKeys(orbital.config) !== undefined;
+  return STATIC_PARAM_FIELDS.filter((f) => {
+    if ((f.name === 'persistence' || f.name === 'collection') && !allowPersistenceOverride) {
+      return false;
+    }
+    if (f.name === 'config' && !hasConfig) return false;
+    return true;
+  });
 }
 
 function splitTraits(traits: OrbitalSchema['orbitals'][number]['traits']): SplitTraits {
@@ -97,12 +122,14 @@ export function extractManifest(orb: OrbitalSchema): readonly OrbitalParamsManif
   const behaviorName = orb.name;
   return orb.orbitals.map((orbital) => {
     const { refTraitNames, inlineTraitNames } = splitTraits(orbital.traits);
+    const configKeys = declaredConfigKeys(orbital.config);
     return {
       organism: behaviorName,
       orbitalName: orbital.name,
-      paramFields: paramFieldsForPersistence(entityPersistence(orbital.entity)),
+      paramFields: paramFieldsFor(orb, orbital),
       traitNames: refTraitNames,
       inlineTraitNames,
+      ...(configKeys !== undefined ? { configKeys } : {}),
     };
   });
 }

@@ -33,7 +33,12 @@ import type {
   TraitTick,
   TraitId,
 } from '../types/index.js';
-import { isCallSiteConfigDeclaration, persistenceModeAllowsOverrides, ledgerRename } from '../types/index.js';
+import {
+  isCallSiteConfigDeclaration,
+  overrideDeclaredKnobs,
+  persistenceModeAllowsOverrides,
+  ledgerRename,
+} from '../types/index.js';
 import type {
   MakePageRefOpts,
   MakeTraitRefOpts,
@@ -96,6 +101,22 @@ export function validateOrbitalFactoryParams(
             allowed: manifest.traitNames,
           },
         };
+      }
+    }
+  }
+
+  if (candidate.config !== undefined) {
+    const cfg = candidate.config;
+    if (cfg === null || typeof cfg !== 'object' || Array.isArray(cfg)) {
+      return {
+        ok: false,
+        error: { kind: 'config-not-object', received: Array.isArray(cfg) ? 'array' : typeof cfg },
+      };
+    }
+    const allowedKeys = manifest.configKeys ?? [];
+    for (const key of Object.keys(cfg)) {
+      if (!allowedKeys.includes(key)) {
+        return { ok: false, error: { kind: 'unknown-config-key', key, allowed: allowedKeys } };
       }
     }
   }
@@ -315,8 +336,8 @@ function rewriteEventContract(
     ...contract,
     payloadSchema: contract.payloadSchema.map((f) => {
       const next = { ...f, type: rewritePayloadFieldType(f.type, oldName, newName) };
-      if (typeof f.entityType === 'string' && f.entityType === oldName) {
-        next.entityType = newName;
+      if (typeof f.entity === 'string' && f.entity === oldName) {
+        next.entity = newName;
       }
       return next;
     }),
@@ -832,6 +853,20 @@ export function applyParamsToOrb(
     traits: rebuildTraits(orbital.traits),
     pages: rebuildPages(orbital.pages),
   });
+
+  // This orbital's OWN declared knobs (`Orbital.config`) ride through
+  // untouched when the caller supplies no override, and get their
+  // `default`s folded when `params.config` is set. Silently no-ops when the
+  // orbital declares no config of its own — mirrors `buildEntity`'s
+  // persistence-override gate (an override with nothing to apply to is
+  // ignored, not an error; `validateOrbitalFactoryParams` is what rejects a
+  // `config` param against a manifest with no `configKeys`).
+  if (orbital.config !== undefined) {
+    built.config =
+      params.config !== undefined
+        ? overrideDeclaredKnobs(orbital.config, params.config)
+        : orbital.config;
+  }
 
   if (built.traits && params.traitOverrides !== undefined) {
     built.traits = built.traits.map((t) => {

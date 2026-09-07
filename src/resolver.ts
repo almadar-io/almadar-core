@@ -16,12 +16,14 @@ import type { State, Event, Transition } from './types/state-machine.js';
 import type { TraitEventListener, TraitTick } from './types/trait.js';
 
 /**
- * Extended entity shape for schema data that may carry `defaults`.
- * The core Entity type does not include `defaults`, but parsed schemas
- * can attach it as extra data for singleton initialization.
+ * Extended entity shape for schema data that may carry `defaults`/`icon`.
+ * The core Entity type does not include either — `defaults` is extra data
+ * for singleton initialization, `icon` an optional display extension —
+ * but parsed schemas can attach both.
  */
 interface EntityWithDefaults extends Entity {
   defaults?: Record<string, FieldValue>;
+  icon?: string;
 }
 
 // ============================================================================
@@ -121,8 +123,7 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
       const entity: ResolvedEntity = {
         name: entityDef.name,
         description: entityDef.description,
-        // eslint-disable-next-line almadar/no-record-string-unknown -- icon is an optional extension not on Entity type
-        icon: (entityDef as unknown as { icon?: string }).icon,
+        icon: entityDef.icon,
         collection: entityDef.collection || entityDef.name.toLowerCase() + 's',
         fields: (entityDef.fields || [])
           .filter((field: EntityField): field is EntityField & { name: string } =>
@@ -132,8 +133,7 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
           name: field.name,
           type: field.type,
           tsType: inferTsType(field.type),
-          // eslint-disable-next-line almadar/no-record-string-unknown -- description is an optional extension not on EntityField type
-          description: (field as unknown as { description?: string }).description,
+          description: field.description,
           default: field.default,
           required: field.required ?? false,
           // lolo string unions lower to `type:'string'` + a `values` sidecar
@@ -167,8 +167,8 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
     // Without this unwrap, `trait.name` on a ref wrapper is undefined,
     // and useTraitStateMachine subscribes to zero events for every ref.
     for (const rawTrait of (orbital.traits || [])) {
-      const wrap = rawTrait as { _resolved?: Trait };
-      const maybeResolved = wrap._resolved;
+      const maybeResolved =
+        typeof rawTrait === 'object' && 'ref' in rawTrait ? rawTrait._resolved : undefined;
       const trait: Trait =
         maybeResolved && maybeResolved.stateMachine
           ? maybeResolved

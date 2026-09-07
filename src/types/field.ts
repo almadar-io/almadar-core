@@ -67,14 +67,7 @@ export type FieldType =
     // Rust compiler accepts; the TS mirror must carry them or generated
     // factories fail DTS (docs/Almadar_LOLO_Gaps.md L-6).
     | 'scalar'
-    | 'union'
-    // Deliberately OPEN data — same wire shape as `json`, opposite intent.
-    // `json` means "not typed yet" (the debt `ORB_T_GENERIC_TYPE_DEPRECATED`
-    // rejects); `opaque` means "not closeable, and a struct here would be a
-    // lie": an audit snapshot of an arbitrary row, a third-party response body,
-    // an upstream event's payload at a generic wiring atom, or content storage
-    // the behavior never inspects (docs/Almadar_LOLO_Gaps.md L-7).
-    | 'opaque';
+    | 'union';
 
 /** Every `FieldType`, as a runtime array. Downstream imports this instead of
  *  re-listing the union — five copies had already drifted apart. */
@@ -307,14 +300,7 @@ type ScalarFieldType =
     // Closed scalar transport union (`ControlValue`) — a real .lolo/.orb type
     // the compiler accepts in payloads and map values; the TS mirror must carry
     // it or generated factories fail DTS (docs/Almadar_LOLO_Gaps.md L-6).
-    | 'scalar'
-    // Deliberately OPEN data — same wire shape as `json`, opposite intent.
-    // `json` means "not typed yet" (the debt `ORB_T_GENERIC_TYPE_DEPRECATED`
-    // rejects); `opaque` means "not closeable, and a struct here would be a
-    // lie": an audit snapshot of an arbitrary row, a third-party response body,
-    // an upstream event's payload at a generic wiring atom, or content storage
-    // the behavior never inspects (docs/Almadar_LOLO_Gaps.md L-7).
-    | 'opaque';
+    | 'scalar';
 
 /** Fields shared across every variant. */
 type EntityFieldBase = {

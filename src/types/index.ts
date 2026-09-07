@@ -29,6 +29,8 @@ export {
   type EntityCall,
   type PageRef,
   type PageRefObject,
+  // Orbital reference types (import system, Stage A)
+  type OrbitalRefObject,
   // Computed Event Types (Trait-Centric Model)
   type EventSource,
   type ComputedEventContract,
@@ -43,6 +45,9 @@ export {
   PageRefSchema,
   PageRefStringSchema,
   PageRefObjectSchema,
+  // Orbital reference schemas
+  OrbitalRefStringSchema,
+  OrbitalRefObjectSchema,
   EventListenerSchema,
   EventSourceSchema,
   ComputedEventContractSchema,
@@ -59,6 +64,7 @@ export {
   parseEntityRef,
   parsePageRef,
   parseImportedTraitRef,
+  parseOrbitalRef,
   isImportedTraitRef,
   // Expectation accessors
   expectedEntityName,
@@ -69,13 +75,10 @@ export {
   type OrbitalSchema,
   type OrbitalSchema as AppSchema, // Alias
   type OrbitalSchemaWithTraits,
-  type OrbitalConfig,
   type OrbitalSchemaInput,
-  type OrbitalConfigInput,
   type SchemaMetadata,
   type ConfigProvenanceRecord,
   OrbitalSchemaSchema,
-  OrbitalConfigSchema,
   SchemaMetadataSchema,
   ConfigProvenanceRecordSchema,
   parseOrbitalSchema,
@@ -101,6 +104,7 @@ export {
   type LedgerEntry,
   type IdentityLedger,
   mintId,
+  deriveId,
   isOrbitalId,
   asOrbitalId,
   isEntityId,
@@ -505,6 +509,7 @@ export {
   type SecretConfigType,
   isSecretConfigType,
   maskSecretConfigValues,
+  overrideDeclaredKnobs,
   type CallSiteConfigEntry,
   type CallSiteConfig,
   isCallSiteConfigDeclaration,

@@ -12,7 +12,6 @@ import type { ContextExtensions } from "../index";
 
 // Augment the core interface with app-specific fields.
 declare module "../index" {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ContextExtensions {
     auth?: { userId: string };
     agent?: { traceId: string };

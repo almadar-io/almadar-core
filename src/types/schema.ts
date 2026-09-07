@@ -24,52 +24,13 @@ import {
 } from "./domain.js";
 import type { ServiceDefinition } from "./service.js";
 import { ServiceDefinitionSchema } from "./service.js";
-import type { Trait } from "./trait.js";
+import type { Trait, DeclaredTraitConfig } from "./trait.js";
+import { DeclaredTraitConfigSchema } from "./trait.js";
 import type { IdentityLedger } from "./identity.js";
 import { IdentityLedgerSchema } from "./identity.js";
 import type { ThemeRef } from "./domain.js";
 import { ThemeRefSchema } from "./domain.js";
 import type { RuntimeValue } from "./json.js";
-
-// ============================================================================
-// Orbital Config
-// ============================================================================
-
-/**
- * Global configuration for the application
- */
-export interface OrbitalConfig {
-  /** Theme configuration */
-  theme?: {
-    primary?: string;
-    secondary?: string;
-    mode?: "light" | "dark" | "system";
-  };
-  /** Feature flags */
-  features?: Record<string, boolean>;
-  /** API configuration */
-  api?: {
-    baseUrl?: string;
-    timeout?: number;
-  };
-}
-
-export const OrbitalConfigSchema = z.object({
-  theme: z
-    .object({
-      primary: z.string().optional(),
-      secondary: z.string().optional(),
-      mode: z.enum(["light", "dark", "system"]).optional(),
-    })
-    .optional(),
-  features: z.record(z.boolean()).optional(),
-  api: z
-    .object({
-      baseUrl: z.string().optional(),
-      timeout: z.number().optional(),
-    })
-    .optional(),
-});
 
 // ============================================================================
 // Orbital Schema
@@ -124,9 +85,8 @@ export interface OrbitalSchema {
    * unless the orbital declares its own `theme` (precedence: orbital →
    * app → the runtime's baseline default). Authored as `theme "<key>"` in
    * the `.lolo` app header; a full `<base>-<light|dark>` registry key.
-   * Distinct from the legacy `config.theme` color knobs
-   * ({@link OrbitalConfig}) — this names a registry theme, not palette
-   * values.
+   * Distinct from {@link OrbitalSchema.config} — this names a registry
+   * theme, not a declared knob.
    */
   theme?: ThemeRef;
 
@@ -166,8 +126,12 @@ export interface OrbitalSchema {
   /** External services */
   services?: ServiceDefinition[];
 
-  /** Global config */
-  config?: OrbitalConfig;
+  /**
+   * Organism-level DECLARED knobs (§4.5) — shared by every orbital in this
+   * schema, forwarded via `@config.<knob>`. Distinct from `Orbital.config`,
+   * which declares one orbital's own knobs.
+   */
+  config?: DeclaredTraitConfig;
 
   /** Compiler-emitted metadata (resolved `.orb` `_metadata`). */
   _metadata?: SchemaMetadata;
@@ -214,7 +178,7 @@ export const OrbitalSchemaSchema = z.object({
     .array(OrbitalZodSchema)
     .min(1, "At least one orbital is required"),
   services: z.array(ServiceDefinitionSchema).optional(),
-  config: OrbitalConfigSchema.optional(),
+  config: DeclaredTraitConfigSchema.optional(),
   _metadata: SchemaMetadataSchema.optional(),
   // V4 identity — optional/dual-carry until the Phase-7 flip. Present on
   // id-carrying `.orb` files so `parseOrbitalSchema` preserves them instead
@@ -308,4 +272,3 @@ export function safeParseOrbitalSchema(data: RuntimeValue) {
 // ============================================================================
 
 export type OrbitalSchemaInput = z.input<typeof OrbitalSchemaSchema>;
-export type OrbitalConfigInput = z.input<typeof OrbitalConfigSchema>;

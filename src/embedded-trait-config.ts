@@ -20,11 +20,34 @@
  *
  * @packageDocumentation
  */
-import type { OrbitalDefinition, OrbitalSchema, RuntimeValue, SExpr, Trait, TraitConfig, TraitConfigValue, TraitRef } from './types/index.js';
+import type { DeclaredTraitConfig, OrbitalDefinition, OrbitalSchema, RuntimeValue, SExpr, Trait, TraitConfig, TraitConfigValue, TraitRef } from './types/index.js';
 import { normalizeCallSiteConfigToValues } from './types/index.js';
 
 const TRAIT_BINDING_PREFIX = '@trait.';
 const CONFIG_FORWARD_RE = /^@config\.([A-Za-z_][A-Za-z0-9_]*)$/;
+/**
+ * Call-site payload capture grammar. Mirrors the Rust orbital-core
+ * `CALLSITE_PAYLOAD_PREFIX` (`orbital-core/src/schema/types.rs`) — a
+ * JSX-hoisted inline child trait's config value of this form is a snapshot
+ * of the COMPOSING transition's triggering event payload, resolved against
+ * the `callsitePayload` core binding root (`@almadar/evaluator`,
+ * `@almadar/core`'s `CORE_BINDINGS`).
+ */
+const CALLSITE_PAYLOAD_PREFIX = '@callsitePayload.';
+
+/** True when any string leaf in `value`'s tree starts with `prefix`. Same
+ *  recursive shape as `collectTraitRefsFromValue`, generalized to a plain
+ *  prefix test instead of a name-collecting Set — no regex, no heuristics
+ *  on unrelated text. */
+function valueContainsPrefixedString(value: RuntimeValue, prefix: string): boolean {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'string') return value.startsWith(prefix);
+  if (Array.isArray(value)) return value.some((item) => valueContainsPrefixedString(item, prefix));
+  if (typeof value === 'object') {
+    return Object.values(value as Record<string, RuntimeValue>).some((v) => valueContainsPrefixedString(v, prefix));
+  }
+  return false;
+}
 
 function collectTraitRefsFromValue(value: RuntimeValue, into: Set<string>): void {
   if (value === null || value === undefined) return;
@@ -243,6 +266,48 @@ function resolveForwardsDeep(
 }
 
 /**
+ * Resolve a declared trait config's defaults (`OrbitalDefinition.config` /
+ * `OrbitalSchema.config`) into a plain `TraitConfig`, for use as a forward
+ * rung the same shape as a referrer's call-site config. Keys with no
+ * `default` contribute nothing. `undefined` when nothing resolves, so a
+ * caller can skip the rung entirely.
+ */
+function fromDeclared(declared: DeclaredTraitConfig | undefined): TraitConfig | undefined {
+  if (!declared) return undefined;
+  const out: Record<string, TraitConfigValue> = {};
+  let any = false;
+  for (const [key, field] of Object.entries(declared)) {
+    if (field.default !== undefined) {
+      out[key] = field.default;
+      any = true;
+    }
+  }
+  return any ? out : undefined;
+}
+
+/**
+ * Apply one forward rung in place: chain any still-unresolved `@config.<key>`
+ * literal in `out` through `rungConfig`. A no-op when `rungConfig` is absent
+ * or when nothing in `out` is still a literal forward — resolved values from
+ * an earlier (higher-priority) rung are untouched.
+ */
+function applyForwardRung(
+  out: Record<string, TraitConfigValue>,
+  rungConfig: TraitConfig | undefined,
+): void {
+  if (!rungConfig) return;
+  const consumed = new Map<string, TraitConfigValue>();
+  for (const [key, value] of Object.entries(out)) {
+    out[key] = resolveForwardsDeep(value, rungConfig, consumed);
+  }
+  for (const [key, value] of consumed) {
+    if (!(key in out)) {
+      out[key] = value;
+    }
+  }
+}
+
+/**
  * Build the trait-name → resolved-`TraitConfig` map for a schema: each
  * trait's raw call-site config, normalized to plain values, with any
  * `@config.<key>` forward chained through to the referrer that actually
@@ -252,6 +317,7 @@ export function buildResolvedTraitConfigs(
   schema: OrbitalSchema | undefined | null,
 ): Record<string, TraitConfig> {
   const rawByName: Record<string, TraitRef & { config?: unknown }> = {};
+  const orbitalByTrait: Record<string, OrbitalDefinition> = {};
   if (!schema?.orbitals) return {};
   for (const orbital of schema.orbitals as OrbitalDefinition[]) {
     const traitRefs: TraitRef[] | undefined = orbital.traits;
@@ -259,6 +325,9 @@ export function buildResolvedTraitConfigs(
     for (const t of traitRefs) {
       if (typeof t === 'string') continue;
       const name = (t as { name?: string; ref?: string }).name ?? (t as { ref?: string }).ref;
+      if (typeof name === 'string') {
+        orbitalByTrait[name] = orbital;
+      }
       const config = (t as { config?: unknown }).config;
       if (typeof name === 'string' && config !== undefined) {
         rawByName[name] = { ...(t as object), config } as TraitRef & { config?: unknown };
@@ -281,25 +350,18 @@ export function buildResolvedTraitConfigs(
     if (resolving.has(name)) return base;
     resolving.add(name);
     const out: Record<string, TraitConfigValue> = { ...base };
+    // Rung 1: the trait that embeds this one via `@trait.X` (the child's
+    // RENDER TREE still carries the raw token, e.g. `content: "@config.title"`,
+    // and render-time interpolation resolves it against the child's own
+    // config — so a consumed key must ALSO surface there, or the knob
+    // resolves while the tree read stays blank, per
+    // R-CONFIG-DEFAULT-INLINE-TRAIT-OWN-CONFIG-UNRESOLVED).
     const referrer = referrerByChild.get(name);
-    if (referrer && referrer !== name) {
-      const referrerConfig = resolveConfig(referrer);
-      // Track which referrer keys the forwards consumed: the child's RENDER
-      // TREE still carries the raw token (`content: "@config.title"`), and
-      // render-time interpolation resolves it against the child's own config
-      // — so the consumed key must ALSO surface there, or the knob resolves
-      // while the tree read stays blank (the
-      // R-CONFIG-DEFAULT-INLINE-TRAIT-OWN-CONFIG-UNRESOLVED blank title).
-      const consumed = new Map<string, TraitConfigValue>();
-      for (const [key, value] of Object.entries(out)) {
-        out[key] = resolveForwardsDeep(value, referrerConfig, consumed);
-      }
-      for (const [key, value] of consumed) {
-        if (!(key in out)) {
-          out[key] = value;
-        }
-      }
-    }
+    applyForwardRung(out, referrer && referrer !== name ? resolveConfig(referrer) : undefined);
+    // Rung 2: the trait's owning orbital's declared config defaults.
+    applyForwardRung(out, fromDeclared(orbitalByTrait[name]?.config));
+    // Rung 3: the schema's declared config defaults.
+    applyForwardRung(out, fromDeclared(schema?.config));
     resolving.delete(name);
     resolved.set(name, out);
     return out;
@@ -311,4 +373,101 @@ export function buildResolvedTraitConfigs(
     if (cfg !== undefined) map[name] = cfg;
   }
   return map;
+}
+
+/**
+ * True when `trait`'s own config (any nested value, including each field's
+ * `.default`) or state machine literally contains a `@callsitePayload.<field>`
+ * capture — the JSX-hoisted-child grammar. Scans both, mirroring
+ * `collectTraitEmbedAdjacency`'s scan: a molecule can carry the capture in a
+ * config default (`content: @callsitePayload.error`) or directly inside a
+ * transition's `render-ui` effect args.
+ *
+ * Used by {@link collectCallsiteCaptureChildren} to find which embedded
+ * children need their lifecycle transition re-run under their embedder's
+ * payload whenever the embedder's own transition fires (`@almadar/runtime`'s
+ * `OrbitalServerRuntime.executeEffects`, `@almadar/ui`'s
+ * `useTraitStateMachine`).
+ */
+export function traitReferencesCallsitePayload(trait: Trait | undefined | null): boolean {
+  if (!trait) return false;
+  if (trait.config && valueContainsPrefixedString(trait.config as RuntimeValue, CALLSITE_PAYLOAD_PREFIX)) {
+    return true;
+  }
+  const stateMachine = (trait as { stateMachine?: SExpr }).stateMachine;
+  if (stateMachine && valueContainsPrefixedString(stateMachine, CALLSITE_PAYLOAD_PREFIX)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Per-orbital referrer → embedded-children adjacency, filtered down to
+ * children whose subtree needs to be re-rendered under the referrer's
+ * payload: a direct child that itself references `@callsitePayload` (see
+ * {@link traitReferencesCallsitePayload}), OR a direct child that is a
+ * pass-through to a capture-bearing descendant somewhere below it (a
+ * grandchild's capture resolves UP the embed chain to the nearest host
+ * transition that actually has a payload — mirrors
+ * `orbital-compiler/src/phases/validation/binding.rs`'s
+ * `validate_callsite_payload_captures`, which validates the same capture up
+ * the embed chain on the compiled path).
+ *
+ * The caller re-renders level by level: after a trait's transition fires
+ * with payload `P`, look up its direct children here, re-run each child's
+ * lifecycle transition with `callsitePayload: P`, then recurse into that
+ * child's own entry in this same map (still with `P`) for grandchildren —
+ * so a non-capturing intermediate trait is walked through (to reach the
+ * capturing descendant) without itself needing a payload-dependent redraw.
+ */
+export function collectCallsiteCaptureChildren(
+  orbital: OrbitalDefinition,
+): ReadonlyMap<string, ReadonlySet<string>> {
+  const adjacency = collectTraitEmbedAdjacency(orbital);
+  const traitsByName = new Map<string, Trait>();
+  const traits: TraitRef[] = orbital.traits;
+  if (Array.isArray(traits)) {
+    for (const traitRef of traits) {
+      const target = targetTraitOf(traitRef);
+      if (target?.name) traitsByName.set(target.name, target);
+    }
+  }
+
+  // Memoized "does this trait's own capture, or any descendant reachable
+  // through `adjacency`, capture?" — a cycle guard (`seen`) protects against
+  // a malformed embed graph looping back on itself; embeds don't legitimately
+  // cycle, so this is defensive, not load-bearing.
+  const reachesCapture = new Map<string, boolean>();
+  function traitReachesCapture(name: string, seen: Set<string>): boolean {
+    const cached = reachesCapture.get(name);
+    if (cached !== undefined) return cached;
+    if (seen.has(name)) return false;
+    seen.add(name);
+    const trait = traitsByName.get(name);
+    if (trait && traitReferencesCallsitePayload(trait)) {
+      reachesCapture.set(name, true);
+      return true;
+    }
+    const children = adjacency.get(name);
+    if (children) {
+      for (const child of children) {
+        if (traitReachesCapture(child, seen)) {
+          reachesCapture.set(name, true);
+          return true;
+        }
+      }
+    }
+    reachesCapture.set(name, false);
+    return false;
+  }
+
+  const out = new Map<string, ReadonlySet<string>>();
+  for (const [referrer, children] of adjacency) {
+    const keep = new Set<string>();
+    for (const child of children) {
+      if (traitReachesCapture(child, new Set())) keep.add(child);
+    }
+    if (keep.size > 0) out.set(referrer, keep);
+  }
+  return out;
 }

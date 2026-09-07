@@ -200,7 +200,11 @@ describe.each(STRATEGIES)('mock-seed policy [%s]', (strategy) => {
     });
 
     it('honors a declared numeric range in both strategies', () => {
-      const f: EntityField = { name: 'rating', type: 'number', min: 1, max: 5 };
+      // `required: true` so the every-other-row optional-unset policy (see
+      // "undefaulted optional fields are left unset on alternating rows"
+      // below) doesn't turn this into a mixed number/undefined assertion —
+      // this test is about range synthesis, not the unset policy.
+      const f: EntityField = { name: 'rating', type: 'number', min: 1, max: 5, required: true };
       for (const i of [1, 2, 3, 4, 5, 6]) {
         const v = sampleFieldValue(f, ctx(strategy, i));
         expect(typeof v).toBe('number');
@@ -228,6 +232,78 @@ describe.each(STRATEGIES)('mock-seed policy [%s]', (strategy) => {
       const f: EntityField = { name: 'coverImage', type: 'string' };
       expect(sampleFieldValue(f, ctx(strategy))).not.toContain('picsum.photos');
     });
+  });
+});
+
+describe('undefaulted optional fields are left unset on alternating rows', () => {
+  // A required field, a defaulted optional, and an undefaulted optional —
+  // the three shapes the policy must tell apart.
+  const fields: EntityField[] = [
+    { name: 'title', type: 'string', required: true },
+    { name: 'priority', type: 'string', values: ['low', 'high'], default: 'low' },
+    { name: 'assigneeNote', type: 'string' },
+    { name: 'status', type: 'string', values: ['open', 'resolved'] },
+  ];
+
+  it('omits the undefaulted optional on every EVEN seeded row, keeps it on every ODD row', () => {
+    const rows = sampleRows(entity(fields), 6, 'seeded');
+    expect(rows).toHaveLength(6);
+    rows.forEach((row, i) => {
+      const rowNumber = i + 1;
+      if (rowNumber % 2 === 0) {
+        expect(row).not.toHaveProperty('assigneeNote');
+      } else {
+        expect(row).toHaveProperty('assigneeNote');
+        expect(typeof row.assigneeNote).toBe('string');
+      }
+    });
+  });
+
+  it('never omits the required or the defaulted-optional field, on any row', () => {
+    const rows = sampleRows(entity(fields), 6, 'seeded');
+    for (const row of rows) {
+      expect(row).toHaveProperty('title');
+      expect(row).toHaveProperty('priority');
+    }
+  });
+
+  it('enum-typed optional fields follow the same rule as any other optional field', () => {
+    const rows = sampleRows(entity(fields), 6, 'seeded');
+    rows.forEach((row, i) => {
+      const rowNumber = i + 1;
+      if (rowNumber % 2 === 0) {
+        expect(row).not.toHaveProperty('status');
+      } else {
+        expect(['open', 'resolved']).toContain(row.status);
+      }
+    });
+  });
+
+  it('relation fields are never affected — a placeholder is always present for the linking pass', () => {
+    const relationFields: EntityField[] = [
+      { name: 'owner', type: 'relation', relation: { entity: 'User', cardinality: 'one' } },
+    ];
+    const rows = sampleRows(entity(relationFields), 6, 'seeded');
+    for (const row of rows) {
+      expect(row).toHaveProperty('owner');
+      expect(row.owner).toBe('');
+    }
+  });
+
+  it('the index strategy stays complete — a synthesized payload must carry every field', () => {
+    const rows = sampleRows(entity(fields), 6, 'index');
+    for (const row of rows) {
+      expect(row).toHaveProperty('assigneeNote');
+      expect(row).toHaveProperty('status');
+    }
+  });
+
+  it('a single-row entity always lands on row 1 and is never affected', () => {
+    // A `[runtime]` singleton, or any collection seeded with exactly one row.
+    const rows = sampleRows(entity(fields, 'runtime'), 6, 'seeded');
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toHaveProperty('assigneeNote');
+    expect(rows[0]).toHaveProperty('status');
   });
 });
 

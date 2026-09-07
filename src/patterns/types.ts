@@ -80,9 +80,6 @@ export interface PatternPropTypeSchema {
   /** Self-referential tree-node child — the shape is captured at the parent
    *  level, so recursing here would not terminate. */
   cyclic?: boolean;
-  /** Genuinely unshapeable source (`Record`/generic/`ReactNode`/opaque brand):
-   *  the shapeless fallback is the CORRECT type here, not an unresolved gap. */
-  freeform?: boolean;
   /** Set when the value's source type is core `ScenePos` — the type-identity
    *  signal that grounds a pattern's `drawable` capability. */
   scenePos?: boolean;
@@ -234,9 +231,6 @@ export interface PatternPropDef {
   mapValue?: PatternPropTypeSchema;
   /** Numeric-literal-union members (`1 | 2 | 3`); the type stays `number`. */
   numericEnumValues?: number[];
-  /** Genuinely unshapeable source (`Record`/generic/`ReactNode`/opaque brand):
-   *  the shapeless fallback is CORRECT here, not an unresolved gap. */
-  freeform?: boolean;
   /** For `kind: "entity"`: fields the component declared REQUIRED via
    *  `EntityWith<K>`. `ORB_X_ENTITY_PROP_CONTRACT` rejects a behavior binding
    *  an entity that does not provide them. */
@@ -250,8 +244,8 @@ export interface PatternPropDef {
    *  component's own `action`/`actionPayload` carries any serializable signal. */
   nonEmittable?: boolean;
   /** A prop non-authorable as a `.lolo` config knob (injected bus context,
-   *  structural `OrbitalSchema`/`Trait`, native `Map`/`Set`). Distinct from
-   *  `freeform`, which IS a JSON object an app can supply. */
+   *  structural `OrbitalSchema`/`Trait`, native `Map`/`Set`) — not a data
+   *  shape a config knob could carry at all. */
   nonAuthorable?: boolean;
   /**
    * For `kind: "event-ref"` whose source is `EventEmit<P>`: the
