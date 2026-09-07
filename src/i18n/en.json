@@ -319,6 +319,7 @@
     "pattern": "pattern",
     "patternPath": "patternPath",
     "payload": "payload",
+    "payloadEntity": "payloadEntity",
     "payloadMapping": "payloadMapping",
     "payloadSchema": "payloadSchema",
     "persistence": "persistence",

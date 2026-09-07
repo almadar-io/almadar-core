@@ -135,6 +135,21 @@ export type Event = {
   tier?: string;
   /** Expected payload structure */
   payloadSchema?: PayloadField[];
+  /**
+   * The entity this WHOLE payload was declared as (`type X = Event
+   * <EntityName>`, the bare/concrete form) — mirrors Rust
+   * `EventDefinition.payload_entity` (G4, `Almadar_Compiler_Gaps.md` §82).
+   * Distinct from `PayloadField.entity` (a single NESTED field's value is
+   * an entity instance): this marks the payload schema ITSELF as a 1:1
+   * mirror of that entity's CURRENT fields. Consumed by
+   * `resolveTraitTypeParamSentinels` (`resolver/sentinel-resolution.ts`)
+   * to re-derive `payloadSchema` from the entity's post-`fields{}`/
+   * `extend{}` shape once an orbital-import or trait-reference override
+   * has materialized; kept in sync across entity renames the same one
+   * owner `PayloadField.entity` already uses
+   * (`renamePayloadEntityMarkers`, `reference-resolver.ts`).
+   */
+  payloadEntity?: string;
   /** Domain vs System classification (optional, for analysis) */
   classification?: "domain" | "system";
   /** Semantic role of this event (optional, for analysis) */
@@ -149,6 +164,7 @@ export const EventSchema = z.object({
   synonyms: z.string().optional(),
   tier: z.string().optional(),
   payloadSchema: z.array(PayloadFieldSchema).optional(),
+  payloadEntity: z.string().optional(),
   classification: z.enum(["domain", "system"]).optional(),
   semanticRole: z.string().optional(),
 });

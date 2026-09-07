@@ -319,6 +319,7 @@
     "pattern": "vzorec",
     "patternPath": "potVzorca",
     "payload": "podatki",
+    "payloadEntity": "podatkiEntiteta",
     "payloadMapping": "podatkiPreslikava",
     "payloadSchema": "podatkiShema",
     "persistence": "trajnost",

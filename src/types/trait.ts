@@ -684,6 +684,13 @@ export type TraitEventContract = {
      *  `EventPayload`) which is a separate concept. */
     payloadSchema?: EventPayloadField[];
     /**
+     * Same marker as `Event.payloadEntity` (`state-machine.ts`) — this
+     * emit's payload was declared `type X = Event <EntityName>` and is a
+     * flat mirror of that entity's fields. See that field's doc for the
+     * full contract (G4, `Almadar_Compiler_Gaps.md` §82).
+     */
+    payloadEntity?: string;
+    /**
      * Event scope:
      * - 'internal': Trait-to-trait within same orbital (default)
      * - 'external': Exposed for cross-orbital communication
@@ -757,6 +764,7 @@ export const TraitEventContractSchema = z.object({
     definerKnob: z.string().optional(),
     scopeOverridden: z.boolean().optional(),
     payloadSchema: z.array(EventPayloadFieldSchema).optional(),
+    payloadEntity: z.string().optional(),
     scope: EventScopeSchema.optional(),
 });
 

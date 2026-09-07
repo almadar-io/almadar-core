@@ -319,6 +319,7 @@
     "pattern": "نمط",
     "patternPath": "مسار_النمط",
     "payload": "حمولة",
+    "payloadEntity": "كيان_الحمولة",
     "payloadMapping": "تخطيط_الحمولة",
     "payloadSchema": "مخطط_الحمولة",
     "persistence": "استمرارية",
