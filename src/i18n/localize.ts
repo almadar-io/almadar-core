@@ -586,26 +586,47 @@ export function localizeOrbValue(
   if (lang === 'en') return value;
   const orbKeys = forward(lang, ['orb'], ['orb']);
   const types = forward(lang, ['types'], ['types']);
+  const tags = forward(lang, ['tags'], ['tags']);
   const heads = forward(lang, ['effects'], ['effects'], options.operators);
   const sigils = forward(lang, ['sigils'], ['sigils', 'annotations']);
 
-  const walk = (node: JsonValue): JsonValue => {
+  /**
+   * `type` is overloaded, and only POSITION separates the two meanings: on an
+   * entity field it names a field type (`"type": "date"`), inside a
+   * `render-ui` props object it names a PATTERN (`{ "type": "icon" }`), which
+   * is opaque by the pattern-vocabulary ruling. Exactly one of the 279 pattern
+   * names collides with a field-type word — `icon` — and translating it there
+   * renamed the pattern. `inExpression` is set once we descend into an
+   * s-expression, which is the only way a pattern name is reachable.
+   *
+   * Note this defect round-trips: the inbound walker applied the same rule, so
+   * `orb emit orb` matched and the round-trip gate could not see it. A
+   * symmetric error is invisible to a symmetric gate — hence the dedicated
+   * assertion in the tests.
+   */
+  const walk = (node: JsonValue, inExpression: boolean): JsonValue => {
     if (Array.isArray(node)) {
-      const items = node.map(walk);
-      const head = items[0];
-      if (typeof head === 'string') {
-        const native = heads.get(head);
-        if (native !== undefined) items[0] = native;
-      }
+      // An array is an s-expression only when its head resolves as one; a
+      // plain value list (`"fields": ["title", "completed"]`) is not.
+      const head = node[0];
+      const native = typeof head === 'string' ? heads.get(head) : undefined;
+      const isExpression = native !== undefined;
+      const items = node.map((child, index) =>
+        index === 0 && isExpression ? child : walk(child, inExpression || isExpression),
+      );
+      if (native !== undefined) items[0] = native;
       return items;
     }
     if (node !== null && typeof node === 'object') {
       const out: JsonObject = {};
       for (const [key, child] of Object.entries(node)) {
         const nativeKey = orbKeys.get(key) ?? key;
-        let next = walk(child);
-        if (key === 'type' && typeof next === 'string') {
-          next = types.get(next) ?? next;
+        let next = walk(child, inExpression);
+        if (typeof next === 'string') {
+          if (key === 'type' && !inExpression) next = types.get(next) ?? next;
+          // `"persistence": "persistent"` — the word is `tags` vocabulary and
+          // has always had a translation; only this walker never applied it.
+          else if (key === 'persistence') next = tags.get(next) ?? next;
         }
         out[nativeKey] = next;
       }
@@ -622,5 +643,5 @@ export function localizeOrbValue(
     return node;
   };
 
-  return walk(value);
+  return walk(value, false);
 }

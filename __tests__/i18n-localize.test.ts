@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { FIELD_TYPES } from '../src/types/field.js';
 import {
+  aliasMap,
   coreTables,
+  LANGUAGE_CODES,
   lexLolo,
   localizeLoloSource,
   localizeMap,
@@ -184,5 +187,99 @@ describe('localizeOrbValue', () => {
   it('returns English unchanged', () => {
     const value = { orbitals: [{ name: 'Demo' }] };
     expect(localizeOrbValue(value, 'en')).toBe(value);
+  });
+});
+
+/**
+ * The `types` section is the vocabulary for a type POSITION, so every value a
+ * field may declare has to be spellable in every language. Nothing enforced
+ * that before: `checkI18nCoverage` compares ar/sl against `en.json`, and
+ * `i18n-orb-universe` pins the `.orb` KEY universe — neither compares
+ * `en.json.types` against the type list core actually accepts. Five valid
+ * field types (`array`, `enum`, `relation`, `node`, `union`) had drifted out
+ * of the table, so `x : enum` could not be written in Arabic or Slovenian at
+ * all. See docs/Almadar_i18n_Gaps.md.
+ *
+ * The reverse containment is deliberately NOT asserted: `types` also carries
+ * words that are legal in a type position without being a FIELD type
+ * (`int`, `void`, `any`, `Map`, `SExpr`, `component`, `secret`, …).
+ */
+describe('types vocabulary vs the field-type universe', () => {
+  it('every FIELD_TYPES member is translatable in every language', () => {
+    const missing: string[] = [];
+    for (const fieldType of FIELD_TYPES) {
+      for (const lang of LANGUAGE_CODES) {
+        if (coreTables[lang].types[fieldType] === undefined) {
+          missing.push(`${lang}.types.${fieldType}`);
+        }
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+
+  it('each one round-trips — the emitted spelling reads back as the same type', () => {
+    for (const lang of LANGUAGE_CODES) {
+      const forward = localizeMap(lang);
+      for (const fieldType of FIELD_TYPES) {
+        const native = forward.get(fieldType);
+        // `undefined` means the guard withheld it (an ambiguous spelling);
+        // anything emitted must canonicalize back.
+        if (native === undefined) continue;
+        expect(aliasMap(lang, 'types').get(native)).toBe(fieldType);
+      }
+    }
+  });
+});
+
+/**
+ * These three defects all round-trip — the inbound walker applied the same
+ * rule as the outbound one, so `orb emit orb` matched and the corpus gate
+ * stayed green while the output was wrong. A symmetric error is invisible to a
+ * symmetric gate, so each needs an assertion of its own.
+ */
+describe('the `type` overload, resolved by position', () => {
+  const RENDER_UI = {
+    effects: [
+      ['render-ui', 'main', { type: 'icon', name: 'shopping-cart', size: 'lg' }],
+    ],
+  };
+
+  it.each(['ar', 'sl'] as const)('leaves a pattern name alone inside an s-expression (%s)', (lang) => {
+    // `icon` is the one pattern name (of 279) that collides with a field-type
+    // word, and it appears 483 times in the docs corpus.
+    const json = JSON.stringify(localizeOrbValue(RENDER_UI, lang));
+    expect(json).toContain('"icon"');
+    expect(json).not.toContain(coreTables[lang].types.icon);
+  });
+
+  it.each(['ar', 'sl'] as const)('still translates a field type outside one (%s)', (lang) => {
+    const out = localizeOrbValue(
+      { orbitals: [{ entity: { fields: [{ name: 'avatar', type: 'icon' }] } }] },
+      lang,
+    );
+    expect(JSON.stringify(out)).toContain(coreTables[lang].types.icon);
+  });
+
+  it.each(['ar', 'sl'] as const)('does not mistake a plain string list for an expression (%s)', (lang) => {
+    // `["title", "completed"]` has a string head but is not an s-expression.
+    const out = localizeOrbValue(
+      { orbitals: [{ entity: { fields: [{ name: 'a', type: 'date' }] } }], values: ['title', 'completed'] },
+      lang,
+    );
+    const json = JSON.stringify(out);
+    expect(json).toContain('"title"');
+    expect(json).toContain(coreTables[lang].types.date);
+  });
+});
+
+describe('persistence values', () => {
+  it.each(['ar', 'sl'] as const)('translates the persistence tag in %s', (lang) => {
+    const out = localizeOrbValue({ orbitals: [{ entity: { persistence: 'persistent' } }] }, lang);
+    expect(JSON.stringify(out)).toContain(coreTables[lang].tags.persistent);
+  });
+
+  it.each(['ar', 'sl'] as const)('round-trips through the inbound alias map (%s)', (lang) => {
+    const native = coreTables[lang].tags.persistent;
+    expect(aliasMap(lang, 'tags').get(native)).toBe('persistent');
   });
 });
