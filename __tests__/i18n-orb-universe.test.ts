@@ -10,7 +10,8 @@ import ts from 'typescript';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { coreTables } from '../src/i18n/index.js';
+import { coreTables, ORB_NOTATION_KEYS } from '../src/i18n/index.js';
+import { collectPaths, notationKeys } from '../scripts/gen-orb-notation.mjs';
 
 const OPAQUE_TYPES = /PatternConfig|PatternProps|^Date$|^Promise$|^Function$|^Effect$|^TypedEffect$|^SExpression$|^SExpr$|^Expression$|^Guard$|^JsonValue$|^Json$/;
 const OPAQUE_PROPS = new Set(['effects', 'guard', 'initialEffects', 'content', 'props']);
@@ -95,13 +96,36 @@ describe('.orb structural vocabulary vs the TS type universe', () => {
     const enOrbKeys = new Set(Object.keys(coreTables.en.orb));
     const rustOnlySet = new Set(orbRustOnly.keys);
 
-    // TS-universe ⊆ en.orb
-    const tsNotInEnOrb = tsUniverse.filter((name) => !enOrbKeys.has(name));
+    // TS-universe − notation ⊆ en.orb. A key reachable ONLY under a theme
+    // `tokens` node is a design-system token name, not language vocabulary
+    // (owner ruling 2026-09-07), so it is deliberately absent.
+    const tsNotInEnOrb = tsUniverse.filter(
+      (name) => !enOrbKeys.has(name) && !ORB_NOTATION_KEYS.has(name),
+    );
     expect(tsNotInEnOrb, `TS-declared OrbitalSchema propert${tsNotInEnOrb.length === 1 ? 'y' : 'ies'} missing from en.json "orb" section: ${tsNotInEnOrb.map((n) => `${n} (${names.get(n)})`).join(', ')}`).toEqual([]);
+
+    // …and no notation key may be IN the vocabulary.
+    const notationInVocabulary = [...enOrbKeys].filter((k) => ORB_NOTATION_KEYS.has(k)).sort();
+    expect(notationInVocabulary, `design-system token names must not be vocabulary: ${notationInVocabulary.join(', ')}`).toEqual([]);
 
     // en.orb ⊆ TS-universe ∪ orb-rust-only.json
     const tsUniverseSet = new Set(tsUniverse);
     const enOrbUnexplained = [...enOrbKeys].filter((key) => !tsUniverseSet.has(key) && !rustOnlySet.has(key)).sort();
     expect(enOrbUnexplained, `en.json "orb" keys not declared in the TS type tree and not recorded in orb-rust-only.json: ${enOrbUnexplained.join(', ')}`).toEqual([]);
+  });
+});
+
+/**
+ * `orb-notation.json` is generated (`gen:orb-notation`) but committed, so it
+ * can go stale the moment the theme types change. Re-derive it here from the
+ * same walk the generator uses and fail on any drift — otherwise a new token
+ * silently becomes translatable vocabulary again, which is the exact defect
+ * this file was written to close.
+ */
+describe('orb-notation.json vs the schema', () => {
+  it('matches a fresh walk of OrbitalSchema', () => {
+    const entry = join(import.meta.dirname, '..', 'src', 'types', 'schema.ts');
+    const derived = notationKeys(collectPaths(entry));
+    expect(derived).toEqual([...ORB_NOTATION_KEYS].sort());
   });
 });

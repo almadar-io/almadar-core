@@ -72,7 +72,8 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "pnpm run build",
-    "prepare": "git config core.hooksPath .githooks"
+    "prepare": "git config core.hooksPath .githooks",
+    "gen:orb-notation": "tsx scripts/gen-orb-notation.mts"
   },
   "dependencies": {
     "zod": "^3.22.0"

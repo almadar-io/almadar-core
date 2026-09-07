@@ -6,6 +6,7 @@
  * @packageDocumentation
  */
 
+import orbNotationRaw from './orb-notation.json';
 import enRaw from './en.json';
 import arRaw from './ar.json';
 import slRaw from './sl.json';
@@ -141,12 +142,42 @@ export function parseI18nTables(raw: unknown, source: string): I18nTables {
   return { meta: raw.meta, ...sections };
 }
 
+/** Validating loader for `orb-notation.json` — no assertion, same contract as the tables. */
+function parseNotationKeys(raw: unknown, source: string): string[] {
+  if (!isPlainObject(raw) || !('keys' in raw) || !Array.isArray(raw.keys)) {
+    throw new Error(`notation file "${source}": expected { keys: string[] }`);
+  }
+  const keys: string[] = [];
+  for (const key of raw.keys) {
+    if (typeof key !== 'string') {
+      throw new Error(`notation file "${source}": every key must be a string`);
+    }
+    keys.push(key);
+  }
+  return keys;
+}
+
 export function parseOperatorTables(raw: unknown, source: string): OperatorTables {
   if (!isPlainObject(raw) || !('operators' in raw) || !isStringRecord(raw.operators)) {
     throw new Error(`operator table "${source}": expected { operators: Record<string,string> }`);
   }
   return { operators: raw.operators };
 }
+
+/**
+ * `.orb` schema keys that are DESIGN-SYSTEM notation, not language vocabulary,
+ * and so are deliberately absent from the `orb` section: the colour palette,
+ * the spacing and type scales, density, elevation, geometry, motion,
+ * iconography and illustration token names.
+ *
+ * Derived, not curated — a key whose every path through `OrbitalSchema` lies
+ * under a theme `tokens` node. Regenerate with
+ * `pnpm --filter @almadar/core run gen:orb-notation`; the universe test
+ * re-derives it and fails if this file drifts.
+ */
+export const ORB_NOTATION_KEYS: ReadonlySet<string> = new Set(
+  parseNotationKeys(orbNotationRaw, 'orb-notation.json'),
+);
 
 export const coreTables: Record<LanguageCode, I18nTables> = {
   en: parseI18nTables(enRaw, 'en.json'),
@@ -211,7 +242,8 @@ export type I18nProblemKind =
   | 'collision'
   | 'selector-not-unique'
   | 'operators-mismatch'
-  | 'identical-to-english';
+  | 'identical-to-english'
+  | 'notation-in-vocabulary';
 
 export interface I18nProblem {
   lang: LanguageCode;
@@ -238,6 +270,27 @@ export function checkI18nCoverage(input: I18nCoverageInput): { ok: boolean; prob
   const problems: I18nProblem[] = [];
   const { core, std, canonicalOperators } = input;
   const enTable = core.en;
+
+  // (0) notation-in-vocabulary — a design-system token name must never be a
+  // vocabulary key. The `orb` section is "every serialized key of the `.orb`
+  // schema", and a theme's token maps put their token NAMES in key position,
+  // so the type-walk that builds the section will re-introduce them on any
+  // schema change unless something says no. Owner ruling 2026-09-07: the
+  // vocabulary is what the LANGUAGE defines; a library's API surface stays
+  // English. See ORB_NOTATION_KEYS / scripts/gen-orb-notation.mts.
+  for (const lang of LANGUAGE_CODES) {
+    for (const key of Object.keys(core[lang].orb)) {
+      if (ORB_NOTATION_KEYS.has(key)) {
+        problems.push({
+          lang,
+          section: 'orb',
+          kind: 'notation-in-vocabulary',
+          key,
+          detail: 'design-system token name — notation, not language vocabulary',
+        });
+      }
+    }
+  }
 
   // (1) missing / orphan / empty
   for (const lang of LANGUAGE_CODES) {
