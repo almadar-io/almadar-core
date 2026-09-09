@@ -8,7 +8,6 @@
  */
 
 import { z } from "zod";
-import type { JsonValue } from './json.js';
 
 // ============================================================================
 // Domain Categories
@@ -1053,14 +1052,17 @@ export type ThemeRef = ThemeDefinition | string;
  * `icon`/`badge`/`children` are optional shaping knobs an author may set on a
  * call-site override. The `@pages` render sigil yields the minimal
  * `{ href, label }` form (one per inline page: `href = page.path`,
- * `label = page.name`), which is assignable to this type.
+ * `label = page.name`), which is assignable to this type. `children` nests
+ * one level deep — a NavItem with children renders as a group header that
+ * expands its children on click rather than navigating directly; a further
+ * nested `children` on those entries is not rendered (depth 2 only).
  */
 export interface NavItem {
   label: string;
   href: string;
   icon?: string;
   badge?: string;
-  children?: JsonValue[];
+  children?: NavItem[];
 }
 
 /**
