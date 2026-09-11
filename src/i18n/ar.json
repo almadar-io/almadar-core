@@ -57,6 +57,7 @@
     "persistent": "دائم",
     "runtime": "وقت_التشغيل",
     "shared": "مشترك",
+    "local": "محلي",
     "identity": "هوية",
     "instance": "نسخة",
     "collection": "مجموعة"
@@ -364,6 +365,7 @@
     "shadows": "ظلال",
     "shape": "شكل",
     "shared": "مشترك",
+    "local": "محلي",
     "singleton": "وحيد",
     "site": "موقع_الويب",
     "slots": "فتحات",

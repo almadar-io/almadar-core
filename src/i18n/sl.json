@@ -57,6 +57,7 @@
     "persistent": "trajno",
     "runtime": "izvajanje",
     "shared": "skupno",
+    "local": "lokalno",
     "identity": "identiteta",
     "instance": "primerek",
     "collection": "zbirka"
@@ -364,6 +365,7 @@
     "shadows": "sence",
     "shape": "oblika",
     "shared": "skupno",
+    "local": "lokalno",
     "singleton": "edinec",
     "site": "mesto",
     "slots": "reze",

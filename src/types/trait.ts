@@ -1299,6 +1299,13 @@ export type Trait = {
      */
     scope: TraitScope;
     /**
+     * `local` trait-header flag — declares client-only dispatch. Authored in
+     * `.lolo` as the `local` modifier on the trait header (`[interaction, instance, local]`).
+     * Undeclared (`undefined`) means server-gated dispatch. Mirrors the Rust
+     * `OirTrait::local` field; never inferred from effects.
+     */
+    local?: boolean;
+    /**
      * The entity this trait is linked to.
      * Required for inline trait definitions within an orbital.
      */
@@ -1440,6 +1447,8 @@ export const TraitSchema = z.object({
     entityBindingSynonyms: z.string().optional(),
     capabilities: z.array(z.string()).optional(),
     scope: TraitScopeSchema,
+    /** `local` trait-header flag — declares client-only dispatch (mirrors Rust `OirTrait::local`). Undeclared = server-gated dispatch. */
+    local: z.boolean().optional(),
     linkedEntity: z.string().optional(),
     linkedEntityId: EntityIdSchema.optional(),
     entityRefIds: z.record(z.string().min(1), EntityIdSchema).optional(),

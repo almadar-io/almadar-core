@@ -153,6 +153,7 @@ export {
   persistenceModeAllowsOverrides,
   isFieldValue,
   type FieldValue,
+  FieldValueSchema,
   type ControlValue,
   type EntityRow,
   type EntityWith,
@@ -357,7 +358,6 @@ export {
   type CallServiceEffect,
   type SpawnEffect,
   type DespawnEffect,
-  type NotifyEffect,
   type LogEffect,
   type DoEffect,
   type RenderItemLambda,
@@ -414,7 +414,6 @@ export {
   spawn,
   despawn,
   doEffects,
-  notify,
   // Resource effect builders
   ref,
   deref,
@@ -975,6 +974,9 @@ export {
   type BusEventSource,
   type BusEventListener,
   type Unsubscribe,
+  type EmittedEvent,
+  type EventDispatchRequest,
+  type EventDispatchResponse,
 } from "./bus.js";
 
 // Verification wire types (shared by @almadar/ui's verificationRegistry

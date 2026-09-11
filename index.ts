@@ -169,6 +169,8 @@ export {
 // writes through this one function).
 export {
   mergeEntityFrame,
+  resolveEntityView,
+  omitFrameFields,
   type EntityFieldWrite,
   type EntityFrameState,
 } from './src/shared-entity/merge';

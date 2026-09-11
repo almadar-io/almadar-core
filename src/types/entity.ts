@@ -253,6 +253,11 @@ export function persistenceModeAllowsOverrides(
  */
 export type FieldValue = string | number | boolean | Date | null | string[] | FieldValue[] | { [key: string]: FieldValue | undefined };
 
+/** Zod twin of `FieldValue` — the one runtime validator for a stored field slot. */
+export const FieldValueSchema: z.ZodType<FieldValue> = z.lazy(() =>
+  z.union([z.string(), z.number(), z.boolean(), z.date(), z.null(), z.array(FieldValueSchema), z.record(FieldValueSchema.optional())]),
+);
+
 /**
  * What a FORM CONTROL puts on the event bus — the closed set of shapes an
  * Input / Select / Checkbox / Date / multi-select / file field actually

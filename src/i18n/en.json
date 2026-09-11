@@ -57,6 +57,7 @@
     "persistent": "persistent",
     "runtime": "runtime",
     "shared": "shared",
+    "local": "local",
     "identity": "identity",
     "instance": "instance",
     "collection": "collection"
@@ -364,6 +365,7 @@
     "shadows": "shadows",
     "shape": "shape",
     "shared": "shared",
+    "local": "local",
     "singleton": "singleton",
     "site": "site",
     "slots": "slots",

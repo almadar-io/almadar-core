@@ -48,3 +48,47 @@ export function mergeEntityFrame(
   }
   return next;
 }
+
+/**
+ * Resolves what a trait's `@entity` binding reads: a client-supplied
+ * `frame` is UNTRUSTED (it travels on the wire as `EventRequest.fields`),
+ * so it may only contribute keys on `allowedFrameKeys` (the entity's
+ * `@intrinsic` fields) and never `id` — a real row column always wins over
+ * the frame, and an explicit `id` argument wins over everything. Both
+ * execution paths (the JS interpreter and the generated TS server) call
+ * this so `@entity` layers identically: declared defaults < fetched row <
+ * frame, with the row/id override on top.
+ */
+export function resolveEntityView(input: {
+  readonly frame?: EntityRow;
+  readonly row?: EntityRow | null;
+  readonly id?: string;
+  readonly allowedFrameKeys: readonly string[];
+}): EntityRow {
+  const { frame, row, id, allowedFrameKeys } = input;
+  const view: EntityRow = {};
+  if (frame) {
+    for (const key of allowedFrameKeys) {
+      if (key === 'id') continue;
+      if (Object.prototype.hasOwnProperty.call(frame, key)) {
+        view[key] = frame[key];
+      }
+    }
+  }
+  Object.assign(view, row ?? {});
+  if (id !== undefined) view.id = id;
+  return view;
+}
+
+/**
+ * Strips frame/view-state keys from a row before it reaches the store, so
+ * an untrusted client frame (or scratch view state) never gets persisted.
+ * Both persist paths call this on the way to their store write.
+ */
+export function omitFrameFields(row: EntityRow, frameKeys: readonly string[]): EntityRow {
+  const next: EntityRow = { ...row };
+  for (const key of frameKeys) {
+    delete next[key];
+  }
+  return next;
+}

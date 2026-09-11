@@ -23,10 +23,10 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
     }
   });
 
-  it('admits the 2D game category (game-shell present, 35 entries)', () => {
+  it('admits the 2D game category (game-shell present, 36 entries)', () => {
     expect(grouped.game).toBeDefined();
     expect(grouped.game.map((p) => p.name)).toContain('game-shell');
-    expect(grouped.game.length).toBe(35);
+    expect(grouped.game.length).toBe(36);
   });
 
   it('excludes debug and template categories', () => {
@@ -58,6 +58,8 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
   //   component +2  document-panel, rich-text-editor   (the writing surface)
   //   display   -1  document-details                   (left the allowed
   //                 display set when it gained its entity binding)
+  // Re-pinned 2026-09-11 from 35/247:
+  //   game      +1  draw-skinned-mesh                      (CPU-posed 2D skin)
   it('pins the per-category allowed counts', () => {
     const counts = Object.fromEntries(
       Object.entries(grouped).map(([cat, items]) => [cat, items.length]),
@@ -67,14 +69,14 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
       display: 39,
       filter: 4,
       form: 10,
-      game: 35,
+      game: 36,
       media: 1,
     });
-    expect(names.length).toBe(247);
+    expect(names.length).toBe(248);
   });
 
   it('admits the drifted patterns by name, not just by count', () => {
-    for (const name of ['draw-group', 'draw-mesh']) {
+    for (const name of ['draw-group', 'draw-mesh', 'draw-skinned-mesh']) {
       expect(grouped.game.map((p) => p.name)).toContain(name);
     }
     for (const name of [

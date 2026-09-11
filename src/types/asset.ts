@@ -63,9 +63,10 @@ export const AssetDimensionSchema = z.enum(ASSET_DIMENSIONS);
 
 /**
  * Rendering aspect ratio of an asset: square (tiles/sprites/portraits/icons),
- * 16:9 (scene backdrops), 5:7 (cards), 8:1 (effect frame strips).
+ * 16:9 (scene backdrops), 5:7 (cards), 8:1 (effect frame strips),
+ * 4:1 (wide paddles/bars), 5:3 (wide scenes), 1:2 (tall banners).
  */
-export const ASSET_ASPECTS = ['1:1', '16:9', '5:7', '8:1'] as const;
+export const ASSET_ASPECTS = ['1:1', '16:9', '5:7', '8:1', '4:1', '5:3', '1:2'] as const;
 
 export type AssetAspect = (typeof ASSET_ASPECTS)[number];
 
@@ -373,6 +374,10 @@ export interface Asset extends SemanticAssetRef {
     name?: string;
     /** Optional thumbnail URL (inspector picker grid). */
     thumbnailUrl?: string;
+    /** Authored generation subject (visualDNA) for asset-workflow regeneration. */
+    prompt?: string;
+    /** Authored per-animation frame choreography — the exact pose per frame, the only pose source for animated slots. */
+    choreography?: Record<string, string[]>;
 }
 
 export const AssetSchema = SemanticAssetRefSchema.extend({
@@ -381,6 +386,8 @@ export const AssetSchema = SemanticAssetRefSchema.extend({
     sprite: z.string().optional(),
     name: z.string().optional(),
     thumbnailUrl: z.string().optional(),
+    prompt: z.string().optional(),
+    choreography: z.record(z.string(), z.array(z.string())).optional(),
 });
 
 // ============================================================================

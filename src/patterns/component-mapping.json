@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-08T23:56:00.442Z",
+  "exportedAt": "2026-09-10T08:51:20.514Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -1317,6 +1317,11 @@
     "draw-sprite": {
       "component": "DrawSprite",
       "importPath": "@/components/game/atoms/DrawSprite",
+      "category": "game"
+    },
+    "draw-skinned-mesh": {
+      "component": "DrawSkinnedMesh",
+      "importPath": "@/components/game/atoms/DrawSkinnedMesh",
       "category": "game"
     },
     "draw-text": {

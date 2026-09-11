@@ -363,15 +363,6 @@ export type DespawnEffect = ['despawn', string];
 export type DoEffect = ['do', ...SExpr[]];
 
 /**
- * Notify effect - sends a notification.
- * @example ['notify', 'in-app', 'Task created successfully']
- * @example ['notify', 'in-app', ['str/concat', 'Item: ', '@entity.name']]
- */
-export type NotifyEffect =
-    | ['notify', string, string | SExpr]
-    | ['notify', string, string | SExpr, string];
-
-/**
  * Options accepted by `fetch` / `ref` / `deref` effects. Mirrors what
  * `OrbitalServerRuntime`'s fetch handler reads at runtime: `id`, `filter`,
  * `limit`, `offset`, `include`, plus the trailing `emit:` map for
@@ -730,7 +721,6 @@ export type TypedEffect =
     | SpawnEffect
     | DespawnEffect
     | DoEffect
-    | NotifyEffect
     | FetchEffect
     | IfEffect
     | WhenEffect
@@ -996,29 +986,6 @@ export function despawn(entityId: string): DespawnEffect {
  */
 export function doEffects(...effects: SExpr[]): DoEffect {
     return ['do', ...effects];
-}
-
-/**
- * Create a notify effect
- * @example ["notify", "in-app", "Task created successfully"]
- */
-export function notify(
-    channel: 'email' | 'push' | 'sms' | 'in-app',
-    message: string
-): NotifyEffect;
-export function notify(
-    channel: 'email' | 'push' | 'sms' | 'in-app',
-    message: string,
-    recipient: string
-): NotifyEffect;
-export function notify(
-    channel: 'email' | 'push' | 'sms' | 'in-app',
-    message: string,
-    recipient?: string
-): NotifyEffect {
-    return recipient
-        ? ['notify', channel, message, recipient]
-        : ['notify', channel, message];
 }
 
 /**

@@ -237,7 +237,7 @@ export interface OrbitalVerificationAPI {
    * `UI:${traitScope}.${event}` and emits that on the bus, matching
    * the codegen-emitted subscription keys (gap #13). When omitted,
    * the legacy bare-prefix form `UI:${event}` is used — kept only
-   * for system-scope events like `UI:NOTIFY`; trait-driven dispatch
+   * for system-scope events like `UI:NAVIGATE`; trait-driven dispatch
    * MUST pass a `traitScope`.
    */
   sendEvent?: (

@@ -11,6 +11,7 @@
 
 import type { EventPayload } from "./expression.js";
 import type { OrbitalId, TraitId, EventId } from "./identity.js";
+import type { EntityRow } from "./entity.js";
 
 /**
  * Declared event key. A trait's event names (INIT, SAVE, CLOSE,
@@ -179,3 +180,63 @@ export type BusEventListener = (event: BusEvent) => void;
 
 /** Returned by `on()` / `once()` to detach a listener. */
 export type Unsubscribe = () => void;
+
+/**
+ * One event a transition's effects emitted, carried back to the client to
+ * re-dispatch (in order) so the state machine advances through the
+ * cascade without server-side recursion. Named/shaped to match the
+ * generated compiled-path `EmittedEvent` (orbital-shell-typescript's
+ * `shared/types.ts`) so the two execution paths agree on one shape.
+ */
+export interface EmittedEvent {
+  event: string;
+  payload?: EventPayload;
+  source?: BusEventSource;
+}
+
+/**
+ * Client → server event dispatch request. The single upstream owner of
+ * this shape — both the JS interpreter and the compiled path's generated
+ * `EventRequest` (orbital-shell-typescript's `shared/types.ts`) carry the
+ * same fields, so the two execution paths cannot drift.
+ */
+export interface EventDispatchRequest {
+  event: string;
+  payload?: EventPayload;
+  /** Current client state, for validation. */
+  currentState?: string;
+  /** Per-tab client id — the live-broadcast origin-exclusion key. */
+  clientId?: string;
+  /**
+   * The dispatching trait's current `@entity` frame (declared defaults <
+   * fetched row < `[shared]` frame). The server layers it over the row it
+   * resolves via `resolveEntityView` so guards and effects read the same
+   * values the client does.
+   */
+  fields?: EntityRow;
+}
+
+/**
+ * Server → client event dispatch response. Mirrors the compiled path's
+ * generated `EventResponse` (orbital-shell-typescript's `shared/types.ts`);
+ * kept field-for-field in sync except `effectResults`, which core has no
+ * canonical shape for yet (the per-app generated `EffectResult` is
+ * distinct from core's `EffectResult` in `types/living.ts` — reusing that
+ * one would misdescribe this field, so it is intentionally omitted here).
+ */
+export interface EventDispatchResponse {
+  success: boolean;
+  newState?: string;
+  data?: Record<string, EntityRow[]>;
+  /** Events emitted while running this transition's effects, in order. */
+  emittedEvents?: EmittedEvent[];
+  /**
+   * `@entity` fields this transition's server-side `set` effects wrote,
+   * post-effect. The client merges them over its own effect results
+   * (server wins).
+   */
+  fields?: EntityRow;
+  error?: string;
+  /** Guard that failed, for debugging. */
+  guardFailed?: string;
+}

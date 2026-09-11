@@ -25,6 +25,9 @@ export {
   isMainSlotRenderUi,
 } from './content-grade.js';
 
+// Self-overlay pattern types (single owner — lint/slot consumers)
+export { SELF_OVERLAY_PATTERN_TYPES } from './self-overlay.js';
+
 // Backwards compatible alias - registry refers to patterns registry
 export const registry = patternsRegistry;
 

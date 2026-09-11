@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-07T01:58:57.916Z",
+  "exportedAt": "2026-09-10T08:46:50.227Z",
   "integrators": {
     "github": {
       "name": "github",
@@ -3581,6 +3581,77 @@
               }
             }
           }
+        }
+      ]
+    },
+    "rigger": {
+      "name": "rigger",
+      "description": "Local rigger service (FastAPI) — mesh rigging build + render",
+      "category": "media",
+      "actions": [
+        {
+          "name": "health",
+          "description": "Liveness probe of the local rigger service.",
+          "params": [],
+          "responseShape": {
+            "ok": "boolean"
+          }
+        },
+        {
+          "name": "buildMesh",
+          "description": "Build a rigged mesh bundle from a source image via the local rigger service.",
+          "params": [
+            {
+              "name": "imagePath",
+              "type": "string",
+              "required": true,
+              "description": "Path to the source image."
+            },
+            {
+              "name": "rig",
+              "type": "string",
+              "required": true,
+              "description": "Rig type to build (e.g. 'humanoid', 'quadruped')."
+            }
+          ],
+          "responseShape": {
+            "bundlePath": "string",
+            "boneCount": "number",
+            "vertexCount": "number",
+            "triangleCount": "number",
+            "clips": "string[]"
+          }
+        },
+        {
+          "name": "render",
+          "description": "Render a rigged mesh bundle to output files via the local rigger service.",
+          "params": [
+            {
+              "name": "imagePath",
+              "type": "string",
+              "required": true,
+              "description": "Path to the source image."
+            },
+            {
+              "name": "rig",
+              "type": "string",
+              "required": true,
+              "description": "Rig type."
+            },
+            {
+              "name": "preset",
+              "type": "string",
+              "required": true,
+              "description": "Render preset name."
+            },
+            {
+              "name": "outDir",
+              "type": "string",
+              "required": true,
+              "description": "Output directory for rendered files."
+            }
+          ],
+          "responseShape": {}
         }
       ]
     }
