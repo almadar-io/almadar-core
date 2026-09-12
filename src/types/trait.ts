@@ -306,6 +306,15 @@ export type ConfigFieldDeclaration = {
      * token itself is still present.
      */
     readonly forwardedFrom?: string;
+    /**
+     * The definer knob this field is the payload companion of, when its
+     * declared type was `@payload(<knob>)`: the L2 sigil pass rewrites the
+     * sentinel to the resolved payload type and records the knob here, the
+     * same way `forwardedFrom` keeps a provenance the resolved `default` /
+     * `type` can no longer show. Absent for any field that was never a
+     * `@payload(<knob>)` sentinel. Compiled-path wire key `payloadFor`.
+     */
+    readonly payloadFor?: string;
 };
 
 export type ConfigFieldItemsDeclaration = {
@@ -340,6 +349,7 @@ export const ConfigFieldDeclarationSchema: z.ZodType<ConfigFieldDeclaration> = z
     items: ConfigFieldItemsDeclarationSchema.optional(),
     properties: z.lazy(() => z.record(TraitEntityFieldSchema)).optional(),
     forwardedFrom: z.string().optional(),
+    payloadFor: z.string().optional(),
 });
 
 /**
