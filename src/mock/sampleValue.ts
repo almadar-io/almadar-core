@@ -39,8 +39,12 @@ export type SampleStrategy = 'seeded' | 'index';
 /** Recursion cap for self-referential `items` / `properties` walks. */
 const MAX_NESTED_DEPTH = 3;
 
-/** Keys never synthesized — the caller's row loop owns them. */
-const RESERVED_FIELD_NAMES: ReadonlySet<string> = new Set(['id', 'createdAt', 'updatedAt']);
+/** Framework-stamped columns — the row's id and audit timestamps, minted by
+ *  the store itself, never synthesized here and never a REQUIRED column a
+ *  caller must supply (`EffectExecutor`'s persist-create check, `@almadar/
+ *  runtime`'s mock store stamping). The one owner; every caller imports this
+ *  instead of repeating the name list. */
+export const RESERVED_FIELD_NAMES: ReadonlySet<string> = new Set(['id', 'createdAt', 'updatedAt']);
 
 export interface SampleEntity {
   readonly name: string;

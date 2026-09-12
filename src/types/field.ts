@@ -337,6 +337,13 @@ type EntityFieldBase = {
     /** User-vocabulary synonyms (authored `@synonyms "..."` in `.lolo`).
      *  Free text feeding catalog search / curation field-matching. */
     synonyms?: string;
+    /**
+     * The imported entity this field was merged from on a rebind (sibling
+     * pull / entity contract). Absent on author-declared fields — a merged
+     * field's `required` is the ATOM's own write contract, never the host
+     * writer's.
+     */
+    mergedFrom?: string;
 };
 
 /**
@@ -457,6 +464,7 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
         intrinsic: z.boolean().optional(),
         description: z.string().optional(),
         synonyms: z.string().optional(),
+        mergedFrom: z.string().optional(),
     };
 
     /** Build a scalar variant schema. `values?` is permitted as a hint;

@@ -1,10 +1,10 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-10T08:46:50.227Z",
+  "exportedAt": "2026-09-12T12:14:53.173Z",
   "services": {
     "llm": {
       "name": "llm",
-      "description": "LLM service \u2014 text generation, classification, extraction, summarization",
+      "description": "LLM service — text generation, classification, extraction, summarization",
       "category": "ai",
       "package": "@almadar/llm",
       "backend": "production",
@@ -117,7 +117,7 @@
                 "properties": {
                   "type": "object",
                   "required": false,
-                  "description": "Keyed by field name \u2014 each named field carries its OWN nested schema\n(real JSON-Schema semantics; a single un-keyed nested schema here would\nsay every field of an object shares one shape).",
+                  "description": "Keyed by field name — each named field carries its OWN nested schema\n(real JSON-Schema semantics; a single un-keyed nested schema here would\nsay every field of an object shares one shape).",
                   "mapValue": {
                     "type": "JsonSchemaDefinition",
                     "cyclic": true,
@@ -147,7 +147,7 @@
                 "enum": {
                   "type": "string[]",
                   "required": false,
-                  "description": "Enum values are serialized to strings on the wire \u2014 pass `[\"a\",\"b\"]` even for non-string enums."
+                  "description": "Enum values are serialized to strings on the wire — pass `[\"a\",\"b\"]` even for non-string enums."
                 }
               }
             },
@@ -239,7 +239,7 @@
     },
     "ml": {
       "name": "ml",
-      "description": "ML service \u2014 model inference on a trained or off-the-shelf model",
+      "description": "ML service — model inference on a trained or off-the-shelf model",
       "category": "ai",
       "package": "@almadar/llm",
       "backend": "production",
@@ -284,7 +284,7 @@
     },
     "data": {
       "name": "data",
-      "description": "Data service \u2014 CRUD operations on entities",
+      "description": "Data service — CRUD operations on entities",
       "category": "infrastructure",
       "package": "@almadar/server",
       "backend": "production",
@@ -400,7 +400,7 @@
     },
     "eventbus": {
       "name": "eventbus",
-      "description": "Event bus \u2014 cross-trait pub/sub messaging",
+      "description": "Event bus — cross-trait pub/sub messaging",
       "category": "infrastructure",
       "package": "@almadar/server",
       "backend": "production",
@@ -445,7 +445,7 @@
     },
     "discovery": {
       "name": "discovery",
-      "description": "Service discovery \u2014 register and find services",
+      "description": "Service discovery — register and find services",
       "category": "infrastructure",
       "package": "@almadar/server",
       "backend": "production",
@@ -577,7 +577,7 @@
     },
     "migration": {
       "name": "migration",
-      "description": "Migration service \u2014 import external data (notes, docs, references) into the system",
+      "description": "Migration service — import external data (notes, docs, references) into the system",
       "category": "infrastructure",
       "package": "@almadar-io/migration",
       "backend": "production",
@@ -703,7 +703,7 @@
     },
     "skills": {
       "name": "skills",
-      "description": "Skills service \u2014 AI-powered schema generation",
+      "description": "Skills service — AI-powered schema generation",
       "category": "ai",
       "package": "@almadar/skills",
       "backend": "production",
@@ -830,7 +830,7 @@
     },
     "github": {
       "name": "github",
-      "description": "GitHub integration \u2014 repos, issues, PRs",
+      "description": "GitHub integration — repos, issues, PRs",
       "category": "devtools",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -1066,7 +1066,7 @@
         },
         {
           "name": "getFile",
-          "description": "Read a file's content from a repository at a given ref (declared intent \u2014 dispatch is being wired).",
+          "description": "Read a file's content from a repository at a given ref (declared intent — dispatch is being wired).",
           "params": [
             {
               "name": "owner",
@@ -1102,7 +1102,7 @@
         },
         {
           "name": "listCommits",
-          "description": "List commits on a repository, optionally filtered by file path (declared intent \u2014 dispatch is being wired).",
+          "description": "List commits on a repository, optionally filtered by file path (declared intent — dispatch is being wired).",
           "params": [
             {
               "name": "owner",
@@ -1164,7 +1164,7 @@
         },
         {
           "name": "createIssue",
-          "description": "Open a new issue on a repository (declared intent \u2014 dispatch is being wired).",
+          "description": "Open a new issue on a repository (declared intent — dispatch is being wired).",
           "params": [
             {
               "name": "owner",
@@ -1225,7 +1225,7 @@
     },
     "stripe": {
       "name": "stripe",
-      "description": "Stripe integration \u2014 payments, subscriptions, invoices",
+      "description": "Stripe integration — payments, subscriptions, invoices",
       "category": "payment",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -1321,7 +1321,7 @@
     },
     "llm-integration": {
       "name": "llm-integration",
-      "description": "LLM integration \u2014 generate, embed, classify via external providers",
+      "description": "LLM integration — generate, embed, classify via external providers",
       "category": "ai",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -1512,7 +1512,7 @@
     },
     "youtube": {
       "name": "youtube",
-      "description": "YouTube Data API \u2014 search videos, get video/channel details",
+      "description": "YouTube Data API — search videos, get video/channel details",
       "category": "media",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -1589,7 +1589,7 @@
     },
     "twilio": {
       "name": "twilio",
-      "description": "Twilio \u2014 SMS, voice calls, verification",
+      "description": "Twilio — SMS, voice calls, verification",
       "category": "messaging",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -1667,7 +1667,7 @@
     },
     "email": {
       "name": "email",
-      "description": "Email service \u2014 send, send with template",
+      "description": "Email service — send, send with template",
       "category": "messaging",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -1746,7 +1746,7 @@
     },
     "webhook": {
       "name": "webhook",
-      "description": "Outbound webhook \u2014 signed HTTP POST notifications to external endpoints",
+      "description": "Outbound webhook — signed HTTP POST notifications to external endpoints",
       "category": "messaging",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -1806,7 +1806,7 @@
     },
     "push": {
       "name": "push",
-      "description": "Web Push \u2014 VAPID-signed browser push notifications",
+      "description": "Web Push — VAPID-signed browser push notifications",
       "category": "messaging",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -1894,7 +1894,7 @@
     },
     "calendar": {
       "name": "calendar",
-      "description": "Google Calendar \u2014 list/create/update/delete events, free-busy, push-channel watch (service account, domain-wide delegation)",
+      "description": "Google Calendar — list/create/update/delete events, free-busy, push-channel watch (service account, domain-wide delegation)",
       "category": "infrastructure",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -2223,7 +2223,7 @@
         {
           "envVar": "GOOGLE_CALENDAR_CHANNEL_TOKEN",
           "required": false,
-          "description": "Watch-channel verification token \u2014 required to receive inbound calendar hooks (two-way sync)"
+          "description": "Watch-channel verification token — required to receive inbound calendar hooks (two-way sync)"
         }
       ],
       "hooks": [
@@ -2237,7 +2237,7 @@
     },
     "drive": {
       "name": "drive",
-      "description": "Google Drive \u2014 list/get/upload files, folders, sharing (service account, domain-wide delegation)",
+      "description": "Google Drive — list/get/upload files, folders, sharing (service account, domain-wide delegation)",
       "category": "infrastructure",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -2410,7 +2410,7 @@
         {
           "envVar": "GOOGLE_DRIVE_SA_KEY",
           "required": false,
-          "description": "Google service-account key JSON (raw or base64) with drive scope \u2014 serves reads; store in Secret Manager, bind as env"
+          "description": "Google service-account key JSON (raw or base64) with drive scope — serves reads; store in Secret Manager, bind as env"
         },
         {
           "envVar": "GOOGLE_DRIVE_SUBJECT",
@@ -2420,7 +2420,7 @@
         {
           "envVar": "GOOGLE_DRIVE_REFRESH_TOKEN",
           "required": false,
-          "description": "User OAuth refresh token (drive-consent.mjs) \u2014 serves writes; SA uploads are impossible on personal accounts (no SA storage quota)"
+          "description": "User OAuth refresh token (drive-consent.mjs) — serves writes; SA uploads are impossible on personal accounts (no SA storage quota)"
         },
         {
           "envVar": "GOOGLE_DRIVE_FOLDER_ID",
@@ -2432,7 +2432,7 @@
     },
     "metaAds": {
       "name": "metaAds",
-      "description": "Meta Ads \u2014 read-only Marketing Insights (spend, campaigns) for profitability reporting",
+      "description": "Meta Ads — read-only Marketing Insights (spend, campaigns) for profitability reporting",
       "category": "marketing",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -2521,21 +2521,21 @@
         {
           "envVar": "META_AD_ACCOUNT_ID",
           "required": false,
-          "description": "Default ad account id (act_\u2026); per-call accountId overrides"
+          "description": "Default ad account id (act_…); per-call accountId overrides"
         }
       ],
       "hooks": []
     },
     "accounting": {
       "name": "accounting",
-      "description": "Accounting export \u2014 invoice/journal rows to import-ready CSV (provider-pluggable)",
+      "description": "Accounting export — invoice/journal rows to import-ready CSV (provider-pluggable)",
       "category": "finance",
       "package": "@almadar/integrations",
       "backend": "production",
       "actions": [
         {
           "name": "exportInvoices",
-          "description": "Shape invoice rows into an import-ready CSV export (no accounting-vendor connection \u2014 generic column set).",
+          "description": "Shape invoice rows into an import-ready CSV export (no accounting-vendor connection — generic column set).",
           "params": [
             {
               "name": "invoices",
@@ -2659,7 +2659,7 @@
     },
     "banking": {
       "name": "banking",
-      "description": "Banking \u2014 GoCardless Bank Account Data (requisitions, accounts, transactions) for reconciliation",
+      "description": "Banking — GoCardless Bank Account Data (requisitions, accounts, transactions) for reconciliation",
       "category": "finance",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -2782,7 +2782,7 @@
     },
     "esign": {
       "name": "esign",
-      "description": "E-signature \u2014 send/track/download envelopes (DocuSign first, provider-pluggable)",
+      "description": "E-signature — send/track/download envelopes (DocuSign first, provider-pluggable)",
       "category": "infrastructure",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -2876,14 +2876,14 @@
     },
     "docker": {
       "name": "docker",
-      "description": "Docker \u2014 container and image management",
+      "description": "Docker — container and image management",
       "category": "devtools",
       "package": "@almadar/integrations",
       "backend": "simulated",
       "actions": [
         {
           "name": "build",
-          "description": "Simulate building a container image (in-memory backend \u2014 no real Docker daemon/SDK; a real build is not yet implemented).",
+          "description": "Simulate building a container image (in-memory backend — no real Docker daemon/SDK; a real build is not yet implemented).",
           "params": [
             {
               "name": "tag",
@@ -3211,7 +3211,7 @@
     },
     "database": {
       "name": "database",
-      "description": "Database integration \u2014 read-only SQL queries over external connections",
+      "description": "Database integration — read-only SQL queries over external connections",
       "category": "infrastructure",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -3224,7 +3224,7 @@
               "name": "connectionRef",
               "type": "string",
               "required": true,
-              "description": "Env-var NAME whose value is the Postgres connection string \u2014 never the secret itself; resolved from the credential store/environment at run time."
+              "description": "Env-var NAME whose value is the Postgres connection string — never the secret itself; resolved from the credential store/environment at run time."
             },
             {
               "name": "sql",
@@ -3253,14 +3253,14 @@
     },
     "storage": {
       "name": "storage",
-      "description": "Object storage \u2014 upload, download, delete, list files",
+      "description": "Object storage — upload, download, delete, list files",
       "category": "infrastructure",
       "package": "@almadar/integrations",
       "backend": "production",
       "actions": [
         {
           "name": "upload",
-          "description": "Upload an object to an S3-compatible bucket (real S3/R2/MinIO backend when storage credentials are configured, in-memory dev fallback otherwise \u2014 refused in production). Admits either the canonical `key`+`content` pair or the file-form `file` payload (UploadDropZone's `{ name, size, type, content }` shape); when `file` is present its `key`/`content` are derived from it.",
+          "description": "Upload an object to an S3-compatible bucket (real S3/R2/MinIO backend when storage credentials are configured, in-memory dev fallback otherwise — refused in production). Admits either the canonical `key`+`content` pair or the file-form `file` payload (UploadDropZone's `{ name, size, type, content }` shape); when `file` is present its `key`/`content` are derived from it.",
           "params": [
             {
               "name": "bucket",
@@ -3314,7 +3314,7 @@
               "name": "acl",
               "type": "'public' | 'private'",
               "required": false,
-              "description": "Object ACL \u2014 'public' produces a public URL, otherwise the URL is signed/private."
+              "description": "Object ACL — 'public' produces a public URL, otherwise the URL is signed/private."
             },
             {
               "name": "maxSize",
@@ -3326,7 +3326,7 @@
               "name": "metadata",
               "type": "object",
               "required": false,
-              "description": "Object metadata stored alongside the content (S3-compatible object stores carry metadata as string headers \u2014 never structured values).",
+              "description": "Object metadata stored alongside the content (S3-compatible object stores carry metadata as string headers — never structured values).",
               "mapValue": {
                 "type": "string"
               }
@@ -3344,7 +3344,7 @@
         },
         {
           "name": "uploadMany",
-          "description": "Upload a whole UploadDropZone batch in one call, one item per file \u2014 the FSM-friendly shape for bulk-persisting uploaded-file rows.",
+          "description": "Upload a whole UploadDropZone batch in one call, one item per file — the FSM-friendly shape for bulk-persisting uploaded-file rows.",
           "params": [
             {
               "name": "bucket",
@@ -3591,7 +3591,7 @@
         {
           "envVar": "STORAGE_ENDPOINT",
           "required": false,
-          "description": "Custom S3-compatible endpoint (R2/MinIO/\u2026); empty = AWS S3"
+          "description": "Custom S3-compatible endpoint (R2/MinIO/…); empty = AWS S3"
         },
         {
           "envVar": "STORAGE_PUBLIC_URL_BASE",
@@ -3603,7 +3603,7 @@
     },
     "queue": {
       "name": "queue",
-      "description": "Message queue \u2014 publish, subscribe, acknowledge messages",
+      "description": "Message queue — publish, subscribe, acknowledge messages",
       "category": "infrastructure",
       "package": "@almadar/integrations",
       "backend": "simulated",
@@ -3622,7 +3622,7 @@
               "name": "payload",
               "type": "ServiceParams",
               "required": true,
-              "description": "Job payload \u2014 the caller declares its own shape.",
+              "description": "Job payload — the caller declares its own shape.",
               "shapedBy": "payload"
             },
             {
@@ -3635,7 +3635,7 @@
               "name": "priority",
               "type": "number",
               "required": false,
-              "description": "Priority \u2014 higher values are dequeued before lower ones."
+              "description": "Priority — higher values are dequeued before lower ones."
             }
           ],
           "responseShape": {
@@ -3665,7 +3665,7 @@
                 "payload": {
                   "type": "ServiceParams",
                   "required": true,
-                  "description": "Whatever `enqueue` was given \u2014 the caller declares its own shape.",
+                  "description": "Whatever `enqueue` was given — the caller declares its own shape.",
                   "shapedBy": "payload"
                 },
                 "enqueuedAt": {
@@ -3703,7 +3703,7 @@
                 "payload": {
                   "type": "ServiceParams",
                   "required": true,
-                  "description": "Whatever `enqueue` was given \u2014 the caller declares its own shape.",
+                  "description": "Whatever `enqueue` was given — the caller declares its own shape.",
                   "shapedBy": "payload"
                 },
                 "enqueuedAt": {
@@ -3732,7 +3732,7 @@
               "name": "result",
               "type": "ServiceParams",
               "required": false,
-              "description": "Result payload to attach to the job \u2014 the caller declares its own shape (not necessarily the same shape as the job's `payload`).",
+              "description": "Result payload to attach to the job — the caller declares its own shape (not necessarily the same shape as the job's `payload`).",
               "shapedBy": "result"
             }
           ],
@@ -3805,7 +3805,7 @@
     },
     "redis": {
       "name": "redis",
-      "description": "Redis \u2014 cache get/set/delete, pub/sub",
+      "description": "Redis — cache get/set/delete, pub/sub",
       "category": "infrastructure",
       "package": "@almadar/integrations",
       "backend": "simulated",
@@ -3842,7 +3842,7 @@
               "name": "value",
               "type": "ServiceParams",
               "required": true,
-              "description": "Value to store \u2014 the caller declares its own shape.",
+              "description": "Value to store — the caller declares its own shape.",
               "shapedBy": "value"
             },
             {
@@ -3970,7 +3970,7 @@
               "name": "message",
               "type": "ServiceParams",
               "required": true,
-              "description": "Message payload \u2014 the caller declares its own shape.",
+              "description": "Message payload — the caller declares its own shape.",
               "shapedBy": "message"
             }
           ],
@@ -4005,7 +4005,7 @@
     },
     "oauth": {
       "name": "oauth",
-      "description": "OAuth/OIDC \u2014 authorization-code + PKCE flow, token management, userinfo",
+      "description": "OAuth/OIDC — authorization-code + PKCE flow, token management, userinfo",
       "category": "auth",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -4138,7 +4138,7 @@
     },
     "credentials": {
       "name": "credentials",
-      "description": "Tenant credential store \u2014 masked list, set/remove, test connection, master-key rotation (settings-page backend)",
+      "description": "Tenant credential store — masked list, set/remove, test connection, master-key rotation (settings-page backend)",
       "category": "auth",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -4280,26 +4280,26 @@
         {
           "envVar": "ALMADAR_CREDENTIAL_MASTER_KEY",
           "required": false,
-          "description": "AES-256 master key (64-char hex) enabling the hosted credential store \u2014 hold it alone in the platform secret store"
+          "description": "AES-256 master key (64-char hex) enabling the hosted credential store — hold it alone in the platform secret store"
         },
         {
           "envVar": "ALMADAR_CREDENTIAL_MASTER_KEY_PREVIOUS",
           "required": false,
-          "description": "Previous master key, present only during a rotation window \u2014 decrypts old rows until `credentials.rotate` re-encrypts them"
+          "description": "Previous master key, present only during a rotation window — decrypts old rows until `credentials.rotate` re-encrypts them"
         }
       ],
       "hooks": []
     },
     "otel": {
       "name": "otel",
-      "description": "OpenTelemetry \u2014 spans, metrics, logs",
+      "description": "OpenTelemetry — spans, metrics, logs",
       "category": "infrastructure",
       "package": "@almadar/integrations",
       "backend": "simulated",
       "actions": [
         {
           "name": "startSpan",
-          "description": "Start a trace span (in-memory backend \u2014 no OpenTelemetry SDK/exporter).",
+          "description": "Start a trace span (in-memory backend — no OpenTelemetry SDK/exporter).",
           "params": [
             {
               "name": "name",
@@ -4451,7 +4451,7 @@
     },
     "cli": {
       "name": "cli",
-      "description": "CLI tool execution \u2014 run commands, get output",
+      "description": "CLI tool execution — run commands, get output",
       "category": "devtools",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -4480,7 +4480,7 @@
     },
     "deepagent": {
       "name": "deepagent",
-      "description": "DeepAgent \u2014 AI agent orchestration",
+      "description": "DeepAgent — AI agent orchestration",
       "category": "ai",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -4511,7 +4511,7 @@
               "name": "context",
               "type": "IntegrationParams",
               "required": false,
-              "description": "Extra context passed through to the agent \u2014 the caller declares its own shape.",
+              "description": "Extra context passed through to the agent — the caller declares its own shape.",
               "shapedBy": "context"
             }
           ],
@@ -4624,7 +4624,7 @@
     },
     "wikimedia": {
       "name": "wikimedia",
-      "description": "Wikipedia API \u2014 redirect-resolved page lookup (description, portrait, lead extract)",
+      "description": "Wikipedia API — redirect-resolved page lookup (description, portrait, lead extract)",
       "category": "reference",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -4664,7 +4664,7 @@
     },
     "iconify": {
       "name": "iconify",
-      "description": "Iconify API \u2014 brand-logo / icon resolution, search, and body fetch",
+      "description": "Iconify API — brand-logo / icon resolution, search, and body fetch",
       "category": "reference",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -4737,7 +4737,7 @@
     },
     "arxiv": {
       "name": "arxiv",
-      "description": "arXiv API \u2014 frontier academic preprint search (emerging-axis research backend)",
+      "description": "arXiv API — frontier academic preprint search (emerging-axis research backend)",
       "category": "reference",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -4806,7 +4806,7 @@
     },
     "rigger": {
       "name": "rigger",
-      "description": "Local rigger service (FastAPI) \u2014 mesh rigging build + render",
+      "description": "Local rigger service (FastAPI) — mesh rigging build + render",
       "category": "media",
       "package": "@almadar/integrations",
       "backend": "production",
@@ -4833,7 +4833,7 @@
               "name": "rig",
               "type": "object",
               "required": true,
-              "description": "Rig to build: { parts: [{ id, name, x0, y0, x1, y1, pivotX, pivotY, z, parent }] } (the captured rig rows)."
+              "description": "The rig definition (parts, boxes, pivots, …) as JSON."
             }
           ],
           "responseShape": {
@@ -4858,7 +4858,7 @@
               "name": "rig",
               "type": "object",
               "required": true,
-              "description": "Rig to build: { parts: [{ id, name, x0, y0, x1, y1, pivotX, pivotY, z, parent }] } (the captured rig rows)."
+              "description": "The rig definition (parts, boxes, pivots, …) as JSON."
             },
             {
               "name": "preset",
@@ -4871,9 +4871,201 @@
               "type": "string",
               "required": true,
               "description": "Output directory for rendered files."
+            },
+            {
+              "name": "mode",
+              "type": "string",
+              "required": false,
+              "description": "Render path: 'mesh' (skinned, deforming) or 'cutout' (rigid per-part layers). Defaults to 'mesh'."
+            },
+            {
+              "name": "supersample",
+              "type": "number",
+              "required": false,
+              "description": "Supersampling factor for the cutout path. Defaults to 1."
             }
           ],
-          "responseShape": {}
+          "responseShape": {
+            "outdir": "string",
+            "frames": "number",
+            "framePaths": "string[]",
+            "sheet": "string",
+            "gif": "string",
+            "atlas": "string"
+          }
+        },
+        {
+          "name": "listPresets",
+          "description": "List the available animation presets (name, fps, frame count, bone roles) from the local rigger service.",
+          "params": [],
+          "responseShape": {
+            "presets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "path": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "fps": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "frames": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "bones": {
+                    "type": "object[]",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "loadRig",
+          "description": "Load a rig file, resolving `cloneOf` parts to concrete box/pivot geometry.",
+          "params": [
+            {
+              "name": "rigPath",
+              "type": "string",
+              "required": true,
+              "description": "Path to the rig JSON file."
+            }
+          ],
+          "responseShape": {
+            "rig": "object",
+            "resolved": "object"
+          }
+        },
+        {
+          "name": "saveRig",
+          "description": "Save a rig file; the server validates it and rejects a malformed part.",
+          "params": [
+            {
+              "name": "rigPath",
+              "type": "string",
+              "required": true,
+              "description": "Path to write the rig JSON file."
+            },
+            {
+              "name": "rig",
+              "type": "object",
+              "required": true,
+              "description": "The rig definition (parts, boxes, pivots, …) as JSON."
+            }
+          ],
+          "responseShape": {
+            "rigPath": "string",
+            "parts": "number"
+          }
+        },
+        {
+          "name": "ownership",
+          "description": "Render the per-part pixel ownership map for a rig over a source image.",
+          "params": [
+            {
+              "name": "imagePath",
+              "type": "string",
+              "required": true,
+              "description": "Path to the source image."
+            },
+            {
+              "name": "rig",
+              "type": "object",
+              "required": true,
+              "description": "The rig definition (parts, boxes, pivots, …) as JSON."
+            },
+            {
+              "name": "outPath",
+              "type": "string",
+              "required": true,
+              "description": "Path to write the ownership-map PNG."
+            }
+          ],
+          "responseShape": {
+            "outPath": "string",
+            "legend": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "color": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "generate",
+          "description": "Generate one image on the local image server (text-to-image, or a Kontext edit conditioned on `sourcePath`).",
+          "params": [
+            {
+              "name": "model",
+              "type": "'z-image-turbo' | 'kontext'",
+              "required": true,
+              "description": "Generation model: 'z-image-turbo' (text-to-image) or 'kontext' (edit; requires sourcePath)."
+            },
+            {
+              "name": "prompt",
+              "type": "string",
+              "required": true,
+              "description": "The generation/edit prompt."
+            },
+            {
+              "name": "seed",
+              "type": "number",
+              "required": false,
+              "description": "Random seed; omit for a fresh one each call."
+            },
+            {
+              "name": "size",
+              "type": "string",
+              "required": false,
+              "description": "Output image size, e.g. '1024x1024'. Defaults to '1024x1024'."
+            },
+            {
+              "name": "steps",
+              "type": "number",
+              "required": false,
+              "description": "Diffusion step count."
+            },
+            {
+              "name": "sourcePath",
+              "type": "string",
+              "required": false,
+              "description": "Path to the source image to edit; REQUIRED for 'kontext'."
+            },
+            {
+              "name": "outDir",
+              "type": "string",
+              "required": true,
+              "description": "Output directory the generated PNG is written under."
+            }
+          ],
+          "responseShape": {
+            "outPath": "string",
+            "model": "string",
+            "prompt": "string",
+            "seed": "number | null",
+            "size": "string",
+            "sourcePath": "string | null",
+            "elapsedMs": "number"
+          }
         }
       ],
       "credentials": [
@@ -4886,6 +5078,11 @@
           "envVar": "RIGGER_TIMEOUT_MS",
           "required": false,
           "description": "Per-request timeout (ms)"
+        },
+        {
+          "envVar": "RIGGER_GENERATE_TIMEOUT_MS",
+          "required": false,
+          "description": "Timeout (ms) for the 'generate' action; a local z-image-turbo run takes ~60-90 s and a kontext edit at 1024px several minutes (default 600000)"
         }
       ],
       "hooks": []

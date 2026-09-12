@@ -26,6 +26,7 @@ export {
   type SampleContext,
   type SampleStrategy,
   IMAGE_FIELD_NAMES,
+  RESERVED_FIELD_NAMES,
   isDeclaredDefaultHonored,
   sampleFieldValue,
   sampleImageUrl,

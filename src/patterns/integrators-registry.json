@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-10T08:46:50.227Z",
+  "exportedAt": "2026-09-12T12:14:53.173Z",
   "integrators": {
     "github": {
       "name": "github",
@@ -3609,9 +3609,9 @@
             },
             {
               "name": "rig",
-              "type": "string",
+              "type": "object",
               "required": true,
-              "description": "Rig type to build (e.g. 'humanoid', 'quadruped')."
+              "description": "The rig definition (parts, boxes, pivots, …) as JSON."
             }
           ],
           "responseShape": {
@@ -3634,9 +3634,9 @@
             },
             {
               "name": "rig",
-              "type": "string",
+              "type": "object",
               "required": true,
-              "description": "Rig type."
+              "description": "The rig definition (parts, boxes, pivots, …) as JSON."
             },
             {
               "name": "preset",
@@ -3649,9 +3649,201 @@
               "type": "string",
               "required": true,
               "description": "Output directory for rendered files."
+            },
+            {
+              "name": "mode",
+              "type": "string",
+              "required": false,
+              "description": "Render path: 'mesh' (skinned, deforming) or 'cutout' (rigid per-part layers). Defaults to 'mesh'."
+            },
+            {
+              "name": "supersample",
+              "type": "number",
+              "required": false,
+              "description": "Supersampling factor for the cutout path. Defaults to 1."
             }
           ],
-          "responseShape": {}
+          "responseShape": {
+            "outdir": "string",
+            "frames": "number",
+            "framePaths": "string[]",
+            "sheet": "string",
+            "gif": "string",
+            "atlas": "string"
+          }
+        },
+        {
+          "name": "listPresets",
+          "description": "List the available animation presets (name, fps, frame count, bone roles) from the local rigger service.",
+          "params": [],
+          "responseShape": {
+            "presets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "path": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "fps": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "frames": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "bones": {
+                    "type": "object[]",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "loadRig",
+          "description": "Load a rig file, resolving `cloneOf` parts to concrete box/pivot geometry.",
+          "params": [
+            {
+              "name": "rigPath",
+              "type": "string",
+              "required": true,
+              "description": "Path to the rig JSON file."
+            }
+          ],
+          "responseShape": {
+            "rig": "object",
+            "resolved": "object"
+          }
+        },
+        {
+          "name": "saveRig",
+          "description": "Save a rig file; the server validates it and rejects a malformed part.",
+          "params": [
+            {
+              "name": "rigPath",
+              "type": "string",
+              "required": true,
+              "description": "Path to write the rig JSON file."
+            },
+            {
+              "name": "rig",
+              "type": "object",
+              "required": true,
+              "description": "The rig definition (parts, boxes, pivots, …) as JSON."
+            }
+          ],
+          "responseShape": {
+            "rigPath": "string",
+            "parts": "number"
+          }
+        },
+        {
+          "name": "ownership",
+          "description": "Render the per-part pixel ownership map for a rig over a source image.",
+          "params": [
+            {
+              "name": "imagePath",
+              "type": "string",
+              "required": true,
+              "description": "Path to the source image."
+            },
+            {
+              "name": "rig",
+              "type": "object",
+              "required": true,
+              "description": "The rig definition (parts, boxes, pivots, …) as JSON."
+            },
+            {
+              "name": "outPath",
+              "type": "string",
+              "required": true,
+              "description": "Path to write the ownership-map PNG."
+            }
+          ],
+          "responseShape": {
+            "outPath": "string",
+            "legend": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "color": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "generate",
+          "description": "Generate one image on the local image server (text-to-image, or a Kontext edit conditioned on `sourcePath`).",
+          "params": [
+            {
+              "name": "model",
+              "type": "'z-image-turbo' | 'kontext'",
+              "required": true,
+              "description": "Generation model: 'z-image-turbo' (text-to-image) or 'kontext' (edit; requires sourcePath)."
+            },
+            {
+              "name": "prompt",
+              "type": "string",
+              "required": true,
+              "description": "The generation/edit prompt."
+            },
+            {
+              "name": "seed",
+              "type": "number",
+              "required": false,
+              "description": "Random seed; omit for a fresh one each call."
+            },
+            {
+              "name": "size",
+              "type": "string",
+              "required": false,
+              "description": "Output image size, e.g. '1024x1024'. Defaults to '1024x1024'."
+            },
+            {
+              "name": "steps",
+              "type": "number",
+              "required": false,
+              "description": "Diffusion step count."
+            },
+            {
+              "name": "sourcePath",
+              "type": "string",
+              "required": false,
+              "description": "Path to the source image to edit; REQUIRED for 'kontext'."
+            },
+            {
+              "name": "outDir",
+              "type": "string",
+              "required": true,
+              "description": "Output directory the generated PNG is written under."
+            }
+          ],
+          "responseShape": {
+            "outPath": "string",
+            "model": "string",
+            "prompt": "string",
+            "seed": "number | null",
+            "size": "string",
+            "sourcePath": "string | null",
+            "elapsedMs": "number"
+          }
         }
       ]
     }
