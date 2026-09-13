@@ -90,3 +90,39 @@ describe('buildGuardPayloads — and-handler bare-string sub-guards', () => {
     expect(pass.row).toEqual({ id: 'mock-test-id', name: 'mock-test-name' });
   });
 });
+
+/**
+ * RV-53 — `(> (array/len ?data) 0)` (`DirectMessageStarter.AUTO_OPEN`'s real
+ * shape: "does the loaded list have rows"). Before the fix, `>`'s handler
+ * called `extractPayloadFieldPath` on the nested `["array/len", ref]` node
+ * directly, got `null` (it isn't a bare `@payload.x` string), and fell
+ * through to `{pass:{},fail:{}}` — a list-non-empty guard synthesized
+ * NOTHING for `data` even on the pass branch, making it false by
+ * construction wherever nothing else independently supplied a non-empty
+ * array for that field.
+ */
+describe('buildGuardPayloads — array/len comparisons (RV-53)', () => {
+  it('"> 0" (seeded-rows case): pass carries a non-empty array, fail carries an empty one', () => {
+    const { pass, fail } = buildGuardPayloads(['>', ['array/len', '@payload.data'], 0]);
+    expect(Array.isArray(pass.data)).toBe(true);
+    expect((pass.data as unknown[]).length).toBeGreaterThan(0);
+    expect(fail.data).toEqual([]);
+  });
+
+  it('">= 2": pass has exactly 2 rows, fail clamps below zero to an empty (not negative-length) array', () => {
+    const { pass, fail } = buildGuardPayloads(['>=', ['array/len', '@payload.items'], 2]);
+    expect(pass.items).toHaveLength(2);
+    expect(fail.items).toHaveLength(1);
+  });
+
+  it('"< 1" (empty-store case): pass is the empty list itself — the only value satisfying "fewer than one row"', () => {
+    const { pass, fail } = buildGuardPayloads(['<', ['array/len', '@payload.data'], 1]);
+    expect(pass.data).toEqual([]);
+    expect((fail.data as unknown[]).length).toBeGreaterThan(0);
+  });
+
+  it('nests array/len paths the same as any other comparison (dotted @payload path)', () => {
+    const { pass } = buildGuardPayloads(['>', ['array/len', '@payload.result.rows'], 0]);
+    expect(Array.isArray((pass.result as { rows: unknown }).rows)).toBe(true);
+  });
+});

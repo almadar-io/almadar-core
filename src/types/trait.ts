@@ -237,6 +237,21 @@ export function maskSecretConfigValues(
 }
 
 /**
+ * A `trait`-typed knob's override may spell the unbound sentinel as the bare
+ * `none` — `orbital-lolo`'s plain-wiring grammar has no static type at the
+ * call site, so it lowers `none` to the literal string `"none"` like any
+ * other identifier. This is the one place the field's declared `type` is
+ * known, so it is where the string is canonicalized to `null` — the
+ * language's single "unbound" representation for a `trait`-typed knob
+ * (owner ruling 2026-09-13), mirroring the compiler's
+ * `canonicalize_unbound_trait_override` (`orbital-compiler/src/phases/
+ * inline/trait.rs`). A no-op for every other type or value.
+ */
+function canonicalizeUnboundTraitOverride(fieldType: string, value: TraitConfigValue): TraitConfigValue {
+    return fieldType === 'trait' && value === 'none' ? null : value;
+}
+
+/**
  * Fold an override value map onto a `DeclaredTraitConfig`'s per-knob
  * `default`, mirroring the compiler's `ORB_O_CONFIG_UNKNOWN_KEY` check.
  * Single owner for the factory-runtime overlay (`applyParamsToOrb` folding
@@ -261,7 +276,7 @@ export function overrideDeclaredKnobs(
                     `(ORB_O_CONFIG_UNKNOWN_KEY). Declared: ${Object.keys(declared).join(', ') || '(none)'}`,
             );
         }
-        out[key] = { ...field, default: overrides[key] };
+        out[key] = { ...field, default: canonicalizeUnboundTraitOverride(field.type, overrides[key]) };
     }
     return out;
 }

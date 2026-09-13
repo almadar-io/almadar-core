@@ -136,12 +136,12 @@ export interface BusEventSource {
    * just-dispatched event; server-side cascade emits there carry
    * `fromBridge: true` but NOT `dispatched`, so they still reach the
    * source trait's transition handler, e.g. `loading -> browsing` on a
-   * fetch's `emit.success`) and by ServerBridge's response-cascade
-   * re-emit (runtime path — every response entry echoes this tab's own
-   * dispatch, already delivered locally via the click-time qualified
-   * emit / bare-cascade subscription; cross-trait `listens` don't filter
-   * on this flag, so their delivery is unaffected). Push-leg events from
-   * OTHER tabs (multiplayer) are never stamped.
+   * fetch's `emit.success`) and by ServerBridge (runtime path — stamped
+   * on exactly one response-cascade echo per event the dispatch delivered
+   * locally on the bare key, `stampLocallyDeliveredEchoes`; server-only
+   * results stay unstamped). Cross-trait `listens` never filter on this
+   * flag, so their delivery is unaffected. Push-leg events from OTHER
+   * tabs (multiplayer) are never stamped.
    */
   dispatched?: boolean;
   /**

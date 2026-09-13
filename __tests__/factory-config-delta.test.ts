@@ -35,6 +35,24 @@ describe('overrideDeclaredKnobs', () => {
   it('is a no-op given an empty override map', () => {
     expect(overrideDeclaredKnobs(declared, {})).toEqual(declared);
   });
+
+  it('canonicalizes a trait-typed knob’s "none" override to null (owner ruling 2026-09-13)', () => {
+    const withTrait: DeclaredTraitConfig = {
+      ...declared,
+      uiTrait: { type: 'trait', default: '@trait.DefaultForm' },
+    };
+    const out = overrideDeclaredKnobs(withTrait, { uiTrait: 'none' });
+    expect(out.uiTrait).toEqual({ type: 'trait', default: null });
+  });
+
+  it('leaves a non-trait knob’s literal "none" override untouched (no text heuristic)', () => {
+    const withStringKnob: DeclaredTraitConfig = {
+      ...declared,
+      mode: { type: 'string', default: 'edit' },
+    };
+    const out = overrideDeclaredKnobs(withStringKnob, { mode: 'none' });
+    expect(out.mode).toEqual({ type: 'string', default: 'none' });
+  });
 });
 
 // ----------------------------------------------------------------------------

@@ -62,6 +62,31 @@ function isPayloadObject(v: EventPayloadValue): v is EventPayload {
 }
 
 /**
+ * RV-53: a numeric comparison's LHS may be `["array/len", "@payload.x"]`
+ * (`when (> (array/len ?data) 0)` — "does this list have rows") rather
+ * than a bare `@payload.x` reference. `extractPayloadFieldPath` only
+ * matches a string, so this shape fell through comparison handling
+ * silently (`>` IS a recognized operator, so no gap warning fired) and
+ * synthesized nothing — `?data` stayed unresolved even on the PASS
+ * variant, making a list-non-empty guard false BY CONSTRUCTION regardless
+ * of which branch verify was trying to walk.
+ */
+function extractArrayLenPath(ref: unknown): string[] | null {
+  if (!Array.isArray(ref) || ref.length !== 2 || ref[0] !== 'array/len') return null;
+  return extractPayloadFieldPath(ref[1]);
+}
+
+/** `n` synthesized rows — a real (non-empty, unless `n <= 0`) array whose
+ *  length is exactly what the comparison branch needs, never a bare
+ *  number written where the guard reads a list. Negative lengths (a
+ *  `lt`/`lte` fail/pass computed as `n - 1` at `n = 0`) clamp to 0 — an
+ *  empty list is the correct, real fact for "fewer than zero rows" can
+ *  never mean, never a synthesis artifact. */
+function arrayOfLength(n: number): EventPayloadValue[] {
+  return Array.from({ length: Math.max(0, n) }, (_, i) => ({ id: `mock-test-id-${i}` }));
+}
+
+/**
  * Guard operators this module synthesizes real pass/fail payloads for
  * (subject to the arg shape actually being payload-steerable — an
  * `@entity`/`@config`-only guard using one of these ops still falls
@@ -465,26 +490,34 @@ export function buildGuardPayloads(guard: unknown): GuardPayload {
   }
 
   if (op === 'gt' || op === '>') {
-    const path = extractPayloadFieldPath(guard[1]);
+    const arrayPath = extractArrayLenPath(guard[1]);
     const n = typeof guard[2] === 'number' ? guard[2] : 0;
+    if (arrayPath) return { pass: nestedPayload(arrayPath, arrayOfLength(n + 1)), fail: nestedPayload(arrayPath, arrayOfLength(n)) };
+    const path = extractPayloadFieldPath(guard[1]);
     if (path) return { pass: nestedPayload(path, n + 1), fail: nestedPayload(path, n - 1) };
   }
 
   if (op === 'gte' || op === '>=') {
-    const path = extractPayloadFieldPath(guard[1]);
+    const arrayPath = extractArrayLenPath(guard[1]);
     const n = typeof guard[2] === 'number' ? guard[2] : 0;
+    if (arrayPath) return { pass: nestedPayload(arrayPath, arrayOfLength(n)), fail: nestedPayload(arrayPath, arrayOfLength(n - 1)) };
+    const path = extractPayloadFieldPath(guard[1]);
     if (path) return { pass: nestedPayload(path, n), fail: nestedPayload(path, n - 1) };
   }
 
   if (op === 'lt' || op === '<') {
-    const path = extractPayloadFieldPath(guard[1]);
+    const arrayPath = extractArrayLenPath(guard[1]);
     const n = typeof guard[2] === 'number' ? guard[2] : 0;
+    if (arrayPath) return { pass: nestedPayload(arrayPath, arrayOfLength(n - 1)), fail: nestedPayload(arrayPath, arrayOfLength(n + 1)) };
+    const path = extractPayloadFieldPath(guard[1]);
     if (path) return { pass: nestedPayload(path, n - 1), fail: nestedPayload(path, n + 1) };
   }
 
   if (op === 'lte' || op === '<=') {
-    const path = extractPayloadFieldPath(guard[1]);
+    const arrayPath = extractArrayLenPath(guard[1]);
     const n = typeof guard[2] === 'number' ? guard[2] : 0;
+    if (arrayPath) return { pass: nestedPayload(arrayPath, arrayOfLength(n)), fail: nestedPayload(arrayPath, arrayOfLength(n + 1)) };
+    const path = extractPayloadFieldPath(guard[1]);
     if (path) return { pass: nestedPayload(path, n), fail: nestedPayload(path, n + 1) };
   }
 

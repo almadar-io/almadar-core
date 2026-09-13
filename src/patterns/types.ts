@@ -27,6 +27,11 @@ import type { EventPayloadValue } from '../types/expression.js';
  *                     Each item has a field (default `"event"`, override
  *                     with {@link PatternPropDef.eventField}) holding a
  *                     declared event key. Same rename applies per item.
+ * - `"event-map"`  — the prop is an object whose dynamic-key VALUES are
+ *                     declared event keys (`Record<K, EventKey>` / a d-pad's
+ *                     direction→event map, a canvas's keycode→event map).
+ *                     Set from the Record/index-signature value type's own
+ *                     `EventKey` identity — never from the prop's name.
  * - `"entity"`     — the prop is the pattern's data INLET: the bound entity
  *                     record(s) it renders. The inlet half of the circuit,
  *                     symmetric with the event OUTLET kinds above. Source type:
@@ -44,6 +49,7 @@ export type PropKind =
   | 'event-ref'
   | 'event-listen'
   | 'event-list'
+  | 'event-map'
   | 'callback'
   | 'entity';
 

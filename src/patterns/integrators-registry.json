@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-12T12:14:53.173Z",
+  "exportedAt": "2026-09-12T17:27:32.966Z",
   "integrators": {
     "github": {
       "name": "github",
@@ -3782,6 +3782,141 @@
                   "color": {
                     "type": "string",
                     "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "buildLayers",
+          "description": "Build per-part cutout layer images (name, box, z-order, pivot) from a source image and rig.",
+          "params": [
+            {
+              "name": "imagePath",
+              "type": "string",
+              "required": true,
+              "description": "Path to the source image."
+            },
+            {
+              "name": "rig",
+              "type": "object",
+              "required": true,
+              "description": "The rig definition (parts, boxes, pivots, …) as JSON."
+            },
+            {
+              "name": "outDir",
+              "type": "string",
+              "required": true,
+              "description": "Output directory for the layer images."
+            }
+          ],
+          "responseShape": {
+            "layers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "path": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "x": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "y": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "w": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "h": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "z": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "pivot": {
+                    "type": "[number, number]",
+                    "required": true
+                  },
+                  "isRest": {
+                    "type": "boolean",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "pose",
+          "description": "Sample a pose/animation preset into per-frame, per-part transforms for a rig.",
+          "params": [
+            {
+              "name": "imagePath",
+              "type": "string",
+              "required": true,
+              "description": "Path to the source image."
+            },
+            {
+              "name": "rig",
+              "type": "object",
+              "required": true,
+              "description": "The rig definition (parts, boxes, pivots, …) as JSON."
+            },
+            {
+              "name": "roles",
+              "type": "object",
+              "required": true,
+              "description": "Map of part name to preset bone role.",
+              "mapValue": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "preset",
+              "type": "string",
+              "required": false,
+              "description": "Animation preset name."
+            },
+            {
+              "name": "overrides",
+              "type": "object",
+              "required": false,
+              "description": "Per-part motion overrides applied over the preset."
+            }
+          ],
+          "responseShape": {
+            "fps": "number",
+            "frames": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "mapValue": {
+                  "type": "object",
+                  "properties": {
+                    "angle": {
+                      "type": "number",
+                      "required": true
+                    },
+                    "bx": {
+                      "type": "number",
+                      "required": true
+                    },
+                    "by": {
+                      "type": "number",
+                      "required": true
+                    }
                   }
                 }
               }
