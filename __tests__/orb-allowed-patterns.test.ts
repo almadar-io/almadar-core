@@ -60,19 +60,21 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
   //                 display set when it gained its entity binding)
   // Re-pinned 2026-09-11 from 35/247:
   //   game      +1  draw-skinned-mesh                      (CPU-posed 2D skin)
+  // Re-pinned 2026-09-16 from 248:
+  //   component +1  gantt                                  (the Gantt molecule)
   it('pins the per-category allowed counts', () => {
     const counts = Object.fromEntries(
       Object.entries(grouped).map(([cat, items]) => [cat, items.length]),
     );
     expect(counts).toMatchObject({
-      component: 108,
+      component: 109,
       display: 39,
       filter: 4,
       form: 10,
       game: 36,
       media: 1,
     });
-    expect(names.length).toBe(248);
+    expect(names.length).toBe(249);
   });
 
   it('admits the drifted patterns by name, not just by count', () => {
