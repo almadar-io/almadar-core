@@ -14,22 +14,33 @@
  */
 
 import type { OrbitalEntity } from '../types/entity.js';
-import type { EntityRef } from '../types/orbital.js';
+import type { EntityRef, OrbitalDefinition } from '../types/orbital.js';
 import type { OrbitalSchema } from '../types/schema.js';
 import type { SExpr } from '../types/expression.js';
 
-/** Inline entity definitions of an orbital: the primary plus any auxiliaries. */
-function inlineEntities(schema: OrbitalSchema): OrbitalEntity[] {
+/**
+ * One orbital's own inline entity definitions: its primary entity plus any
+ * auxiliaries an import brought along (`auxiliaryEntities` — a linkedEntity
+ * naming an imported atom's own entity resolves here, not among any
+ * orbital's primary entity alone). Skips unresolved `string`/`EntityCall`
+ * refs — those are pre-inline-phase forms that never reach this by the time
+ * a schema is served.
+ */
+export function orbitalInlineEntities(orbital: OrbitalDefinition): OrbitalEntity[] {
   const out: OrbitalEntity[] = [];
-  for (const orbital of schema.orbitals ?? []) {
-    const refs: EntityRef[] = [orbital.entity, ...(orbital.auxiliaryEntities ?? [])];
-    for (const ref of refs) {
-      if (typeof ref === 'object' && ref !== null && 'fields' in ref) {
-        out.push(ref as OrbitalEntity);
-      }
+  const refs: EntityRef[] = [orbital.entity, ...(orbital.auxiliaryEntities ?? [])];
+  for (const ref of refs) {
+    if (typeof ref === 'object' && ref !== null && 'fields' in ref) {
+      out.push(ref as OrbitalEntity);
     }
   }
   return out;
+}
+
+/** Inline entity definitions of every orbital in a schema: each orbital's
+ * primary entity plus any auxiliaries. */
+function inlineEntities(schema: OrbitalSchema): OrbitalEntity[] {
+  return (schema.orbitals ?? []).flatMap(orbitalInlineEntities);
 }
 
 /** An entity's four declared directives. Any may be absent — an absent

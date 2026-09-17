@@ -141,6 +141,7 @@ export {
   type EntityAccessPolicies,
   entityAccessPolicies,
   entityAccessTable,
+  orbitalInlineEntities,
 } from './src/access/entityAccess';
 
 // `expects` derivation — compute an orbital's consumer-side requirement

@@ -12,23 +12,19 @@
 
 import type { OrbitalEntity } from '../types/entity.js';
 import type { EntityField } from '../types/field.js';
-import type { EntityRef, OrbitalDefinition } from '../types/orbital.js';
+import type { OrbitalDefinition } from '../types/orbital.js';
 import type { OrbitalSchema } from '../types/schema.js';
 import type { SExpr } from '../types/expression.js';
-import { entityAccessPolicies, type EntityAccessPolicies } from '../access/entityAccess.js';
+import {
+  entityAccessPolicies,
+  orbitalInlineEntities,
+  type EntityAccessPolicies,
+} from '../access/entityAccess.js';
 
-/** Inline entity definitions of an orbital: the primary plus any auxiliaries. */
+/** Inline entity definitions of every orbital in a schema: each orbital's
+ * primary entity plus any auxiliaries. */
 function inlineEntities(schema: OrbitalSchema): OrbitalEntity[] {
-  const out: OrbitalEntity[] = [];
-  for (const orbital of schema.orbitals ?? []) {
-    const refs: EntityRef[] = [orbital.entity, ...(orbital.auxiliaryEntities ?? [])];
-    for (const ref of refs) {
-      if (typeof ref === 'object' && ref !== null && 'fields' in ref) {
-        out.push(ref as OrbitalEntity);
-      }
-    }
-  }
-  return out;
+  return (schema.orbitals ?? []).flatMap(orbitalInlineEntities);
 }
 
 /**
