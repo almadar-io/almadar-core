@@ -136,11 +136,27 @@ function declaredValues(field: EntityField): readonly string[] | undefined {
  * Is `field.default` a value the synthesizer must return verbatim?
  *
  * Exported so codegen and tests share the one predicate rather than restating it.
+ *
+ * `isRuntime` defaults to `false` (the persistent/multi-row behavior) —
+ * a `[runtime]` singleton's seeded row must equal its declared-defaults
+ * projection outright (gate 1: persistence must agree with the default
+ * layer in the `@entity` merge, or the machine boots into the wrong
+ * state), so ANY declared default is honored there, unconditionally.
+ * For a persistent, multi-row entity a number/boolean default is a
+ * NEW-RECORD default, not a claim about every existing row — same
+ * reasoning already applied below to a string default on a closed
+ * vocabulary (the row cycle wins over it). Honoring it verbatim made
+ * every mock-seeded counter/amount field (`hours = 0`, `debit = 0`, a
+ * runtime-only concern accidentally applied to every row of a real
+ * collection) read as literally, uniformly zero across the whole
+ * collection — confirmed 2026-09-17 across `LedgerEntry.debit/credit`,
+ * `ExecTimeEntry.hours/costRate`, `ExecCost.amount`.
  */
-export function isDeclaredDefaultHonored(field: EntityField): boolean {
+export function isDeclaredDefaultHonored(field: EntityField, isRuntime = false): boolean {
   const value = field.default;
   if (value === undefined || value === null) return false;
-  if (typeof value === 'number' || typeof value === 'boolean') return true;
+  if (isRuntime) return true;
+  if (typeof value === 'number' || typeof value === 'boolean') return false;
   if (Array.isArray(value)) return true;
   if (typeof value === 'object') return true;
   if (typeof value !== 'string') return false;
@@ -286,11 +302,11 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
 
   // Gate 1: a runtime singleton's seeded row must equal its declared-defaults
   // projection, or persistence disagrees with the default layer in the @entity
-  // merge and boots the machine into the wrong state.
+  // merge and boots the machine into the wrong state. A persistent (multi-row)
+  // entity's number/boolean default is a new-record default, not a claim
+  // about every existing row — see `isDeclaredDefaultHonored`'s own doc.
   const isRuntime = ctx.persistence === 'runtime';
-  if (isRuntime && honoredDefault !== undefined) return honoredDefault;
-
-  if (!isRuntime && isDeclaredDefaultHonored(field) && honoredDefault !== undefined) {
+  if (isDeclaredDefaultHonored(field, isRuntime) && honoredDefault !== undefined) {
     return honoredDefault;
   }
 

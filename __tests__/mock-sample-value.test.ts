@@ -38,9 +38,13 @@ describe.each(STRATEGIES)('mock-seed policy [%s]', (strategy) => {
       expect(sampleFieldValue(f, ctx(strategy))).toBe('Title');
     });
 
-    it('honors 0 and false — the falsy traps the numeric-only gate existed for', () => {
-      expect(sampleFieldValue({ name: 'tokenCount', type: 'number', default: 0 }, ctx(strategy))).toBe(0);
-      expect(sampleFieldValue({ name: 'enabled', type: 'boolean', default: false }, ctx(strategy))).toBe(false);
+    it('honors 0 and false on a runtime singleton — the falsy traps the numeric-only gate existed for', () => {
+      expect(
+        sampleFieldValue({ name: 'tokenCount', type: 'number', default: 0 }, ctx(strategy, 1, 'runtime')),
+      ).toBe(0);
+      expect(
+        sampleFieldValue({ name: 'enabled', type: 'boolean', default: false }, ctx(strategy, 1, 'runtime')),
+      ).toBe(false);
     });
 
     it('honors empty collection defaults', () => {
@@ -184,6 +188,28 @@ describe.each(STRATEGIES)('mock-seed policy [%s]', (strategy) => {
     it('the same field on a collection does cycle', () => {
       const rows = sampleRows(entity([boardResult], 'persistent'), 3, strategy);
       expect(rows.map((r) => r.result)).toEqual(['none', 'victory', 'defeat']);
+    });
+
+    // C-MOCK-SEED-NUMBER-DEFAULT-FLATTENED: a `= 0`-style number/boolean
+    // default is a runtime singleton's real starting state (honored
+    // verbatim there, same falsy-trap protection as above) but on a
+    // persistent, multi-row entity it's a new-record default only — every
+    // row honoring it verbatim made every mock-seeded counter/amount field
+    // (`debit`, `hours`, `costRate`, `amount`, ...) read as uniformly zero
+    // across the whole collection. Confirmed 2026-09-17.
+    it('honors a 0/false default verbatim on a runtime singleton', () => {
+      const counter: EntityField = { name: 'tokenCount', type: 'number', default: 0, required: true };
+      const rows = sampleRows(entity([counter], 'runtime'), 6, strategy);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]!.tokenCount).toBe(0);
+    });
+
+    it('does NOT flatten a 0/false default across a persistent collection — it randomizes', () => {
+      const counter: EntityField = { name: 'tokenCount', type: 'number', default: 0, required: true };
+      const rows = sampleRows(entity([counter], 'persistent'), 6, strategy);
+      expect(rows).toHaveLength(6);
+      expect(rows.every((r) => r.tokenCount === 0)).toBe(false);
+      for (const row of rows) expect(typeof row.tokenCount).toBe('number');
     });
   });
 
