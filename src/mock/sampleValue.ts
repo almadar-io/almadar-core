@@ -158,6 +158,28 @@ export function sampleRowCount(entity: SampleEntity, requested: number): number 
   return entity.persistence === 'runtime' ? 1 : requested;
 }
 
+/**
+ * Value for a declared `@mock "..."` field — the declared string used
+ * LITERALLY, never interpreted through any domain-name lookup. Comma-
+ * separated is an explicit candidate list the author supplies real values
+ * for, rotated by row index (`@mock "Acme Corp, Globex Inc, Wayne
+ * Enterprises"` -> row 1 gets "Acme Corp", row 2 "Globex Inc", ...). No
+ * comma is a single literal value, index-suffixed so rows aren't
+ * byte-identical (`@mock "person-name"` -> "person-name-1",
+ * "person-name-2", ...). Mirrors `seed.rs`'s Rust twin exactly — same
+ * split/rotate/suffix rule, no per-domain code on either side.
+ */
+export function mockFieldValue(declared: string, index: number): string {
+  const candidates = declared
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+  if (candidates.length > 1) {
+    return candidates[(index - 1) % candidates.length]!;
+  }
+  return `${declared.trim()}-${index}`;
+}
+
 function sampleText(field: EntityField, ctx: SampleContext): string {
   const fieldName = field.name ?? 'field';
   if (IMAGE_FIELD_NAMES.has(fieldName.toLowerCase())) {
@@ -296,6 +318,20 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
     // Row 1 yields values[0], which is the declared default for 85% of fields.
     const ordinal = isRuntime ? 1 : ctx.index;
     return values[(ordinal - 1) % values.length]!;
+  }
+
+  // A declared `@mock "..."` wins over the type-based dispatch below and is
+  // used LITERALLY — never mapped through a domain-name lookup table (that
+  // would be this generator deciding what "person-name" means, exactly the
+  // guess `.lolo`'s type system doesn't get to make). Comma-separated is an
+  // explicit candidate list the AUTHOR supplies real values for, rotated by
+  // row index. No comma is a single literal value, index-suffixed so rows
+  // aren't byte-identical. No `@mock` at all falls straight through to the
+  // ordinary type-based synthesis below, unchanged. Mirrors `seed.rs`'s
+  // Rust twin exactly.
+  if (field.mock !== undefined) {
+    const ordinal = isRuntime ? 1 : ctx.index;
+    return mockFieldValue(field.mock, ordinal);
   }
 
   switch (field.type) {

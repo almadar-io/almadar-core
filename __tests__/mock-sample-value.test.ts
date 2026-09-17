@@ -127,6 +127,36 @@ describe.each(STRATEGIES)('mock-seed policy [%s]', (strategy) => {
     });
   });
 
+  describe('a declared @mock value is used literally, never through a domain lookup', () => {
+    // `required: true` on every field below so the every-other-row
+    // undefaulted-optional-unset policy (see "undefaulted optional fields
+    // are left unset on alternating rows" further down) doesn't turn these
+    // into a mixed value/undefined assertion — these tests are about @mock
+    // synthesis, not the unset policy.
+    it('rotates comma-separated literal candidates by row index — the author supplies real values', () => {
+      const field: EntityField = {
+        name: 'clientName',
+        type: 'string',
+        required: true,
+        mock: 'Acme Corp, Globex Inc, Wayne Enterprises',
+      };
+      const got = [1, 2, 3, 4].map((i) => sampleFieldValue(field, ctx(strategy, i)));
+      expect(got).toEqual(['Acme Corp', 'Globex Inc', 'Wayne Enterprises', 'Acme Corp']);
+    });
+
+    it('with no comma, uses the single literal value suffixed with the row index', () => {
+      const field: EntityField = { name: 'clientName', type: 'string', required: true, mock: 'person-name' };
+      expect(sampleFieldValue(field, ctx(strategy, 1))).toBe('person-name-1');
+      expect(sampleFieldValue(field, ctx(strategy, 2))).toBe('person-name-2');
+    });
+
+    it('with no @mock declared, falls through to ordinary type-based synthesis unchanged', () => {
+      const field: EntityField = { name: 'clientName', type: 'string' };
+      const got = sampleFieldValue(field, ctx(strategy, 1));
+      expect(got).not.toMatch(/^person-name/);
+    });
+  });
+
   describe('gate 1 — runtime singletons', () => {
     const boardResult: EntityField = {
       name: 'result',

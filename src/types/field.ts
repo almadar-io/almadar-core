@@ -337,6 +337,13 @@ type EntityFieldBase = {
     /** User-vocabulary synonyms (authored `@synonyms "..."` in `.lolo`).
      *  Free text feeding catalog search / curation field-matching. */
     synonyms?: string;
+    /** Declared mock value(s) (authored `@mock "..."` in `.lolo`), used
+     *  LITERALLY by the seeder (`sampleValue.ts`, `seed.rs`) — never mapped
+     *  through a domain-name lookup table. Comma-separated is an explicit
+     *  candidate list rotated by row index (`@mock "Acme Corp, Globex Inc"`);
+     *  no comma is a single literal value, index-suffixed per row
+     *  (`@mock "person-name"` -> "person-name-1", "person-name-2", ...). */
+    mock?: string;
     /**
      * The imported entity this field was merged from on a rebind (sibling
      * pull / entity contract). Absent on author-declared fields — a merged
@@ -464,6 +471,7 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
         intrinsic: z.boolean().optional(),
         description: z.string().optional(),
         synonyms: z.string().optional(),
+        mock: z.string().optional(),
         mergedFrom: z.string().optional(),
     };
 
