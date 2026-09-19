@@ -1,6 +1,6 @@
 {
   "name": "@almadar/core",
-  "version": "10.98.0",
+  "version": "10.99.0",
   "description": "Core schema types and definitions for Almadar",
   "type": "module",
   "main": "./dist/index.js",
@@ -99,6 +99,7 @@
     "@typescript/native": "npm:typescript@^7.0.2",
     "eslint": "10.0.0",
     "tsup": "^8.0.0",
+    "tsx": "^4.22.4",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vitest": "^1.4.0",
     "turbo": "^2.8.17"
