@@ -308,6 +308,11 @@ export function isFieldValue(value: RuntimeValue): value is FieldValue {
  */
 export type EntityRow = { id?: string } & Record<string, FieldValue | undefined>;
 
+/** Zod twin of `EntityRow` — the one runtime validator for an `@entity` wire row. */
+export const EntityRowSchema: z.ZodType<EntityRow> = z
+  .object({ id: z.string().optional() })
+  .catchall(FieldValueSchema.optional());
+
 /**
  * A field-TYPED `EntityRow` — the SINGLE entity type, refined with a concrete
  * field SHAPE `S`. Non-optional members of `S` are REQUIRED, each with its real

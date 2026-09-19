@@ -298,6 +298,37 @@ export type PersistRowInput = { id?: string | SExpr } & Record<string, FieldValu
 export type PersistData = EntityRow | PersistRowInput | string | SExpr[];
 
 /**
+ * One EVALUATED operation of the runtime path's `["persist", "batch", [...ops]]`
+ * form, as `EffectExecutor` hands it to `handlers.persist('batch', '', { operations })`
+ * and both server persist handlers execute it. The row is optional on
+ * create/update (an absent row persists `{}`), exactly as the handlers always
+ * tolerated. The compiled path has no batch persist — ledger §169.
+ */
+export type PersistBatchOperation =
+    | ['create', string, EntityRow?]
+    | ['update', string, string, EntityRow?]
+    | ['delete', string, string];
+
+function isRowObject(value: RuntimeValue): value is EntityRow {
+    return typeof value === 'object' && value !== null && !Array.isArray(value) && !(value instanceof Date);
+}
+
+/** The ONE structural check for a batch operation — every consumer narrows through it. */
+export function isPersistBatchOperation(value: RuntimeValue): value is PersistBatchOperation {
+    if (!Array.isArray(value) || typeof value[1] !== 'string') return false;
+    switch (value[0]) {
+        case 'create':
+            return value.length === 2 || (value.length === 3 && isRowObject(value[2]));
+        case 'update':
+            return typeof value[2] === 'string' && (value.length === 3 || (value.length === 4 && isRowObject(value[3])));
+        case 'delete':
+            return value.length === 3 && typeof value[2] === 'string';
+        default:
+            return false;
+    }
+}
+
+/**
  * Persist effect - creates, updates, deletes, or clears entities.
  *
  * Each operation accepts an optional trailing `PersistEmitConfig` so the
@@ -392,6 +423,23 @@ export type FetchOptions = {
  * @example ['fetch', 'User'] or ['fetch', 'User', { id: '@payload.userId' }]
  */
 export type FetchEffect = ['fetch', string] | ['fetch', string, FetchOptions];
+
+/** Options for `fetch-stream` — mirror of the compiler's `OirEffect::FetchStream`
+ *  (`orbital-core/src/ir/effects.rs`) and the runtime's `fetchStream` handler. */
+export type FetchStreamOptions = {
+    id?: string | SExpr;
+    filter?: SExpr;
+    /** `on_message` fires per chunk; `success` on completion. */
+    emit?: { on_message?: string; success?: string; failure?: string };
+};
+
+/**
+ * Fetch-stream effect - streams entity rows (server-side), one `on_message`
+ * emit per chunk. The compiled path (`OirEffect::FetchStream`) and the
+ * runtime (`EffectExecutor` `'fetch-stream'`) both execute it.
+ * @example ['fetch-stream', 'Message', { filter: ['=', '@entity.roomId', '@payload.roomId'], emit: { on_message: 'CHUNK' } }]
+ */
+export type FetchStreamEffect = ['fetch-stream', string] | ['fetch-stream', string, FetchStreamOptions];
 
 /**
  * Result returned by a fetch / ref / deref handler.
@@ -722,6 +770,7 @@ export type TypedEffect =
     | DespawnEffect
     | DoEffect
     | FetchEffect
+    | FetchStreamEffect
     | IfEffect
     | WhenEffect
     | LetEffect
@@ -786,6 +835,33 @@ export type TypedEffect =
  * ["persist", "create", "Task", { "title": "@payload.title" }]
  */
 export type Effect = TypedEffect;
+
+/**
+ * The effects a server reports an outcome for on
+ * `OrbitalEventResponse.effectResults` (`ServerEffectResult.effect`). Every
+ * member is checked against the effect heads above at compile time, so a
+ * name that is not an effect cannot be listed and a new server-reported
+ * effect is added HERE only — the wire type, its zod twin and the
+ * `events-wire` fixture case all derive from this array.
+ */
+export const SERVER_REPORTED_EFFECTS = [
+    'set',
+    'persist',
+    'call-service',
+    'fetch',
+    'fetch-stream',
+    'ref',
+    'deref',
+    'swap!',
+    'atomic',
+    'emit',
+] as const satisfies readonly Effect[0][];
+
+export type ServerReportedEffect = (typeof SERVER_REPORTED_EFFECTS)[number];
+
+/** A namespaced effect head (`trace/emit`, `memory/store`, `llm/…`) — what a
+ *  `substrate` result's `name` carries. Derived from the union, never listed. */
+export type NamespacedEffectName = Extract<Effect[0], `${string}/${string}`>;
 
 /**
  * Schema for Effect - validates S-expression format. Arguments validate as
@@ -1098,6 +1174,25 @@ export type ResolvedPatternProps = {
     | RenderChildrenMap
     | Array<ResolvedPatternProps | RenderChildrenMap>;
 };
+
+/**
+ * Zod twin of `PatternConfig`/`AnyPatternConfig` — validates the WIRE SHAPE
+ * (a plain object, or `null` for an unset render-ui target) only. Per-pattern
+ * prop shape (the hundreds of generated `PatternPropsMap` variants) is
+ * enforced by the patterns registry at `orb validate` / lolo parse time, not
+ * re-validated here — a second, drifting copy of that registry is exactly
+ * the duplicate this schema must not become.
+ */
+export const PatternConfigSchema: z.ZodType<AnyPatternConfig | null> = z.custom<AnyPatternConfig | null>(
+    (value) => value === null || (typeof value === 'object' && value !== null && !Array.isArray(value)),
+    { message: 'Expected a pattern config object or null' },
+);
+
+/** Zod twin of `ResolvedPatternProps` — validates the wire shape (a plain object) only, see {@link PatternConfigSchema}. */
+export const ResolvedPatternPropsSchema: z.ZodType<ResolvedPatternProps> = z.custom<ResolvedPatternProps>(
+    (value) => typeof value === 'object' && value !== null && !Array.isArray(value),
+    { message: 'Expected a resolved pattern props object' },
+);
 
 /** A node in a render-ui effect tree. */
 export interface RenderUINode {

@@ -13,6 +13,8 @@ export default defineConfig({
     'patterns/index': 'src/patterns/index.ts',
     'mock/index': 'src/mock/index.ts',
     'i18n/index': 'src/i18n/index.ts',
+    'themes/index': 'src/themes/index.ts',
+    'fixtures': 'src/fixtures.ts',
   },
   format: ['esm'],
   dts: true,

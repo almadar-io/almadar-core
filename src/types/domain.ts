@@ -828,40 +828,31 @@ export type ColorTokens = {
   placeholder?: string;
 };
 
-export const ColorTokensSchema = z.object({
-  primary: z.string().optional(),
-  primaryHover: z.string().optional(),
-  primaryForeground: z.string().optional(),
-  secondary: z.string().optional(),
-  secondaryHover: z.string().optional(),
-  secondaryForeground: z.string().optional(),
-  accent: z.string().optional(),
-  accentForeground: z.string().optional(),
-  muted: z.string().optional(),
-  mutedForeground: z.string().optional(),
-  background: z.string().optional(),
-  foreground: z.string().optional(),
-  card: z.string().optional(),
-  cardForeground: z.string().optional(),
-  surface: z.string().optional(),
-  border: z.string().optional(),
-  input: z.string().optional(),
-  ring: z.string().optional(),
-  error: z.string().optional(),
-  errorForeground: z.string().optional(),
-  success: z.string().optional(),
-  successForeground: z.string().optional(),
-  warning: z.string().optional(),
-  warningForeground: z.string().optional(),
-  info: z.string().optional(),
-  infoForeground: z.string().optional(),
-  tableHeader: z.string().optional(),
-  tableBorder: z.string().optional(),
-  tableRowHover: z.string().optional(),
-  surfaceHover: z.string().optional(),
-  borderHover: z.string().optional(),
-  placeholder: z.string().optional(),
-});
+/** Rejects the array unless it names every key of `T` — the completeness half
+ *  of "one list, derived from the type": `satisfies readonly (keyof T)[]` stops
+ *  a non-key, this stops a missing key. */
+export type KeysComplete<T, Keys extends readonly (keyof T)[]> =
+  Exclude<keyof T, Keys[number]> extends never ? Keys : never;
+
+const COLOR_TOKEN_KEY_LIST = [
+  'primary', 'primaryHover', 'primaryForeground', 'secondary', 'secondaryHover', 'secondaryForeground',
+  'accent', 'accentForeground', 'muted', 'mutedForeground', 'background', 'foreground',
+  'card', 'cardForeground', 'surface', 'border', 'input', 'ring',
+  'error', 'errorForeground', 'success', 'successForeground', 'warning', 'warningForeground',
+  'info', 'infoForeground', 'tableHeader', 'tableBorder', 'tableRowHover', 'surfaceHover',
+  'borderHover', 'placeholder',
+] as const satisfies readonly (keyof ColorTokens)[];
+
+/** Every `ColorTokens` key, in declaration order — the ONE list. The zod twin
+ *  below, the native theme accessors (`almadar-pattern-sync`
+ *  `native-theme-map.ts`) and the `theme-tokens/every-key` fixture that gates
+ *  the Rust `ColorTokens` mirror all derive from it (ledger §166). */
+export const COLOR_TOKEN_KEYS: KeysComplete<ColorTokens, typeof COLOR_TOKEN_KEY_LIST> = COLOR_TOKEN_KEY_LIST;
+export type ColorTokenKey = (typeof COLOR_TOKEN_KEYS)[number];
+
+export const ColorTokensSchema: z.ZodType<ColorTokens> = z.object(
+  Object.fromEntries(COLOR_TOKEN_KEYS.map((key) => [key, z.string().optional()])),
+);
 
 /**
  * Illustration style preset for empty/loading/error/onboarding states.
@@ -899,6 +890,15 @@ export type IllustrationTokens = {
   errorAsset?: string;
   onboardingAsset?: string;
 };
+
+const ILLUSTRATION_TOKEN_KEY_LIST = [
+  'style', 'emptyAsset', 'loadingAsset', 'errorAsset', 'onboardingAsset',
+] as const satisfies readonly (keyof IllustrationTokens)[];
+
+/** Every `IllustrationTokens` key — see `COLOR_TOKEN_KEYS`. */
+export const ILLUSTRATION_TOKEN_KEYS: KeysComplete<IllustrationTokens, typeof ILLUSTRATION_TOKEN_KEY_LIST> =
+  ILLUSTRATION_TOKEN_KEY_LIST;
+export type IllustrationTokenKey = (typeof ILLUSTRATION_TOKEN_KEYS)[number];
 
 export const IllustrationTokensSchema = z.object({
   style: IllustrationStyleSchema.optional(),

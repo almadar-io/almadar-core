@@ -172,3 +172,8 @@ export * from './src/patterns/index';
 // i18n vocabulary tables for the `.lolo`/`.orb` language (English, Arabic,
 // Slovenian) and the coverage gate (pattern-sync's `i18n` step imports this).
 export * from './src/i18n/index';
+
+// Theme presets — THEME_PRESETS (ThemeDefinition, one per built-in preset),
+// migrated from packages/almadar-ui/themes/*.css. almadar-pattern-sync's
+// `themes` step regenerates that CSS from these presets.
+export * from './src/themes/index';

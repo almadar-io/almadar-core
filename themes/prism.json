@@ -1,0 +1,203 @@
+{
+  "name": "prism",
+  "tokens": {
+    "motion": {
+      "durations": {
+        "instant": "0ms",
+        "fast": "80ms",
+        "normal": "120ms",
+        "slow": "180ms",
+        "dramatic": "240ms"
+      },
+      "easings": {
+        "linear": "linear",
+        "standard": "linear",
+        "emphasized": "linear",
+        "spring": "linear"
+      }
+    },
+    "iconography": {
+      "family": "lucide",
+      "strokeWidth": "1.5",
+      "defaultSize": "14px"
+    },
+    "elevation": {
+      "cardElevation": "var(--shadow-sm)",
+      "popoverElevation": "var(--shadow-main)",
+      "dialogElevation": "var(--shadow-main)",
+      "toastElevation": "var(--shadow-sm)"
+    },
+    "geometry": {
+      "radiusContainer": "6px",
+      "radiusInteractive": "10px",
+      "radiusPill": "9999px",
+      "borderHairline": "1px",
+      "borderStandard": "1px",
+      "borderHeavy": "2px"
+    },
+    "colors": {
+      "primary": "#7c3aed",
+      "primary-hover": "#6d28d9",
+      "primary-foreground": "#ffffff",
+      "secondary": "#f1f5f9",
+      "secondary-hover": "#e2e8f0",
+      "secondary-foreground": "#0f172a",
+      "accent": "#84cc16",
+      "accent-foreground": "#1a2e05",
+      "muted": "#f1f5f9",
+      "muted-foreground": "#59677c",
+      "background": "#fafafa",
+      "foreground": "#0f172a",
+      "card": "#ffffff",
+      "card-foreground": "#0f172a",
+      "surface": "#f5f5f7",
+      "border": "#e2e8f0",
+      "input": "#cbd5e1",
+      "ring": "#7c3aed",
+      "error": "#dc2626",
+      "error-foreground": "#ffffff",
+      "success": "#15803d",
+      "success-foreground": "#ffffff",
+      "warning": "#b45309",
+      "warning-foreground": "#ffffff",
+      "info": "#2563eb",
+      "info-foreground": "#ffffff"
+    },
+    "radii": {
+      "none": "0px",
+      "sm": "4px",
+      "md": "6px",
+      "lg": "10px",
+      "xl": "12px",
+      "full": "9999px"
+    },
+    "shadows": {
+      "none": "none",
+      "sm": "0 1px 0 rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.04)",
+      "main": "0 1px 2px rgba(15, 23, 42, 0.06), 0 2px 6px rgba(15, 23, 42, 0.04)",
+      "lg": "0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.04)",
+      "inner": "inset 0 1px 1px rgba(15, 23, 42, 0.04)",
+      "hover": "0 2px 6px rgba(124, 58, 237, 0.12)",
+      "active": "0 1px 2px rgba(124, 58, 237, 0.08)"
+    },
+    "typography": {
+      "border-width": "1px",
+      "border-width-thin": "1px",
+      "border-width-thick": "2px",
+      "icon-color": "currentColor",
+      "transition-fast": "80ms",
+      "transition-normal": "120ms",
+      "transition-slow": "180ms",
+      "transition-timing": "linear",
+      "hover-scale": "1.0",
+      "hover-translate-y": "-1px",
+      "hover-translate-x": "0",
+      "active-scale": "0.99",
+      "active-translate-y": "0",
+      "focus-ring-width": "2px",
+      "focus-ring-offset": "2px",
+      "focus-ring-color": "#7c3aed"
+    }
+  },
+  "variants": {
+    "dark": {
+      "motion": {
+        "durations": {
+          "instant": "0ms",
+          "fast": "80ms",
+          "normal": "120ms",
+          "slow": "180ms",
+          "dramatic": "240ms"
+        },
+        "easings": {
+          "linear": "linear",
+          "standard": "linear",
+          "emphasized": "linear",
+          "spring": "linear"
+        }
+      },
+      "iconography": {
+        "family": "lucide",
+        "strokeWidth": "1.5",
+        "defaultSize": "14px"
+      },
+      "elevation": {
+        "cardElevation": "var(--shadow-sm)",
+        "popoverElevation": "var(--shadow-main)",
+        "dialogElevation": "var(--shadow-main)",
+        "toastElevation": "var(--shadow-sm)"
+      },
+      "geometry": {
+        "radiusContainer": "6px",
+        "radiusInteractive": "10px",
+        "radiusPill": "9999px",
+        "borderHairline": "1px",
+        "borderStandard": "1px",
+        "borderHeavy": "2px"
+      },
+      "colors": {
+        "primary": "#a78bfa",
+        "primary-hover": "#c4b5fd",
+        "primary-foreground": "#1e1b4b",
+        "secondary": "#1f1d3a",
+        "secondary-hover": "#2a2748",
+        "secondary-foreground": "#e2e8f0",
+        "accent": "#bef264",
+        "accent-foreground": "#1a2e05",
+        "muted": "#1f1d3a",
+        "muted-foreground": "#94a3b8",
+        "background": "#0c0a1a",
+        "foreground": "#e2e8f0",
+        "card": "#14122a",
+        "card-foreground": "#e2e8f0",
+        "surface": "#1f1d3a",
+        "border": "#2a2748",
+        "input": "#3a3658",
+        "ring": "#a78bfa",
+        "error": "#f87171",
+        "error-foreground": "#000000",
+        "success": "#4ade80",
+        "success-foreground": "#000000",
+        "warning": "#fbbf24",
+        "warning-foreground": "#000000",
+        "info": "#60a5fa",
+        "info-foreground": "#000000"
+      },
+      "radii": {
+        "none": "0px",
+        "sm": "4px",
+        "md": "6px",
+        "lg": "10px",
+        "xl": "12px",
+        "full": "9999px"
+      },
+      "shadows": {
+        "none": "none",
+        "sm": "0 1px 0 rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2)",
+        "main": "0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3)",
+        "lg": "0 4px 12px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3)",
+        "inner": "inset 0 1px 1px rgba(0, 0, 0, 0.3)",
+        "hover": "0 2px 8px rgba(167, 139, 250, 0.2)",
+        "active": "0 1px 2px rgba(167, 139, 250, 0.15)"
+      },
+      "typography": {
+        "border-width": "1px",
+        "border-width-thin": "1px",
+        "border-width-thick": "2px",
+        "icon-color": "currentColor",
+        "transition-fast": "80ms",
+        "transition-normal": "120ms",
+        "transition-slow": "180ms",
+        "transition-timing": "linear",
+        "hover-scale": "1.0",
+        "hover-translate-y": "-1px",
+        "hover-translate-x": "0",
+        "active-scale": "0.99",
+        "active-translate-y": "0",
+        "focus-ring-width": "2px",
+        "focus-ring-offset": "2px",
+        "focus-ring-color": "#a78bfa"
+      }
+    }
+  }
+}

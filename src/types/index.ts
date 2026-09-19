@@ -156,6 +156,7 @@ export {
   FieldValueSchema,
   type ControlValue,
   type EntityRow,
+  EntityRowSchema,
   type EntityWith,
   type EntityData,
 } from "./entity.js";
@@ -246,6 +247,8 @@ export {
   type EvalContext,
   type EventPayload,
   type EventPayloadValue,
+  EventPayloadSchema,
+  EventPayloadValueSchema,
   isEventPayloadValue,
   type LogMeta,
   type LogMetaValue,
@@ -301,6 +304,7 @@ export {
   resolvePersonaSpec,
   type UserContext,
   type RawUserClaims,
+  RawUserClaimsSchema,
 } from "./user.js";
 
 // ============================================================================
@@ -340,6 +344,9 @@ export {
   type Effect,
   type EffectInput,
   type TypedEffect,
+  SERVER_REPORTED_EFFECTS,
+  type ServerReportedEffect,
+  type NamespacedEffectName,
   type UISlot,
   type PatternConfig,
   type TemplatePatternConfig,
@@ -354,7 +361,11 @@ export {
   type EmitEffect,
   type SetEffect,
   type PersistEffect,
+  type PersistBatchOperation,
+  isPersistBatchOperation,
   type FetchEffect,
+  type FetchStreamEffect,
+  type FetchStreamOptions,
   type CallServiceEffect,
   type SpawnEffect,
   type DespawnEffect,
@@ -422,6 +433,8 @@ export {
   atomic,
   // Runtime pattern types
   type ResolvedPatternProps,
+  ResolvedPatternPropsSchema,
+  PatternConfigSchema,
   type RenderUINode,
 } from "./effect.js";
 
@@ -624,6 +637,9 @@ export {
   type ElevationTokens,
   type GeometryTokens,
   type ColorTokens,
+  type ColorTokenKey,
+  type IllustrationTokenKey,
+  type KeysComplete,
   type IllustrationStyle,
   type IllustrationTokens,
   // SkinSpec composed type + slice aliases (doc §2.3 vocabulary)
@@ -687,6 +703,8 @@ export {
   ElevationTokensSchema,
   GeometryTokensSchema,
   ColorTokensSchema,
+  COLOR_TOKEN_KEYS,
+  ILLUSTRATION_TOKEN_KEYS,
   IllustrationStyleSchema,
   IllustrationTokensSchema,
   // SkinSpec composed schema + slice schemas (doc §2.3 vocabulary)
@@ -972,12 +990,45 @@ export {
   type EventListen,
   type BusEvent,
   type BusEventSource,
+  BusEventSourceSchema,
   type BusEventListener,
   type Unsubscribe,
   type EmittedEvent,
+  EmittedEventSchema,
+  // Client-effect wire grammar
+  type ClientRenderUITuple,
+  type ClientNavigateTuple,
+  type ClientNavigateBackTuple,
+  type ClientEffectTuple,
+  ClientRenderUITupleSchema,
+  ClientNavigateTupleSchema,
+  ClientNavigateBackTupleSchema,
+  ClientEffectTupleSchema,
+  // Event dispatch wire — canonical = the TS runtime's implementation
+  type OrbitalEventRequest,
+  type OrbitalEventResponse,
+  OrbitalEventRequestSchema,
+  OrbitalEventResponseSchema,
+  // Live broadcast wire (server → other connected clients)
+  type LiveBroadcastItem,
+  LiveBroadcastItemSchema,
+  /** @deprecated use OrbitalEventRequest */
   type EventDispatchRequest,
+  /** @deprecated use OrbitalEventRequestSchema */
+  EventDispatchRequestSchema,
+  /** @deprecated use OrbitalEventResponse */
   type EventDispatchResponse,
+  /** @deprecated use OrbitalEventResponseSchema */
+  EventDispatchResponseSchema,
 } from "./bus.js";
+
+// Server-side effect result — the wire shape effectResults carries
+export {
+  type ServerBatchSummary,
+  ServerBatchSummarySchema,
+  type ServerEffectResult,
+  ServerEffectResultSchema,
+} from "./effect-result.js";
 
 // Verification wire types (shared by @almadar/ui's verificationRegistry
 // producer and @almadar-io/verify's state-bridge consumer — hoisted

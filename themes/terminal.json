@@ -1,0 +1,457 @@
+{
+  "name": "terminal",
+  "tokens": {
+    "density": {
+      "spacing": {
+        "space0": "0px",
+        "space1": "3px",
+        "space2": "6px",
+        "space3": "9px",
+        "space4": "12px",
+        "space5": "15px",
+        "space6": "18px",
+        "space7": "21px",
+        "space8": "24px",
+        "space9": "27px",
+        "space10": "30px",
+        "space11": "33px",
+        "space12": "36px"
+      },
+      "buttonHeightSm": "20px",
+      "buttonHeightMd": "24px",
+      "buttonHeightLg": "30px",
+      "inputHeightSm": "20px",
+      "inputHeightMd": "24px",
+      "inputHeightLg": "30px",
+      "rowHeightCompact": "22px",
+      "rowHeightNormal": "28px",
+      "rowHeightSpacious": "34px",
+      "cardPaddingSm": "6px",
+      "cardPaddingMd": "8px",
+      "cardPaddingLg": "12px",
+      "dialogPadding": "12px",
+      "sectionGap": "16px"
+    },
+    "typeScale": {
+      "displayFamily": "\"JetBrains Mono\", \"Fira Code\", \"SF Mono\", ui-monospace",
+      "bodyFamily": "\"JetBrains Mono\", \"Fira Code\", \"SF Mono\", ui-monospace",
+      "monoFamily": "\"JetBrains Mono\", \"Fira Code\", \"SF Mono\", ui-monospace",
+      "scale": {
+        "xs": {
+          "size": "11px",
+          "lineHeight": "14px"
+        },
+        "sm": {
+          "size": "12px",
+          "lineHeight": "16px"
+        },
+        "base": {
+          "size": "13px",
+          "lineHeight": "17px"
+        },
+        "lg": {
+          "size": "14px",
+          "lineHeight": "18px"
+        },
+        "xl": {
+          "size": "15px",
+          "lineHeight": "20px"
+        },
+        "2xl": {
+          "size": "16px",
+          "lineHeight": "20px"
+        },
+        "3xl": {
+          "size": "18px",
+          "lineHeight": "22px"
+        },
+        "4xl": {
+          "size": "20px",
+          "lineHeight": "24px"
+        },
+        "display-1": {
+          "size": "24px",
+          "lineHeight": "28px"
+        },
+        "display-2": {
+          "size": "28px",
+          "lineHeight": "32px"
+        }
+      },
+      "intents": {
+        "headingMajor": {
+          "slot": "display",
+          "size": "2xl",
+          "weight": "bold"
+        },
+        "headingMinor": {
+          "slot": "display",
+          "size": "lg",
+          "weight": "bold"
+        },
+        "bodyEmphasis": {
+          "slot": "body",
+          "size": "sm",
+          "weight": "medium"
+        },
+        "bodyDefault": {
+          "slot": "body",
+          "size": "sm",
+          "weight": "normal"
+        },
+        "bodyQuiet": {
+          "slot": "body",
+          "size": "sm",
+          "weight": "normal"
+        },
+        "caption": {
+          "slot": "body",
+          "size": "xs",
+          "weight": "normal"
+        },
+        "numeric": {
+          "slot": "mono",
+          "size": "sm",
+          "weight": "medium"
+        }
+      }
+    },
+    "motion": {
+      "durations": {
+        "instant": "0ms",
+        "fast": "var(--transition-fast)",
+        "normal": "var(--transition-normal)",
+        "slow": "var(--transition-slow)",
+        "dramatic": "200ms"
+      },
+      "easings": {
+        "linear": "linear",
+        "standard": "linear",
+        "emphasized": "linear",
+        "spring": "linear"
+      }
+    },
+    "iconography": {
+      "family": "phosphor-fill",
+      "strokeWidth": "0",
+      "defaultSize": "14px"
+    },
+    "elevation": {
+      "cardElevation": "none",
+      "popoverElevation": "none",
+      "dialogElevation": "none",
+      "toastElevation": "none"
+    },
+    "geometry": {
+      "radiusContainer": "0px",
+      "radiusInteractive": "0px",
+      "radiusPill": "0px",
+      "borderHairline": "1px",
+      "borderStandard": "var(--border-width)",
+      "borderHeavy": "var(--border-width-thick)"
+    },
+    "colors": {
+      "primary": "#00ff66",
+      "primary-hover": "#00cc52",
+      "primary-foreground": "#000000",
+      "secondary": "#000000",
+      "secondary-hover": "#1a1a1a",
+      "secondary-foreground": "#ffffff",
+      "accent": "#ffb300",
+      "accent-foreground": "#000000",
+      "muted": "#f2f2f2",
+      "muted-foreground": "#555555",
+      "background": "#ffffff",
+      "foreground": "#000000",
+      "card": "#ffffff",
+      "card-foreground": "#000000",
+      "surface": "#f2f2f2",
+      "border": "#000000",
+      "input": "#000000",
+      "ring": "#00ff66",
+      "table-header": "#000000",
+      "table-border": "#000000",
+      "table-row-hover": "#f2f2f2",
+      "surface-hover": "#e8e8e8",
+      "border-hover": "#000000",
+      "placeholder": "#777777",
+      "error": "#e6002e",
+      "error-foreground": "#ffffff",
+      "success": "#00cc52",
+      "success-foreground": "#000000",
+      "warning": "#ffb300",
+      "warning-foreground": "#000000",
+      "info": "#00aaff",
+      "info-foreground": "#000000"
+    },
+    "radii": {
+      "none": "0px",
+      "sm": "0px",
+      "md": "0px",
+      "lg": "0px",
+      "xl": "0px",
+      "full": "9999px"
+    },
+    "shadows": {
+      "none": "none",
+      "sm": "none",
+      "main": "none",
+      "lg": "none",
+      "inner": "none",
+      "hover": "none",
+      "active": "none"
+    },
+    "typography": {
+      "border-width": "2px",
+      "border-width-thin": "1px",
+      "border-width-thick": "3px",
+      "font-family": "\"JetBrains Mono\", \"Fira Code\", \"SF Mono\", ui-monospace",
+      "font-weight-normal": "400",
+      "font-weight-medium": "500",
+      "font-weight-bold": "700",
+      "letter-spacing": "0",
+      "line-height": "1.35",
+      "icon-color": "currentColor",
+      "transition-fast": "60ms",
+      "transition-normal": "100ms",
+      "transition-slow": "140ms",
+      "transition-timing": "linear",
+      "hover-scale": "1",
+      "hover-translate-y": "0",
+      "hover-translate-x": "0",
+      "active-scale": "1",
+      "active-translate-y": "0",
+      "focus-ring-width": "2px",
+      "focus-ring-offset": "0px",
+      "focus-ring-color": "#00ff66"
+    }
+  },
+  "variants": {
+    "dark": {
+      "density": {
+        "spacing": {
+          "space0": "0px",
+          "space1": "3px",
+          "space2": "6px",
+          "space3": "9px",
+          "space4": "12px",
+          "space5": "15px",
+          "space6": "18px",
+          "space7": "21px",
+          "space8": "24px",
+          "space9": "27px",
+          "space10": "30px",
+          "space11": "33px",
+          "space12": "36px"
+        },
+        "buttonHeightSm": "20px",
+        "buttonHeightMd": "24px",
+        "buttonHeightLg": "30px",
+        "inputHeightSm": "20px",
+        "inputHeightMd": "24px",
+        "inputHeightLg": "30px",
+        "rowHeightCompact": "22px",
+        "rowHeightNormal": "28px",
+        "rowHeightSpacious": "34px",
+        "cardPaddingSm": "6px",
+        "cardPaddingMd": "8px",
+        "cardPaddingLg": "12px",
+        "dialogPadding": "12px",
+        "sectionGap": "16px"
+      },
+      "typeScale": {
+        "displayFamily": "\"JetBrains Mono\", \"Fira Code\", \"SF Mono\", ui-monospace",
+        "bodyFamily": "\"JetBrains Mono\", \"Fira Code\", \"SF Mono\", ui-monospace",
+        "monoFamily": "\"JetBrains Mono\", \"Fira Code\", \"SF Mono\", ui-monospace",
+        "scale": {
+          "xs": {
+            "size": "11px",
+            "lineHeight": "14px"
+          },
+          "sm": {
+            "size": "12px",
+            "lineHeight": "16px"
+          },
+          "base": {
+            "size": "13px",
+            "lineHeight": "17px"
+          },
+          "lg": {
+            "size": "14px",
+            "lineHeight": "18px"
+          },
+          "xl": {
+            "size": "15px",
+            "lineHeight": "20px"
+          },
+          "2xl": {
+            "size": "16px",
+            "lineHeight": "20px"
+          },
+          "3xl": {
+            "size": "18px",
+            "lineHeight": "22px"
+          },
+          "4xl": {
+            "size": "20px",
+            "lineHeight": "24px"
+          },
+          "display-1": {
+            "size": "24px",
+            "lineHeight": "28px"
+          },
+          "display-2": {
+            "size": "28px",
+            "lineHeight": "32px"
+          }
+        },
+        "intents": {
+          "headingMajor": {
+            "slot": "display",
+            "size": "2xl",
+            "weight": "bold"
+          },
+          "headingMinor": {
+            "slot": "display",
+            "size": "lg",
+            "weight": "bold"
+          },
+          "bodyEmphasis": {
+            "slot": "body",
+            "size": "sm",
+            "weight": "medium"
+          },
+          "bodyDefault": {
+            "slot": "body",
+            "size": "sm",
+            "weight": "normal"
+          },
+          "bodyQuiet": {
+            "slot": "body",
+            "size": "sm",
+            "weight": "normal"
+          },
+          "caption": {
+            "slot": "body",
+            "size": "xs",
+            "weight": "normal"
+          },
+          "numeric": {
+            "slot": "mono",
+            "size": "sm",
+            "weight": "medium"
+          }
+        }
+      },
+      "motion": {
+        "durations": {
+          "instant": "0ms",
+          "fast": "var(--transition-fast)",
+          "normal": "var(--transition-normal)",
+          "slow": "var(--transition-slow)",
+          "dramatic": "200ms"
+        },
+        "easings": {
+          "linear": "linear",
+          "standard": "linear",
+          "emphasized": "linear",
+          "spring": "linear"
+        }
+      },
+      "iconography": {
+        "family": "phosphor-fill",
+        "strokeWidth": "0",
+        "defaultSize": "14px"
+      },
+      "elevation": {
+        "cardElevation": "none",
+        "popoverElevation": "none",
+        "dialogElevation": "none",
+        "toastElevation": "none"
+      },
+      "geometry": {
+        "radiusContainer": "0px",
+        "radiusInteractive": "0px",
+        "radiusPill": "0px",
+        "borderHairline": "1px",
+        "borderStandard": "var(--border-width)",
+        "borderHeavy": "var(--border-width-thick)"
+      },
+      "colors": {
+        "primary": "#00ff66",
+        "primary-hover": "#33ff85",
+        "primary-foreground": "#000000",
+        "secondary": "#1a1a1a",
+        "secondary-hover": "#262626",
+        "secondary-foreground": "#00ff66",
+        "accent": "#ffb300",
+        "accent-foreground": "#000000",
+        "muted": "#0d0d0d",
+        "muted-foreground": "#888888",
+        "background": "#000000",
+        "foreground": "#aaffaa",
+        "card": "#050505",
+        "card-foreground": "#00ff66",
+        "surface": "#0d0d0d",
+        "border": "#00ff66",
+        "input": "#00ff66",
+        "ring": "#00ff66",
+        "table-header": "#00ff66",
+        "table-border": "#00ff66",
+        "table-row-hover": "#0d0d0d",
+        "surface-hover": "#1a1a1a",
+        "border-hover": "#33ff85",
+        "placeholder": "#557755",
+        "error": "#ff3355",
+        "error-foreground": "#000000",
+        "success": "#00ff66",
+        "success-foreground": "#000000",
+        "warning": "#ffb300",
+        "warning-foreground": "#000000",
+        "info": "#00ccff",
+        "info-foreground": "#000000"
+      },
+      "radii": {
+        "none": "0px",
+        "sm": "0px",
+        "md": "0px",
+        "lg": "0px",
+        "xl": "0px",
+        "full": "9999px"
+      },
+      "shadows": {
+        "none": "none",
+        "sm": "none",
+        "main": "none",
+        "lg": "none",
+        "inner": "none",
+        "hover": "none",
+        "active": "none"
+      },
+      "typography": {
+        "border-width": "2px",
+        "border-width-thin": "1px",
+        "border-width-thick": "3px",
+        "font-family": "\"JetBrains Mono\", \"Fira Code\", \"SF Mono\", ui-monospace",
+        "font-weight-normal": "400",
+        "font-weight-medium": "500",
+        "font-weight-bold": "700",
+        "letter-spacing": "0",
+        "line-height": "1.35",
+        "icon-color": "currentColor",
+        "transition-fast": "60ms",
+        "transition-normal": "100ms",
+        "transition-slow": "140ms",
+        "transition-timing": "linear",
+        "hover-scale": "1",
+        "hover-translate-y": "0",
+        "hover-translate-x": "0",
+        "active-scale": "1",
+        "active-translate-y": "0",
+        "focus-ring-width": "2px",
+        "focus-ring-offset": "0px",
+        "focus-ring-color": "#00ff66"
+      }
+    }
+  }
+}

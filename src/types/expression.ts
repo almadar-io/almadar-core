@@ -419,6 +419,23 @@ export function isEventPayloadValue(value: RuntimeValue): value is EventPayloadV
   return false;
 }
 
+/** Zod twin of `EventPayloadValue` — the one runtime validator for a bus-emit payload slot. */
+export const EventPayloadValueSchema: z.ZodType<EventPayloadValue> = z.lazy(() =>
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.date(),
+    z.null(),
+    z.undefined(),
+    EventPayloadSchema,
+    z.array(EventPayloadValueSchema),
+  ]),
+);
+
+/** Zod twin of `EventPayload` — the wire shape of a bus event's `payload`. */
+export const EventPayloadSchema: z.ZodType<EventPayload> = z.lazy(() => z.record(EventPayloadValueSchema));
+
 /**
  * Allowed leaf value for `LogMeta`. Mirrors `EventPayloadValue` shape so
  * the same row/list data flows through logs without manual flattening,

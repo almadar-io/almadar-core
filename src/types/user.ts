@@ -13,7 +13,8 @@
  * @packageDocumentation
  */
 
-import type { FieldValue } from './entity.js';
+import { z } from 'zod';
+import { FieldValueSchema, type FieldValue } from './entity.js';
 
 /** Authenticated user / agent identity behind `@user.x` bindings. */
 export interface UserContext {
@@ -53,6 +54,19 @@ export interface RawUserClaims {
   permissions?: string[];
   [key: string]: FieldValue | undefined;
 }
+
+/** Zod twin of `RawUserClaims` — the wire shape of `OrbitalEventRequest.user`. */
+export const RawUserClaimsSchema: z.ZodType<RawUserClaims> = z
+  .object({
+    id: z.string().optional(),
+    uid: z.string().optional(),
+    email: z.string().nullable().optional(),
+    name: z.string().optional(),
+    displayName: z.string().nullable().optional(),
+    role: z.string().optional(),
+    permissions: z.array(z.string()).optional(),
+  })
+  .catchall(FieldValueSchema.optional());
 
 /** Claim keys {@link normalizeUserContext} derives rather than copies verbatim. */
 const DERIVED_CLAIM_KEYS: readonly string[] = ['id', 'name', 'displayName', 'email'];

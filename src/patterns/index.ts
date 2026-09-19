@@ -36,11 +36,13 @@ export const INTEGRATORS_REGISTRY = integratorsRegistry;
 export const COMPONENT_MAPPING = componentMapping;
 export const EVENT_CONTRACTS = eventContracts;
 
-import type { PatternPropDef } from './types.js';
+import type { PatternPropDef, PropKind } from './types.js';
+export { PROP_KINDS } from './types.js';
 
 export type {
   PatternPropDef,
   PropKind,
+  PatternPropTypeSchema,
   PatternPayloadField,
   PatternCallbackArg,
 } from './types.js';
@@ -146,7 +148,7 @@ export function isEntityAwarePattern(patternType: string): boolean {
  * `event-listen` is deliberately absent: it names an event the component
  * SUBSCRIBES to, not one it fires. `entity` is the inlet.
  */
-const EVENT_OUTLET_KINDS: ReadonlySet<string> = new Set(['event', 'event-ref', 'callback']);
+const EVENT_OUTLET_KINDS: ReadonlySet<PropKind> = new Set<PropKind>(['event', 'event-ref', 'callback']);
 
 /** Memoised per-pattern results — the registry is a frozen JSON import. */
 const eventKeyPropsCache = new Map<string, ReadonlySet<string>>();

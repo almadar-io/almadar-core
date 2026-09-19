@@ -1,6 +1,6 @@
 {
   "name": "@almadar/core",
-  "version": "10.97.0",
+  "version": "10.98.0",
   "description": "Core schema types and definitions for Almadar",
   "type": "module",
   "main": "./dist/index.js",
@@ -52,23 +52,37 @@
       "import": "./dist/i18n/index.js",
       "require": "./dist/i18n/index.js"
     },
+    "./themes": {
+      "types": "./dist/themes/index.d.ts",
+      "import": "./dist/themes/index.js",
+      "require": "./dist/themes/index.js"
+    },
     "./patterns/*": {
       "types": "./dist/patterns/*",
       "import": "./dist/patterns/*",
       "require": "./dist/patterns/*"
+    },
+    "./fixtures": {
+      "types": "./dist/fixtures.d.ts",
+      "import": "./dist/fixtures.js",
+      "require": "./dist/fixtures.js"
     }
   },
   "files": [
     "dist",
-    "src/types/bindings.ts"
+    "src/types/bindings.ts",
+    "themes",
+    "fixtures"
   ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "pnpm run build:themes && pnpm run build:fixtures && tsup",
     "build:watch": "tsup --watch",
+    "build:fixtures": "tsx scripts/generate-event-wire-fixtures.ts && tsx scripts/generate-theme-fixtures.ts",
+    "build:themes": "tsx scripts/generate-theme-index.ts",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "pnpm run build",

@@ -1,0 +1,41 @@
+{
+  "clientEffects": [
+    [
+      "render-ui",
+      "toolbar",
+      {
+        "label": "New Note",
+        "type": "button"
+      },
+      {
+        "disabled": true,
+        "label": "Creating…"
+      }
+    ]
+  ],
+  "clientEffectsByTrait": [
+    {
+      "effect": [
+        "render-ui",
+        "toolbar",
+        {
+          "label": "New Note",
+          "type": "button"
+        },
+        {
+          "disabled": true,
+          "label": "Creating…"
+        }
+      ],
+      "traitName": "InlineButtonRender3"
+    }
+  ],
+  "emittedEvents": [],
+  "states": {
+    "InlineButtonRender3": "pending",
+    "NoteCatalog": "browsing",
+    "NotePersistor": "idle"
+  },
+  "success": true,
+  "transitioned": true
+}

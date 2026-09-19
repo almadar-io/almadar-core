@@ -44,14 +44,16 @@ import type { EventPayloadValue } from '../types/expression.js';
  * Reserved for future use: `"config-binding"`. Add here rather than
  * inventing per-consumer markers.
  */
-export type PropKind =
-  | 'event'
-  | 'event-ref'
-  | 'event-listen'
-  | 'event-list'
-  | 'event-map'
-  | 'callback'
-  | 'entity';
+export const PROP_KINDS = [
+  'event',
+  'event-ref',
+  'event-listen',
+  'event-list',
+  'event-map',
+  'callback',
+  'entity',
+] as const;
+export type PropKind = (typeof PROP_KINDS)[number];
 
 /**
  * Recursive structural schema for array elements / nested objects, mirrored
@@ -290,4 +292,7 @@ export interface PatternPropDef {
    * registry.
    */
   default?: EventPayloadValue;
+  /** Source type was `EventPayload` — pattern-sync's `lolo-emit` writes it so
+   *  the `.lolo` member types `Map string EventPayloadValue`. */
+  eventPayloadBrand?: boolean;
 }

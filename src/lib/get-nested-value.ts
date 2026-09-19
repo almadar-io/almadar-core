@@ -11,13 +11,14 @@
  *
  * @packageDocumentation
  */
-import type { EventPayload, EventPayloadValue, FieldValue } from '../types/index.js';
+import type { EventPayload, EventPayloadValue, FieldValue, UserContext } from '../types/index.js';
 
 type NestedValueInput =
   | EventPayload
   | EventPayloadValue
   | FieldValue
   | Record<string, FieldValue | undefined>
+  | UserContext
   | null
   | undefined;
 

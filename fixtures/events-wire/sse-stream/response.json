@@ -1,0 +1,79 @@
+{
+  "clientEffects": [
+    [
+      "render-ui",
+      "toolbar",
+      {
+        "label": "New Note",
+        "type": "button"
+      },
+      {
+        "disabled": true,
+        "label": "Saving…"
+      }
+    ],
+    [
+      "render-ui",
+      "toast",
+      {
+        "type": "toast-slot",
+        "variant": "success"
+      },
+      {
+        "title": "Note saved"
+      },
+      5
+    ]
+  ],
+  "clientEffectsByTrait": [
+    {
+      "effect": [
+        "render-ui",
+        "toolbar",
+        {
+          "label": "New Note",
+          "type": "button"
+        },
+        {
+          "disabled": true,
+          "label": "Saving…"
+        }
+      ],
+      "traitName": "NotePersistor"
+    },
+    {
+      "effect": [
+        "render-ui",
+        "toast",
+        {
+          "type": "toast-slot",
+          "variant": "success"
+        },
+        {
+          "title": "Note saved"
+        },
+        5
+      ],
+      "traitName": "NotePersistor"
+    }
+  ],
+  "emittedEvents": [
+    {
+      "event": "NoteSaved",
+      "payload": {
+        "id": "note-1"
+      },
+      "source": {
+        "orbital": "NoteBoard",
+        "trait": "NotePersistor"
+      }
+    }
+  ],
+  "states": {
+    "InlineButtonRender3": "idle",
+    "NoteCatalog": "browsing",
+    "NotePersistor": "saved"
+  },
+  "success": true,
+  "transitioned": true
+}

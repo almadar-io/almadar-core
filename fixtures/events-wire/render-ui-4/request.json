@@ -1,0 +1,5 @@
+{
+  "clientId": "tab-1",
+  "event": "CREATE_DRAFT",
+  "targetTrait": "InlineButtonRender3"
+}
