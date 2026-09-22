@@ -1485,6 +1485,8 @@ export const TraitSchema = z.object({
     ticks: z.array(TraitTickSchema).optional(),
     emits: z.array(TraitEventContractSchema).optional(),
     listens: z.array(TraitEventListenerSchema).optional(),
+    /** Call-site rename map (`events { ACTION: CONFIRM_VOID }`) — mirrors `Trait.events`. */
+    events: z.record(z.string().min(1), z.string().min(1)).optional(),
     ui: TraitUIBindingSchema.optional(),
     config: DeclaredTraitConfigSchema.optional(),
     sourceBehavior: SourceBehaviorMetadataSchema.optional(),

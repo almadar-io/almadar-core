@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { FIELD_TYPES } from '../src/types/field.js';
+import { FIELD_TYPES, TYPE_POSITION_ONLY } from '../src/types/field.js';
 import {
   aliasMap,
   coreTables,
@@ -215,6 +215,19 @@ describe('types vocabulary vs the field-type universe', () => {
       }
     }
     expect(missing).toEqual([]);
+  });
+
+  // Derive rather than pin (G-i18n-5): the `types` vocabulary section is
+  // exactly FIELD_TYPES (entity field types) ∪ TYPE_POSITION_ONLY (words
+  // legal in a type position that aren't field types) — nothing more,
+  // nothing less. This catches an unexplained extra key too, which the
+  // one-directional check above cannot.
+  it('en.json "types" section is exactly FIELD_TYPES ∪ TYPE_POSITION_ONLY, for every language', () => {
+    const expected = [...FIELD_TYPES, ...TYPE_POSITION_ONLY].slice().sort();
+    for (const lang of LANGUAGE_CODES) {
+      const actual = Object.keys(coreTables[lang].types).sort();
+      expect(actual, `${lang}.json "types" section`).toEqual(expected);
+    }
   });
 
   it('each one round-trips — the emitted spelling reads back as the same type', () => {

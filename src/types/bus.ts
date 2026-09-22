@@ -365,6 +365,28 @@ export interface OrbitalEventRequest {
   behavior?: string;
 }
 
+/** Structured reason one trait (or the whole dispatch) did not transition. */
+export type TransitionRejectionCode =
+  | 'no-matching-transition'
+  | 'guard-rejected'
+  | 'no-dispatchable-traits';
+
+/**
+ * Why a dispatched trait (or the whole request) did not transition —
+ * G-RUNTIME-023. `statesDeclaringEvent` lists the states whose transition
+ * table DOES declare the event, which makes a stale client-supplied `from`
+ * self-explanatory in a stateless response.
+ */
+export interface TransitionRejection {
+  code: TransitionRejectionCode;
+  trait?: string;
+  from?: string;
+  event?: string;
+  statesDeclaringEvent?: string[];
+  transition?: string;
+  guard?: unknown;
+}
+
 /**
  * Server → client event dispatch response. Mirrors the compiled path's
  * generated `EventResponse` (orbital-shell-typescript's `shared/types.ts`,
@@ -414,6 +436,12 @@ export interface OrbitalEventResponse {
   effectResults?: ServerEffectResult[];
   /** Guard that failed, addressed as `"<Trait>.<event>"`, for debugging. */
   guardFailed?: string;
+  /**
+   * Structured per-trait / per-request rejection reasons (G-RUNTIME-023) —
+   * present only when nothing transitioned. Supersedes the `guardFailed`
+   * string (kept for backcompat) with a machine-readable shape.
+   */
+  rejections?: TransitionRejection[];
   error?: string;
 }
 
@@ -447,6 +475,19 @@ export const OrbitalEventResponseSchema: z.ZodType<OrbitalEventResponse, z.ZodTy
     .optional(),
   effectResults: z.array(ServerEffectResultSchema).optional(),
   guardFailed: z.string().optional(),
+  rejections: z
+    .array(
+      z.object({
+        code: z.enum(['no-matching-transition', 'guard-rejected', 'no-dispatchable-traits']),
+        trait: z.string().optional(),
+        from: z.string().optional(),
+        event: z.string().optional(),
+        statesDeclaringEvent: z.array(z.string()).optional(),
+        transition: z.string().optional(),
+        guard: z.unknown().optional(),
+      }),
+    )
+    .optional(),
   error: z.string().optional(),
 });
 

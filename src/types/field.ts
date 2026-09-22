@@ -110,6 +110,28 @@ export function isSemanticStringType(type: FieldType): type is SemanticStringTyp
 
 export const FieldTypeSchema = z.enum(FIELD_TYPES);
 
+/** Words legal in a `.lolo`/`.orb` TYPE POSITION that are not entity field
+ *  types (config/param/return annotations, primitives with no field-level
+ *  meaning, etc.) — declared so the i18n `types` vocabulary section is
+ *  `FIELD_TYPES ∪ TYPE_POSITION_ONLY` exactly, not a hand-maintained superset
+ *  held together by a one-directional pinned test (see G-i18n-5). */
+export const TYPE_POSITION_ONLY = [
+    'Map',
+    'SExpr',
+    'any',
+    'asset',
+    'bool',
+    'component',
+    'duration',
+    'entity',
+    'float',
+    'icon',
+    'int',
+    'null',
+    'secret',
+    'void',
+] as const;
+
 // ============================================================================
 // Relation Configuration
 // ============================================================================

@@ -191,6 +191,7 @@ export {
   type FieldType,
   type SemanticStringType,
   FIELD_TYPES,
+  TYPE_POSITION_ONLY,
   SEMANTIC_STRING_TYPES,
   isSemanticStringType,
   isSemanticStringValue,
@@ -1007,6 +1008,8 @@ export {
   // Event dispatch wire — canonical = the TS runtime's implementation
   type OrbitalEventRequest,
   type OrbitalEventResponse,
+  type TransitionRejection,
+  type TransitionRejectionCode,
   OrbitalEventRequestSchema,
   OrbitalEventResponseSchema,
   // Live broadcast wire (server → other connected clients)
