@@ -502,6 +502,35 @@ export const OrbitalEventResponseSchema: z.ZodType<OrbitalEventResponse, z.ZodTy
 });
 
 // ============================================================================
+// Register wire (client → server schema registration)
+// ============================================================================
+
+/**
+ * Where circuit state lives between events (`docs/Almadar_Runtime_Stateless_Stateful_PLAN.md` §1a):
+ * `'stateless'` = the client carries it on every request, `'stateful'` = the server holds it.
+ */
+export type ServerTopology = 'stateless' | 'stateful';
+
+export const ServerTopologySchema = z.enum(['stateless', 'stateful']);
+
+/** `POST /register` response. `topology` absent = a server that predates the declaration. */
+export interface OrbitalRegisterResponse {
+  success: boolean;
+  topology?: ServerTopology;
+  message?: string;
+  orbitals?: string[];
+  error?: string;
+}
+
+export const OrbitalRegisterResponseSchema: z.ZodType<OrbitalRegisterResponse, z.ZodTypeDef, object> = z.object({
+  success: z.boolean(),
+  topology: ServerTopologySchema.optional(),
+  message: z.string().optional(),
+  orbitals: z.array(z.string()).optional(),
+  error: z.string().optional(),
+});
+
+// ============================================================================
 // Live broadcast wire (server → other connected clients)
 // ============================================================================
 

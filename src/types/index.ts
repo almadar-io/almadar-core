@@ -553,6 +553,11 @@ export {
   type OrbitalTraitRef,
   // Rebindable entity binding contract
   type EntityFieldContract,
+  // Client dispatch strategy (mirrors orbital-core runtime::dispatch_mode)
+  type DispatchMode,
+  DispatchModeSchema,
+  computeDispatchMode,
+  computeTraitDispatchMode,
   // Schemas
   TraitSchema,
   EntityFieldContractSchema,
@@ -1013,6 +1018,11 @@ export {
   type TransitionRejectionCode,
   OrbitalEventRequestSchema,
   OrbitalEventResponseSchema,
+  // Register wire
+  type ServerTopology,
+  type OrbitalRegisterResponse,
+  ServerTopologySchema,
+  OrbitalRegisterResponseSchema,
   // Live broadcast wire (server → other connected clients)
   type LiveBroadcastItem,
   LiveBroadcastItemSchema,

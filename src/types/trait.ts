@@ -15,7 +15,7 @@ import { StateMachineSchema, PayloadTypeWhenSchema } from './state-machine.js';
 import type { Effect } from './effect.js';
 import { EffectSchema } from './effect.js';
 import type { Entity } from './entity.js';
-import { EntitySchema } from './entity.js';
+import { EntitySchema, isRuntimeEntity } from './entity.js';
 import type { AnyPatternConfig } from '../patterns/index.js';
 import type { Expression, SExpr } from './expression.js';
 import { ExpressionSchema, SExprSchema } from './expression.js';
@@ -1271,6 +1271,50 @@ export const EffectUseSchema = z.object({
 export type EffectRow = EffectUse[];
 
 export const EffectRowSchema = z.array(EffectUseSchema);
+
+/**
+ * Client dispatch strategy for a trait's transitions — the ONE rule,
+ * computed from declared facts only, never inferred from a trait's effects
+ * (`docs/Almadar_LOLO.md` §7). Mirrors `orbital-core`'s
+ * `runtime::dispatch_mode::DispatchMode` serde shape exactly (the enum both
+ * `OirTrait::dispatch_mode` (compiled path) and `TraitDefinition::dispatch_mode`
+ * (runtime kernel) return) — same variant spellings, so a value round-trips
+ * on the wire unchanged.
+ */
+export type DispatchMode = 'persistedAwaited' | 'hybridClientOnly' | 'runtimeOptimistic';
+
+export const DispatchModeSchema = z.enum(['persistedAwaited', 'hybridClientOnly', 'runtimeOptimistic']);
+
+/**
+ * The one rule (`orbital-core`'s `runtime::dispatch_mode::compute`): a
+ * declared `local` trait is always client-only regardless of entity
+ * persistence; otherwise a `[runtime]` linked entity dispatches
+ * optimistically; anything else awaits the server. `local` wins over
+ * `entityIsRuntime` in every combination.
+ */
+export function computeDispatchMode(local: boolean, entityIsRuntime: boolean): DispatchMode {
+    if (local) {
+        return 'hybridClientOnly';
+    }
+    if (entityIsRuntime) {
+        return 'runtimeOptimistic';
+    }
+    return 'persistedAwaited';
+}
+
+/**
+ * `computeDispatchMode` for a trait plus its resolved linked entity — the TS
+ * twin of `OirTrait::dispatch_mode(entity: Option<&OirEntity>)` /
+ * `TraitDefinition::dispatch_mode`. `entity` is `undefined` when unlinked or
+ * unresolved, matching the Rust `None` case (treated as not-runtime, so the
+ * trait falls through to `persistedAwaited` unless `local`).
+ */
+export function computeTraitDispatchMode(
+    trait: Pick<Trait, 'local'>,
+    entity: Entity | undefined,
+): DispatchMode {
+    return computeDispatchMode(trait.local ?? false, entity !== undefined && isRuntimeEntity(entity));
+}
 
 export type Trait = {
     /** V4 dual-carry id sibling of `name` — optional until the Phase-7 flip. */
