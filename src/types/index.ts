@@ -962,6 +962,7 @@ export {
   type ResolvedTraitDataEntity,
   type ResolvedTraitUIBinding,
   type ResolvedTrait,
+  type ResolvedTraitEmit,
   type ResolvedTraitBinding,
   // Pattern & Section types
   type ResolvedPattern,

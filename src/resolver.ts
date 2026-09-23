@@ -179,6 +179,16 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
         description: trait.description,
         source: 'schema',
         category: trait.category,
+        // V4 dual-carry ids + emit contracts, preserved when the source
+        // trait carries them — the emit-source stamp needs `id`/`eventId`
+        // for id-scoped `listens` matching (`buildSourceMatcher` compares
+        // ids ONLY, so a name-only stamp never matches a `traitId`-carrying
+        // listen). Absent on id-free schemas, which keep the legacy
+        // name-only stamp exactly as before.
+        ...(trait.id !== undefined ? { id: trait.id } : {}),
+        ...(trait.emits !== undefined
+          ? { emits: trait.emits.map((e) => ({ event: e.event, eventId: e.eventId })) }
+          : {}),
         states: (trait.stateMachine?.states || []).map((s: State) => ({
           name: s.name,
           isInitial: s.isInitial ?? false,

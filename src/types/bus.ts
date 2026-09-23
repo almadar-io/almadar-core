@@ -442,6 +442,15 @@ export interface OrbitalEventResponse {
    * string (kept for backcompat) with a machine-readable shape.
    */
   rejections?: TransitionRejection[];
+  /**
+   * Names of traits DROPPED from a stateless cascade because the cross-trait
+   * worklist hit its safety-valve cap (G-RUNTIME-027) — the response's
+   * states/effects/entity rows are INCOMPLETE for these traits. Absent when
+   * the whole worklist ran. Surfaced so the truncation is observable
+   * (previously the tail of any page over ~20 traits silently never
+   * executed).
+   */
+  cascadeTruncated?: string[];
   error?: string;
 }
 
@@ -488,6 +497,7 @@ export const OrbitalEventResponseSchema: z.ZodType<OrbitalEventResponse, z.ZodTy
       }),
     )
     .optional(),
+  cascadeTruncated: z.array(z.string()).optional(),
   error: z.string().optional(),
 });
 

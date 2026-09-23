@@ -11,6 +11,7 @@ import type { SExpr } from './expression.js';
 import type { Entity, EntityRow, FieldValue } from './entity.js';
 import type { JsonValue, RuntimeValue } from './json.js';
 import type { ListenSource } from './trait.js';
+import type { TraitId, EventId } from './identity.js';
 import type { AnyPatternConfig } from '../patterns/index.js';
 
 // ============================================================================
@@ -182,6 +183,16 @@ export interface ResolvedTraitUIBinding {
 }
 
 /**
+ * One emit contract on a resolved trait — the minimal shape the
+ * emit-source stamp needs (`eventId` lookup by event name, parity with
+ * `OrbitalServerRuntime`'s `emitContract?.eventId`).
+ */
+export interface ResolvedTraitEmit {
+  event: string;
+  eventId?: EventId;
+}
+
+/**
  * Fully resolved trait - expanded from schema OR library.
  * The compiler generates code from this structure universally,
  * without knowing which specific trait it is.
@@ -189,6 +200,23 @@ export interface ResolvedTraitUIBinding {
 export interface ResolvedTrait {
   /** Unique trait identifier */
   name: string;
+
+  /**
+   * V4 dual-carry id sibling of `name` — preserved from the source trait
+   * when the schema carries ids. The emit-source stamp needs it: an
+   * id-scoped `listens` matcher (`buildSourceMatcher`, `@almadar/runtime`)
+   * compares ids ONLY, so a name-only stamp never matches a `traitId`-carrying
+   * listen (the chat SAVE → DO_CREATE relay died on the stateful path,
+   * 2026-09-22).
+   */
+  id?: TraitId;
+
+  /**
+   * The trait's emit contracts, preserved from the source trait when the
+   * schema carries them. The emit-source stamp reads `eventId` from the
+   * matching contract — parity with `OrbitalServerRuntime`'s emit stamp.
+   */
+  emits?: ResolvedTraitEmit[];
 
   /** Human-readable description */
   description?: string;
