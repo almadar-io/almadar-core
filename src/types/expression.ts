@@ -456,3 +456,48 @@ export type LogMetaValue =
 export interface LogMeta {
   [key: string]: LogMetaValue;
 }
+
+/**
+ * True when `expr` provably evaluates falsy — the twin of orbital-core's
+ * `SExpression::is_statically_false`, one table on both paths. Conservative:
+ * anything undecidable returns `false` ("not provably false"). `resolve`
+ * turns a binding (`@config.selfFetch`) into its known literal value, or
+ * `undefined` when unknown — the JS path keeps config bindings in guards
+ * where Rust inlines them.
+ */
+export function isStaticallyFalse(expr: SExpr, resolve?: (binding: string) => SExprAtom | undefined): boolean {
+  const known = (e: SExpr): SExpr => {
+    if (typeof e === 'string' && e.startsWith('@') && resolve !== undefined) {
+      const value = resolve(e);
+      return value === undefined ? e : value;
+    }
+    return e;
+  };
+  const isLiteral = (e: SExpr): boolean =>
+    e === null || typeof e === 'boolean' || typeof e === 'number' || (typeof e === 'string' && !e.startsWith('@'));
+  const value = known(expr);
+  if (value === false || value === null) return true;
+  if (typeof value === 'number') return value === 0;
+  if (typeof value === 'string') return value === '';
+  if (Array.isArray(value)) {
+    const op = value[0];
+    if (typeof op !== 'string') return value.length === 0;
+    const args = value.slice(1);
+    switch (op) {
+      case 'and': return args.some((a) => isStaticallyFalse(a, resolve));
+      case 'or': return args.length > 0 && args.every((a) => isStaticallyFalse(a, resolve));
+      case 'not': return args.length === 1 && known(args[0]) === true;
+      case '==':
+      case '!=': {
+        if (args.length !== 2) return false;
+        const [l, r] = [known(args[0]), known(args[1])];
+        if (!isLiteral(l) || !isLiteral(r)) return false;
+        return (l === r) === (op === '!=');
+      }
+      default: return false;
+    }
+  }
+  if (typeof value === 'object') return Object.keys(value).length === 0;
+  return false;
+}
+

@@ -167,6 +167,37 @@ export interface BusEventSource {
 // `z.ZodType<T>` mis-typechecks. `object` is what the wire actually carries
 // (a JSON body) — never `unknown`.
 
+/** The delivery a transition is processing: `@event`, and one element of `@prevEvents` (Runtime Spec Clause 5.5). */
+export interface DeliveryRecord {
+  event: string;
+  payload?: EventPayload;
+  source: BusEventSource;
+}
+
+/** A trait's log so far in a dispatch that began elsewhere (`@prevEvents` / `@prevStates`), carried on the request. */
+export interface DispatchLog {
+  prevEvents: DeliveryRecord[];
+  prevStates: string[];
+}
+
+/** The evaluator value of a delivery record: `source` carries exactly the ten `BusEventSource` fields that are set. */
+export function deliveryRecordValue(record: DeliveryRecord): EventPayload {
+  const s = record.source;
+  const source: EventPayload = {
+    ...(s.orbital !== undefined ? { orbital: s.orbital } : {}),
+    ...(s.orbitalId !== undefined ? { orbitalId: s.orbitalId } : {}),
+    ...(s.trait !== undefined ? { trait: s.trait } : {}),
+    ...(s.traitId !== undefined ? { traitId: s.traitId } : {}),
+    ...(s.eventId !== undefined ? { eventId: s.eventId } : {}),
+    ...(s.transition !== undefined ? { transition: s.transition } : {}),
+    ...(s.tick !== undefined ? { tick: s.tick } : {}),
+    ...(s.fromBridge !== undefined ? { fromBridge: s.fromBridge } : {}),
+    ...(s.dispatched !== undefined ? { dispatched: s.dispatched } : {}),
+    ...(s.originClientId !== undefined ? { originClientId: s.originClientId } : {}),
+  };
+  return { event: record.event, payload: record.payload ?? null, source };
+}
+
 /** Zod twin of `BusEventSource`. */
 export const BusEventSourceSchema: z.ZodType<BusEventSource, z.ZodTypeDef, object> = z.object({
   orbital: z.string().optional(),
@@ -179,6 +210,19 @@ export const BusEventSourceSchema: z.ZodType<BusEventSource, z.ZodTypeDef, objec
   fromBridge: z.boolean().optional(),
   dispatched: z.boolean().optional(),
   originClientId: z.string().optional(),
+});
+
+/** Zod twin of `DeliveryRecord`. */
+export const DeliveryRecordSchema: z.ZodType<DeliveryRecord, z.ZodTypeDef, object> = z.object({
+  event: z.string(),
+  payload: EventPayloadSchema.optional(),
+  source: BusEventSourceSchema,
+});
+
+/** Zod twin of `DispatchLog`. */
+export const DispatchLogSchema: z.ZodType<DispatchLog, z.ZodTypeDef, object> = z.object({
+  prevEvents: z.array(DeliveryRecordSchema),
+  prevStates: z.array(z.string()),
 });
 
 /**
@@ -363,6 +407,10 @@ export interface OrbitalEventRequest {
   entityByTrait?: Record<string, EntityRow>;
   /** The orbital/behavior name this dispatch targets, for stateless multi-orbital addressing. */
   behavior?: string;
+  /** `@event` for the target when this request continues a dispatch that began on the client; absent = a direct dispatch. */
+  delivery?: DeliveryRecord;
+  /** The target trait's log so far in that dispatch; absent = empty. */
+  dispatchLog?: DispatchLog;
 }
 
 /** Structured reason one trait (or the whole dispatch) did not transition. */
@@ -385,6 +433,19 @@ export interface TransitionRejection {
   statesDeclaringEvent?: string[];
   transition?: string;
   guard?: unknown;
+}
+
+/**
+ * One client effect paired with the trait that produced it and, when the
+ * producer knows it, the transition that fired: that transition's own event
+ * key (for a listens delivery, the triggered event, not the source emit) and
+ * the state it fired from. A client stamps render provenance from these.
+ */
+export interface ClientEffectByTrait {
+  traitName: string;
+  effect: ClientEffectTuple;
+  event?: string;
+  fromState?: string;
 }
 
 /**
@@ -431,7 +492,7 @@ export interface OrbitalEventResponse {
    *
    * Same length and ordering as `clientEffects`; entries are 1:1 by index.
    */
-  clientEffectsByTrait?: Array<{ traitName: string; effect: ClientEffectTuple }>;
+  clientEffectsByTrait?: ClientEffectByTrait[];
   /** Results from server-side effects (persist, call-service, set). */
   effectResults?: ServerEffectResult[];
   /** Guard that failed, addressed as `"<Trait>.<event>"`, for debugging. */
@@ -468,6 +529,8 @@ export const OrbitalEventRequestSchema: z.ZodType<OrbitalEventRequest, z.ZodType
   traits: z.array(z.object({ trait: z.string(), from: z.string() })).optional(),
   entityByTrait: z.record(EntityRowSchema).optional(),
   behavior: z.string().optional(),
+  delivery: DeliveryRecordSchema.optional(),
+  dispatchLog: DispatchLogSchema.optional(),
 });
 
 /** Zod twin of `OrbitalEventResponse`. Third type param `object`, see `BusEventSourceSchema`. */
@@ -480,7 +543,12 @@ export const OrbitalEventResponseSchema: z.ZodType<OrbitalEventResponse, z.ZodTy
   entityByTrait: z.record(EntityRowSchema).optional(),
   clientEffects: z.array(ClientEffectTupleSchema).optional(),
   clientEffectsByTrait: z
-    .array(z.object({ traitName: z.string(), effect: ClientEffectTupleSchema }))
+    .array(z.object({
+      traitName: z.string(),
+      effect: ClientEffectTupleSchema,
+      event: z.string().optional(),
+      fromState: z.string().optional(),
+    }))
     .optional(),
   effectResults: z.array(ServerEffectResultSchema).optional(),
   guardFailed: z.string().optional(),

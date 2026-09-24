@@ -9,6 +9,9 @@
  */
 
 import { type JsonValue, isJsonArray, isJsonObject } from '../../types/json.js';
+import type { SExpr, SExprObject } from '../../types/expression.js';
+import type { Effect } from '../../types/effect.js';
+import type { AnyPatternConfig } from '../pattern-types.js';
 
 function collectPatternTypeTokens(node: JsonValue, out: Set<string>): void {
   if (!isJsonObject(node)) return;
@@ -39,5 +42,67 @@ export function collectRenderUiPatternTypes(ir: JsonValue, out: Set<string>): vo
 export function renderUiPatternTypesOf(ir: JsonValue): ReadonlySet<string> {
   const out = new Set<string>();
   collectRenderUiPatternTypes(ir, out);
+  return out;
+}
+
+/** One slot a transition paints and the pattern it paints there. */
+export interface RenderUiEntry {
+  slot: string;
+  pattern: AnyPatternConfig | SExprObject;
+}
+
+type EffectNode = Effect | SExpr;
+
+function isPatternNode(value: EffectNode | AnyPatternConfig | undefined): value is AnyPatternConfig | SExprObject {
+  return value !== null && value !== undefined && typeof value === 'object' && !Array.isArray(value);
+}
+
+function collectRenderUiEntries(effect: EffectNode, out: RenderUiEntry[]): void {
+  if (!Array.isArray(effect)) return;
+  const head = effect[0];
+  if (head === 'render-ui') {
+    const slot = effect[1];
+    const pattern = effect[2];
+    if (typeof slot === 'string' && isPatternNode(pattern)) out.push({ slot, pattern });
+    return;
+  }
+  for (const child of controlBody(effect)) collectRenderUiEntries(child, out);
+}
+
+/** The effects a control form runs; empty for every other effect. */
+function controlBody(effect: Effect | SExpr[]): readonly EffectNode[] {
+  switch (effect[0]) {
+    case 'do':
+    case 'atomic':
+    case 'async/all':
+    case 'async/sequence':
+    case 'async/race':
+      return effect.slice(1);
+    case 'if':
+    case 'when':
+    case 'async/delay':
+    case 'async/debounce':
+    case 'async/throttle':
+    case 'async/interval':
+      return effect.slice(2);
+    case 'let':
+      return effect.slice(2);
+    default:
+      return [];
+  }
+}
+
+/**
+ * Every `render-ui` a transition's effects perform, in order — including ones
+ * nested inside `do` / `if` / `when` / `let` / `atomic` / `async/*` bodies.
+ * Entries reference the schema's own pattern objects (never copies), so an
+ * editor can mutate what it finds. A `null` (clear-slot) render and a pattern
+ * given as a binding string are not entries.
+ */
+export function renderUiEntriesOf(effects: readonly SExpr[]): Array<{ slot: string; pattern: SExprObject }>;
+export function renderUiEntriesOf(effects: readonly EffectNode[]): RenderUiEntry[];
+export function renderUiEntriesOf(effects: readonly EffectNode[]): RenderUiEntry[] {
+  const out: RenderUiEntry[] = [];
+  for (const effect of effects) collectRenderUiEntries(effect, out);
   return out;
 }

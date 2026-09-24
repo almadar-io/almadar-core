@@ -159,6 +159,32 @@ describe.each(STRATEGIES)('mock-seed policy [%s]', (strategy) => {
       const got = sampleFieldValue(field, ctx(strategy, 1));
       expect(got).not.toMatch(/^person-name/);
     });
+
+    it('seeds a numeric @mock as numbers, so sums and averages over seeded rows are real', () => {
+      const field: EntityField = { name: 'uptime', type: 'number', required: true, mock: '99.99, 99.5, 100' };
+      const got = [1, 2, 3].map((i) => sampleFieldValue(field, ctx(strategy, i)));
+      expect(got).toEqual([99.99, 99.5, 100]);
+    });
+
+    it('seeds a money @mock as numbers', () => {
+      const field: EntityField = { name: 'total', type: 'money', required: true, mock: '250000, 84000' };
+      expect(sampleFieldValue(field, ctx(strategy, 2))).toBe(84000);
+    });
+
+    it('seeds a boolean @mock as booleans', () => {
+      const field: EntityField = { name: 'inStock', type: 'boolean', required: true, mock: 'true, false' };
+      expect([1, 2].map((i) => sampleFieldValue(field, ctx(strategy, i)))).toEqual([true, false]);
+    });
+
+    it('keeps a numeric-looking @mock on a string field as text', () => {
+      const field: EntityField = { name: 'matterNumber', type: 'string', required: true, mock: '2026, 2027' };
+      expect(sampleFieldValue(field, ctx(strategy, 1))).toBe('2026');
+    });
+
+    it('keeps a non-numeric @mock on a number field as the declared literal rather than inventing a number', () => {
+      const field: EntityField = { name: 'uptime', type: 'number', required: true, mock: 'n/a, 99.5' };
+      expect(sampleFieldValue(field, ctx(strategy, 1))).toBe('n/a');
+    });
   });
 
   describe('gate 1 — runtime singletons', () => {

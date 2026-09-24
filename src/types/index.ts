@@ -241,6 +241,7 @@ export {
   getArgs,
   sexpr,
   walkSExpr,
+  isStaticallyFalse,
   collectBindings,
   // Constants
   CORE_BINDINGS,
@@ -686,6 +687,8 @@ export {
   ThemeRefSchema,
   ThemeRefStringSchema,
   isThemeReference,
+  isThemeRegistryKey,
+  themeDataKey,
   // Skin axis schemas (Layer 1 visual variation)
   SpacingScaleSchema,
   DensityTokensSchema,
@@ -902,6 +905,7 @@ export {
   type HistoryMeta,
   type ValidationMeta,
   type SemanticChangeKind,
+  SEMANTIC_CHANGE_KINDS,
   type SemanticSchemaChange,
 } from "./changeset.js";
 
@@ -1014,6 +1018,7 @@ export {
   // Event dispatch wire — canonical = the TS runtime's implementation
   type OrbitalEventRequest,
   type OrbitalEventResponse,
+  type ClientEffectByTrait,
   type TransitionRejection,
   type TransitionRejectionCode,
   OrbitalEventRequestSchema,
@@ -1035,6 +1040,10 @@ export {
   /** @deprecated use OrbitalEventResponseSchema */
   EventDispatchResponseSchema,
 } from "./bus.js";
+
+export { dispatchVisitKey } from "./visit-key.js";
+export { type DeliveryRecord, type DispatchLog, DeliveryRecordSchema, DispatchLogSchema, deliveryRecordValue } from "./bus.js";
+export { DispatchMemory, dispatchScopeOf, type DispatchScope } from "./dispatch-memory.js";
 
 // Server-side effect result — the wire shape effectResults carries
 export {
@@ -1087,6 +1096,7 @@ export {
   type SSEEventBase,
   type StartEvent,
   type MessageEvent,
+  type LlmCallMeta,
   type ToolCallEvent,
   type ToolResultEvent,
   type TodoUpdateEvent,

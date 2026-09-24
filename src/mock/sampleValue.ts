@@ -196,6 +196,24 @@ export function mockFieldValue(declared: string, index: number): string {
   return `${declared.trim()}-${index}`;
 }
 
+/**
+ * A declared `@mock` value in its field's own type: numeric fields seed
+ * numbers and boolean fields seed booleans, so aggregates over seeded rows
+ * are real. A literal that doesn't parse stays the declared string. Mirrors
+ * `seed.rs`'s `typed_mock_value`.
+ */
+export function typedMockValue(field: EntityField, literal: string): string | number | boolean {
+  if (field.type === 'number' || field.type === 'money') {
+    const n = Number(literal);
+    return literal.trim() !== '' && Number.isFinite(n) ? n : literal;
+  }
+  if (field.type === 'boolean') {
+    if (literal === 'true') return true;
+    if (literal === 'false') return false;
+  }
+  return literal;
+}
+
 function sampleText(field: EntityField, ctx: SampleContext): string {
   const fieldName = field.name ?? 'field';
   if (IMAGE_FIELD_NAMES.has(fieldName.toLowerCase())) {
@@ -347,7 +365,7 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
   // Rust twin exactly.
   if (field.mock !== undefined) {
     const ordinal = isRuntime ? 1 : ctx.index;
-    return mockFieldValue(field.mock, ordinal);
+    return typedMockValue(field, mockFieldValue(field.mock, ordinal));
   }
 
   switch (field.type) {

@@ -335,12 +335,24 @@ function setsEqual(a: Set<string>, b: Set<string>): boolean {
   return true;
 }
 
-function inlineTraitMap(refs: TraitRef[]): Map<string, Trait> {
-  const map = new Map<string, Trait>();
+/** Every trait an orbital declares, keyed by its name (a composed trait without a `name` goes by its `ref`). */
+function namedTraitMap(refs: TraitRef[]): Map<string, TraitRef> {
+  const map = new Map<string, TraitRef>();
   for (const r of refs) {
-    if (isInlineTrait(r)) map.set((r as Trait).name, r as Trait);
+    const key = typeof r === 'string' ? r : isInlineTrait(r) ? r.name : (r.name ?? r.ref);
+    map.set(key, r);
   }
   return map;
+}
+
+/** The atom a composed trait points at; `null` for an inline trait. */
+function composedSource(r: TraitRef): string | null {
+  if (typeof r === 'string') return r;
+  return isInlineTrait(r) ? null : r.ref;
+}
+
+function traitConfigOf(r: TraitRef): Trait['config'] | Exclude<TraitRef, string | Trait>['config'] {
+  return typeof r === 'string' ? undefined : r.config;
 }
 
 function inlinePageMap(refs: PageRef[]): Map<string, Page> {
@@ -411,9 +423,9 @@ function diffSemanticOrbital(
     changes.push({ kind: 'entity-fields-changed', orbitalName: name });
   }
 
-  // Traits
-  const bTraits = inlineTraitMap(before.traits ?? []);
-  const aTraits = inlineTraitMap(after.traits ?? []);
+  // Traits — inline and composed (`ref`) alike, keyed by the name the orbital knows them by.
+  const bTraits = namedTraitMap(before.traits ?? []);
+  const aTraits = namedTraitMap(after.traits ?? []);
 
   for (const [tName] of aTraits) {
     if (!bTraits.has(tName)) changes.push({ kind: 'trait-added', orbitalName: name, traitName: tName });
@@ -422,9 +434,27 @@ function diffSemanticOrbital(
     if (!aTraits.has(tName)) changes.push({ kind: 'trait-removed', orbitalName: name, traitName: tName });
   }
 
-  for (const [tName, aTrait] of aTraits) {
-    const bTrait = bTraits.get(tName);
-    if (!bTrait) continue;
+  for (const [tName, aRef] of aTraits) {
+    const bRef = bTraits.get(tName);
+    if (bRef === undefined) continue;
+
+    if (composedSource(bRef) !== composedSource(aRef)) {
+      changes.push({ kind: 'trait-removed', orbitalName: name, traitName: tName });
+      changes.push({ kind: 'trait-added', orbitalName: name, traitName: tName });
+      continue;
+    }
+    if (!jsonEqual(traitConfigOf(bRef), traitConfigOf(aRef))) {
+      changes.push({ kind: 'trait-config-changed', orbitalName: name, traitName: tName });
+    }
+    if (!isInlineTrait(bRef) || !isInlineTrait(aRef)) {
+      if (typeof bRef !== 'string' && typeof aRef !== 'string'
+        && (!jsonEqual(bRef.linkedEntity, aRef.linkedEntity) || !jsonEqual(bRef.events, aRef.events))) {
+        changes.push({ kind: 'event-wiring-changed', orbitalName: name, traitName: tName });
+      }
+      continue;
+    }
+    const bTrait = bRef;
+    const aTrait = aRef;
 
     const bSM = bTrait.stateMachine;
     const aSM = aTrait.stateMachine;
@@ -454,6 +484,10 @@ function diffSemanticOrbital(
     if (!jsonEqual(bTrait.emits, aTrait.emits) || !jsonEqual(bTrait.listens, aTrait.listens)) {
       changes.push({ kind: 'event-wiring-changed', orbitalName: name, traitName: tName });
     }
+  }
+
+  if (!jsonEqual(before.theme, after.theme)) {
+    changes.push({ kind: 'theme-changed', orbitalName: name });
   }
 
   // Pages
@@ -520,6 +554,15 @@ export function diffSchemaSemantics(
   for (const [name, aOrb] of aOrbitals) {
     const bOrb = bOrbitals.get(name);
     if (bOrb) changes.push(...diffSemanticOrbital(name, bOrb, aOrb));
+  }
+
+  // An app-level theme or token change restyles every orbital.
+  if (!jsonEqual(before.theme, after.theme) || !jsonEqual(before.designTokens, after.designTokens)) {
+    for (const [name] of aOrbitals) {
+      if (!changes.some((c) => c.kind === 'theme-changed' && c.orbitalName === name)) {
+        changes.push({ kind: 'theme-changed', orbitalName: name });
+      }
+    }
   }
 
   return changes;

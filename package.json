@@ -1,6 +1,6 @@
 {
   "name": "@almadar/core",
-  "version": "10.102.0",
+  "version": "10.103.0",
   "description": "Core schema types and definitions for Almadar",
   "type": "module",
   "main": "./dist/index.js",
@@ -26,6 +26,11 @@
       "types": "./dist/factory-runtime/index.d.ts",
       "import": "./dist/factory-runtime/index.js",
       "require": "./dist/factory-runtime/index.js"
+    },
+    "./lolo-document": {
+      "types": "./dist/lolo-document/index.d.ts",
+      "import": "./dist/lolo-document/index.js",
+      "require": "./dist/lolo-document/index.js"
     },
     "./state-machine": {
       "types": "./dist/state-machine/index.d.ts",

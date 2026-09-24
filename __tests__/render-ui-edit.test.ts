@@ -13,6 +13,10 @@ import { describe, it, expect } from 'vitest';
 
 import {
   applyRenderOverlay,
+  insertChildAtPath,
+  navigatePatternPath,
+  removeChildAtPath,
+  replaceChildAtPath,
   type PatternNode,
   type RenderUiPatch,
 } from '../src/render-ui-edit.js';
@@ -179,5 +183,69 @@ describe('findRenderUiRoot empty-transition anchoring (CE-G1)', () => {
 
     expect(result.applied).toBe(0);
     expect(result.stale).toHaveLength(1);
+  });
+});
+
+describe('pattern paths as the renderer emits them (`root.children.N…`)', () => {
+  const tree = (): PatternNode => ({
+    type: 'stack',
+    children: [
+      { type: 'typography', content: 'A' },
+      { type: 'stack', children: [{ type: 'badge', label: 'x' }, { type: 'badge', label: 'y' }] },
+    ],
+  });
+
+  it('navigates root, a child, and a grandchild', () => {
+    const t = tree();
+    expect(navigatePatternPath(t, 'root')).toBe(t);
+    expect(navigatePatternPath(t, 'root.children.0')?.content).toBe('A');
+    expect(navigatePatternPath(t, 'root.children.1.children.1')?.label).toBe('y');
+  });
+
+  it('accepts a path without the leading root label', () => {
+    expect(navigatePatternPath(tree(), 'children.1.children.0')?.label).toBe('x');
+  });
+
+  it('follows children nested under props (the form some IR passes emit)', () => {
+    const t: PatternNode = { type: 'stack', props: { children: [{ type: 'badge', label: 'p' }] } };
+    expect(navigatePatternPath(t, 'root.children.0')?.label).toBe('p');
+  });
+
+  it('misses cleanly: out of range, a scalar leaf, a non-children key', () => {
+    const t = tree();
+    expect(navigatePatternPath(t, 'root.children.5')).toBeNull();
+    expect(navigatePatternPath(t, 'root.children.0.content')).toBeNull();
+    expect(navigatePatternPath(t, 'root.children.-1')).toBeNull();
+  });
+
+  it('removes, replaces and inserts at nested paths (the parent of root.children.1 is root)', () => {
+    const t = tree();
+    expect(removeChildAtPath(t, 'root.children.0')).toBe(true);
+    expect(t.children?.map((c) => (typeof c === 'string' ? c : c.type))).toEqual(['stack']);
+    expect(replaceChildAtPath(t, 'root.children.0.children.0', { type: 'icon', name: 'star' })).toBe(true);
+    expect(navigatePatternPath(t, 'root.children.0.children.0')?.type).toBe('icon');
+    expect(insertChildAtPath(t, 'root.children.0', 1, { type: 'divider' })).toBe(true);
+    expect(navigatePatternPath(t, 'root.children.0')?.children?.map((c) => (typeof c === 'string' ? c : c.type))).toEqual(['icon', 'divider', 'badge']);
+  });
+
+  it('a structural op on a path that is not a child path refuses', () => {
+    const t = tree();
+    expect(removeChildAtPath(t, 'root')).toBe(false);
+    expect(replaceChildAtPath(t, 'root.children.9', { type: 'x' })).toBe(false);
+    expect(t.children).toHaveLength(2);
+  });
+});
+
+describe('a trait embed (`@trait.X`) in children is a leaf, never a node', () => {
+  it('navigating onto an embed misses; siblings after it still resolve', () => {
+    const t: PatternNode = { type: 'stack', children: ['@trait.Toolbar', { type: 'typography', content: 'Notes' }] };
+    expect(navigatePatternPath(t, 'root.children.0')).toBeNull();
+    expect(navigatePatternPath(t, 'root.children.1')?.content).toBe('Notes');
+  });
+
+  it('an embed can be moved/removed like any child', () => {
+    const t: PatternNode = { type: 'stack', children: ['@trait.A', '@trait.B'] };
+    expect(removeChildAtPath(t, 'root.children.0')).toBe(true);
+    expect(t.children).toEqual(['@trait.B']);
   });
 });

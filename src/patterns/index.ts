@@ -348,6 +348,8 @@ export {
 export {
   collectRenderUiPatternTypes,
   renderUiPatternTypesOf,
+  renderUiEntriesOf,
+  type RenderUiEntry,
 } from './helpers/render-ui-pattern-types.js';
 
 // Export pattern recommender for @almadar/agent design tool

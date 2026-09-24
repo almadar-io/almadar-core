@@ -21,12 +21,17 @@
  * - `trait`: `@trait.x` — render-time reference to another trait's
  *   mounted view. Resolved by `<TraitFrame>` at runtime, not by the
  *   SExpression compiler.
- * - `item`: `@item.x` — iterator variable inside a `map` / repeat
- *   pattern.
- * - `now`: `@now` — current timestamp (ISO string).
- * - `computed`: `@computed.x` — evaluator-computed value (Phase 4.5).
- * - `other`: catch-all for unknown prefixes or entity-reference
- *   bindings (`@User.name`, `@_item`).
+ * - `now`: `@now` — the dispatch's one timestamp (Runtime Spec Clause 8.5).
+ * - `callsitePayload`: `@callsitePayload.x` — a composing transition's
+ *   payload captured for an inlined child trait (compiler-produced).
+ * - `pages` / `currentTheme`: render-resolved schema sigils (no path).
+ * - `event`, `prevEvents`, `prevStates`, `fromState`, `toState`: the delivery
+ *   being processed and this dispatch's log (Runtime Spec Clause 5.5).
+ * - `other`: not a root — a lambda/let local (`@item`) or an
+ *   entity-reference binding (`@User.name`).
+ *
+ * The author-facing roots are the i18n `sigils` table; the orbital-compiler
+ * validator's `CORE_BINDING_ROOTS` is the same set as `BINDING_ROOTS` minus `other`.
  *
  * @packageDocumentation
  */
@@ -38,12 +43,18 @@ export type BindingRoot =
   | 'entity'
   | 'payload'
   | 'state'
-  | 'config'
-  | 'user'
-  | 'trait'
-  | 'item'
   | 'now'
-  | 'computed'
+  | 'config'
+  | 'trait'
+  | 'user'
+  | 'callsitePayload'
+  | 'pages'
+  | 'currentTheme'
+  | 'event'
+  | 'prevEvents'
+  | 'prevStates'
+  | 'fromState'
+  | 'toState'
   | 'other';
 
 /** Every known binding root, in a stable order — useful for exhaustiveness checks. */
@@ -51,12 +62,18 @@ export const BINDING_ROOTS: readonly BindingRoot[] = [
   'entity',
   'payload',
   'state',
-  'config',
-  'user',
-  'trait',
-  'item',
   'now',
-  'computed',
+  'config',
+  'trait',
+  'user',
+  'callsitePayload',
+  'pages',
+  'currentTheme',
+  'event',
+  'prevEvents',
+  'prevStates',
+  'fromState',
+  'toState',
   'other',
 ] as const;
 

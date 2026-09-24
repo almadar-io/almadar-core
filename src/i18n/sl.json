@@ -60,7 +60,8 @@
     "local": "lokalno",
     "identity": "identiteta",
     "instance": "primerek",
-    "collection": "zbirka"
+    "collection": "zbirka",
+    "background": "ozadno"
   },
   "categories": {
     "interaction": "interakcija",
@@ -104,7 +105,12 @@
     "now": "zdaj",
     "config": "konfiguracija",
     "user": "uporabnik",
-    "trait": "znacilnost"
+    "trait": "znacilnost",
+    "event": "dogodek",
+    "prevEvents": "prejsnjiDogodki",
+    "prevStates": "prejsnjaStanja",
+    "fromState": "izStanja",
+    "toState": "vStanje"
   },
   "effects": {
     "set": "nastavi",
@@ -188,6 +194,7 @@
     "alias": "vzdevek",
     "animations": "animacije",
     "appliesTo": "veljaZa",
+    "runsInBackground": "teceVOzadju",
     "as": "kot",
     "aspect": "razmerje",
     "assetRef": "sredstvoSklic",

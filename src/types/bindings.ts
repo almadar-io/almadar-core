@@ -118,6 +118,31 @@ export const BINDING_DOCS = {
     examples: ['@currentTheme'],
     requiresPath: false,
   },
+  event: {
+    description: 'The delivery being processed: { event, payload, source } — for a listens delivery the source emit, with its BusEventSource envelope (Runtime Spec Clause 5.5)',
+    examples: ['@event.event', '@event.payload.n', '@event.source.trait', '@event.source.tick'],
+    requiresPath: false,
+  },
+  prevEvents: {
+    description: 'The deliveries this trait already received in this dispatch, in order, each shaped like @event',
+    examples: ['@prevEvents'],
+    requiresPath: false,
+  },
+  prevStates: {
+    description: 'The states this trait left in this dispatch, in order',
+    examples: ['@prevStates'],
+    requiresPath: false,
+  },
+  fromState: {
+    description: "The transition's source state",
+    examples: ['@fromState'],
+    requiresPath: false,
+  },
+  toState: {
+    description: "The transition's target state (null in a listens `when`, where no transition is chosen yet)",
+    examples: ['@toState'],
+    requiresPath: false,
+  },
 } as const;
 
 /**
@@ -125,12 +150,12 @@ export const BINDING_DOCS = {
  */
 export const BINDING_CONTEXT_RULES = {
   guard: {
-    allowed: ['entity', 'payload', 'state', 'now', 'config', 'user'] as const,
+    allowed: ['entity', 'payload', 'state', 'now', 'config', 'user', 'event', 'prevEvents', 'prevStates', 'fromState', 'toState'] as const,
     description:
-      'Guards can access entity fields, event payload, current state, time, the call-site trait config (@config.X), and the authenticated user context (@user.id, @user.role) for ownership / role gates. Config access lets atoms write mode-aware guards — e.g. std-modal\'s OPEN can require @payload.row only when @config.mode equals "edit", letting create-mode legitimately fire OPEN with no row. Like effects, @config.X is substituted at molecule/organism inline time with the literal call-site value; at atom-scope validate, @config is allowed-but-unresolved.',
+      'Guards can read the delivery being processed and this dispatch\'s log (@event, @prevEvents, @prevStates) and the transition\'s ends (@fromState, @toState; Runtime Spec Clause 5.5). Guards can access entity fields, event payload, current state, time, the call-site trait config (@config.X), and the authenticated user context (@user.id, @user.role) for ownership / role gates. Config access lets atoms write mode-aware guards — e.g. std-modal\'s OPEN can require @payload.row only when @config.mode equals "edit", letting create-mode legitimately fire OPEN with no row. Like effects, @config.X is substituted at molecule/organism inline time with the literal call-site value; at atom-scope validate, @config is allowed-but-unresolved.',
   },
   effect: {
-    allowed: ['entity', 'payload', 'state', 'now', 'trait', 'config', 'user', 'callsitePayload', 'pages', 'currentTheme'] as const,
+    allowed: ['entity', 'payload', 'state', 'now', 'trait', 'config', 'user', 'callsitePayload', 'pages', 'currentTheme', 'event', 'prevEvents', 'prevStates', 'fromState', 'toState'] as const,
     description:
       'Effects can access and modify entity fields, use payload data, embed another trait\'s live frame via @trait.X inside render-ui children, read trait config values (@config.X) for atoms parameterized by their call-site, and read the authenticated user context (@user.id, @user.role). At molecule/organism inline time, @config.X is substituted with the literal value from the call-site config block; at atom-scope validate, @config is allowed-but-unresolved. @callsitePayload.X is the call-site-captured event payload emitted by the compiler\'s inline-trait hoisting (a hoisted render block that captured @payload); it is resolved at the composing effect by the runtime BindingResolver.',
   },

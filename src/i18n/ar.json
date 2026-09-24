@@ -60,7 +60,8 @@
     "local": "محلي",
     "identity": "هوية",
     "instance": "نسخة",
-    "collection": "مجموعة"
+    "collection": "مجموعة",
+    "background": "خلفي"
   },
   "categories": {
     "interaction": "تفاعل",
@@ -104,7 +105,12 @@
     "now": "الآن",
     "config": "تكوين",
     "user": "مستخدم",
-    "trait": "سمة"
+    "trait": "سمة",
+    "event": "حدث",
+    "prevEvents": "الأحداث_السابقة",
+    "prevStates": "الحالات_السابقة",
+    "fromState": "من_حالة",
+    "toState": "إلى_حالة"
   },
   "effects": {
     "set": "تعيين",
@@ -188,6 +194,7 @@
     "alias": "اسم_مستعار",
     "animations": "رسوم_متحركة",
     "appliesTo": "ينطبق_على",
+    "runsInBackground": "يعمل_في_الخلفية",
     "as": "كـ",
     "aspect": "نسبة",
     "assetRef": "مرجع_الأصل",

@@ -1096,6 +1096,30 @@ export function isThemeReference(theme: ThemeRef): theme is string {
   return typeof theme === "string";
 }
 
+/** Grammar of a registry theme key — the full kebab-case `data-theme` value. */
+const THEME_REGISTRY_KEY_PATTERN = "[a-z][a-z0-9]*(-[a-z0-9]+)*";
+const THEME_REGISTRY_KEY = new RegExp(`^${THEME_REGISTRY_KEY_PATTERN}$`);
+
+/**
+ * True when `theme` is a registry theme key (e.g. "gazette-light") — a value a
+ * `[data-theme]` selector can match — as opposed to an inline definition or
+ * the legacy "Alias.theme" import form, which must be resolved upstream.
+ */
+export function isThemeRegistryKey(theme: ThemeRef | undefined): theme is string {
+  return typeof theme === "string" && THEME_REGISTRY_KEY.test(theme);
+}
+
+/**
+ * The `data-theme` key an orbital's `theme` maps to: a string ref is the key
+ * itself, an inline definition keys by its `name`, and an absent theme is "".
+ * Mirrors orbital-core's `theme_data_key`.
+ */
+export function themeDataKey(theme: ThemeRef | undefined): string {
+  if (theme === undefined) return "";
+  if (typeof theme === "string") return theme;
+  return theme.name;
+}
+
 /**
  * Validate theme reference format: either the legacy import form
  * "Alias.theme" or a registry theme key (the full kebab-case `data-theme`
@@ -1107,7 +1131,7 @@ export function isThemeReference(theme: ThemeRef): theme is string {
 export const ThemeRefStringSchema = z
   .string()
   .regex(
-    /^([A-Z][a-zA-Z0-9]*\.theme|[a-z][a-z0-9]*(-[a-z0-9]+)*)$/,
+    new RegExp(`^([A-Z][a-zA-Z0-9]*\\.theme|${THEME_REGISTRY_KEY_PATTERN})$`),
     'Theme reference must be "Alias.theme" or a registry theme key (e.g., "linear-clean-light")',
   );
 

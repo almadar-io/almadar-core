@@ -76,6 +76,7 @@ export interface EventWireFixture {
 export const EVENT_WIRE_FIXTURE_CASES: readonly string[] = [
   'cascade-emitted-events',
   'client-effects-by-trait',
+  'client-effects-provenance',
   'effect-results',
   'effect-results-every-kind',
   'guard-rejected',

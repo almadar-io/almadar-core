@@ -13,6 +13,7 @@
  */
 
 import type { OrbitalDefinition, Trait, Effect } from './types/index.js';
+import { renderUiEntriesOf } from './patterns/helpers/render-ui-pattern-types.js';
 
 // ----------------------------------------------------------------------------
 // Structural pattern node
@@ -29,11 +30,14 @@ export type PatternValue =
   | PatternNode
   | readonly PatternValue[];
 
-/** One node in a render-ui pattern tree as it appears in resolved `.orb`. */
+/**
+ * One node in a render-ui pattern tree as it appears in resolved `.orb`. A
+ * child is a nested node or a `@trait.X` embed (another trait's render).
+ */
 export interface PatternNode {
   type?: string;
-  children?: PatternNode[];
-  [prop: string]: PatternValue | PatternNode[] | undefined;
+  children?: Array<PatternNode | string>;
+  [prop: string]: PatternValue | Array<PatternNode | string> | undefined;
 }
 
 // ----------------------------------------------------------------------------
@@ -99,37 +103,49 @@ export interface RenderUiPatch {
 // Pure node primitives
 // ----------------------------------------------------------------------------
 
-/** Navigate a dot-separated path (`root`, `root.children.0`, …) to a node. */
+/** The children array of a node: `children`, or `props.children` (the nested form some IR passes emit). */
+function childrenOf(node: PatternNode): Array<PatternNode | string> | null {
+  if (Array.isArray(node.children)) return node.children;
+  const props = node.props;
+  if (props && typeof props === 'object' && !Array.isArray(props) && !(props instanceof Date)) {
+    const nested = (props as PatternNode).children;
+    if (Array.isArray(nested)) return nested;
+  }
+  return null;
+}
+
+/**
+ * Navigate a path as the renderer emits it (`root`, `root.children.0`,
+ * `root.children.1.children.0`) to a node. The leading `root` is a label, not
+ * a key; a path without it is accepted too.
+ */
 export function navigatePatternPath(root: PatternNode, path: string): PatternNode | null {
   if (!path || path === 'root') return root;
-  const parts = path.split('.');
-  let current: PatternValue | PatternNode | readonly PatternValue[] | undefined = root;
+  const parts = (path.startsWith('root.') ? path.slice('root.'.length) : path).split('.');
+  let current: PatternNode | Array<PatternNode | string> | null = root;
   for (const part of parts) {
-    if (current === null || current === undefined || typeof current !== 'object') return null;
+    if (current === null) return null;
     if (Array.isArray(current)) {
       const idx = Number.parseInt(part, 10);
       if (Number.isNaN(idx) || idx < 0 || idx >= current.length) return null;
-      current = current[idx];
+      const item: PatternNode | string | undefined = current[idx];
+      current = item && typeof item === 'object' && !Array.isArray(item) ? item : null;
+    } else if (part === 'children') {
+      current = childrenOf(current);
     } else {
-      const record = current as PatternNode;
-      if (part === 'children' && Array.isArray(record.children)) {
-        current = record.children;
-      } else {
-        current = record[part];
-      }
+      const value: PatternValue | PatternNode[] | undefined = current[part];
+      current = value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date) ? (value as PatternNode) : null;
     }
   }
-  return typeof current === 'object' && current !== null && !Array.isArray(current)
-    ? (current as PatternNode)
-    : null;
+  return Array.isArray(current) ? null : current;
 }
 
-function splitChildPath(path: string): { parentPath: string; index: number } | null {
-  const lastDot = path.lastIndexOf('.');
-  if (lastDot === -1) return null;
-  const index = Number.parseInt(path.slice(lastDot + 1), 10);
-  if (Number.isNaN(index)) return null;
-  return { parentPath: path.slice(0, lastDot), index };
+/** `<parent>.children.<i>` → the parent's path and the index; null for anything else. */
+export function splitPatternChildPath(path: string): { parentPath: string; index: number } | null {
+  const match = /^(.*)\.children\.(\d+)$/.exec(path) ?? /^children\.(\d+)$/.exec(path);
+  if (!match) return null;
+  if (match.length === 2) return { parentPath: 'root', index: Number.parseInt(match[1], 10) };
+  return { parentPath: match[1], index: Number.parseInt(match[2], 10) };
 }
 
 /** Set a prop on the node at `path`. Returns false if the path misses. */
@@ -147,12 +163,12 @@ export function setPropAtPath(
 
 /** Replace the node at a child path (`<parent>.children.<i>`) with `node`. */
 export function replaceChildAtPath(root: PatternNode, path: string, node: PatternNode): boolean {
-  const split = splitChildPath(path);
+  const split = splitPatternChildPath(path);
   if (!split) return false;
   const parent = navigatePatternPath(root, split.parentPath);
-  if (!parent || !Array.isArray(parent.children)) return false;
-  if (split.index < 0 || split.index >= parent.children.length) return false;
-  parent.children[split.index] = node;
+  const children = parent ? childrenOf(parent) : null;
+  if (!children || split.index >= children.length) return false;
+  children[split.index] = node;
   return true;
 }
 
@@ -165,21 +181,21 @@ export function insertChildAtPath(
 ): boolean {
   const parent = navigatePatternPath(root, parentPath);
   if (!parent) return false;
-  const children = parent.children ?? [];
+  const children = childrenOf(parent) ?? [];
   const i = index < 0 || index > children.length ? children.length : index;
   children.splice(i, 0, node);
-  parent.children = children;
+  if (!childrenOf(parent)) parent.children = children;
   return true;
 }
 
 /** Remove the node at a child path. */
 export function removeChildAtPath(root: PatternNode, path: string): boolean {
-  const split = splitChildPath(path);
+  const split = splitPatternChildPath(path);
   if (!split) return false;
   const parent = navigatePatternPath(root, split.parentPath);
-  if (!parent || !Array.isArray(parent.children)) return false;
-  if (split.index < 0 || split.index >= parent.children.length) return false;
-  parent.children.splice(split.index, 1);
+  const children = parent ? childrenOf(parent) : null;
+  if (!children || split.index >= children.length) return false;
+  children.splice(split.index, 1);
   return true;
 }
 
@@ -223,7 +239,9 @@ function findByFingerprint(node: PatternNode, path: string, fp: string): string 
   if (fingerprintNode(node) === fp) return path;
   if (Array.isArray(node.children)) {
     for (let i = 0; i < node.children.length; i++) {
-      const r = findByFingerprint(node.children[i], `${path}.children.${i}`, fp);
+      const child = node.children[i];
+      if (typeof child === 'string') continue;
+      const r = findByFingerprint(child, `${path}.children.${i}`, fp);
       if (r) return r;
     }
   }
@@ -245,14 +263,6 @@ export interface RenderOverlayResult {
  *  `Effect` tuple. The `['render-ui', slot, config]` form carries the structural
  *  pattern node at index 2 in resolved `.orb`; we narrow `Effect` by its tag and
  *  validate the payload is a concrete node (not a `@binding` string or null). */
-function readRenderUi(eff: Effect): { slot: string; node: PatternNode } | null {
-  if (eff[0] !== 'render-ui') return null;
-  const slot = eff[1];
-  const config = eff[2];
-  if (typeof slot !== 'string') return null;
-  if (config === null || typeof config !== 'object' || Array.isArray(config)) return null;
-  return { slot, node: config as PatternNode };
-}
 
 /** Narrow a trait reference to an inline `Trait` (the only `TraitRef` member
  *  with a `stateMachine`). No cast — `in` narrows the union. */
@@ -263,31 +273,45 @@ function asInlineTrait(ref: OrbitalDefinition['traits'][number]): Trait | null {
   return null;
 }
 
-/** Find the render-ui root node for a patch address. Prefers the exact
- *  transition match; falls back to the first trait+slot render-ui when the
- *  transition is unknown (canvas selections at INIT carry no data-orb-transition,
- *  so `address.transition` is empty and no real transition can match). */
+/** Where a trait's render lives: the transition (by event, optionally its from-state) and the slot. */
+export interface RenderRootAddress {
+  transition: string;
+  state?: string;
+  slot: string;
+}
+
+/**
+ * The render-ui root a trait paints for an address, including renders nested
+ * in control forms (`when`/`if`). Prefers the exact transition; an empty
+ * transition (a canvas selection with no provenance) takes the first render
+ * into that slot.
+ */
+export function renderRootOf(trait: Trait, address: RenderRootAddress): PatternNode | null {
+  const wantTransition = address.transition !== '';
+  const wantState = address.state !== undefined && address.state !== '';
+  let fallback: PatternNode | null = null;
+  for (const t of trait.stateMachine?.transitions ?? []) {
+    if (wantState && t.from !== address.state) continue;
+    for (const entry of renderUiEntriesOf(t.effects ?? [])) {
+      if (entry.slot !== address.slot) continue;
+      const node = entry.pattern as PatternNode;
+      if (wantTransition && t.event === address.transition) return node;
+      if (!wantTransition) fallback ??= node;
+    }
+  }
+  return fallback;
+}
+
+/** Find the render-ui root node for a patch address (see `renderRootOf`). */
 function findRenderUiRoot(
   orbital: OrbitalDefinition,
   address: RenderUiPatchAddress,
 ): PatternNode | null {
-  const wantTransition = address.transition !== '';
-  const wantState = address.state !== undefined && address.state !== '';
-  let fallback: PatternNode | null = null;
   for (const ref of orbital.traits) {
     const trait = asInlineTrait(ref);
-    if (!trait || trait.name !== address.trait) continue;
-    for (const t of trait.stateMachine?.transitions ?? []) {
-      if (wantState && t.from !== address.state) continue;
-      for (const eff of t.effects ?? []) {
-        const ru = readRenderUi(eff);
-        if (!ru || ru.slot !== address.slot) continue;
-        if (wantTransition && t.event === address.transition) return ru.node;
-        fallback ??= ru.node;
-      }
-    }
+    if (trait && trait.name === address.trait) return renderRootOf(trait, address);
   }
-  return fallback;
+  return null;
 }
 
 /** Resolve the effective path for a patch, re-anchoring by fingerprint. */

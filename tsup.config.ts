@@ -8,6 +8,7 @@ export default defineConfig({
     'types/index': 'src/types/index.ts',
     'factory/index': 'src/factory/index.ts',
     'factory-runtime/index': 'src/factory-runtime/index.ts',
+    'lolo-document/index': 'src/lolo-document/index.ts',
     'state-machine/index': 'src/state-machine/index.ts',
     'builders': 'src/builders.ts',
     'patterns/index': 'src/patterns/index.ts',

@@ -165,19 +165,24 @@ export interface ValidationMeta {
  * What kind of .orb concept changed between two schema versions.
  * Used by canvas focus derivation, CLI narration, selective re-verification.
  */
-export type SemanticChangeKind =
-  | 'orbital-added'
-  | 'orbital-removed'
-  | 'entity-fields-changed'
-  | 'trait-added'
-  | 'trait-removed'
-  | 'state-machine-changed'
-  | 'guard-changed'
-  | 'effect-changed'
-  | 'render-ui-changed'
-  | 'event-wiring-changed'
-  | 'page-changed'
-  | 'behavior-composed';
+export const SEMANTIC_CHANGE_KINDS = [
+  'orbital-added',
+  'orbital-removed',
+  'entity-fields-changed',
+  'trait-added',
+  'trait-removed',
+  'trait-config-changed',
+  'state-machine-changed',
+  'guard-changed',
+  'effect-changed',
+  'render-ui-changed',
+  'event-wiring-changed',
+  'page-changed',
+  'theme-changed',
+  'behavior-composed',
+] as const;
+
+export type SemanticChangeKind = (typeof SEMANTIC_CHANGE_KINDS)[number];
 
 /**
  * A semantic change between two OrbitalSchema versions.

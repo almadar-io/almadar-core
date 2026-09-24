@@ -284,6 +284,24 @@ const CASES: Record<string, EventWireFixture> = {
     },
   },
 
+  'client-effects-provenance': {
+    request: { event: 'SAVE', targetTrait: 'NoteForm', clientId: 'tab-1' },
+    response: {
+      success: true,
+      transitioned: true,
+      states: { ...IDLE_STATES, NoteForm: 'saved' },
+      emittedEvents: [],
+      clientEffects: [
+        ['render-ui', 'main', { type: 'alert', message: 'Saved' }],
+        ['render-ui', 'sidebar', { type: 'data-list', entity: 'Note' }],
+      ],
+      clientEffectsByTrait: [
+        { traitName: 'NoteForm', effect: ['render-ui', 'main', { type: 'alert', message: 'Saved' }], event: 'SAVE', fromState: 'editing' },
+        { traitName: 'NoteCatalog', effect: ['render-ui', 'sidebar', { type: 'data-list', entity: 'Note' }], event: 'REFRESH', fromState: 'idle' },
+      ],
+    },
+  },
+
   'effect-results': {
     request: {
       event: 'SAVE',

@@ -64,12 +64,30 @@ export interface StartEvent extends SSEEventBase {
   };
 }
 
+/** The LLM call behind a raw `message` frame — everything the trace records, untruncated. */
+export interface LlmCallMeta {
+  service: string;
+  provider: string;
+  model: string;
+  systemPrompt: string;
+  userPrompt: string;
+  toolCallsJson?: string;
+  attempt?: number;
+  durationMs: number;
+  promptTokens?: number;
+  completionTokens?: number;
+  cachedPromptTokens?: number;
+  costUSD?: number;
+}
+
 export interface MessageEvent extends SSEEventBase {
   type: 'message';
   data: {
     content: string;
     role: 'assistant' | 'user' | 'system';
     isComplete: boolean;
+    /** Present when the frame is a raw LLM response. */
+    llm?: LlmCallMeta;
   };
 }
 

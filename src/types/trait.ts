@@ -533,6 +533,8 @@ export type TraitTick = {
     priority?: number;
     interval: string | number;
     appliesTo?: string[];
+    /** `[background]`: runs with no client mounted; otherwise paused while no client has the trait mounted. */
+    runsInBackground?: boolean;
     pages?: string[];
     /** V4 dual-carry id sibling of `pages` — optional until the Phase-7 flip. */
     pageIds?: PageId[];
@@ -582,6 +584,7 @@ export const TraitTickSchema = z.object({
     priority: z.number().optional(),
     interval: TickIntervalSchema,
     appliesTo: z.array(z.string()).optional(),
+    runsInBackground: z.boolean().optional(),
     pages: z.array(z.string()).optional(),
     pageIds: z.array(PageIdSchema).optional(),
     guard: ExpressionSchema.optional(),
@@ -1286,18 +1289,18 @@ export type DispatchMode = 'persistedAwaited' | 'hybridClientOnly' | 'runtimeOpt
 export const DispatchModeSchema = z.enum(['persistedAwaited', 'hybridClientOnly', 'runtimeOptimistic']);
 
 /**
- * The one rule (`orbital-core`'s `runtime::dispatch_mode::compute`): a
- * declared `local` trait is always client-only regardless of entity
- * persistence; otherwise a `[runtime]` linked entity dispatches
- * optimistically; anything else awaits the server. `local` wins over
- * `entityIsRuntime` in every combination.
+ * The one rule (`orbital-core`'s `runtime::dispatch_mode::compute`): `local`
+ * is always client-only; a `[runtime]` entity lives in the client, so its
+ * trait is client-only unless the trait's own effects reach the server
+ * (`touchesServer`, from the registry's declared `runsOn`), then optimistic;
+ * anything else awaits the server.
  */
-export function computeDispatchMode(local: boolean, entityIsRuntime: boolean): DispatchMode {
+export function computeDispatchMode(local: boolean, entityIsRuntime: boolean, touchesServer: boolean): DispatchMode {
     if (local) {
         return 'hybridClientOnly';
     }
     if (entityIsRuntime) {
-        return 'runtimeOptimistic';
+        return touchesServer ? 'runtimeOptimistic' : 'hybridClientOnly';
     }
     return 'persistedAwaited';
 }
@@ -1307,13 +1310,16 @@ export function computeDispatchMode(local: boolean, entityIsRuntime: boolean): D
  * twin of `OirTrait::dispatch_mode(entity: Option<&OirEntity>)` /
  * `TraitDefinition::dispatch_mode`. `entity` is `undefined` when unlinked or
  * unresolved, matching the Rust `None` case (treated as not-runtime, so the
- * trait falls through to `persistedAwaited` unless `local`).
+ * trait falls through to `persistedAwaited` unless `local`). `touchesServer`:
+ * the trait's own transitions or client ticks call a `runsOn: server` effect —
+ * computed downstream, where the operator registry lives.
  */
 export function computeTraitDispatchMode(
     trait: Pick<Trait, 'local'>,
     entity: Entity | undefined,
+    touchesServer: boolean,
 ): DispatchMode {
-    return computeDispatchMode(trait.local ?? false, entity !== undefined && isRuntimeEntity(entity));
+    return computeDispatchMode(trait.local ?? false, entity !== undefined && isRuntimeEntity(entity), touchesServer);
 }
 
 export type Trait = {

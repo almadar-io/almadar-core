@@ -28,6 +28,7 @@ import type {
   EventScope,
   Trait,
   DeclaredTraitConfig,
+  TraitEventListener,
 } from "./trait.js";
 import {
   TraitRefSchema,
@@ -35,6 +36,7 @@ import {
   EventScopeSchema,
   TraitSchema,
   DeclaredTraitConfigSchema,
+  TraitEventListenerSchema,
 } from "./trait.js";
 import type {
   DomainContext,
@@ -618,7 +620,21 @@ export type OrbitalRefObject = {
    * concern.
    */
   extend?: readonly EntityField[];
+
+  /**
+   * `listens { Source.EVENT -> Target.TRIGGER }` — declared routes INTO the
+   * imported set. Each entry appends one listen to the imported trait named
+   * by `trait` (upstream name). A source naming an imported trait follows
+   * the prefix; any other source is a host sibling and keeps its name. The
+   * trigger is in the post-`events {}` vocabulary. A target outside the
+   * imported set (after omit/only) refuses resolution
+   * (`ORB_O_LISTEN_TARGET_UNKNOWN`).
+   */
+  listens?: readonly OrbitalRefListen[];
 };
+
+/** One orbital-import `listens {}` entry: the target imported trait plus an ordinary listen. */
+export type OrbitalRefListen = TraitEventListener & { trait: string };
 
 /**
  * Validate orbital reference format: "Alias.orbitals.OrbitalName"
@@ -644,6 +660,7 @@ export const OrbitalRefObjectSchema = z.object({
   entities: z.record(z.string(), z.string()).optional(),
   mounts: z.record(z.string(), z.array(z.string())).optional(),
   extend: z.array(EntityFieldSchema).optional(),
+  listens: z.array(TraitEventListenerSchema.extend({ trait: z.string() })).optional(),
 });
 
 /**

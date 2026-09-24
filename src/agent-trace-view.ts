@@ -13,6 +13,8 @@
  */
 
 import type { JsonValue, ToolArgs } from './types/json.js';
+import type { SemanticChangeKind } from './types/changeset.js';
+import type { LlmCallMeta } from './types/sse.js';
 
 // ----------------------------------------------------------------------------
 // Shared leaf shapes
@@ -72,7 +74,74 @@ export type TraceActivity =
       }>;
       skipDefault: string;
       timestamp: number;
-    };
+    }
+  | {
+      type: 'analysis';
+      organism: string;
+      organismReason?: string;
+      complexity?: { category: string; reasoning: string };
+      renames: Array<{ from: string; to: string }>;
+      deletes: string[];
+      timestamp: number;
+    }
+  | { type: 'orbital_started'; orbitalName: string; timestamp: number }
+  | { type: 'orbital_done'; orbitalName: string; traitCount?: number; transitionCount?: number; timestamp: number }
+  | {
+      type: 'schema_change';
+      changeKind: SemanticChangeKind;
+      orbitalName: string;
+      traitName?: string;
+      transitionEvent?: string;
+      timestamp: number;
+    }
+  | { type: 'done'; orbitalCount: number; timestamp: number }
+  | { type: 'cancelled'; message: string; timestamp: number }
+  /** A raw LLM response, with the call that produced it when known. */
+  | { type: 'llm_response'; content: string; llm?: LlmCallMeta; timestamp: number };
+
+/** Every `TraceActivity` type — the vocabulary a host picks an audience's view from. */
+export const TRACE_ACTIVITY_TYPES = [
+  'message',
+  'tool_call',
+  'tool_result',
+  'file_operation',
+  'schema_diff',
+  'error',
+  'coordinator_decision',
+  'plan_committed',
+  'pending_question',
+  'clarification_question',
+  'analysis',
+  'orbital_started',
+  'orbital_done',
+  'schema_change',
+  'done',
+  'cancelled',
+  'llm_response',
+] as const satisfies ReadonlyArray<TraceActivity['type']>;
+
+/** Which activities one audience sees. */
+export interface TraceActivityAudience {
+  types: ReadonlyArray<TraceActivity['type']>;
+  /** Message roles shown; omitted = every role. */
+  messageRoles?: ReadonlyArray<TraceAvatarRole>;
+  /** `schema_change` kinds shown; omitted = every kind. */
+  schemaChangeKinds?: ReadonlyArray<SemanticChangeKind>;
+}
+
+export function selectTraceActivities(
+  activities: readonly TraceActivity[],
+  audience: TraceActivityAudience,
+): TraceActivity[] {
+  return activities.filter((activity) => {
+    if (!audience.types.includes(activity.type)) return false;
+    if (activity.type === 'message' && audience.messageRoles) return audience.messageRoles.includes(activity.role);
+    if (activity.type === 'schema_change' && audience.schemaChangeKinds) {
+      return audience.schemaChangeKinds.includes(activity.changeKind);
+    }
+    return true;
+  });
+}
 
 // ----------------------------------------------------------------------------
 // TraceActivityItem — the agent-trace `ActivityItem` render union
@@ -162,3 +231,4 @@ export interface TraceChatMessage {
   /** Thinking-mode chain-of-thought (DeepSeek), echoed back on tool round-trips. */
   reasoningContent?: string;
 }
+

@@ -60,7 +60,8 @@
     "local": "local",
     "identity": "identity",
     "instance": "instance",
-    "collection": "collection"
+    "collection": "collection",
+    "background": "background"
   },
   "categories": {
     "interaction": "interaction",
@@ -104,7 +105,12 @@
     "now": "now",
     "config": "config",
     "user": "user",
-    "trait": "trait"
+    "trait": "trait",
+    "event": "event",
+    "prevEvents": "prevEvents",
+    "prevStates": "prevStates",
+    "fromState": "fromState",
+    "toState": "toState"
   },
   "effects": {
     "set": "set",
@@ -188,6 +194,7 @@
     "alias": "alias",
     "animations": "animations",
     "appliesTo": "appliesTo",
+    "runsInBackground": "runsInBackground",
     "as": "as",
     "aspect": "aspect",
     "assetRef": "assetRef",
