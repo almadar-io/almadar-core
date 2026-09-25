@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-21T16:53:16.837Z",
+  "exportedAt": "2026-09-25T03:49:13.459Z",
   "contracts": {
     "form": {
       "emits": [
@@ -929,39 +929,6 @@
       "requires": [],
       "entityAware": false
     },
-    "feature-grid-organism": {
-      "emits": [
-        {
-          "event": "FEATURE_CLICK",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        }
-      ],
-      "requires": [],
-      "entityAware": true
-    },
-    "hero-organism": {
-      "emits": [
-        {
-          "event": "CTA_PRIMARY",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        },
-        {
-          "event": "CTA_SECONDARY",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        }
-      ],
-      "requires": [],
-      "entityAware": true
-    },
     "ui-slot-renderer": {
       "emits": [
         {
@@ -994,58 +961,6 @@
       ],
       "requires": [],
       "entityAware": false
-    },
-    "book-cover-page": {
-      "emits": [
-        {
-          "event": "BOOK_START",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        }
-      ],
-      "requires": [],
-      "entityAware": false
-    },
-    "book-nav-bar": {
-      "emits": [
-        {
-          "event": "BOOK_PAGE_PREV",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        }
-      ],
-      "requires": [],
-      "entityAware": false
-    },
-    "book-table-of-contents": {
-      "emits": [
-        {
-          "event": "BOOK_NAVIGATE",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        }
-      ],
-      "requires": [],
-      "entityAware": false
-    },
-    "book-viewer": {
-      "emits": [
-        {
-          "event": "BOOK_PAGE_CHANGE",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        }
-      ],
-      "requires": [],
-      "entityAware": true
     },
     "trait-slot": {
       "emits": [

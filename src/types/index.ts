@@ -321,6 +321,8 @@ export {
   type StateMachine,
   type PayloadField,
   type PayloadTypeWhen,
+  type PayloadTypeContainer,
+  payloadTypeContainer,
   type StateInput,
   type EventInput,
   type GuardInput,

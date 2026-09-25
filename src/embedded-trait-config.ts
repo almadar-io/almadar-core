@@ -21,7 +21,7 @@
  * @packageDocumentation
  */
 import type { DeclaredTraitConfig, OrbitalDefinition, OrbitalSchema, RuntimeValue, SExpr, Trait, TraitConfig, TraitConfigValue, TraitRef } from './types/index.js';
-import { normalizeCallSiteConfigToValues } from './types/index.js';
+import { isCallSiteConfigDeclaration, normalizeCallSiteConfigToValues } from './types/index.js';
 
 const TRAIT_BINDING_PREFIX = '@trait.';
 const CONFIG_FORWARD_RE = /^@config\.([A-Za-z_][A-Za-z0-9_]*)$/;
@@ -470,4 +470,50 @@ export function collectCallsiteCaptureChildren(
     if (keep.size > 0) out.set(referrer, keep);
   }
   return out;
+}
+
+/**
+ * The organism-scope knobs `traits` forward: every declared call-site config
+ * entry whose `default` or `forwardedFrom` is a bare `@config.<knob>`. An app
+ * stored one `.orb` per orbital keeps exactly these knobs of the organism's
+ * `config` in each file (an unforwarded one is `ORB_O_CONFIG_DEAD_KNOB`).
+ */
+export function collectForwardedConfigKeys(traits: ReadonlyArray<TraitRef>): ReadonlySet<string> {
+  const forwarded = new Set<string>();
+  for (const traitRef of traits) {
+    const config = typeof traitRef === 'string' ? undefined : traitRef.config;
+    if (!config) continue;
+    for (const entry of Object.values(config)) {
+      if (!isCallSiteConfigDeclaration(entry)) continue;
+      for (const token of [entry.default, entry.forwardedFrom]) {
+        const knob = typeof token === 'string' ? CONFIG_FORWARD_RE.exec(token)?.[1] : undefined;
+        if (knob) forwarded.add(knob);
+      }
+    }
+  }
+  return forwarded;
+}
+
+/** `config` narrowed to `forwarded`; undefined when none of its knobs is forwarded. */
+export function filterConfigToForwardedKeys(
+  config: DeclaredTraitConfig,
+  forwarded: ReadonlySet<string>,
+): DeclaredTraitConfig | undefined {
+  const kept = Object.entries(config).filter(([key]) => forwarded.has(key));
+  return kept.length > 0 ? Object.fromEntries(kept) : undefined;
+}
+
+/** Every per-orbital file's organism `config`, unioned; the first declaration of a knob wins. */
+export function unionOrganismConfigs(
+  schemas: ReadonlyArray<Pick<OrbitalSchema, 'config'>>,
+): DeclaredTraitConfig | undefined {
+  let merged: Record<string, DeclaredTraitConfig[string]> | undefined;
+  for (const schema of schemas) {
+    if (schema.config === undefined) continue;
+    merged ??= {};
+    for (const [key, field] of Object.entries(schema.config)) {
+      if (!(key in merged)) merged[key] = field;
+    }
+  }
+  return merged;
 }

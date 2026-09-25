@@ -107,6 +107,26 @@ export type PayloadField = {
   entity?: string;
 };
 
+/**
+ * The container a payload field's `type` string declares. `[X]` (and the
+ * bare `array` primitive) is an array of `X`; `object` is a plain object;
+ * every other spelling — scalars, entity names, `@entity`, type variables,
+ * unions — is opaque to a container check.
+ */
+export type PayloadTypeContainer =
+  | { kind: 'array'; element: string }
+  | { kind: 'object' }
+  | { kind: 'opaque' };
+
+export function payloadTypeContainer(type: string): PayloadTypeContainer {
+  if (type === 'array') return { kind: 'array', element: '' };
+  if (type === 'object') return { kind: 'object' };
+  if (type.length > 2 && type.startsWith('[') && type.endsWith(']')) {
+    return { kind: 'array', element: type.slice(1, -1) };
+  }
+  return { kind: 'opaque' };
+}
+
 export const PayloadFieldSchema: z.ZodType<PayloadField> = z.object({
   name: z.string().min(1),
   type: z.string().min(1),

@@ -37,6 +37,9 @@ export {
   buildResolvedTraitConfigs,
   traitReferencesCallsitePayload,
   collectCallsiteCaptureChildren,
+  collectForwardedConfigKeys,
+  filterConfigToForwardedKeys,
+  unionOrganismConfigs,
 } from './src/embedded-trait-config';
 
 // Dot-notation nested value lookup — shared by `@almadar/ui` and emitted

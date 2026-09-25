@@ -516,10 +516,10 @@ export type DerefEffect =
 /**
  * Swap! effect - atomic compare-and-swap on an entity field.
  * Only updates if the current value matches the expected value.
- * @example ['swap!', '@entity.health', ['fn', ['old'], ['-', 'old', '@payload.damage']]]
- * @example ['swap!', '@entity.counter', ['+', '@entity.counter', 1]]
+ * @example ['swap', '@entity.health', ['fn', ['old'], ['-', 'old', '@payload.damage']]]
+ * @example ['swap', '@entity.counter', ['+', '@entity.counter', 1]]
  */
-export type SwapEffect = ['swap!', string, SExpr];
+export type SwapEffect = ['swap', string, SExpr];
 
 /**
  * Options accepted by `watch` effects. Mirrors what the runtime reads when
@@ -852,7 +852,7 @@ export const SERVER_REPORTED_EFFECTS = [
     'fetch-stream',
     'ref',
     'deref',
-    'swap!',
+    'swap',
     'atomic',
     'emit',
 ] as const satisfies readonly Effect[0][];
@@ -1115,7 +1115,7 @@ export function deref(binding: string, selector?: FetchOptions): DerefEffect {
 }
 
 /**
- * Create a swap! effect (atomic compare-and-swap).
+ * Create a swap effect (atomic compare-and-swap).
  *
  * @param {string} binding - Binding to atomically update
  * @param {SExpr} transform - Transformation expression applied to the current value
@@ -1123,10 +1123,10 @@ export function deref(binding: string, selector?: FetchOptions): DerefEffect {
  *
  * @example
  * swap('@entity.counter', ['+', '@entity.counter', 1]);
- * // returns ["swap!", "@entity.counter", ["+", "@entity.counter", 1]]
+ * // returns ["swap", "@entity.counter", ["+", "@entity.counter", 1]]
  */
 export function swap(binding: string, transform: SExpr): SwapEffect {
-    return ['swap!', binding, transform];
+    return ['swap', binding, transform];
 }
 
 /**

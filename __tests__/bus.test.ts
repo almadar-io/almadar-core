@@ -175,7 +175,7 @@ describe('ServerEffectResult.effect derives from the effect union', () => {
   });
 
   it('rejects a name that is not an effect head', () => {
-    expect(() => ServerEffectResultSchema.parse({ effect: 'swap', success: true })).toThrow();
+    expect(() => ServerEffectResultSchema.parse({ effect: 'swap!', success: true })).toThrow(); // the retired spelling
     expect(() => ServerEffectResultSchema.parse({ effect: 'substrate', name: 'store', success: true })).toThrow();
   });
 });

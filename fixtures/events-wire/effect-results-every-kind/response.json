@@ -36,7 +36,7 @@
       "success": true
     },
     {
-      "effect": "swap!",
+      "effect": "swap",
       "entityType": "Note",
       "success": true
     },
