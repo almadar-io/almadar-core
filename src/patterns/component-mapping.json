@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-25T03:49:13.459Z",
+  "exportedAt": "2026-09-26T10:53:57.077Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -1273,6 +1273,16 @@
       "component": "GeometricPattern",
       "importPath": "@/components/core/molecules/GeometricPattern",
       "category": "component"
+    },
+    "icon-button": {
+      "component": "IconButton",
+      "importPath": "@/components/core/molecules/IconButton",
+      "category": "component"
+    },
+    "top-nav-item": {
+      "component": "TopNavItem",
+      "importPath": "@/components/core/molecules/TopNavItem",
+      "category": "navigation"
     }
   }
 }
