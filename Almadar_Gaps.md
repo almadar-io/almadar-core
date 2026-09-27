@@ -15,4 +15,3 @@ Next code: `G-CORE-013`
 ### Foundation / Core tier (`@almadar/core`, patterns, logger, validation, analytics, i18n tables)
 
 - **G-CORE-012** — `OrbitalSchemaSchema`'s inferred output is not assignable to `OrbitalSchema` (the zod `traits` element type ≠ `TraitRef`), so a request body can't be typed `z.ZodType<{ schema: OrbitalSchema }>` from it; `@kflow-builder/shared` had to keep the resolve body's zod check server-side. Converge the zod schema and the TS type (one generated from the other). `src/types/schema.ts` [architectural] — found 2026-09-26
-- **G-CORE-009** — `.lolo` `aspect : string` isn't validated against `ASSET_ASPECTS` at `orb validate` time. `[rung-2, compiler-owned, sacred — not queued without permission]` — orig: `Almadar_Core_Gaps.md` (residual)
