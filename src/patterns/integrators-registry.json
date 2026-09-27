@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-12T17:27:32.966Z",
+  "exportedAt": "2026-09-27T02:05:16.940Z",
   "integrators": {
     "github": {
       "name": "github",
@@ -2866,13 +2866,13 @@
       "actions": [
         {
           "name": "authorize",
-          "description": "Build the provider authorization URL (PKCE + state) for an OAuth/OIDC login redirect; real OIDC discovery when OAUTH_CLIENT_ID/SECRET are configured, an in-memory mock otherwise.",
+          "description": "Build the provider authorization URL (PKCE + state) for an OAuth/OIDC login redirect; OIDC discovery (Google) or static OAuth 2 metadata (GitHub) when OAUTH_CLIENT_ID/SECRET are configured, an in-memory mock otherwise.",
           "params": [
             {
               "name": "provider",
               "type": "'google' | 'github' | 'auth0'",
               "required": true,
-              "description": "Identity provider; OIDC issuer defaults to Google unless OIDC_ISSUER_URL overrides it."
+              "description": "Identity provider; OIDC issuer defaults to Google unless OIDC_ISSUER_URL overrides it; GitHub uses its OAuth 2 endpoints."
             },
             {
               "name": "scopes",
@@ -2885,6 +2885,12 @@
               "type": "string",
               "required": true,
               "description": "Callback URL the provider redirects back to after consent."
+            },
+            {
+              "name": "subject",
+              "type": "string",
+              "required": false,
+              "description": "Opaque id of whoever started the flow (the verified user); `token` returns it so the host can refuse anyone else completing."
             }
           ],
           "responseShape": {
@@ -2907,13 +2913,21 @@
               "type": "string",
               "required": true,
               "description": "The `state` value returned by `authorize`."
+            },
+            {
+              "name": "subject",
+              "type": "string",
+              "required": false,
+              "description": "Who is completing; must equal the `subject` bound at `authorize`, checked before the code is exchanged."
             }
           ],
           "responseShape": {
             "accessToken": "string",
             "refreshToken": "string",
             "expiresIn": "number",
-            "tokenType": "'bearer'"
+            "tokenType": "'bearer'",
+            "scope": "string[]",
+            "subject": "string"
           }
         },
         {

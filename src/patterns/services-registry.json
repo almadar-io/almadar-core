@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-12T17:27:32.966Z",
+  "exportedAt": "2026-09-27T02:05:16.940Z",
   "services": {
     "llm": {
       "name": "llm",
@@ -227,12 +227,19 @@
         {
           "envVar": "ANTHROPIC_API_KEY",
           "required": false,
+          "oneOf": "provider",
           "description": "Anthropic API key (use this OR OPENAI_API_KEY)"
         },
         {
           "envVar": "OPENAI_API_KEY",
           "required": false,
+          "oneOf": "provider",
           "description": "OpenAI API key (use this OR ANTHROPIC_API_KEY)"
+        },
+        {
+          "envVar": "LLM_PROVIDER",
+          "required": false,
+          "description": "Chat provider when several keys are set: anthropic | openai | deepseek | kimi | openrouter (default: the first key found)"
         }
       ],
       "hooks": []
@@ -1500,11 +1507,13 @@
         {
           "envVar": "ANTHROPIC_API_KEY",
           "required": false,
+          "oneOf": "provider",
           "description": "Anthropic API key"
         },
         {
           "envVar": "OPENAI_API_KEY",
           "required": false,
+          "oneOf": "provider",
           "description": "OpenAI API key"
         }
       ],
@@ -1729,11 +1738,13 @@
         {
           "envVar": "SENDGRID_API_KEY",
           "required": false,
+          "oneOf": "provider",
           "description": "SendGrid API key (use this OR RESEND_API_KEY)"
         },
         {
           "envVar": "RESEND_API_KEY",
           "required": false,
+          "oneOf": "provider",
           "description": "Resend API key (use this OR SENDGRID_API_KEY)"
         },
         {
@@ -2410,6 +2421,7 @@
         {
           "envVar": "GOOGLE_DRIVE_SA_KEY",
           "required": false,
+          "oneOf": "auth",
           "description": "Google service-account key JSON (raw or base64) with drive scope — serves reads; store in Secret Manager, bind as env"
         },
         {
@@ -2420,6 +2432,7 @@
         {
           "envVar": "GOOGLE_DRIVE_REFRESH_TOKEN",
           "required": false,
+          "oneOf": "auth",
           "description": "User OAuth refresh token (drive-consent.mjs) — serves writes; SA uploads are impossible on personal accounts (no SA storage quota)"
         },
         {
@@ -4012,13 +4025,13 @@
       "actions": [
         {
           "name": "authorize",
-          "description": "Build the provider authorization URL (PKCE + state) for an OAuth/OIDC login redirect; real OIDC discovery when OAUTH_CLIENT_ID/SECRET are configured, an in-memory mock otherwise.",
+          "description": "Build the provider authorization URL (PKCE + state) for an OAuth/OIDC login redirect; OIDC discovery (Google) or static OAuth 2 metadata (GitHub) when OAUTH_CLIENT_ID/SECRET are configured, an in-memory mock otherwise.",
           "params": [
             {
               "name": "provider",
               "type": "'google' | 'github' | 'auth0'",
               "required": true,
-              "description": "Identity provider; OIDC issuer defaults to Google unless OIDC_ISSUER_URL overrides it."
+              "description": "Identity provider; OIDC issuer defaults to Google unless OIDC_ISSUER_URL overrides it; GitHub uses its OAuth 2 endpoints."
             },
             {
               "name": "scopes",
@@ -4031,6 +4044,12 @@
               "type": "string",
               "required": true,
               "description": "Callback URL the provider redirects back to after consent."
+            },
+            {
+              "name": "subject",
+              "type": "string",
+              "required": false,
+              "description": "Opaque id of whoever started the flow (the verified user); `token` returns it so the host can refuse anyone else completing."
             }
           ],
           "responseShape": {
@@ -4053,13 +4072,21 @@
               "type": "string",
               "required": true,
               "description": "The `state` value returned by `authorize`."
+            },
+            {
+              "name": "subject",
+              "type": "string",
+              "required": false,
+              "description": "Who is completing; must equal the `subject` bound at `authorize`, checked before the code is exchanged."
             }
           ],
           "responseShape": {
             "accessToken": "string",
             "refreshToken": "string",
             "expiresIn": "number",
-            "tokenType": "'bearer'"
+            "tokenType": "'bearer'",
+            "scope": "string[]",
+            "subject": "string"
           }
         },
         {
@@ -4116,12 +4143,12 @@
         {
           "envVar": "OAUTH_CLIENT_ID",
           "required": true,
-          "description": "OIDC client ID"
+          "description": "OAuth/OIDC client ID"
         },
         {
           "envVar": "OAUTH_CLIENT_SECRET",
           "required": true,
-          "description": "OIDC client secret"
+          "description": "OAuth/OIDC client secret"
         },
         {
           "envVar": "OAUTH_REDIRECT_URI",
