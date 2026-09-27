@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-26T10:53:57.077Z",
+  "exportedAt": "2026-09-27T02:12:25.691Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -1283,6 +1283,16 @@
       "component": "TopNavItem",
       "importPath": "@/components/core/molecules/TopNavItem",
       "category": "navigation"
+    },
+    "change-list": {
+      "component": "ChangeList",
+      "importPath": "@/components/core/molecules/ChangeList",
+      "category": "display"
+    },
+    "commit-row": {
+      "component": "CommitRow",
+      "importPath": "@/components/core/molecules/CommitRow",
+      "category": "component"
     }
   }
 }
