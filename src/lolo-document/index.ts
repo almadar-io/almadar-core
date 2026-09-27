@@ -691,6 +691,59 @@ export function setConfigValue(doc: LoloDocument, traitName: string, key: string
   return [{ start: ls, end: ls, insert: line }];
 }
 
+/**
+ * Index of a 1-based line and character (code point) column — the position `orb embeds`
+ * reports for an inline embed's opening `<`. -1 when the text has no such position.
+ */
+function indexOfLineCol(text: string, line: number, col: number): number {
+  let i = 0;
+  for (let l = 1; l < line; l++) {
+    const nl = text.indexOf('\n', i);
+    if (nl === -1) return -1;
+    i = nl + 1;
+  }
+  for (let c = 1; c < col; c++) {
+    if (i >= text.length || text[i] === '\n') return -1;
+    i += (text.codePointAt(i) ?? 0) > 0xffff ? 2 : 1;
+  }
+  return i;
+}
+
+/**
+ * Set `key` on the inline behavior embed whose tag opens at (`line`, `col`) — the
+ * `.lolo` home of an `.orb` trait named `Inline<Short><N>` (located by `orb embeds`).
+ * Replaces the attribute's value in place, or adds it before the opening tag closes.
+ */
+export function setEmbedAttribute(text: string, line: number, col: number, key: string, value: LoloValue): TextEdit[] {
+  const open = indexOfLineCol(text, line, col);
+  if (open < 0 || text[open] !== '<') throw new Error(`lolo-document: no embed tag at ${line}:${col}`);
+  const formatted = `{${formatLoloValue(value)}}`;
+  let i = open + 1;
+  while (i < text.length && !/[\s/>]/.test(text[i])) i++;
+  for (;;) {
+    while (i < text.length && /\s/.test(text[i])) i++;
+    if (i >= text.length) throw new Error(`lolo-document: unterminated embed tag at ${line}:${col}`);
+    if (text[i] === '>' || text.startsWith('/>', i)) {
+      let at = i;
+      while (at > open && /\s/.test(text[at - 1])) at--;
+      return [{ start: at, end: at, insert: ` ${key}=${formatted}` }];
+    }
+    const nameStart = i;
+    while (i < text.length && /[A-Za-z0-9_-]/.test(text[i])) i++;
+    const name = text.slice(nameStart, i);
+    if (name === '' || text[i] !== '=') throw new Error(`lolo-document: unreadable attribute in the embed at ${line}:${col}`);
+    const valueStart = i + 1;
+    const valueEnd = text[valueStart] === '{'
+      ? matchDelimiter(text, valueStart) + 1
+      : text[valueStart] === '"'
+        ? skipString(text, valueStart)
+        : -1;
+    if (valueEnd <= valueStart) throw new Error(`lolo-document: unreadable value for ${name} in the embed at ${line}:${col}`);
+    if (name === key) return [{ start: valueStart, end: valueEnd, insert: formatted }];
+    i = valueEnd;
+  }
+}
+
 /** Top-level elements of an array literal `[ … ]` as spans (balanced, string-aware). */
 export function arrayElementSpans(text: string, arraySpan: Span): Span[] {
   const spans: Span[] = [];

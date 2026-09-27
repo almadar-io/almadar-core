@@ -18,6 +18,7 @@ import {
   removeTrait,
   renameEvent,
   setConfigArrayRow,
+  setEmbedAttribute,
   setConfigValue,
 } from '../src/lolo-document';
 
@@ -241,5 +242,43 @@ describe('aliasForBehavior', () => {
 describe('applyEdits identity', () => {
   it('is the identity with no edits (byte-identical round trip)', () => {
     expect(applyEdits(SAMPLE, [])).toBe(SAMPLE);
+  });
+});
+
+describe('setEmbedAttribute — an inline embed located by `orb embeds` (line, character column)', () => {
+  const TEXT = [
+    'orbital O {',
+    '  trait V -> E [interaction] {',
+    '    state idle {',
+    '      INIT -> idle',
+    '        (render-ui main <Box title={"«»"}><Button.traits.ButtonRender label={"New Note"} variant={primary} /></Box>)',
+    '    }',
+    '  }',
+    '}',
+  ].join('\n');
+
+  it('replaces an existing attribute value and nothing else', () => {
+    const next = applyEdits(TEXT, setEmbedAttribute(TEXT, 5, 43, 'label', 'Write a note'));
+    expect(next).toBe(TEXT.replace('label={"New Note"}', 'label={"Write a note"}'));
+  });
+
+  it('adds an attribute the embed does not set yet, before the tag closes', () => {
+    const next = applyEdits(TEXT, setEmbedAttribute(TEXT, 5, 43, 'icon', 'plus'));
+    expect(next).toContain('variant={primary} icon={"plus"} />');
+  });
+
+  it('control: a value holding braces and quotes stays one balanced attribute', () => {
+    const next = applyEdits(TEXT, setEmbedAttribute(TEXT, 5, 43, 'label', 'say "hi" {now}'));
+    expect(next).toContain('label={"say \\"hi\\" {now}"} variant={primary}');
+  });
+
+  it('edge: columns count characters — «» before the tag are 2 columns, not 4 bytes', () => {
+    expect(() => setEmbedAttribute(TEXT, 5, 45, 'label', 'x')).toThrow(/no embed tag/);
+  });
+
+  it('edge: a non-self-closing embed gets the attribute inside its opening tag', () => {
+    const text = '(render-ui main <Stack.traits.StackRender gap={md}>\n  <Box />\n</Stack.traits.StackRender>)';
+    const next = applyEdits(text, setEmbedAttribute(text, 1, 17, 'gap', 'lg'));
+    expect(next.split('\n')[0]).toBe('(render-ui main <Stack.traits.StackRender gap={"lg"}>');
   });
 });

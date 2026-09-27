@@ -1142,6 +1142,7 @@ export {
   type KnownValidationErrorCode,
   KNOWN_VALIDATION_ERROR_CODES,
   isKnownValidationErrorCode,
+  orbitalIndexOfValidationPath,
 } from "./validation.js";
 
 // ============================================================================

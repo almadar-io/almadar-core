@@ -294,7 +294,7 @@ export function ledgerResolveName(
   return null;
 }
 
-/** Immutable rename: returns a new ledger with the id's `curName` + `renames` updated. */
+/** Immutable rename: returns a new ledger with the id's `curName` + `renames` updated; renaming to the current name is a no-op. */
 export function ledgerRename(
   ledger: IdentityLedger,
   id: string,
@@ -302,7 +302,7 @@ export function ledgerRename(
   at: string,
 ): IdentityLedger {
   const entry = ledger.entries[id];
-  if (entry === undefined) return ledger;
+  if (entry === undefined || entry.curName === to) return ledger;
   const updated: LedgerEntry = {
     ...entry,
     curName: to,

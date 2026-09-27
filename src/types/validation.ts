@@ -47,6 +47,23 @@ export interface ValidationError {
  */
 export type ValidationErrorCode = string;
 
+const ORBITAL_PATH_PREFIX = /^orbitals\[(\d+)(?: \([^\]]*\))?\]/;
+
+/**
+ * The index of the orbital a validation error belongs to, read from the
+ * validator's declared path shape `orbitals[<index> (<name>)]…`, split into
+ * segments or not (`['orbitals[<index> (<name>)]', …]`, `['orbitals', <index>, …]`);
+ * null for a schema-level (or missing) path.
+ */
+export function orbitalIndexOfValidationPath(path: string | ReadonlyArray<string | number> | undefined): number | null {
+  if (Array.isArray(path)) {
+    if (path[0] === 'orbitals') return typeof path[1] === 'number' ? path[1] : null;
+    return typeof path[0] === 'string' ? orbitalIndexOfValidationPath(path[0]) : null;
+  }
+  const m = typeof path === 'string' ? ORBITAL_PATH_PREFIX.exec(path) : null;
+  return m ? Number(m[1]) : null;
+}
+
 /**
  * The result of a single validator pass: a boolean verdict plus the errors
  * and warnings (the validator wire shape, `ValidationError`).
