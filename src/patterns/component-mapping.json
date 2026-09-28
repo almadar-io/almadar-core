@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-27T13:02:32.256Z",
+  "exportedAt": "2026-09-28T12:49:04.761Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -1292,6 +1292,16 @@
     "commit-row": {
       "component": "CommitRow",
       "importPath": "@/components/core/molecules/CommitRow",
+      "category": "component"
+    },
+    "avl-state-machine": {
+      "component": "AvlStateMachine",
+      "importPath": "@/components/avl/molecules/AvlStateMachine",
+      "category": "display"
+    },
+    "avl-glyph": {
+      "component": "AvlGlyph",
+      "importPath": "@/components/avl/molecules/AvlGlyph",
       "category": "component"
     }
   }

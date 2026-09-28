@@ -298,6 +298,24 @@ export function getOperator(expr: SExpr): string | null {
 }
 
 /**
+ * Print an S-expression in `.lolo` surface form: calls as `(op args…)`,
+ * bindings bare, strings quoted, objects `{ k: v }`, literal arrays `[a b]`.
+ * Structural only — a string-headed array is a call, as in {@link isSExpr}.
+ */
+export function formatSExpr(expr: SExpr): string {
+  if (expr === null) return 'null';
+  if (typeof expr === 'string') return isBinding(expr) ? expr : JSON.stringify(expr);
+  if (typeof expr === 'number' || typeof expr === 'boolean') return String(expr);
+  if (Array.isArray(expr)) {
+    const op = getOperator(expr);
+    if (op !== null) return `(${[op, ...expr.slice(1).map(formatSExpr)].join(' ')})`;
+    return `[${expr.map(formatSExpr).join(' ')}]`;
+  }
+  const entries = Object.entries(expr).map(([k, v]) => `${k}: ${formatSExpr(v)}`);
+  return entries.length === 0 ? '{}' : `{ ${entries.join(', ')} }`;
+}
+
+/**
  * Get the arguments from an S-expression call.
  *
  * @param expr - S-expression array

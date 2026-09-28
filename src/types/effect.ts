@@ -754,6 +754,30 @@ export type AsyncAllEffect = ['async/all', ...Effect[]];
  */
 export type AsyncSequenceEffect = ['async/sequence', ...Effect[]];
 
+/** Effect operators the std registry declares that had no typed tuple (arity from the registry). */
+export type NotifyEffect = ['notify', SExpr] | ['notify', SExpr, SExpr];
+export type SendServerEffect = ['send-server', SExpr] | ['send-server', SExpr, SExpr];
+export type AsyncTimeoutEffect = ['async/timeout', SExpr, SExpr];
+export type AsyncRetryEffect = ['async/retry', SExpr, SExpr];
+export type NnSetWeightsEffect = ['nn/setWeights', SExpr, SExpr];
+export type TrainLoopEffect = ['train/loop', SExpr, SExpr, SExpr];
+export type TrainStepEffect = ['train/step', SExpr, SExpr, SExpr, SExpr];
+export type TrainClipGradientsEffect = ['train/clipGradients', SExpr, SExpr];
+export type TrainClipWeightsEffect = ['train/clipWeights', SExpr, SExpr];
+export type TrainSgdEffect = ['train/sgd', SExpr, SExpr] | ['train/sgd', SExpr, SExpr, SExpr];
+export type TrainAdamEffect = ['train/adam', SExpr, SExpr] | ['train/adam', SExpr, SExpr, SExpr] | ['train/adam', SExpr, SExpr, SExpr, SExpr];
+export type ProbSeedEffect = ['prob/seed', SExpr];
+export type ProbConditionEffect = ['prob/condition', SExpr];
+export type WorkspaceWriteOrbitalEffect = ['workspace/write-orbital', SExpr, SExpr];
+export type WorkspaceWriteFileEffect = ['workspace/write-file', SExpr, SExpr];
+export type WorkspaceWriteSchemaEffect = ['workspace/write-schema', SExpr];
+export type WorkspaceWritePlanEffect = ['workspace/write-plan', SExpr];
+export type WorkspaceArchiveOrbitalEffect = ['workspace/archive-orbital', SExpr];
+export type LoloEmitBodyEffect = ['lolo/emit-body', SExpr, SExpr, SExpr];
+export type IntegrationHttpEffect = ['integration/http', SExpr, SExpr, SExpr] | ['integration/http', SExpr, SExpr, SExpr, SExpr];
+export type IntegrationGithubGetRepoEffect = ['integration/github-get-repo', SExpr, SExpr];
+export type IntegrationGithubCreateIssueEffect = ['integration/github-create-issue', SExpr, SExpr, SExpr];
+
 /**
  * Union of all typed effects.
  * Provides compile-time validation for common effect types.
@@ -803,7 +827,29 @@ export type TypedEffect =
     | ComposeEffect
     | TraceEffect
     | MemoryEffect
-    | ApplicationEffect;
+    | ApplicationEffect
+    | NotifyEffect
+    | SendServerEffect
+    | AsyncTimeoutEffect
+    | AsyncRetryEffect
+    | NnSetWeightsEffect
+    | TrainLoopEffect
+    | TrainStepEffect
+    | TrainClipGradientsEffect
+    | TrainClipWeightsEffect
+    | TrainSgdEffect
+    | TrainAdamEffect
+    | ProbSeedEffect
+    | ProbConditionEffect
+    | WorkspaceWriteOrbitalEffect
+    | WorkspaceWriteFileEffect
+    | WorkspaceWriteSchemaEffect
+    | WorkspaceWritePlanEffect
+    | WorkspaceArchiveOrbitalEffect
+    | LoloEmitBodyEffect
+    | IntegrationHttpEffect
+    | IntegrationGithubGetRepoEffect
+    | IntegrationGithubCreateIssueEffect;
 
 // ============================================================================
 // Effect Type (Strictly Typed)
@@ -835,6 +881,39 @@ export type TypedEffect =
  * ["persist", "create", "Task", { "title": "@payload.title" }]
  */
 export type Effect = TypedEffect;
+
+/** Every literal effect operator the {@link Effect} union declares, as runtime data. */
+export const EFFECT_OPERATORS = [
+  'render-ui', 'navigate', 'navigate-back', 'emit', 'set', 'persist', 'call-service', 'spawn',
+  'despawn', 'do', 'fetch', 'fetch-stream', 'if', 'when', 'let', 'log', 'wait', 'ref', 'deref',
+  'swap', 'watch', 'atomic', 'async/delay', 'async/debounce', 'async/throttle', 'async/interval',
+  'async/race', 'async/all', 'async/sequence', 'forward', 'train', 'evaluate', 'checkpoint/save',
+  'checkpoint/load', 'notify', 'send-server', 'async/timeout', 'async/retry', 'nn/setWeights',
+  'train/loop', 'train/step', 'train/clipGradients', 'train/clipWeights', 'train/sgd',
+  'train/adam', 'prob/seed', 'prob/condition', 'workspace/write-orbital', 'workspace/write-file',
+  'workspace/write-schema', 'workspace/write-plan', 'workspace/archive-orbital', 'lolo/emit-body',
+  'integration/http', 'integration/github-get-repo', 'integration/github-create-issue',
+] as const;
+
+/** Namespaced effect families (`<family>/<name>`, e.g. `llm/generate`) the {@link Effect} union declares. */
+export const EFFECT_OPERATOR_FAMILIES = [
+  'agent', 'os', 'browser', 'llm', 'behavior', 'validate', 'session', 'compose', 'trace', 'memory',
+  'application',
+] as const;
+
+export type EffectOperator = (typeof EFFECT_OPERATORS)[number];
+export type EffectOperatorFamily = (typeof EFFECT_OPERATOR_FAMILIES)[number];
+
+type EffectHead = Effect[0];
+type FamilyOfHead<H> = H extends `${infer P}/${string}` ? (`${P}/\u0000` extends H ? P : never) : never;
+type LiteralOfHead<H> = H extends `${infer P}/${string}` ? (`${P}/\u0000` extends H ? never : H) : H;
+type AssertTrue<T extends true> = T;
+/** Fails to compile when the runtime lists and the {@link Effect} union drift apart, in either direction. */
+export type EffectOperatorsInSync = AssertTrue<
+  [Exclude<LiteralOfHead<EffectHead>, EffectOperator>, Exclude<EffectOperator, LiteralOfHead<EffectHead>>,
+   Exclude<FamilyOfHead<EffectHead>, EffectOperatorFamily>, Exclude<EffectOperatorFamily, FamilyOfHead<EffectHead>>] extends [never, never, never, never]
+    ? true : false
+>;
 
 /**
  * The effects a server reports an outcome for on
