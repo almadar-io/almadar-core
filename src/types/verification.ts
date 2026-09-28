@@ -18,7 +18,7 @@
  */
 
 import type { EntityRow } from "./entity.js";
-import type { EventPayload, SExpr } from "./expression.js";
+import type { EvalTrace, EventPayload, SExpr } from "./expression.js";
 import type { BusEventSource } from "./bus.js";
 
 // ── Checks ────────────────────────────────────────────────────────────
@@ -66,6 +66,8 @@ export interface EffectTrace {
   status: "executed" | "failed" | "skipped";
   error?: string;
   durationMs?: number;
+  /** The effect expression's evaluation, node by node, when the producer traced it. */
+  evalTrace?: EvalTrace;
 }
 
 /** What the server returned for a forwarded event. */
@@ -211,6 +213,32 @@ export interface EventLogEntry {
   type: string;
   payload?: EventPayload;
   timestamp: number;
+}
+
+/** One guarded arm evaluated while choosing which `from --event-->` arm fires. */
+export interface GuardEvaluation {
+  /** Position of the arm among the trait's `from --event-->` arms, in declaration order. */
+  arm: number;
+  guard: SExpr;
+  passed: boolean;
+  trace: EvalTrace;
+  error?: string;
+}
+
+/** One played circuit step: Event → Guard → Transition → Effects. */
+export interface CircuitStepResult {
+  trait: string;
+  event: string;
+  /** A guard-fail always means no transition, even for a self-loop. */
+  transitionFired: boolean;
+  guard: "pass" | "fail" | "none";
+  /** Position of the chosen arm among the trait's `from --event-->` arms; absent when every guard failed. */
+  firedArm?: number;
+  state: { before: string | null; after: string | null };
+  effects: ReadonlyArray<EffectTrace>;
+  emitted: ReadonlyArray<EventLogEntry>;
+  /** Guarded arms evaluated during arm selection, in order, when the guard hook traced them. */
+  guards?: ReadonlyArray<GuardEvaluation>;
 }
 
 // ── Window bridge contract ───────────────────────────────────────────

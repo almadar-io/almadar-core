@@ -297,6 +297,24 @@ export function getOperator(expr: SExpr): string | null {
   return expr[0] as string;
 }
 
+/** Where a node sits in its S-expression: argument indices of calls/arrays, keys of object literals. */
+export type SExprPath = ReadonlyArray<number | string>;
+
+/**
+ * One step of a traced evaluation. `enter`/`exit` bracket a node's evaluation
+ * (`exit` carries its value or error); `iter` marks a node re-entered (a lambda
+ * body per item); `skip` marks an argument the operator never evaluated
+ * (short-circuited `and`/`or`, the untaken `if` branch).
+ */
+export interface EvalStep {
+  kind: 'enter' | 'exit' | 'iter' | 'skip';
+  path: SExprPath;
+  value?: RuntimeValue;
+  error?: string;
+}
+
+export type EvalTrace = EvalStep[];
+
 /**
  * Print an S-expression in `.lolo` surface form: calls as `(op args…)`,
  * bindings bare, strings quoted, objects `{ k: v }`, literal arrays `[a b]`.

@@ -240,6 +240,9 @@ export {
   getOperator,
   getArgs,
   formatSExpr,
+  type SExprPath,
+  type EvalStep,
+  type EvalTrace,
   sexpr,
   walkSExpr,
   isStaticallyFalse,
@@ -1098,6 +1101,8 @@ export {
   type VerificationSnapshot,
   type AssetLoadStatus,
   type EventLogEntry,
+  type GuardEvaluation,
+  type CircuitStepResult,
   type DrawableDescriptor,
   type OrbitalVerificationAPI,
 } from "./verification.js";
