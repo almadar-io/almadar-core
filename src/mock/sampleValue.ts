@@ -49,6 +49,8 @@ export const RESERVED_FIELD_NAMES: ReadonlySet<string> = new Set(['id', 'created
 export interface SampleEntity {
   readonly name: string;
   readonly persistence?: EntityPersistence;
+  /** `[identity]`: the rows are the persona roster, so every field is filled. */
+  readonly identity?: boolean;
   readonly fields: readonly EntityField[];
 }
 
@@ -59,6 +61,8 @@ export interface SampleContext {
   readonly strategy: SampleStrategy;
   /** Declared persistence of the OWNING entity; undefined means persistent. */
   readonly persistence?: EntityPersistence;
+  /** The owning entity is `[identity]`: its rows are personas, never left partly unset. */
+  readonly identity?: boolean;
   readonly depth?: number;
 }
 
@@ -263,7 +267,9 @@ function sampleObject(field: ObjectEntityField, ctx: SampleContext): FieldValue 
   const depth = ctx.depth ?? 0;
   if (!field.properties || depth >= MAX_NESTED_DEPTH) return null;
   const out: Record<string, FieldValue> = {};
-  for (const [propName, propField] of Object.entries(field.properties)) {
+  // Sorted, so the seeded draws do not depend on declaration order (Rust holds properties in a map).
+  const entries = Object.entries(field.properties).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  for (const [propName, propField] of entries) {
     const child: EntityField = { ...propField, name: propName };
     out[propName] = sampleFieldValue(child, { ...ctx, depth: depth + 1 }) ?? null;
   }
@@ -295,13 +301,15 @@ function sampleUnion(field: UnionEntityField, ctx: SampleContext): FieldValue | 
  * `seeded` only — the `index` strategy also backs the verifier's synthesized
  * PAYLOADS, which must stay complete regardless. Deterministic on the row
  * index, never on randomness: every EVEN row (2, 4, 6…) omits them, every ODD
- * row (starting at row 1) fills them in as before. A row-count-1 entity (a
+ * row (starting at row 1) fills them in as before. Never on an `[identity]` entity, whose
+ * rows are the persona roster. Row fields only (depth 0): an
+ * array element or object property is part of a value, never an unset field. A row-count-1 entity (a
  * `[runtime]` singleton, or any collection seeded with exactly one row)
  * always lands on row 1 and is therefore never affected — singleton state
  * stays fully populated with no separate carve-out needed.
  */
 function omitsUndefaultedOptionalFields(ctx: SampleContext): boolean {
-  return ctx.strategy === 'seeded' && ctx.index % 2 === 0;
+  return ctx.strategy === 'seeded' && !ctx.identity && (ctx.depth ?? 0) === 0 && ctx.index % 2 === 0;
 }
 
 /**
@@ -442,6 +450,8 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
     case 'trait':
     case 'slot':
     case 'pattern':
+    // An event name is authored on the owning struct, never random text (seed.rs twin).
+    case 'event':
     // Renderable content is computed by the owning trait's effects, never
     // seeded — same no-sample treatment as the config-only reference types.
     case 'node':
@@ -469,6 +479,7 @@ export function sampleRow(
       ...ctx,
       entityName: entity.name,
       persistence: ctx.persistence ?? entity.persistence,
+      ...(entity.identity ? { identity: true } : {}),
     });
     if (value !== undefined) row[name] = value;
   }

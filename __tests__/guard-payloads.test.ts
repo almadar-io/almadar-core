@@ -126,3 +126,58 @@ describe('buildGuardPayloads — array/len comparisons (RV-53)', () => {
     expect(Array.isArray((pass.result as { rows: unknown }).rows)).toBe(true);
   });
 });
+
+describe('buildGuardPayloads through str/default', () => {
+  const sd = (field: string, dflt: string) => ['str/default', `@payload.${field}`, dflt];
+
+  it('= against the default: pass sends the default, fail anything else', () => {
+    expect(buildGuardPayloads(['=', sd('id', ''), ''])).toEqual({ pass: { id: '' }, fail: { id: 'not-' } });
+  });
+
+  it('!= against the default: pass sends a value, fail sends the default', () => {
+    expect(buildGuardPayloads(['!=', sd('slug', ''), ''])).toEqual({ pass: { slug: 'not-' }, fail: { slug: '' } });
+  });
+
+  it('either operand order', () => {
+    expect(buildGuardPayloads(['=', '', sd('id', '')])).toEqual({ pass: { id: '' }, fail: { id: 'not-' } });
+  });
+
+  it('inside and: the pass payload satisfies both, so a sibling arm keyed on id != "" is not taken', () => {
+    const payloads = buildGuardPayloads(['and', ['=', sd('id', ''), ''], ['!=', sd('slug', ''), '']]);
+    expect(payloads.pass).toEqual({ id: '', slug: 'not-' });
+  });
+
+  it('control: a plain @payload comparison is unchanged', () => {
+    expect(buildGuardPayloads(['=', '@payload.kind', 'a'])).toEqual({ pass: { kind: 'a' }, fail: { kind: 'not-a' } });
+  });
+});
+
+describe('buildGuardPayloads on an array length equality', () => {
+  it('= n: pass sends n items, fail n + 1', () => {
+    const p = buildGuardPayloads(['=', ['array/len', '@payload.data'], 0]);
+    expect(p.pass).toEqual({ data: [] });
+    expect(Array.isArray(p.fail['data']) && p.fail['data'].length).toBe(1);
+  });
+
+  it('!= n: pass sends n + 1 items, fail n', () => {
+    const p = buildGuardPayloads(['!=', ['array/len', '@payload.data'], 2]);
+    expect(Array.isArray(p.pass['data']) && p.pass['data'].length).toBe(3);
+    expect(Array.isArray(p.fail['data']) && p.fail['data'].length).toBe(2);
+  });
+
+  it('control: > on the same length is unchanged', () => {
+    const p = buildGuardPayloads(['>', ['array/len', '@payload.data'], 0]);
+    expect(Array.isArray(p.pass['data']) && p.pass['data'].length).toBe(1);
+  });
+});
+
+describe('buildGuardPayloads fail for and', () => {
+  it('violates the first sub-guard that can fail, skipping constant-true ones (a folded config knob)', () => {
+    const p = buildGuardPayloads(['and', true, ['>', ['array/len', '@payload.data'], 0]]);
+    expect(p.fail).toEqual({ data: [] });
+  });
+
+  it('control: without a constant, the first sub-guard is violated as before', () => {
+    expect(buildGuardPayloads(['and', ['=', '@payload.a', 'x'], ['=', '@payload.b', 'y']]).fail).toEqual({ a: 'not-x' });
+  });
+});

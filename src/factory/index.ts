@@ -20,6 +20,17 @@ export type {
 } from './types.js';
 
 export { rehydrateKnobDefs } from './knob-defs.js';
+export { mergeParams, type ParamConflict, type ParamConflictKind, type ParamsMerge } from './merge.js';
+export {
+  buildLoloBehaviorContracts,
+  serializeLoloBehaviorContracts,
+  inferConfigType,
+  sortKeysDeep,
+  type LoloBehaviorContract,
+  type LoloTraitContract,
+  type LoloOrbitalContract,
+  type NamedOrb,
+} from './lolo-behavior-contracts.js';
 
 export type {
   DomainQuestion,

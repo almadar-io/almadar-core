@@ -3,7 +3,7 @@
  * docs/Almadar_Runtime_Gaps.md R-MOCK-SELF-RELATION-MANY-RANDOM-LINKING.
  */
 import { describe, it, expect } from 'vitest';
-import { linkSelfRelationField, selfRelationForest } from '../src/mock/relationForest.js';
+import { crossRelationValue, isRelationPlaceholder, linkSelfRelationField, selfRelationForest } from '../src/mock/relationForest.js';
 import type { EntityRow } from '../src/types/entity.js';
 
 function ids(count: number): string[] {
@@ -81,5 +81,37 @@ describe('linkSelfRelationField', () => {
     expect(data[1]!['parentId']).toBe('deliberately-stamped');
     expect(data[0]!['parentId']).toBe('');
     expect(data[2]!['parentId']).toBe('Row-0');
+  });
+});
+
+describe('crossRelationValue (twin of orbital-core seed.rs link_relation_fields)', () => {
+  const targets = ['T1', 'T2', 'T3'];
+
+  it('links a one-cardinality row i to target i mod len', () => {
+    expect([0, 1, 2, 3].map((i) => crossRelationValue(targets, i, 'one'))).toEqual(['T1', 'T2', 'T3', 'T1']);
+    expect(crossRelationValue(targets, 4, 'many-to-one')).toBe('T2');
+  });
+
+  it('links a many-cardinality row i to 2 (even i) or 3 (odd i) consecutive targets from offset i', () => {
+    expect(crossRelationValue(targets, 0, 'many')).toEqual(['T1', 'T2']);
+    expect(crossRelationValue(targets, 1, 'many')).toEqual(['T2', 'T3', 'T1']);
+    expect(crossRelationValue(targets, 2, undefined)).toEqual(['T3', 'T1']);
+  });
+
+  it('edge: never more picks than targets, and no target twice', () => {
+    expect(crossRelationValue(['only'], 1, 'many')).toEqual(['only']);
+    expect(crossRelationValue(['a', 'b'], 1, 'many')).toEqual(['b', 'a']);
+  });
+
+  it('control: no targets means no value', () => {
+    expect(crossRelationValue([], 0, 'one')).toBeUndefined();
+    expect(crossRelationValue([], 0, 'many')).toBeUndefined();
+  });
+});
+
+describe('isRelationPlaceholder', () => {
+  it('is true only for the seeder placeholders and a missing value', () => {
+    expect([undefined, '', []].map(isRelationPlaceholder)).toEqual([true, true, true]);
+    expect([null, 'x', ['x']].map(isRelationPlaceholder)).toEqual([false, false, false]);
   });
 });

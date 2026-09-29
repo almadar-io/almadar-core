@@ -73,14 +73,16 @@ export const SExprAtomSchema: z.ZodType<SExprAtom> = z.union([
 ]);
 
 /**
- * Recursive schema for S-expressions.
- * Validates that arrays have at least one element and first element is a string (operator).
+ * Recursive schema for S-expressions: an atom, or a call — an array whose first element is its
+ * string operator. A call's arguments are data (`SExprDataSchema`): an argument array without
+ * an operator head is a literal list, as both evaluators read it (an inlined config list in
+ * `["array/nth", [{…}, {…}], "@entity.i"]`).
  */
 export const SExprSchema: z.ZodType<SExpr> = z.lazy(() =>
   z.union([
     SExprAtomSchema,
     z
-      .array(z.lazy(() => SExprSchema))
+      .array(SExprDataSchema)
       .min(1)
       .refine(
         (arr) => typeof arr[0] === 'string',

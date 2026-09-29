@@ -48,6 +48,31 @@ export function extractPayloadFieldPath(ref: unknown): string[] | null {
   return match ? match[1].split('.') : null;
 }
 
+/** `(str/default @payload.x <string>)` → `['x']`: a payload field read with a fallback. */
+function strDefaultPayloadPath(ref: unknown): string[] | null {
+  if (!Array.isArray(ref) || ref[0] !== 'str/default' || typeof ref[2] !== 'string') return null;
+  return extractPayloadFieldPath(ref[1]);
+}
+
+function isComparedLiteral(x: unknown): x is string | number | boolean | null {
+  return x === null || typeof x === 'number' || typeof x === 'boolean' || (typeof x === 'string' && !x.startsWith('@'));
+}
+
+/**
+ * The payload field a `=`/`!=` compares and the value it is compared with: `@payload.x` or
+ * `(str/default @payload.x "…")` on either side, against a literal on the other (the plain field
+ * on the left keeps accepting any value there, as before).
+ */
+function payloadComparison(a: EventPayloadValue, b: EventPayloadValue): { path: string[]; val: EventPayloadValue } | null {
+  const plain = extractPayloadFieldPath(a);
+  if (plain && b !== undefined) return { path: plain, val: b };
+  for (const [side, other] of [[a, b], [b, a]] as const) {
+    const path = extractPayloadFieldPath(side) ?? strDefaultPayloadPath(side);
+    if (path && isComparedLiteral(other)) return { path, val: other };
+  }
+  return null;
+}
+
 /** `['data','providerName']` + leaf → `{data: {providerName: leaf}}`. */
 function nestedPayload(path: string[], leaf: EventPayloadValue): EventPayload {
   let value: EventPayloadValue = leaf;
@@ -461,10 +486,21 @@ export function buildGuardPayloads(guard: unknown): GuardPayload {
     if (path) return { pass: {}, fail: nestedPayload(path, 'mock-test-value') };
   }
 
+  if (op === 'eq' || op === '==' || op === '=' || op === 'not-eq' || op === '!=' || op === 'neq') {
+    const arrayPath = extractArrayLenPath(guard[1]);
+    if (arrayPath && typeof guard[2] === 'number') {
+      const n = guard[2];
+      const equal = { hit: nestedPayload(arrayPath, arrayOfLength(n)), miss: nestedPayload(arrayPath, arrayOfLength(n + 1)) };
+      return op === 'eq' || op === '==' || op === '='
+        ? { pass: equal.hit, fail: equal.miss }
+        : { pass: equal.miss, fail: equal.hit };
+    }
+  }
+
   if (op === 'eq' || op === '==' || op === '=') {
-    const path = extractPayloadFieldPath(guard[1]);
-    const val = guard[2];
-    if (path && val !== undefined) {
+    const compared = payloadComparison(guard[1], guard[2]);
+    if (compared) {
+      const { path, val } = compared;
       const failVal =
         typeof val === 'number' ? val + 1
         : typeof val === 'string' ? `not-${val}`
@@ -476,9 +512,9 @@ export function buildGuardPayloads(guard: unknown): GuardPayload {
   }
 
   if (op === 'not-eq' || op === '!=' || op === 'neq') {
-    const path = extractPayloadFieldPath(guard[1]);
-    const val = guard[2];
-    if (path && val !== undefined) {
+    const compared = payloadComparison(guard[1], guard[2]);
+    if (compared) {
+      const { path, val } = compared;
       const passVal =
         typeof val === 'number' ? val + 1
         : typeof val === 'string' ? `not-${val}`
@@ -533,7 +569,9 @@ export function buildGuardPayloads(guard: unknown): GuardPayload {
       const built = subs.map(buildGuardPayloads);
       const merged = built.reduce<GuardPayload['pass']>((acc, b) => mergePayloads(acc, b.pass), {});
       const pass = applyFieldIntersections(subs, merged);
-      return { pass, fail: built[0].fail };
+      // A constant-true sub-guard (a config knob folded in) can never be the one that fails.
+      const canFail = subs.findIndex((g) => constTruth(g) !== true);
+      return { pass, fail: built[canFail >= 0 ? canFail : 0].fail };
     }
     if (subs.length === 1) return buildGuardPayloads(subs[0]);
   }

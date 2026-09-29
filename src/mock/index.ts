@@ -34,4 +34,10 @@ export {
   sampleRowCount,
   sampleRows,
 } from './sampleValue.js';
-export { type SelfRelationForest, linkSelfRelationField, selfRelationForest } from './relationForest.js';
+export {
+  type SelfRelationForest,
+  crossRelationValue,
+  isRelationPlaceholder,
+  linkSelfRelationField,
+  selfRelationForest,
+} from './relationForest.js';

@@ -260,6 +260,19 @@ export {
   type LogMetaValue,
 } from "./expression.js";
 
+// Observability: structured log lines and call records (a deployment's topology is read from these)
+export {
+  type CallKind,
+  type CallRecord,
+  type LogContext,
+  type LogSeverity,
+  type StructuredLogEntry,
+  CALL_KINDS,
+  LOG_SEVERITIES,
+  isCallRecord,
+  isStructuredLogEntry,
+} from "./observability.js";
+
 // ============================================================================
 // S-Expression Bindings
 // ============================================================================
@@ -974,6 +987,8 @@ export {
   // Store Contract
   type StoreFilterOp,
   type StoreFilter,
+  type RowPageRequest,
+  type RowPage,
   type StoreContract,
   // Typed EventBus wrapper
   createTypedEventBus,

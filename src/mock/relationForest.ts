@@ -75,3 +75,35 @@ export function linkSelfRelationField(
     row[field.name] = scalar ? forest.parentOf(index) : forest.childrenOf(index);
   });
 }
+
+/** Cardinalities that store ONE target id; everything else stores an id list. */
+const SCALAR_TARGET_CARDINALITIES = new Set(['one', 'many-to-one']);
+
+/**
+ * A cross-entity relation value for row `index` (0-based), deterministic and PRNG-free so every
+ * seeder links identically whatever else it draws: a scalar relation takes `targetIds[index % n]`;
+ * a list takes 2 (even rows) or 3 (odd rows) consecutive distinct ids from offset `index`. Twin of
+ * `orbital-core/src/runtime/seed.rs` `link_relation_fields`. `undefined` when there is no target.
+ */
+export function crossRelationValue(
+  targetIds: readonly string[],
+  index: number,
+  cardinality?: string,
+): string | string[] | undefined {
+  if (targetIds.length === 0) return undefined;
+  if (SCALAR_TARGET_CARDINALITIES.has(cardinality ?? 'many')) return targetIds[index % targetIds.length];
+  const picks: string[] = [];
+  const count = Math.min(targetIds.length, 2 + (index % 2));
+  for (let offset = 0; offset < count; offset++) {
+    const candidate = targetIds[(index + offset) % targetIds.length]!;
+    if (!picks.includes(candidate)) picks.push(candidate);
+  }
+  return picks;
+}
+
+/** A relation cell a seeder may fill: missing, or the `''` / `[]` placeholder `sampleRow` writes. */
+export function isRelationPlaceholder(value: EntityRow[string]): boolean {
+  if (value === undefined) return true;
+  if (typeof value === 'string') return value === '';
+  return Array.isArray(value) && value.length === 0;
+}

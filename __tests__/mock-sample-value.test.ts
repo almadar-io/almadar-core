@@ -484,3 +484,74 @@ describe.each(STRATEGIES)('union fields are never read as an enum vocabulary [%s
     expect(root.subMenu).not.toBe('MenuItem');
   });
 });
+
+describe('object properties draw in sorted key order', () => {
+  it('seeds the same values whatever order the properties were declared in', () => {
+    const a = { name: 'meta', type: 'object' as const, properties: { zeta: { type: 'number' as const }, alpha: { type: 'number' as const } } };
+    const b = { name: 'meta', type: 'object' as const, properties: { alpha: { type: 'number' as const }, zeta: { type: 'number' as const } } };
+    seedRandom(7);
+    const first = sampleFieldValue(a, { entityName: 'E', index: 1, strategy: 'seeded' });
+    seedRandom(7);
+    const second = sampleFieldValue(b, { entityName: 'E', index: 1, strategy: 'seeded' });
+    expect(first).toEqual(second);
+  });
+
+  it('control: a different seed gives different values', () => {
+    const a = { name: 'meta', type: 'object' as const, properties: { zeta: { type: 'number' as const }, alpha: { type: 'number' as const } } };
+    seedRandom(7);
+    const first = sampleFieldValue(a, { entityName: 'E', index: 1, strategy: 'seeded' });
+    seedRandom(8);
+    expect(sampleFieldValue(a, { entityName: 'E', index: 1, strategy: 'seeded' })).not.toEqual(first);
+  });
+});
+
+describe('the every-other-row optional omission is a row-level rule', () => {
+  it('never blanks an array element or an object property', () => {
+    seedRandom(3);
+    const tags = sampleFieldValue(
+      { name: 'tags', type: 'array', required: true, items: { type: 'string' } },
+      { entityName: 'E', index: 2, strategy: 'seeded' },
+    );
+    expect(Array.isArray(tags) && tags.every((t) => typeof t === 'string')).toBe(true);
+    const meta = sampleFieldValue(
+      { name: 'meta', type: 'object', required: true, properties: { note: { type: 'string' } } },
+      { entityName: 'E', index: 2, strategy: 'seeded' },
+    );
+    expect(meta).toMatchObject({ note: expect.any(String) });
+  });
+
+  it('control: an optional row field on an even row is still left unset', () => {
+    seedRandom(3);
+    expect(sampleFieldValue({ name: 'note', type: 'string' }, { entityName: 'E', index: 2, strategy: 'seeded' })).toBeUndefined();
+  });
+});
+
+describe('event-typed fields are never seeded', () => {
+  it('omits an event field (an event name is authored, never random text)', () => {
+    for (const strategy of STRATEGIES) {
+      expect(sampleFieldValue({ name: 'onPick', type: 'event' }, { entityName: 'E', index: 1, strategy })).toBeUndefined();
+    }
+  });
+
+  it('control: a string field beside it is still seeded', () => {
+    expect(sampleFieldValue({ name: 'label', type: 'string' }, { entityName: 'E', index: 1, strategy: 'index' })).toBe('Label 1');
+  });
+});
+
+describe('[identity] rows are fully populated', () => {
+  const person: SampleEntity = {
+    name: 'Person',
+    identity: true,
+    fields: [{ name: 'role', type: 'string', values: ['member', 'moderator', 'admin'] }],
+  };
+
+  it('every persona carries its role (an optional identity field is never left unset)', () => {
+    seedRandom(42);
+    expect(sampleRows(person, 3, 'seeded').map((r) => r['role'])).toEqual(['member', 'moderator', 'admin']);
+  });
+
+  it('control: the same optional field on an ordinary entity is still unset on even rows', () => {
+    seedRandom(42);
+    expect(sampleRows({ ...person, identity: false }, 3, 'seeded').map((r) => r['role'])).toEqual(['member', undefined, 'admin']);
+  });
+});

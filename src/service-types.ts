@@ -289,13 +289,34 @@ export type StoreFilterOp =
   | ">="
   | "in"
   | "not-in"
-  | "contains";
+  | "contains"
+  | "array-contains"
+  | "array-contains-any";
 
 /** A single filter clause for store queries. */
 export interface StoreFilter<T> {
   field: keyof T & string;
   op: StoreFilterOp;
   value: unknown;
+}
+
+/** One page of rows from a store: filters, then search, then sort, then the page. */
+export interface RowPageRequest<T> {
+  /** 1-indexed. */
+  page: number;
+  pageSize: number;
+  filters?: readonly StoreFilter<T>[];
+  /** Case-insensitive substring match over `searchFields` (every field when absent). */
+  search?: string;
+  searchFields?: readonly string[];
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+}
+
+export interface RowPage<T> {
+  rows: T[];
+  /** Rows matching the filters and search, across all pages. */
+  total: number;
 }
 
 /**
