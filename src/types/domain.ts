@@ -973,6 +973,9 @@ export type ColorTokens = {
   surfaceHover?: string;
   borderHover?: string;
   placeholder?: string;
+
+  /* Backdrop dimming behind modals, drawers and lightboxes */
+  scrim?: string;
 };
 
 /** Rejects the array unless it names every key of `T` — the completeness half
@@ -987,7 +990,7 @@ const COLOR_TOKEN_KEY_LIST = [
   'card', 'cardForeground', 'surface', 'border', 'input', 'ring',
   'error', 'errorForeground', 'success', 'successForeground', 'warning', 'warningForeground',
   'info', 'infoForeground', 'tableHeader', 'tableBorder', 'tableRowHover', 'surfaceHover',
-  'borderHover', 'placeholder',
+  'borderHover', 'placeholder', 'scrim',
 ] as const satisfies readonly (keyof ColorTokens)[];
 
 /** Every `ColorTokens` key, in declaration order — the ONE list. The zod twin

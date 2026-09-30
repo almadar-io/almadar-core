@@ -62,7 +62,8 @@
       "warning": "#f59e0b",
       "warning-foreground": "#000000",
       "info": "#1d4ed8",
-      "info-foreground": "#ffffff"
+      "info-foreground": "#ffffff",
+      "scrim": "rgba(0, 0, 0, 0.6)"
     },
     "radii": {
       "none": "0px",
@@ -172,7 +173,8 @@
         "warning": "#fbbf24",
         "warning-foreground": "#000000",
         "info": "#38bdf8",
-        "info-foreground": "#000000"
+        "info-foreground": "#000000",
+        "scrim": "rgba(0, 0, 0, 0.7)"
       },
       "radii": {
         "none": "0px",

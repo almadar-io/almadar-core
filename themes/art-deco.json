@@ -204,7 +204,8 @@
       "warning-foreground": "#1a1200",
       "info": "#1f4a8a",
       "info-foreground": "#ffffff",
-      "primary-hover": "#634900"
+      "primary-hover": "#634900",
+      "scrim": "rgba(0, 0, 0, 0.6)"
     },
     "radii": {
       "none": "0px",
@@ -287,7 +288,8 @@
         "warning": "#f2c14e",
         "warning-foreground": "#1a1200",
         "info": "#79a8f2",
-        "info-foreground": "#051226"
+        "info-foreground": "#051226",
+        "scrim": "rgba(0, 0, 0, 0.7)"
       },
       "shadows": {
         "main": "0 0 10px rgba(212,175,55,0.35)",

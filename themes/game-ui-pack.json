@@ -199,7 +199,8 @@
         "warning": "#ffb703",
         "warning-foreground": "#241a00",
         "info": "#2ea7e1",
-        "info-foreground": "#06202c"
+        "info-foreground": "#06202c",
+        "scrim": "rgba(0, 0, 0, 0.7)"
       },
       "radii": {
         "none": "0px",

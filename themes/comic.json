@@ -203,7 +203,8 @@
       "warning": "#f5a623",
       "warning-foreground": "#2a1a00",
       "info": "#2f6fed",
-      "info-foreground": "#ffffff"
+      "info-foreground": "#ffffff",
+      "scrim": "rgba(0, 0, 0, 0.6)"
     },
     "radii": {
       "none": "0px",
@@ -285,7 +286,8 @@
         "warning": "#ffc24c",
         "warning-foreground": "#2a1a00",
         "info": "#6fa8ff",
-        "info-foreground": "#071b3d"
+        "info-foreground": "#071b3d",
+        "scrim": "rgba(0, 0, 0, 0.7)"
       },
       "typography": {
         "border-width": "3px",

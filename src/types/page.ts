@@ -101,8 +101,8 @@ export type OrbitalPage = {
     /** Nav icon name — `@icon "..."` annotation on the page declaration. */
     icon?: string;
 
-    /** Human nav label — `@label "..."` annotation; when absent, a label is
-     * derived (strip a trailing `Page` suffix from `name`). */
+    /** Human nav label — `@label "..."` annotation; when absent, nav shows
+     * the page `name` as written (never derived). */
     label?: string;
 };
 

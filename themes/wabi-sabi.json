@@ -218,7 +218,8 @@
       "warning": "#e0a82e",
       "warning-foreground": "#1a1200",
       "info": "#3a5f8a",
-      "info-foreground": "#ffffff"
+      "info-foreground": "#ffffff",
+      "scrim": "rgba(0, 0, 0, 0.6)"
     },
     "shadows": {
       "main": "0 2px 10px rgba(60,50,40,0.08)",
@@ -472,7 +473,8 @@
         "warning": "#e8b94f",
         "warning-foreground": "#1a1200",
         "info": "#8ab0dc",
-        "info-foreground": "#071b3d"
+        "info-foreground": "#071b3d",
+        "scrim": "rgba(0, 0, 0, 0.7)"
       },
       "shadows": {
         "main": "0 2px 10px rgba(0,0,0,0.3)",

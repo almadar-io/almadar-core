@@ -31,7 +31,8 @@
     "tableRowHover": "#00001c",
     "surfaceHover": "#00001d",
     "borderHover": "#00001e",
-    "placeholder": "#00001f"
+    "placeholder": "#00001f",
+    "scrim": "#000020"
   },
   "illustration": {
     "style": "minimal",

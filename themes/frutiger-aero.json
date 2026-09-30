@@ -209,7 +209,8 @@
       "warning": "#ffc93c",
       "warning-foreground": "#2a1e00",
       "info": "#0873b8",
-      "info-foreground": "#ffffff"
+      "info-foreground": "#ffffff",
+      "scrim": "rgba(0, 0, 0, 0.6)"
     },
     "radii": {
       "none": "0px",
@@ -382,7 +383,8 @@
         "warning": "#ffd45c",
         "warning-foreground": "#2a1e00",
         "info": "#5cc4ff",
-        "info-foreground": "#04243a"
+        "info-foreground": "#04243a",
+        "scrim": "rgba(0, 0, 0, 0.7)"
       },
       "shadows": {
         "main": "0 8px 24px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.2)",
