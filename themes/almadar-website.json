@@ -1,5 +1,6 @@
 {
   "name": "almadar-website",
+  "displayName": "Almadar Website",
   "tokens": {
     "motion": {
       "durations": {
@@ -97,6 +98,12 @@
       "focus-ring-width": "2px",
       "focus-ring-offset": "2px",
       "focus-ring-color": "#14b8a6"
+    },
+    "typeScale": {
+      "displayFamily": "\"Crimson Pro\", Georgia, serif",
+      "fontImport": "https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap",
+      "headingWeight": "600",
+      "headingTracking": "-0.01em"
     }
   },
   "variants": {

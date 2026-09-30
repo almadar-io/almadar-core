@@ -322,6 +322,14 @@ export type ConfigFieldDeclaration = {
      */
     readonly forwardedFrom?: string;
     /**
+     * The `@config.<knob>` tokens nested INSIDE this field's value (an array
+     * element or object member, e.g. `metrics[].target`) that the resolver
+     * folded to their values — the list twin of `forwardedFrom`, so the
+     * dead-knob check still sees those knobs as read. Absent when nothing
+     * nested resolved. Compiled-path wire key `nestedForwardedFrom`.
+     */
+    readonly nestedForwardedFrom?: ReadonlyArray<string>;
+    /**
      * The definer knob this field is the payload companion of, when its
      * declared type was `@payload(<knob>)`: the L2 sigil pass rewrites the
      * sentinel to the resolved payload type and records the knob here, the
@@ -364,6 +372,7 @@ export const ConfigFieldDeclarationSchema: z.ZodType<ConfigFieldDeclaration> = z
     items: ConfigFieldItemsDeclarationSchema.optional(),
     properties: z.lazy(() => z.record(TraitEntityFieldSchema)).optional(),
     forwardedFrom: z.string().optional(),
+    nestedForwardedFrom: z.array(z.string()).optional(),
     payloadFor: z.string().optional(),
 });
 

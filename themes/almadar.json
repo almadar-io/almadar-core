@@ -1,5 +1,6 @@
 {
   "name": "almadar",
+  "displayName": "Almadar",
   "tokens": {
     "motion": {
       "durations": {
@@ -28,12 +29,13 @@
       "toastElevation": "var(--shadow-main)"
     },
     "geometry": {
-      "radiusContainer": "var(--radius-md)",
+      "radiusContainer": "16px",
       "radiusInteractive": "var(--radius-md)",
       "radiusPill": "var(--radius-full)",
       "borderHairline": "1px",
       "borderStandard": "var(--border-width)",
-      "borderHeavy": "var(--border-width-thick)"
+      "borderHeavy": "var(--border-width-thick)",
+      "cornerShape": "squircle"
     },
     "colors": {
       "primary": "#0f766e",
@@ -97,6 +99,15 @@
       "focus-ring-width": "2px",
       "focus-ring-offset": "2px",
       "focus-ring-color": "#14b8a6"
+    },
+    "typeScale": {
+      "displayFamily": "\"Inter\", \"Noto Sans Arabic\", system-ui, sans-serif",
+      "fontImport": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap",
+      "headingWeight": "800",
+      "headingTracking": "-0.03em"
+    },
+    "surface": {
+      "cardImage": "linear-gradient(160deg, rgba(20,184,166,0.07), rgba(20,184,166,0) 55%)"
     }
   },
   "variants": {
@@ -128,12 +139,13 @@
         "toastElevation": "var(--shadow-main)"
       },
       "geometry": {
-        "radiusContainer": "var(--radius-md)",
+        "radiusContainer": "16px",
         "radiusInteractive": "var(--radius-md)",
         "radiusPill": "var(--radius-full)",
         "borderHairline": "1px",
         "borderStandard": "var(--border-width)",
-        "borderHeavy": "var(--border-width-thick)"
+        "borderHeavy": "var(--border-width-thick)",
+        "cornerShape": "squircle"
       },
       "colors": {
         "primary": "#14b8a6",

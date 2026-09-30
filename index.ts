@@ -38,6 +38,7 @@ export {
   traitReferencesCallsitePayload,
   collectCallsiteCaptureChildren,
   collectForwardedConfigKeys,
+  configForwardTokens,
   filterConfigToForwardedKeys,
   unionOrganismConfigs,
 } from './src/embedded-trait-config';
@@ -153,9 +154,13 @@ export {
 // this, never their own walks).
 export {
   deriveExpectations,
+  pathMatchesPattern,
   type DeriveExpectationsResult,
   type ExpectationDiagnostic,
 } from './src/derive-expectations';
+
+// Route matching — the one path → page-pattern resolver.
+export { matchPath, comparePathSpecificity, matchPathAmong } from './src/route-match';
 
 // Shared-entity frame merge (mechanics-as-traits DRY primitive: the JS
 // interpreter and the generated TypeScript codegen both fold mechanic

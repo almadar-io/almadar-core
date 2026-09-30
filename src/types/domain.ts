@@ -588,17 +588,87 @@ export const TypeIntentMapSchema = z.object({
  * tech (sans + mono numeric), or dense (mono everywhere, tight leading).
  */
 export type TypeScaleTokens = {
+  /** Heading / display family — every h1–h6 and heading variant renders in it. */
   displayFamily?: string;
   bodyFamily?: string;
   monoFamily?: string;
+  /** Stylesheet URL that loads the theme's web fonts (e.g. a Google Fonts css2 URL). */
+  fontImport?: string;
+  /** Heading voice — CSS `font-weight` for headings (`--heading-weight`). */
+  headingWeight?: string;
+  /** Heading voice — CSS `text-transform` (`uppercase`, `lowercase`, `none`). */
+  headingTransform?: string;
+  /** Heading voice — CSS `letter-spacing` (`--heading-tracking`). */
+  headingTracking?: string;
+  /** Heading voice — CSS `font-style` (`italic` for Victorian/Nouveau voices). */
+  headingStyle?: string;
+  /** Heading voice — CSS `text-shadow` (glow, emboss, letterpress, misregistration). */
+  headingShadow?: string;
   scale?: TypeScale;
   intents?: TypeIntentMap;
 };
 
+/**
+ * A CSS `font-family` stack is a comma-separated list of family names, each a
+ * fully quoted string, an unquoted identifier sequence, or a `var(...)`. A
+ * malformed stack (`"A""B"`, `"A"B`) invalidates the whole declaration in the
+ * browser and the theme's font silently falls back, so the schema rejects it.
+ */
+export function isWellFormedFontStack(stack: string): boolean {
+  const items: string[] = [];
+  let current = '';
+  let quote: string | null = null;
+  let depth = 0;
+  for (const ch of stack) {
+    if (quote) {
+      current += ch;
+      if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'") quote = ch;
+    else if (ch === '(') depth++;
+    else if (ch === ')') depth--;
+    if (ch === ',' && depth === 0) {
+      items.push(current.trim());
+      current = '';
+      continue;
+    }
+    current += ch;
+  }
+  if (quote || depth !== 0) return false;
+  items.push(current.trim());
+  return items.every(
+    (item) =>
+      /^"[^"]+"$/.test(item) ||
+      /^'[^']+'$/.test(item) ||
+      /^-?[A-Za-z][\w-]*( [A-Za-z0-9][\w-]*)*$/.test(item) ||
+      /^var\(--[\w-]+(,.*)?\)$/.test(item),
+  );
+}
+
+const FontStackSchema = z.string().refine(isWellFormedFontStack, {
+  message: 'Malformed CSS font-family stack (each family must be comma-separated and fully quoted or bare)',
+});
+
+/** Legacy `typography` map: its `font-family*` keys carry font stacks. */
+const LegacyTypographySchema = z.record(z.string(), z.string()).superRefine((map, ctx) => {
+  for (const [key, value] of Object.entries(map)) {
+    if (key.startsWith('font-family') && !isWellFormedFontStack(value)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: [key], message: `Malformed CSS font-family stack: ${value}` });
+    }
+  }
+});
+
 export const TypeScaleTokensSchema = z.object({
-  displayFamily: z.string().optional(),
-  bodyFamily: z.string().optional(),
-  monoFamily: z.string().optional(),
+  displayFamily: FontStackSchema.optional(),
+  bodyFamily: FontStackSchema.optional(),
+  monoFamily: FontStackSchema.optional(),
+  fontImport: z.string().optional(),
+  headingWeight: z.string().optional(),
+  headingTransform: z.string().optional(),
+  headingTracking: z.string().optional(),
+  headingStyle: z.string().optional(),
+  headingShadow: z.string().optional(),
   scale: TypeScaleSchema.optional(),
   intents: TypeIntentMapSchema.optional(),
 });
@@ -692,16 +762,52 @@ export const MotionIntentMapSchema = z.object({
  * Motion axis — duration palette + easing palette + per-intent mapping.
  * Mechanical (linear, fast) vs organic (cubic-bezier, medium) vs dramatic (spring, slow).
  */
+/**
+ * Motion shapes — the transform each animated surface starts its enter from
+ * and ends its exit at (opacity always fades). Raw CSS `transform` values:
+ * `scale(0.9)`, `translateY(24px)`, `perspective(800px) rotateX(-12deg)`,
+ * `none` for a pure fade. Duration/easing still come from the palettes.
+ */
+export type MotionShapeTokens = {
+  /** Dialog enter-from transform (`--motion-modal-enter-from-transform`). */
+  modalEnter?: string;
+  /** Dialog exit-to transform (`--motion-modal-exit-to-transform`). */
+  modalExit?: string;
+  /** Popover/menu enter-from transform. */
+  popoverEnter?: string;
+  /** Popover/menu exit-to transform. */
+  popoverExit?: string;
+  /** Toast enter-from transform. */
+  toastEnter?: string;
+  /** Toast exit-to transform. */
+  toastExit?: string;
+  /** Page (route) content enter-from transform (pages animate in only). */
+  pageEnter?: string;
+};
+
+export const MotionShapeTokensSchema = z.object({
+  modalEnter: z.string().optional(),
+  modalExit: z.string().optional(),
+  popoverEnter: z.string().optional(),
+  popoverExit: z.string().optional(),
+  toastEnter: z.string().optional(),
+  toastExit: z.string().optional(),
+  pageEnter: z.string().optional(),
+});
+
 export type MotionTokens = {
   durations?: MotionDurationPalette;
   easings?: MotionEasingPalette;
   intents?: MotionIntentMap;
+  /** Per-surface motion shapes (modal, popover, toast, page). */
+  shapes?: MotionShapeTokens;
 };
 
 export const MotionTokensSchema = z.object({
   durations: MotionDurationPaletteSchema.optional(),
   easings: MotionEasingPaletteSchema.optional(),
   intents: MotionIntentMapSchema.optional(),
+  shapes: MotionShapeTokensSchema.optional(),
 });
 
 /** Icon family selector */
@@ -747,6 +853,10 @@ export type ElevationTokens = {
   popoverElevation?: string;
   dialogElevation?: string;
   toastElevation?: string;
+  /** Resting shadow on interactive controls (buttons) — `--elevation-interactive`. */
+  interactiveElevation?: string;
+  /** Shadow while a control is pressed — `--elevation-pressed` (inset for bevel/neumorphic). */
+  pressedElevation?: string;
 };
 
 export const ElevationTokensSchema = z.object({
@@ -754,6 +864,8 @@ export const ElevationTokensSchema = z.object({
   popoverElevation: z.string().optional(),
   dialogElevation: z.string().optional(),
   toastElevation: z.string().optional(),
+  interactiveElevation: z.string().optional(),
+  pressedElevation: z.string().optional(),
 });
 
 /**
@@ -767,6 +879,14 @@ export type GeometryTokens = {
   borderHairline?: string;
   borderStandard?: string;
   borderHeavy?: string;
+  /** CSS `corner-shape` for every rounded box (`round`, `squircle`, `bevel`, `scoop`, `notch`, `superellipse(n)`). */
+  cornerShape?: string;
+  /** CSS `corner-shape` for pill/circle boxes (`rounded-full`) — keeps avatars round under a bevel theme. */
+  cornerShapePill?: string;
+  /** CSS `border-style` for every bordered box (`solid`, `dashed`, `double`, `dotted`, `groove`, `ridge`, `inset`, `outset`). */
+  borderStyle?: string;
+  /** CSS `border-style` for interactive controls (buttons) — `outset` for bevelled chrome. */
+  borderStyleInteractive?: string;
 };
 
 export const GeometryTokensSchema = z.object({
@@ -776,6 +896,33 @@ export const GeometryTokensSchema = z.object({
   borderHairline: z.string().optional(),
   borderStandard: z.string().optional(),
   borderHeavy: z.string().optional(),
+  cornerShape: z.string().optional(),
+  cornerShapePill: z.string().optional(),
+  borderStyle: z.string().optional(),
+  borderStyleInteractive: z.string().optional(),
+});
+
+/**
+ * Surface axis — the material a theme's panels and page are made of: frosted
+ * glass (backdrop filter), gloss or paper (card image layers), grid paper,
+ * halftone or tessellation (page image layers). Values are raw CSS.
+ */
+export type SurfaceTokens = {
+  /** CSS `backdrop-filter` on card/overlay surfaces (`blur(18px) saturate(1.6)`). */
+  backdrop?: string;
+  /** CSS `background-image` layered over card surfaces (gloss gradient, grain, paper). */
+  cardImage?: string;
+  /** CSS `background-image` on the page background (grid paper, halftone, pattern tile). */
+  pageImage?: string;
+  /** CSS `background-size` for `pageImage`. */
+  pageImageSize?: string;
+};
+
+export const SurfaceTokensSchema = z.object({
+  backdrop: z.string().optional(),
+  cardImage: z.string().optional(),
+  pageImage: z.string().optional(),
+  pageImageSize: z.string().optional(),
 });
 
 /**
@@ -937,6 +1084,8 @@ export type ThemeTokens = {
   geometry?: GeometryTokens;
   /** Illustration axis — empty/loading/error state imagery style */
   illustration?: IllustrationTokens;
+  /** Surface axis — panel/page material (glass, gloss, paper, pattern) */
+  surface?: SurfaceTokens;
 
   // ── Legacy free-form maps (pre-Layer-1). Kept for back-compat with
   //    older callers that emit raw `--color-*` / `--radius-*` etc. as
@@ -962,11 +1111,12 @@ export const ThemeTokensSchema = z.object({
   elevation: ElevationTokensSchema.optional(),
   geometry: GeometryTokensSchema.optional(),
   illustration: IllustrationTokensSchema.optional(),
+  surface: SurfaceTokensSchema.optional(),
   // Legacy
   colors: z.record(z.string(), z.string()).optional(),
   radii: z.record(z.string(), z.string()).optional(),
   spacing: z.record(z.string(), z.string()).optional(),
-  typography: z.record(z.string(), z.string()).optional(),
+  typography: LegacyTypographySchema.optional(),
   shadows: z.record(z.string(), z.string()).optional(),
 });
 
@@ -991,6 +1141,8 @@ export type ThemeVariant = {
   geometry?: GeometryTokens;
   /** Illustration axis overrides */
   illustration?: IllustrationTokens;
+  /** Surface axis overrides */
+  surface?: SurfaceTokens;
 
   // ── Legacy free-form maps (pre-Layer-1). See ThemeTokens for guidance.
   /** @deprecated Use `color`. */
@@ -1014,10 +1166,11 @@ export const ThemeVariantSchema = z.object({
   elevation: ElevationTokensSchema.optional(),
   geometry: GeometryTokensSchema.optional(),
   illustration: IllustrationTokensSchema.optional(),
+  surface: SurfaceTokensSchema.optional(),
   colors: z.record(z.string(), z.string()).optional(),
   radii: z.record(z.string(), z.string()).optional(),
   spacing: z.record(z.string(), z.string()).optional(),
-  typography: z.record(z.string(), z.string()).optional(),
+  typography: LegacyTypographySchema.optional(),
   shadows: z.record(z.string(), z.string()).optional(),
 });
 
@@ -1027,6 +1180,8 @@ export const ThemeVariantSchema = z.object({
 export type ThemeDefinition = {
   /** Theme name */
   name: string;
+  /** Human-readable name for theme pickers (e.g. "Art Deco"). */
+  displayName?: string;
   /** Base tokens */
   tokens: ThemeTokens;
   /** Named variants (e.g., "dark", "high-contrast") */
@@ -1035,6 +1190,7 @@ export type ThemeDefinition = {
 
 export const ThemeDefinitionSchema = z.object({
   name: z.string().min(1, "Theme name is required"),
+  displayName: z.string().optional(),
   tokens: ThemeTokensSchema,
   variants: z.record(z.string(), ThemeVariantSchema).optional(),
 });
@@ -1171,6 +1327,7 @@ export type ElevationSlice = ElevationTokens;
 export type MotionSlice = MotionTokens;
 export type IconographySlice = IconographyTokens;
 export type IllustrationSlice = IllustrationTokens;
+export type SurfaceSlice = SurfaceTokens;
 
 export const ColorSliceSchema = ColorTokensSchema;
 export const DensitySliceSchema = DensityTokensSchema;
@@ -1180,6 +1337,7 @@ export const ElevationSliceSchema = ElevationTokensSchema;
 export const MotionSliceSchema = MotionTokensSchema;
 export const IconographySliceSchema = IconographyTokensSchema;
 export const IllustrationSliceSchema = IllustrationTokensSchema;
+export const SurfaceSliceSchema = SurfaceTokensSchema;
 
 // ============================================================================
 // Design Tokens (Legacy)

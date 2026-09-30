@@ -1,10 +1,13 @@
 import { describe, it, expect } from 'vitest';
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { THEME_PRESETS } from '../src/themes/index.js';
 import { ThemeDefinitionSchema } from '../src/types/domain.js';
 
 describe('THEME_PRESETS', () => {
   it('has one entry per migrated preset, keyed by its theme name', () => {
-    expect(Object.keys(THEME_PRESETS).length).toBe(23);
+    const files = readdirSync(join(__dirname, '..', 'themes')).filter((f) => f.endsWith('.json'));
+    expect(Object.keys(THEME_PRESETS).sort()).toEqual(files.map((f) => f.slice(0, -'.json'.length)).sort());
     for (const [key, def] of Object.entries(THEME_PRESETS)) {
       expect(def.name).toBe(key);
     }
@@ -14,6 +17,14 @@ describe('THEME_PRESETS', () => {
     for (const [key, def] of Object.entries(THEME_PRESETS)) {
       const result = ThemeDefinitionSchema.safeParse(def);
       expect(result.success, `${key}: ${result.success ? '' : JSON.stringify(result.error?.issues)}`).toBe(true);
+    }
+  });
+
+  it('every preset declares a displayName and a heading/display family', () => {
+    for (const [key, def] of Object.entries(THEME_PRESETS)) {
+      expect(def.displayName, key).toBeTruthy();
+      const ts = def.tokens.typeScale ?? def.variants?.dark?.typeScale;
+      expect(ts?.displayFamily, key).toBeTruthy();
     }
   });
 

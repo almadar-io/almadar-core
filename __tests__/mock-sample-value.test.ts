@@ -555,3 +555,51 @@ describe('[identity] rows are fully populated', () => {
     expect(sampleRows({ ...person, identity: false }, 3, 'seeded').map((r) => r['role'])).toEqual(['member', undefined, 'admin']);
   });
 });
+
+describe('seeded dates span months, not weeks', () => {
+  // A 30-day window put every seeded date in one or two calendar months, so any
+  // monthly chart over mock data drew a single point. Twin: seed.rs
+  // `seeded_dates_span_months_not_weeks`.
+  const DAY = 24 * 60 * 60 * 1000;
+  const offsets = (): number[] => {
+    seedRandom(7);
+    const now = Date.now();
+    return Array.from({ length: 200 }, (_, i) =>
+      Date.parse(String(sampleFieldValue({ name: 'paidAt', type: 'datetime', required: true }, ctx('seeded', i + 1)))) - now);
+  };
+
+  it('stays within 120 days either side of today', () => {
+    for (const o of offsets()) expect(Math.abs(o)).toBeLessThanOrEqual(120 * DAY + 60_000);
+  });
+
+  it('reaches more than two months back and more than two months ahead', () => {
+    const all = offsets();
+    expect(all.some((o) => o < -60 * DAY)).toBe(true);
+    expect(all.some((o) => o > 60 * DAY)).toBe(true);
+  });
+
+  it('control: the index strategy still dates row n in month n', () => {
+    expect(sampleFieldValue({ name: 'paidAt', type: 'date' }, ctx('index', 3))).toBe('2026-04-15');
+  });
+});
+
+describe.each(STRATEGIES)('a declared @mock on an enum [%s]', (strategy) => {
+  // The dashboard declared mostly-paid sample invoices and got draft/sent/paid/overdue
+  // anyway: the enum rotation ran before the author's candidates. Twin: seed.rs
+  // `a_declared_mock_on_an_enum_wins_over_the_rotation`.
+  const status: EntityField = { name: 'status', type: 'string', values: ['draft', 'sent', 'paid'], required: true, mock: 'paid, paid, sent' };
+
+  it('seeds the author\'s candidates, rotated by row', () => {
+    expect([1, 2, 3, 4].map((i) => sampleFieldValue(status, ctx(strategy, i)))).toEqual(['paid', 'paid', 'sent', 'paid']);
+  });
+
+  it('edge: a single candidate on an enum is used as is on every row, never index-suffixed', () => {
+    const one: EntityField = { ...status, mock: 'paid' };
+    expect([1, 2].map((i) => sampleFieldValue(one, ctx(strategy, i)))).toEqual(['paid', 'paid']);
+  });
+
+  it('control: an enum without @mock still rotates its own values', () => {
+    const plain: EntityField = { ...status, mock: undefined };
+    expect([1, 2, 3, 4].map((i) => sampleFieldValue(plain, ctx(strategy, i)))).toEqual(['draft', 'sent', 'paid', 'draft']);
+  });
+});

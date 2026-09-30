@@ -1,5 +1,6 @@
 {
   "name": "atelier",
+  "displayName": "Atelier",
   "tokens": {
     "density": {
       "spacing": {
@@ -27,15 +28,15 @@
       "rowHeightNormal": "64px",
       "rowHeightSpacious": "80px",
       "cardPaddingSm": "20px",
-      "cardPaddingMd": "28px",
+      "cardPaddingMd": "32px",
       "cardPaddingLg": "40px",
       "dialogPadding": "40px",
-      "sectionGap": "64px"
+      "sectionGap": "56px"
     },
     "typeScale": {
-      "displayFamily": "\"Söhne\", \"Inter Display\", -apple-system, BlinkMacSystemFont, sans-serif",
-      "bodyFamily": "\"Inter\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
-      "monoFamily": "\"JetBrains Mono\", ui-monospace, SFMono-Regular, Menlo, monospace",
+      "displayFamily": "\"Schibsted Grotesk\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "bodyFamily": "\"Hanken Grotesk\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "monoFamily": "\"JetBrains Mono\", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
       "scale": {
         "xs": {
           "size": "12px",
@@ -114,7 +115,13 @@
           "size": "4xl",
           "weight": "bold"
         }
-      }
+      },
+      "fontImport": "https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap",
+      "headingWeight": "500",
+      "headingTransform": "none",
+      "headingTracking": "-0.03em",
+      "headingStyle": "normal",
+      "headingShadow": "none"
     },
     "motion": {
       "durations": {
@@ -129,6 +136,15 @@
         "standard": "cubic-bezier(0.2, 0, 0, 1)",
         "emphasized": "cubic-bezier(0.2, 0, 0, 1)",
         "spring": "cubic-bezier(0.34, 1.56, 0.64, 1)"
+      },
+      "shapes": {
+        "modalEnter": "translateY(10px)",
+        "modalExit": "translateY(10px)",
+        "pageEnter": "translateY(8px)",
+        "popoverEnter": "translateY(4px)",
+        "popoverExit": "translateY(4px)",
+        "toastEnter": "translateY(10px)",
+        "toastExit": "translateY(10px)"
       }
     },
     "iconography": {
@@ -140,15 +156,21 @@
       "cardElevation": "none",
       "popoverElevation": "none",
       "dialogElevation": "none",
-      "toastElevation": "none"
+      "toastElevation": "none",
+      "interactiveElevation": "none",
+      "pressedElevation": "none"
     },
     "geometry": {
-      "radiusContainer": "8px",
+      "radiusContainer": "12px",
       "radiusInteractive": "24px",
       "radiusPill": "9999px",
       "borderHairline": "1px",
       "borderStandard": "1px",
-      "borderHeavy": "1px"
+      "borderHeavy": "1px",
+      "cornerShape": "squircle",
+      "cornerShapePill": "squircle",
+      "borderStyle": "solid",
+      "borderStyleInteractive": "solid"
     },
     "colors": {
       "primary": "#1f51ff",
@@ -186,18 +208,18 @@
     },
     "radii": {
       "none": "0px",
-      "sm": "4px",
-      "md": "8px",
-      "lg": "12px",
-      "xl": "16px",
+      "sm": "6px",
+      "md": "12px",
+      "lg": "18px",
+      "xl": "24px",
       "full": "9999px"
     },
     "shadows": {
-      "none": "none",
-      "sm": "none",
       "main": "none",
+      "sm": "none",
       "lg": "none",
       "inner": "none",
+      "none": "none",
       "hover": "none",
       "active": "none"
     },
@@ -205,12 +227,12 @@
       "border-width": "1px",
       "border-width-thin": "1px",
       "border-width-thick": "1px",
-      "font-family": "\"Inter\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "font-family": "\"Hanken Grotesk\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
       "font-weight-normal": "400",
       "font-weight-medium": "500",
       "font-weight-bold": "700",
-      "letter-spacing": "-0.02em",
-      "line-height": "1.625",
+      "letter-spacing": "-0.015em",
+      "line-height": "1.65",
       "intent-numeric-family": "var(--font-family-display)",
       "icon-color": "currentColor",
       "transition-fast": "300ms",
@@ -229,155 +251,6 @@
   },
   "variants": {
     "dark": {
-      "density": {
-        "spacing": {
-          "space0": "0px",
-          "space1": "4px",
-          "space2": "6px",
-          "space3": "10px",
-          "space4": "14px",
-          "space5": "20px",
-          "space6": "28px",
-          "space7": "36px",
-          "space8": "44px",
-          "space9": "52px",
-          "space10": "60px",
-          "space11": "68px",
-          "space12": "80px"
-        },
-        "buttonHeightSm": "36px",
-        "buttonHeightMd": "44px",
-        "buttonHeightLg": "56px",
-        "inputHeightSm": "36px",
-        "inputHeightMd": "44px",
-        "inputHeightLg": "56px",
-        "rowHeightCompact": "48px",
-        "rowHeightNormal": "64px",
-        "rowHeightSpacious": "80px",
-        "cardPaddingSm": "20px",
-        "cardPaddingMd": "28px",
-        "cardPaddingLg": "40px",
-        "dialogPadding": "40px",
-        "sectionGap": "64px"
-      },
-      "typeScale": {
-        "displayFamily": "\"Söhne\", \"Inter Display\", -apple-system, BlinkMacSystemFont, sans-serif",
-        "bodyFamily": "\"Inter\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
-        "monoFamily": "\"JetBrains Mono\", ui-monospace, SFMono-Regular, Menlo, monospace",
-        "scale": {
-          "xs": {
-            "size": "12px",
-            "lineHeight": "18px"
-          },
-          "sm": {
-            "size": "14px",
-            "lineHeight": "22px"
-          },
-          "base": {
-            "size": "16px",
-            "lineHeight": "26px"
-          },
-          "lg": {
-            "size": "20px",
-            "lineHeight": "30px"
-          },
-          "xl": {
-            "size": "24px",
-            "lineHeight": "32px"
-          },
-          "2xl": {
-            "size": "32px",
-            "lineHeight": "38px"
-          },
-          "3xl": {
-            "size": "40px",
-            "lineHeight": "44px"
-          },
-          "4xl": {
-            "size": "52px",
-            "lineHeight": "56px"
-          },
-          "display-1": {
-            "size": "64px",
-            "lineHeight": "68px"
-          },
-          "display-2": {
-            "size": "80px",
-            "lineHeight": "84px"
-          }
-        },
-        "intents": {
-          "headingMajor": {
-            "slot": "display",
-            "size": "3xl",
-            "weight": "bold"
-          },
-          "headingMinor": {
-            "slot": "display",
-            "size": "xl",
-            "weight": "bold"
-          },
-          "bodyEmphasis": {
-            "slot": "body",
-            "size": "base",
-            "weight": "medium"
-          },
-          "bodyDefault": {
-            "slot": "body",
-            "size": "base",
-            "weight": "normal"
-          },
-          "bodyQuiet": {
-            "slot": "body",
-            "size": "sm",
-            "weight": "normal"
-          },
-          "caption": {
-            "slot": "body",
-            "size": "xs",
-            "weight": "medium"
-          },
-          "numeric": {
-            "slot": "mono",
-            "size": "4xl",
-            "weight": "bold"
-          }
-        }
-      },
-      "motion": {
-        "durations": {
-          "instant": "0ms",
-          "fast": "300ms",
-          "normal": "500ms",
-          "slow": "800ms",
-          "dramatic": "1200ms"
-        },
-        "easings": {
-          "linear": "linear",
-          "standard": "cubic-bezier(0.2, 0, 0, 1)",
-          "emphasized": "cubic-bezier(0.2, 0, 0, 1)",
-          "spring": "cubic-bezier(0.34, 1.56, 0.64, 1)"
-        }
-      },
-      "iconography": {
-        "family": "tabler",
-        "strokeWidth": "1.25",
-        "defaultSize": "22px"
-      },
-      "elevation": {
-        "cardElevation": "none",
-        "popoverElevation": "none",
-        "dialogElevation": "none",
-        "toastElevation": "none"
-      },
-      "geometry": {
-        "radiusContainer": "8px",
-        "radiusInteractive": "24px",
-        "radiusPill": "9999px",
-        "borderHairline": "1px",
-        "borderStandard": "1px",
-        "borderHeavy": "1px"
-      },
       "colors": {
         "primary": "#5b7fff",
         "primary-hover": "#7a96ff",
@@ -412,33 +285,16 @@
         "info": "#5b7fff",
         "info-foreground": "#0d0d0d"
       },
-      "radii": {
-        "none": "0px",
-        "sm": "4px",
-        "md": "8px",
-        "lg": "12px",
-        "xl": "16px",
-        "full": "9999px"
-      },
-      "shadows": {
-        "none": "none",
-        "sm": "none",
-        "main": "none",
-        "lg": "none",
-        "inner": "none",
-        "hover": "none",
-        "active": "none"
-      },
       "typography": {
         "border-width": "1px",
         "border-width-thin": "1px",
         "border-width-thick": "1px",
-        "font-family": "\"Inter\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "font-family": "\"Hanken Grotesk\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
         "font-weight-normal": "400",
         "font-weight-medium": "500",
         "font-weight-bold": "700",
-        "letter-spacing": "-0.02em",
-        "line-height": "1.625",
+        "letter-spacing": "-0.015em",
+        "line-height": "1.65",
         "intent-numeric-family": "var(--font-family-display)",
         "icon-color": "currentColor",
         "transition-fast": "300ms",

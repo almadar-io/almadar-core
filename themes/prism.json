@@ -1,5 +1,6 @@
 {
   "name": "prism",
+  "displayName": "Prism",
   "tokens": {
     "motion": {
       "durations": {
@@ -14,6 +15,15 @@
         "standard": "linear",
         "emphasized": "linear",
         "spring": "linear"
+      },
+      "shapes": {
+        "modalEnter": "scale(0.95)",
+        "modalExit": "scale(0.95)",
+        "pageEnter": "translateY(8px)",
+        "popoverEnter": "scale(0.96)",
+        "popoverExit": "scale(0.96)",
+        "toastEnter": "translateY(12px)",
+        "toastExit": "translateY(12px)"
       }
     },
     "iconography": {
@@ -22,18 +32,24 @@
       "defaultSize": "14px"
     },
     "elevation": {
-      "cardElevation": "var(--shadow-sm)",
-      "popoverElevation": "var(--shadow-main)",
-      "dialogElevation": "var(--shadow-main)",
-      "toastElevation": "var(--shadow-sm)"
+      "cardElevation": "var(--shadow-main)",
+      "popoverElevation": "var(--shadow-lg)",
+      "dialogElevation": "var(--shadow-lg)",
+      "toastElevation": "var(--shadow-main)",
+      "interactiveElevation": "var(--shadow-sm)",
+      "pressedElevation": "var(--shadow-inner)"
     },
     "geometry": {
-      "radiusContainer": "6px",
+      "radiusContainer": "10px",
       "radiusInteractive": "10px",
       "radiusPill": "9999px",
       "borderHairline": "1px",
       "borderStandard": "1px",
-      "borderHeavy": "2px"
+      "borderHeavy": "2px",
+      "cornerShape": "superellipse(1.5)",
+      "cornerShapePill": "superellipse(1.5)",
+      "borderStyle": "solid",
+      "borderStyleInteractive": "solid"
     },
     "colors": {
       "primary": "#7c3aed",
@@ -65,20 +81,20 @@
     },
     "radii": {
       "none": "0px",
-      "sm": "4px",
-      "md": "6px",
-      "lg": "10px",
-      "xl": "12px",
+      "sm": "6px",
+      "md": "10px",
+      "lg": "14px",
+      "xl": "18px",
       "full": "9999px"
     },
     "shadows": {
+      "main": "0 6px 20px -4px rgba(124, 58, 237, 0.22), 0 2px 6px rgba(132, 204, 22, 0.10)",
+      "sm": "0 3px 10px -2px rgba(124, 58, 237, 0.18)",
+      "lg": "0 16px 40px -8px rgba(124, 58, 237, 0.30), 0 4px 12px rgba(132, 204, 22, 0.12)",
+      "inner": "inset 0 1px 2px rgba(124, 58, 237, 0.10)",
       "none": "none",
-      "sm": "0 1px 0 rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.04)",
-      "main": "0 1px 2px rgba(15, 23, 42, 0.06), 0 2px 6px rgba(15, 23, 42, 0.04)",
-      "lg": "0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.04)",
-      "inner": "inset 0 1px 1px rgba(15, 23, 42, 0.04)",
-      "hover": "0 2px 6px rgba(124, 58, 237, 0.12)",
-      "active": "0 1px 2px rgba(124, 58, 237, 0.08)"
+      "hover": "0 10px 28px -6px rgba(124, 58, 237, 0.34), 0 3px 8px rgba(132, 204, 22, 0.14)",
+      "active": "0 2px 6px -2px rgba(124, 58, 237, 0.25)"
     },
     "typography": {
       "border-width": "1px",
@@ -96,45 +112,28 @@
       "active-translate-y": "0",
       "focus-ring-width": "2px",
       "focus-ring-offset": "2px",
-      "focus-ring-color": "#7c3aed"
+      "focus-ring-color": "#7c3aed",
+      "font-family": "\"Manrope\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "letter-spacing": "-0.01em",
+      "line-height": "1.55"
+    },
+    "typeScale": {
+      "displayFamily": "\"Manrope\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "bodyFamily": "\"Manrope\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "monoFamily": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+      "fontImport": "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap",
+      "headingWeight": "800",
+      "headingTransform": "none",
+      "headingTracking": "-0.035em",
+      "headingStyle": "normal",
+      "headingShadow": "none"
+    },
+    "surface": {
+      "cardImage": "linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(236, 72, 153, 0.05) 50%, rgba(132, 204, 22, 0.08) 100%)"
     }
   },
   "variants": {
     "dark": {
-      "motion": {
-        "durations": {
-          "instant": "0ms",
-          "fast": "80ms",
-          "normal": "120ms",
-          "slow": "180ms",
-          "dramatic": "240ms"
-        },
-        "easings": {
-          "linear": "linear",
-          "standard": "linear",
-          "emphasized": "linear",
-          "spring": "linear"
-        }
-      },
-      "iconography": {
-        "family": "lucide",
-        "strokeWidth": "1.5",
-        "defaultSize": "14px"
-      },
-      "elevation": {
-        "cardElevation": "var(--shadow-sm)",
-        "popoverElevation": "var(--shadow-main)",
-        "dialogElevation": "var(--shadow-main)",
-        "toastElevation": "var(--shadow-sm)"
-      },
-      "geometry": {
-        "radiusContainer": "6px",
-        "radiusInteractive": "10px",
-        "radiusPill": "9999px",
-        "borderHairline": "1px",
-        "borderStandard": "1px",
-        "borderHeavy": "2px"
-      },
       "colors": {
         "primary": "#a78bfa",
         "primary-hover": "#c4b5fd",
@@ -163,23 +162,6 @@
         "info": "#60a5fa",
         "info-foreground": "#000000"
       },
-      "radii": {
-        "none": "0px",
-        "sm": "4px",
-        "md": "6px",
-        "lg": "10px",
-        "xl": "12px",
-        "full": "9999px"
-      },
-      "shadows": {
-        "none": "none",
-        "sm": "0 1px 0 rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2)",
-        "main": "0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3)",
-        "lg": "0 4px 12px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3)",
-        "inner": "inset 0 1px 1px rgba(0, 0, 0, 0.3)",
-        "hover": "0 2px 8px rgba(167, 139, 250, 0.2)",
-        "active": "0 1px 2px rgba(167, 139, 250, 0.15)"
-      },
       "typography": {
         "border-width": "1px",
         "border-width-thin": "1px",
@@ -196,7 +178,22 @@
         "active-translate-y": "0",
         "focus-ring-width": "2px",
         "focus-ring-offset": "2px",
-        "focus-ring-color": "#a78bfa"
+        "focus-ring-color": "#a78bfa",
+        "font-family": "\"Manrope\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "letter-spacing": "-0.01em",
+        "line-height": "1.55"
+      },
+      "shadows": {
+        "main": "0 6px 20px -4px rgba(167, 139, 250, 0.35), 0 2px 6px rgba(190, 242, 100, 0.10)",
+        "sm": "0 3px 10px -2px rgba(167, 139, 250, 0.30)",
+        "lg": "0 16px 40px -8px rgba(167, 139, 250, 0.45), 0 4px 12px rgba(190, 242, 100, 0.12)",
+        "inner": "inset 0 1px 2px rgba(0, 0, 0, 0.35)",
+        "none": "none",
+        "hover": "0 10px 28px -6px rgba(167, 139, 250, 0.50), 0 3px 8px rgba(190, 242, 100, 0.14)",
+        "active": "0 2px 6px -2px rgba(167, 139, 250, 0.40)"
+      },
+      "surface": {
+        "cardImage": "linear-gradient(135deg, rgba(167, 139, 250, 0.14) 0%, rgba(236, 72, 153, 0.08) 50%, rgba(190, 242, 100, 0.10) 100%)"
       }
     }
   }

@@ -1,0 +1,329 @@
+{
+  "name": "gothic",
+  "displayName": "Gothic Manuscript",
+  "tokens": {
+    "density": {
+      "spacing": {
+        "space0": "0px",
+        "space1": "4px",
+        "space2": "8px",
+        "space3": "12px",
+        "space4": "16px",
+        "space5": "20px",
+        "space6": "24px",
+        "space7": "28px",
+        "space8": "32px",
+        "space9": "36px",
+        "space10": "40px",
+        "space11": "44px",
+        "space12": "48px"
+      },
+      "buttonHeightSm": "30px",
+      "buttonHeightMd": "38px",
+      "buttonHeightLg": "46px",
+      "inputHeightSm": "30px",
+      "inputHeightMd": "38px",
+      "inputHeightLg": "46px",
+      "rowHeightCompact": "34px",
+      "rowHeightNormal": "42px",
+      "rowHeightSpacious": "50px",
+      "cardPaddingSm": "14px",
+      "cardPaddingMd": "20px",
+      "cardPaddingLg": "28px",
+      "dialogPadding": "26px",
+      "sectionGap": "36px"
+    },
+    "typeScale": {
+      "fontImport": "https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=EB+Garamond:wght@400;500;700&display=swap",
+      "displayFamily": "\"UnifrakturCook\", \"Pirata One\", serif",
+      "bodyFamily": "var(--font-family)",
+      "monoFamily": "\"EB Garamond\", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+      "headingWeight": "700",
+      "headingTransform": "none",
+      "headingTracking": "0.01em",
+      "headingStyle": "normal",
+      "scale": {
+        "xs": {
+          "size": "13px",
+          "lineHeight": "17px"
+        },
+        "sm": {
+          "size": "15px",
+          "lineHeight": "21px"
+        },
+        "base": {
+          "size": "17px",
+          "lineHeight": "25px"
+        },
+        "lg": {
+          "size": "19px",
+          "lineHeight": "30px"
+        },
+        "xl": {
+          "size": "21px",
+          "lineHeight": "30px"
+        },
+        "2xl": {
+          "size": "25px",
+          "lineHeight": "34px"
+        },
+        "3xl": {
+          "size": "32px",
+          "lineHeight": "38px"
+        },
+        "4xl": {
+          "size": "38px",
+          "lineHeight": "42px"
+        },
+        "display-1": {
+          "size": "51px",
+          "lineHeight": "55px"
+        },
+        "display-2": {
+          "size": "64px",
+          "lineHeight": "68px"
+        }
+      },
+      "intents": {
+        "headingMajor": {
+          "slot": "display",
+          "size": "2xl",
+          "weight": "bold"
+        },
+        "headingMinor": {
+          "slot": "display",
+          "size": "lg",
+          "weight": "bold"
+        },
+        "bodyEmphasis": {
+          "slot": "body",
+          "size": "base",
+          "weight": "medium"
+        },
+        "bodyDefault": {
+          "slot": "body",
+          "size": "sm",
+          "weight": "normal"
+        },
+        "bodyQuiet": {
+          "slot": "body",
+          "size": "sm",
+          "weight": "normal"
+        },
+        "caption": {
+          "slot": "body",
+          "size": "xs",
+          "weight": "normal"
+        },
+        "numeric": {
+          "slot": "mono",
+          "size": "sm",
+          "weight": "medium"
+        }
+      }
+    },
+    "motion": {
+      "durations": {
+        "instant": "0ms",
+        "fast": "200ms",
+        "normal": "350ms",
+        "slow": "550ms",
+        "dramatic": "800ms"
+      },
+      "easings": {
+        "linear": "linear",
+        "standard": "ease-in-out",
+        "emphasized": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "spring": "ease-in-out"
+      },
+      "shapes": {
+        "modalEnter": "translateY(-20px)",
+        "modalExit": "translateY(-20px)",
+        "pageEnter": "none",
+        "popoverEnter": "translateY(-8px)",
+        "popoverExit": "translateY(-8px)",
+        "toastEnter": "translateY(-16px)",
+        "toastExit": "translateY(-16px)"
+      }
+    },
+    "iconography": {
+      "family": "phosphor-fill",
+      "strokeWidth": "0",
+      "defaultSize": "16px"
+    },
+    "elevation": {
+      "cardElevation": "var(--shadow-sm)",
+      "popoverElevation": "var(--shadow-main)",
+      "dialogElevation": "var(--shadow-lg)",
+      "toastElevation": "var(--shadow-main)",
+      "interactiveElevation": "var(--shadow-sm)",
+      "pressedElevation": "var(--shadow-active)"
+    },
+    "geometry": {
+      "radiusContainer": "10px",
+      "radiusInteractive": "4px",
+      "radiusPill": "var(--radius-full)",
+      "cornerShape": "scoop",
+      "cornerShapePill": "scoop",
+      "borderStyle": "groove",
+      "borderStyleInteractive": "double",
+      "borderHairline": "1px",
+      "borderStandard": "var(--border-width)",
+      "borderHeavy": "var(--border-width-thick)"
+    },
+    "surface": {
+      "pageImage": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'><path d='M24 4 L44 24 L24 44 L4 24 Z M24 14 L34 24 L24 34 L14 24 Z' fill='none' stroke='rgba(42, 20, 16, 0.09)' stroke-width='1'/></svg>\")",
+      "pageImageSize": "48px 48px"
+    },
+    "colors": {
+      "primary": "#6b1420",
+      "primary-hover": "#550f19",
+      "primary-foreground": "#f5e9cf",
+      "secondary": "#d9c59a",
+      "secondary-hover": "#cdb886",
+      "secondary-foreground": "#2a1410",
+      "accent": "#7a5a12",
+      "accent-foreground": "#ffffff",
+      "muted": "#e3d3ae",
+      "muted-foreground": "#5a4028",
+      "background": "#efe2c6",
+      "foreground": "#2a1410",
+      "card": "#f6ebd2",
+      "card-foreground": "#2a1410",
+      "surface": "#e8d8b4",
+      "border": "#2a1410",
+      "input": "#2a1410",
+      "ring": "#6b1420",
+      "table-header": "#e8d8b4",
+      "table-border": "#2a1410",
+      "table-row-hover": "#eadbb8",
+      "surface-hover": "#e0cea3",
+      "border-hover": "#6b1420",
+      "placeholder": "#77603f",
+      "error": "#a4161a",
+      "error-foreground": "#ffffff",
+      "success": "#2f5f2a",
+      "success-foreground": "#ffffff",
+      "warning": "#d9a521",
+      "warning-foreground": "#2a1410",
+      "info": "#3a3f7a",
+      "info-foreground": "#ffffff"
+    },
+    "radii": {
+      "none": "0px",
+      "sm": "2px",
+      "md": "4px",
+      "lg": "10px",
+      "xl": "10px",
+      "full": "9999px"
+    },
+    "shadows": {
+      "none": "none",
+      "sm": "0 3px 10px 0 rgba(0, 0, 0, 0.4)",
+      "main": "0 8px 22px 0 rgba(0, 0, 0, 0.45), 0 2px 6px 0 rgba(0, 0, 0, 0.5)",
+      "lg": "0 18px 44px 0 rgba(0, 0, 0, 0.55), 0 4px 10px 0 rgba(0, 0, 0, 0.5)",
+      "inner": "inset 0 2px 8px 0 rgba(0, 0, 0, 0.45)",
+      "hover": "0 12px 30px 0 rgba(0, 0, 0, 0.5)",
+      "active": "0 1px 4px 0 rgba(0, 0, 0, 0.6)"
+    },
+    "typography": {
+      "border-width": "3px",
+      "border-width-thin": "1px",
+      "border-width-thick": "5px",
+      "font-family": "\"EB Garamond\", Garamond, Georgia, serif",
+      "font-weight-normal": "400",
+      "font-weight-medium": "500",
+      "font-weight-bold": "700",
+      "letter-spacing": "0.01em",
+      "line-height": "1.55",
+      "icon-color": "currentColor",
+      "transition-fast": "200ms",
+      "transition-normal": "350ms",
+      "transition-slow": "550ms",
+      "transition-timing": "ease-in-out",
+      "hover-scale": "1",
+      "hover-translate-y": "0",
+      "hover-translate-x": "0",
+      "active-scale": "1",
+      "active-translate-y": "0",
+      "focus-ring-width": "2px",
+      "focus-ring-offset": "2px",
+      "focus-ring-color": "#6b1420"
+    }
+  },
+  "variants": {
+    "dark": {
+      "colors": {
+        "primary": "#8c1c2b",
+        "primary-hover": "#a8273a",
+        "primary-foreground": "#f5e9cf",
+        "secondary": "#3b2359",
+        "secondary-hover": "#4a2e6e",
+        "secondary-foreground": "#eadfff",
+        "accent": "#c9a227",
+        "accent-foreground": "#140d04",
+        "muted": "#1e1526",
+        "muted-foreground": "#bfb3cf",
+        "background": "#0f0a12",
+        "foreground": "#e9dfc9",
+        "card": "#170f1d",
+        "card-foreground": "#e9dfc9",
+        "surface": "#130d18",
+        "border": "#c9a227",
+        "input": "#c9a227",
+        "ring": "#c9a227",
+        "table-header": "#130d18",
+        "table-border": "#c9a227",
+        "table-row-hover": "#1c1324",
+        "surface-hover": "#241a2d",
+        "border-hover": "#c9a227",
+        "placeholder": "#8f84a0",
+        "error": "#ff8a8a",
+        "error-foreground": "#140505",
+        "success": "#7fd69a",
+        "success-foreground": "#0a1a10",
+        "warning": "#e0b43c",
+        "warning-foreground": "#140d04",
+        "info": "#a9a6ff",
+        "info-foreground": "#0f0a12"
+      },
+      "shadows": {
+        "none": "none",
+        "sm": "0 3px 10px 0 rgba(0, 0, 0, 0.7)",
+        "main": "0 8px 22px 0 rgba(0, 0, 0, 0.75), 0 2px 6px 0 rgba(0, 0, 0, 0.5)",
+        "lg": "0 18px 44px 0 rgba(0, 0, 0, 0.85), 0 4px 10px 0 rgba(0, 0, 0, 0.5)",
+        "inner": "inset 0 2px 8px 0 rgba(0, 0, 0, 0.45)",
+        "hover": "0 12px 30px 0 rgba(0, 0, 0, 0.8)",
+        "active": "0 1px 4px 0 rgba(0, 0, 0, 0.6)"
+      },
+      "typography": {
+        "border-width": "3px",
+        "border-width-thin": "1px",
+        "border-width-thick": "5px",
+        "font-family": "\"EB Garamond\", Garamond, Georgia, serif",
+        "font-weight-normal": "400",
+        "font-weight-medium": "500",
+        "font-weight-bold": "700",
+        "letter-spacing": "0.01em",
+        "line-height": "1.55",
+        "icon-color": "currentColor",
+        "transition-fast": "200ms",
+        "transition-normal": "350ms",
+        "transition-slow": "550ms",
+        "transition-timing": "ease-in-out",
+        "hover-scale": "1",
+        "hover-translate-y": "0",
+        "hover-translate-x": "0",
+        "active-scale": "1",
+        "active-translate-y": "0",
+        "focus-ring-width": "2px",
+        "focus-ring-offset": "2px",
+        "focus-ring-color": "#c9a227"
+      },
+      "surface": {
+        "pageImage": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'><path d='M24 4 L44 24 L24 44 L4 24 Z M24 14 L34 24 L24 34 L14 24 Z' fill='none' stroke='rgba(201, 162, 39, 0.09)' stroke-width='1'/></svg>\")",
+        "pageImageSize": "48px 48px"
+      }
+    }
+  }
+}

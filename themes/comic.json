@@ -1,5 +1,6 @@
 {
   "name": "comic",
+  "displayName": "Comic Studio",
   "tokens": {
     "density": {
       "spacing": {
@@ -33,8 +34,8 @@
       "sectionGap": "32px"
     },
     "typeScale": {
-      "displayFamily": "\"Fredoka\", \"Inter\", -apple-system, BlinkMacSystemFont, sans-serif",
-      "bodyFamily": "var(--font-family)",
+      "displayFamily": "\"Bangers\", \"Comic Sans MS\", cursive",
+      "bodyFamily": "\"Fredoka\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
       "monoFamily": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
       "scale": {
         "xs": {
@@ -114,7 +115,12 @@
           "size": "sm",
           "weight": "medium"
         }
-      }
+      },
+      "fontImport": "https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@400;500;600;700&display=swap",
+      "headingWeight": "400",
+      "headingTransform": "uppercase",
+      "headingTracking": "0.05em",
+      "headingStyle": "normal"
     },
     "motion": {
       "durations": {
@@ -129,6 +135,15 @@
         "standard": "var(--transition-timing)",
         "emphasized": "cubic-bezier(0.2, 0, 0, 1)",
         "spring": "cubic-bezier(0.34, 1.56, 0.64, 1)"
+      },
+      "shapes": {
+        "modalEnter": "scale(0.8) rotate(-2deg)",
+        "modalExit": "scale(0.8) rotate(-2deg)",
+        "pageEnter": "translateY(12px)",
+        "popoverEnter": "scale(0.85)",
+        "popoverExit": "scale(0.85)",
+        "toastEnter": "translateY(20px) scale(0.9)",
+        "toastExit": "translateY(20px) scale(0.9)"
       }
     },
     "iconography": {
@@ -140,7 +155,9 @@
       "cardElevation": "var(--shadow-sm)",
       "popoverElevation": "var(--shadow-main)",
       "dialogElevation": "var(--shadow-lg)",
-      "toastElevation": "var(--shadow-main)"
+      "toastElevation": "var(--shadow-main)",
+      "interactiveElevation": "var(--shadow-sm)",
+      "pressedElevation": "var(--shadow-active)"
     },
     "geometry": {
       "radiusContainer": "var(--radius-md)",
@@ -148,7 +165,11 @@
       "radiusPill": "var(--radius-full)",
       "borderHairline": "1px",
       "borderStandard": "var(--border-width)",
-      "borderHeavy": "var(--border-width-thick)"
+      "borderHeavy": "var(--border-width-thick)",
+      "cornerShape": "round",
+      "cornerShapePill": "round",
+      "borderStyle": "solid",
+      "borderStyleInteractive": "solid"
     },
     "colors": {
       "primary": "#c2301b",
@@ -205,7 +226,7 @@
       "border-width": "3px",
       "border-width-thin": "2px",
       "border-width-thick": "4px",
-      "font-family": "\"Fredoka\", \"Inter\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "font-family": "\"Fredoka\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
       "font-weight-normal": "400",
       "font-weight-medium": "500",
       "font-weight-bold": "700",
@@ -224,44 +245,84 @@
       "focus-ring-width": "3px",
       "focus-ring-offset": "2px",
       "focus-ring-color": "#2f6fed"
+    },
+    "surface": {
+      "pageImage": "radial-gradient(rgba(28, 28, 40, 0.13) 1.4px, transparent 1.8px)",
+      "pageImageSize": "10px 10px"
     }
   },
   "variants": {
     "dark": {
-      "density": {
-        "spacing": {
-          "space0": "0px",
-          "space1": "4px",
-          "space2": "8px",
-          "space3": "12px",
-          "space4": "16px",
-          "space5": "20px",
-          "space6": "24px",
-          "space7": "28px",
-          "space8": "32px",
-          "space9": "36px",
-          "space10": "40px",
-          "space11": "44px",
-          "space12": "48px"
-        },
-        "buttonHeightSm": "30px",
-        "buttonHeightMd": "40px",
-        "buttonHeightLg": "48px",
-        "inputHeightSm": "30px",
-        "inputHeightMd": "40px",
-        "inputHeightLg": "48px",
-        "rowHeightCompact": "32px",
-        "rowHeightNormal": "40px",
-        "rowHeightSpacious": "48px",
-        "cardPaddingSm": "12px",
-        "cardPaddingMd": "18px",
-        "cardPaddingLg": "24px",
-        "dialogPadding": "24px",
-        "sectionGap": "32px"
+      "colors": {
+        "primary": "#ff7a5c",
+        "primary-hover": "#ff9174",
+        "primary-foreground": "#180a05",
+        "secondary": "#6fe3c4",
+        "secondary-hover": "#8ceccf",
+        "secondary-foreground": "#062a1e",
+        "accent": "#ffdd57",
+        "accent-foreground": "#2a1e00",
+        "muted": "#262a4d",
+        "muted-foreground": "#b7bbe3",
+        "background": "#14162c",
+        "foreground": "#f5efe0",
+        "card": "#1d2044",
+        "card-foreground": "#f5efe0",
+        "surface": "#1a1d3c",
+        "border": "#f0e9d8",
+        "input": "#c9c2a9",
+        "ring": "#6fa8ff",
+        "table-header": "#1a1d3c",
+        "table-border": "#f0e9d8",
+        "table-row-hover": "#20244a",
+        "surface-hover": "#262a52",
+        "border-hover": "#ff7a5c",
+        "placeholder": "#8e92c0",
+        "error": "#ff6b6b",
+        "error-foreground": "#180505",
+        "success": "#4ede93",
+        "success-foreground": "#04210f",
+        "warning": "#ffc24c",
+        "warning-foreground": "#2a1a00",
+        "info": "#6fa8ff",
+        "info-foreground": "#071b3d"
+      },
+      "typography": {
+        "border-width": "3px",
+        "border-width-thin": "2px",
+        "border-width-thick": "4px",
+        "font-family": "\"Fredoka\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "font-weight-normal": "400",
+        "font-weight-medium": "500",
+        "font-weight-bold": "700",
+        "letter-spacing": "0em",
+        "line-height": "1.55",
+        "icon-color": "#ff7a5c",
+        "transition-fast": "120ms",
+        "transition-normal": "200ms",
+        "transition-slow": "320ms",
+        "transition-timing": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "hover-scale": "1.03",
+        "hover-translate-y": "-2px",
+        "hover-translate-x": "-1px",
+        "active-scale": "0.97",
+        "active-translate-y": "1px",
+        "focus-ring-width": "3px",
+        "focus-ring-offset": "2px",
+        "focus-ring-color": "#6fa8ff"
+      },
+      "shadows": {
+        "main": "4px 4px 0 0 #f0e9d8",
+        "sm": "2px 2px 0 0 #f0e9d8",
+        "lg": "6px 6px 0 0 #f0e9d8",
+        "inner": "inset 2px 2px 0 0 rgba(240, 233, 216, 0.15)",
+        "none": "none",
+        "hover": "6px 6px 0 0 #f0e9d8",
+        "active": "1px 1px 0 0 #f0e9d8"
       },
       "typeScale": {
-        "displayFamily": "\"Fredoka\", \"Inter\", -apple-system, BlinkMacSystemFont, sans-serif",
-        "bodyFamily": "var(--font-family)",
+        "displayFamily": "\"Bangers\", \"Comic Sans MS\", cursive",
+        "bodyFamily": "\"Fredoka\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
         "monoFamily": "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
         "scale": {
           "xs": {
@@ -341,116 +402,16 @@
             "size": "sm",
             "weight": "medium"
           }
-        }
-      },
-      "motion": {
-        "durations": {
-          "instant": "0ms",
-          "fast": "var(--transition-fast)",
-          "normal": "var(--transition-normal)",
-          "slow": "var(--transition-slow)",
-          "dramatic": "600ms"
         },
-        "easings": {
-          "linear": "linear",
-          "standard": "var(--transition-timing)",
-          "emphasized": "cubic-bezier(0.2, 0, 0, 1)",
-          "spring": "cubic-bezier(0.34, 1.56, 0.64, 1)"
-        }
+        "fontImport": "https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@400;500;600;700&display=swap",
+        "headingWeight": "400",
+        "headingTransform": "uppercase",
+        "headingTracking": "0.05em",
+        "headingStyle": "normal"
       },
-      "iconography": {
-        "family": "lucide",
-        "strokeWidth": "2.5",
-        "defaultSize": "16px"
-      },
-      "elevation": {
-        "cardElevation": "var(--shadow-sm)",
-        "popoverElevation": "var(--shadow-main)",
-        "dialogElevation": "var(--shadow-lg)",
-        "toastElevation": "var(--shadow-main)"
-      },
-      "geometry": {
-        "radiusContainer": "var(--radius-md)",
-        "radiusInteractive": "var(--radius-md)",
-        "radiusPill": "var(--radius-full)",
-        "borderHairline": "1px",
-        "borderStandard": "var(--border-width)",
-        "borderHeavy": "var(--border-width-thick)"
-      },
-      "colors": {
-        "primary": "#ff7a5c",
-        "primary-hover": "#ff9174",
-        "primary-foreground": "#180a05",
-        "secondary": "#6fe3c4",
-        "secondary-hover": "#8ceccf",
-        "secondary-foreground": "#062a1e",
-        "accent": "#ffdd57",
-        "accent-foreground": "#2a1e00",
-        "muted": "#262a4d",
-        "muted-foreground": "#b7bbe3",
-        "background": "#14162c",
-        "foreground": "#f5efe0",
-        "card": "#1d2044",
-        "card-foreground": "#f5efe0",
-        "surface": "#1a1d3c",
-        "border": "#f0e9d8",
-        "input": "#c9c2a9",
-        "ring": "#6fa8ff",
-        "table-header": "#1a1d3c",
-        "table-border": "#f0e9d8",
-        "table-row-hover": "#20244a",
-        "surface-hover": "#262a52",
-        "border-hover": "#ff7a5c",
-        "placeholder": "#8e92c0",
-        "error": "#ff6b6b",
-        "error-foreground": "#180505",
-        "success": "#4ede93",
-        "success-foreground": "#04210f",
-        "warning": "#ffc24c",
-        "warning-foreground": "#2a1a00",
-        "info": "#6fa8ff",
-        "info-foreground": "#071b3d"
-      },
-      "radii": {
-        "none": "0px",
-        "sm": "8px",
-        "md": "14px",
-        "lg": "20px",
-        "xl": "28px",
-        "full": "9999px"
-      },
-      "shadows": {
-        "main": "4px 4px 0 0 #f0e9d8",
-        "sm": "2px 2px 0 0 #f0e9d8",
-        "lg": "6px 6px 0 0 #f0e9d8",
-        "inner": "inset 2px 2px 0 0 rgba(240, 233, 216, 0.15)",
-        "none": "none",
-        "hover": "6px 6px 0 0 #f0e9d8",
-        "active": "1px 1px 0 0 #f0e9d8"
-      },
-      "typography": {
-        "border-width": "3px",
-        "border-width-thin": "2px",
-        "border-width-thick": "4px",
-        "font-family": "\"Fredoka\", \"Inter\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
-        "font-weight-normal": "400",
-        "font-weight-medium": "500",
-        "font-weight-bold": "700",
-        "letter-spacing": "0em",
-        "line-height": "1.55",
-        "icon-color": "#ff7a5c",
-        "transition-fast": "120ms",
-        "transition-normal": "200ms",
-        "transition-slow": "320ms",
-        "transition-timing": "cubic-bezier(0.34, 1.56, 0.64, 1)",
-        "hover-scale": "1.03",
-        "hover-translate-y": "-2px",
-        "hover-translate-x": "-1px",
-        "active-scale": "0.97",
-        "active-translate-y": "1px",
-        "focus-ring-width": "3px",
-        "focus-ring-offset": "2px",
-        "focus-ring-color": "#6fa8ff"
+      "surface": {
+        "pageImage": "radial-gradient(rgba(240, 233, 216, 0.09) 1.4px, transparent 1.8px)",
+        "pageImageSize": "10px 10px"
       }
     }
   }

@@ -18,6 +18,7 @@
  * @packageDocumentation
  */
 
+import { matchPath } from './route-match.js';
 import type { OrbitalSchema } from './types/schema.js';
 import type { EntityRef, ExpectDeclaration } from './types/orbital.js';
 import { parseImportedTraitRef } from './types/orbital.js';
@@ -105,11 +106,8 @@ function isPlainString(value: WalkableData): value is string {
  * (`validation/effect/navigate.rs`): equal segment count, and every pattern
  * segment either a `:param` or an exact match.
  */
-function pathMatchesPattern(path: string, pattern: string): boolean {
-  const pathParts = path.split('/').filter((s) => s.length > 0);
-  const patternParts = pattern.split('/').filter((s) => s.length > 0);
-  if (pathParts.length !== patternParts.length) return false;
-  return patternParts.every((seg, i) => seg.startsWith(':') || seg === pathParts[i]);
+export function pathMatchesPattern(path: string, pattern: string): boolean {
+  return matchPath(pattern, path) !== null;
 }
 
 /**

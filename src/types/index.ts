@@ -695,6 +695,8 @@ export {
   type KeysComplete,
   type IllustrationStyle,
   type IllustrationTokens,
+  type SurfaceTokens,
+  type MotionShapeTokens,
   // SkinSpec composed type + slice aliases (doc §2.3 vocabulary)
   type SkinSpec,
   type ColorSlice,
@@ -705,6 +707,7 @@ export {
   type MotionSlice,
   type IconographySlice,
   type IllustrationSlice,
+  type SurfaceSlice,
   ALLOWED_CUSTOM_COMPONENTS,
   AGENT_DOMAIN_CATEGORIES,
   type AgentDomainCategory,
@@ -762,6 +765,9 @@ export {
   ILLUSTRATION_TOKEN_KEYS,
   IllustrationStyleSchema,
   IllustrationTokensSchema,
+  SurfaceTokensSchema,
+  MotionShapeTokensSchema,
+  isWellFormedFontStack,
   // SkinSpec composed schema + slice schemas (doc §2.3 vocabulary)
   SkinSpecSchema,
   ColorSliceSchema,
@@ -772,6 +778,7 @@ export {
   MotionSliceSchema,
   IconographySliceSchema,
   IllustrationSliceSchema,
+  SurfaceSliceSchema,
 } from "./domain.js";
 
 // ============================================================================
@@ -1120,6 +1127,9 @@ export {
   type CircuitStepResult,
   type DrawableDescriptor,
   type OrbitalVerificationAPI,
+  PATTERN_PROP_TYPE_ERROR_TESTID,
+  EMPTY_STATE_MARKER,
+  LOADING_STATE_MARKER,
 } from "./verification.js";
 
 // ============================================================================

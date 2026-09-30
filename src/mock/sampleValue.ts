@@ -189,11 +189,16 @@ export function sampleRowCount(entity: SampleEntity, requested: number): number 
  * "person-name-2", ...). Mirrors `seed.rs`'s Rust twin exactly — same
  * split/rotate/suffix rule, no per-domain code on either side.
  */
-export function mockFieldValue(declared: string, index: number): string {
-  const candidates = declared
+/** A declared `@mock`'s comma-separated candidates, trimmed, empties dropped. Twin: `mock_candidates` in seed.rs. */
+export function mockCandidates(declared: string): string[] {
+  return declared
     .split(',')
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
+}
+
+export function mockFieldValue(declared: string, index: number): string {
+  const candidates = mockCandidates(declared);
   if (candidates.length > 1) {
     return candidates[(index - 1) % candidates.length]!;
   }
@@ -230,12 +235,19 @@ function sampleText(field: EntityField, ctx: SampleContext): string {
     : `${titleCase(fieldName)} ${ctx.index}`;
 }
 
+/**
+ * Seeded dates fall within this many days either side of today: wide enough that a monthly
+ * chart over mock rows has several months, while upcoming views still get future dates.
+ * Twin: `SEEDED_DATE_WINDOW_DAYS` in orbital-core `runtime/seed.rs`.
+ */
+export const SEEDED_DATE_WINDOW_DAYS = 120;
+
 function sampleDate(ctx: SampleContext, dateOnly: boolean): string {
   if (ctx.strategy === 'index') {
     const month = String((ctx.index % 12) + 1).padStart(2, '0');
     return dateOnly ? `2026-${month}-15` : `2026-${month}-15T00:00:00.000Z`;
   }
-  const iso = randomStraddlingDate({ days: 15 }).toISOString();
+  const iso = randomStraddlingDate({ days: SEEDED_DATE_WINDOW_DAYS }).toISOString();
   return dateOnly ? iso.split('T')[0]! : iso;
 }
 
@@ -355,13 +367,6 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
     return undefined;
   }
 
-  const values = declaredValues(field);
-  if (values) {
-    // Row 1 yields values[0], which is the declared default for 85% of fields.
-    const ordinal = isRuntime ? 1 : ctx.index;
-    return values[(ordinal - 1) % values.length]!;
-  }
-
   // A declared `@mock "..."` wins over the type-based dispatch below and is
   // used LITERALLY — never mapped through a domain-name lookup table (that
   // would be this generator deciding what "person-name" means, exactly the
@@ -373,7 +378,18 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
   // Rust twin exactly.
   if (field.mock !== undefined) {
     const ordinal = isRuntime ? 1 : ctx.index;
+    // An enum's candidates are its members, used as is: an index suffix would seed a non-member.
+    const members = declaredValues(field) ? mockCandidates(field.mock) : [];
+    if (members.length > 0) return members[(ordinal - 1) % members.length]!;
     return typedMockValue(field, mockFieldValue(field.mock, ordinal));
+  }
+
+  // An enum with no `@mock` rotates its own values (a declared `@mock` wins above).
+  const values = declaredValues(field);
+  if (values) {
+    // Row 1 yields values[0], which is the declared default for 85% of fields.
+    const ordinal = isRuntime ? 1 : ctx.index;
+    return values[(ordinal - 1) % values.length]!;
   }
 
   switch (field.type) {

@@ -20,7 +20,7 @@
  *
  * @packageDocumentation
  */
-import type { DeclaredTraitConfig, OrbitalDefinition, OrbitalSchema, RuntimeValue, SExpr, Trait, TraitConfig, TraitConfigValue, TraitRef } from './types/index.js';
+import type { ConfigFieldDeclaration, DeclaredTraitConfig, OrbitalDefinition, OrbitalSchema, RuntimeValue, SExpr, Trait, TraitConfig, TraitConfigValue, TraitRef } from './types/index.js';
 import { isCallSiteConfigDeclaration, normalizeCallSiteConfigToValues } from './types/index.js';
 
 const TRAIT_BINDING_PREFIX = '@trait.';
@@ -196,8 +196,9 @@ export function collectTraitConfigRefAdjacency(
 /**
  * True when a trait's own config declares at least one `@config.<key>` forward
  * — i.e. part of what it renders is decided by whoever embeds it, resolved by
- * {@link buildResolvedTraitConfigs} against that single referrer. Traits with
- * no forward render identically regardless of embedder, which is what
+ * {@link buildResolvedTraitConfigs} against that single referrer. A nested
+ * token naming one of the trait's own knobs is the trait reading itself, not a
+ * forward. Traits with no forward render identically regardless of embedder, which is what
  * separates an inert shared chrome trait (one `Divider` embedded from two
  * states) from a genuinely embedder-dependent one.
  */
@@ -208,7 +209,8 @@ export function traitDeclaresConfigForward(trait: Trait | undefined | null): boo
   const walk = (value: RuntimeValue): void => {
     if (found || value === null || value === undefined) return;
     if (typeof value === 'string') {
-      if (CONFIG_FORWARD_RE.test(value)) found = true;
+      const knob = CONFIG_FORWARD_RE.exec(value)?.[1];
+      if (knob !== undefined && !(knob in config)) found = true;
       return;
     }
     if (Array.isArray(value)) {
@@ -220,7 +222,13 @@ export function traitDeclaresConfigForward(trait: Trait | undefined | null): boo
     }
   };
   for (const field of Object.values(config)) {
-    walk((field as { default?: SExpr })?.default);
+    const value = (field as { default?: SExpr })?.default;
+    // A whole-default forward publishes the knob from the embedder, even under its own name.
+    if (typeof value === 'string') {
+      if (CONFIG_FORWARD_RE.test(value)) return true;
+      continue;
+    }
+    walk(value);
     if (found) return true;
   }
   return false;
@@ -473,6 +481,29 @@ export function collectCallsiteCaptureChildren(
 }
 
 /**
+ * Every `@config.<knob>` token a declared config entry carries: its whole
+ * `default`, any token nested in it (`metrics[].target`), and the provenance
+ * of forwards a resolver already folded (`forwardedFrom`,
+ * `nestedForwardedFrom`). Twin of `orbital_config.rs` `field_forward_tokens`.
+ */
+export function configForwardTokens(entry: ConfigFieldDeclaration): string[] {
+  const tokens: string[] = [];
+  const walk = (value: TraitConfigValue | undefined): void => {
+    if (typeof value === 'string') {
+      if (value.startsWith('@config.')) tokens.push(value);
+    } else if (Array.isArray(value)) {
+      for (const item of value) walk(item);
+    } else if (value !== null && typeof value === 'object') {
+      for (const item of Object.values(value)) walk(item);
+    }
+  };
+  walk(entry.default);
+  if (entry.forwardedFrom !== undefined) tokens.push(entry.forwardedFrom);
+  tokens.push(...(entry.nestedForwardedFrom ?? []));
+  return tokens;
+}
+
+/**
  * The organism-scope knobs `traits` forward: every declared call-site config
  * entry whose `default` or `forwardedFrom` is a bare `@config.<knob>`. An app
  * stored one `.orb` per orbital keeps exactly these knobs of the organism's
@@ -485,8 +516,8 @@ export function collectForwardedConfigKeys(traits: ReadonlyArray<TraitRef>): Rea
     if (!config) continue;
     for (const entry of Object.values(config)) {
       if (!isCallSiteConfigDeclaration(entry)) continue;
-      for (const token of [entry.default, entry.forwardedFrom]) {
-        const knob = typeof token === 'string' ? CONFIG_FORWARD_RE.exec(token)?.[1] : undefined;
+      for (const token of configForwardTokens(entry)) {
+        const knob = CONFIG_FORWARD_RE.exec(token)?.[1];
         if (knob) forwarded.add(knob);
       }
     }

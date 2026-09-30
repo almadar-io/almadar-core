@@ -321,3 +321,13 @@ export interface OrbitalVerificationAPI {
   /** Clear the event log in place (also bumps `eventLogEpoch`). */
   clearEventLog?: () => void;
 }
+
+/** `data-testid` of the box UISlotRenderer draws when a pattern prop's value
+ *  has a shape no declared type accepts; verifiers count each as a failure. */
+export const PATTERN_PROP_TYPE_ERROR_TESTID = "pattern-prop-type-error";
+
+/** DOM attribute on an empty-state view's root, so a verifier finds empty collections by structure, never by text. */
+export const EMPTY_STATE_MARKER = "data-empty-state";
+
+/** DOM attribute on a loading view's root (spinner, loading state). */
+export const LOADING_STATE_MARKER = "data-loading-state";

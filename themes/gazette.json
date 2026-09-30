@@ -1,5 +1,6 @@
 {
   "name": "gazette",
+  "displayName": "Gazette",
   "tokens": {
     "density": {
       "spacing": {
@@ -27,14 +28,14 @@
       "rowHeightNormal": "56px",
       "rowHeightSpacious": "64px",
       "cardPaddingSm": "16px",
-      "cardPaddingMd": "24px",
+      "cardPaddingMd": "28px",
       "cardPaddingLg": "32px",
       "dialogPadding": "32px",
       "sectionGap": "48px"
     },
     "typeScale": {
-      "displayFamily": "\"Fraunces\", \"Charter\", Georgia, serif",
-      "bodyFamily": "\"Inter\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "displayFamily": "\"Fraunces\", Georgia, \"Times New Roman\", serif",
+      "bodyFamily": "\"Newsreader\", Georgia, \"Times New Roman\", serif",
       "monoFamily": "\"JetBrains Mono\", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
       "scale": {
         "xs": {
@@ -114,7 +115,13 @@
           "size": "sm",
           "weight": "medium"
         }
-      }
+      },
+      "fontImport": "https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Newsreader:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap",
+      "headingWeight": "600",
+      "headingTransform": "none",
+      "headingTracking": "-0.02em",
+      "headingStyle": "italic",
+      "headingShadow": "none"
     },
     "motion": {
       "durations": {
@@ -129,6 +136,15 @@
         "standard": "cubic-bezier(0.2, 0, 0, 1)",
         "emphasized": "cubic-bezier(0.2, 0, 0, 1)",
         "spring": "cubic-bezier(0.34, 1.56, 0.64, 1)"
+      },
+      "shapes": {
+        "modalEnter": "translateY(10px)",
+        "modalExit": "translateY(10px)",
+        "pageEnter": "translateY(8px)",
+        "popoverEnter": "translateY(4px)",
+        "popoverExit": "translateY(4px)",
+        "toastEnter": "translateY(10px)",
+        "toastExit": "translateY(10px)"
       }
     },
     "iconography": {
@@ -137,18 +153,24 @@
       "defaultSize": "20px"
     },
     "elevation": {
-      "cardElevation": "var(--shadow-main)",
-      "popoverElevation": "var(--shadow-lg)",
-      "dialogElevation": "var(--shadow-lg)",
-      "toastElevation": "var(--shadow-main)"
+      "cardElevation": "none",
+      "popoverElevation": "none",
+      "dialogElevation": "none",
+      "toastElevation": "none",
+      "interactiveElevation": "none",
+      "pressedElevation": "none"
     },
     "geometry": {
-      "radiusContainer": "12px",
-      "radiusInteractive": "10px",
+      "radiusContainer": "0px",
+      "radiusInteractive": "0px",
       "radiusPill": "var(--radius-full)",
       "borderHairline": "1px",
-      "borderStandard": "var(--border-width)",
-      "borderHeavy": "var(--border-width-thick)"
+      "borderStandard": "1px",
+      "borderHeavy": "2px",
+      "cornerShape": "round",
+      "cornerShapePill": "round",
+      "borderStyle": "solid",
+      "borderStyleInteractive": "solid"
     },
     "colors": {
       "primary": "#a85436",
@@ -180,31 +202,31 @@
     },
     "radii": {
       "none": "0px",
-      "sm": "6px",
-      "md": "10px",
-      "lg": "12px",
-      "xl": "16px",
+      "sm": "0px",
+      "md": "0px",
+      "lg": "0px",
+      "xl": "0px",
       "full": "9999px"
     },
     "shadows": {
+      "main": "none",
+      "sm": "none",
+      "lg": "none",
+      "inner": "none",
       "none": "none",
-      "sm": "0 1px 2px rgba(26, 22, 20, 0.06)",
-      "main": "0 4px 16px rgba(26, 22, 20, 0.08), 0 2px 4px rgba(26, 22, 20, 0.04)",
-      "lg": "0 16px 48px rgba(26, 22, 20, 0.14), 0 6px 16px rgba(26, 22, 20, 0.06)",
-      "inner": "inset 0 1px 2px rgba(26, 22, 20, 0.06)",
-      "hover": "0 20px 56px rgba(26, 22, 20, 0.16), 0 8px 20px rgba(26, 22, 20, 0.08)",
-      "active": "0 2px 8px rgba(26, 22, 20, 0.1)"
+      "hover": "none",
+      "active": "none"
     },
     "typography": {
       "border-width": "1px",
       "border-width-thin": "1px",
       "border-width-thick": "2px",
-      "font-family": "\"Inter\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+      "font-family": "\"Newsreader\", Georgia, \"Times New Roman\", serif",
       "font-weight-normal": "400",
       "font-weight-medium": "500",
       "font-weight-bold": "700",
-      "letter-spacing": "-0.005em",
-      "line-height": "1.75",
+      "letter-spacing": "0",
+      "line-height": "1.7",
       "icon-color": "#1a1614",
       "transition-fast": "250ms",
       "transition-normal": "400ms",
@@ -222,155 +244,6 @@
   },
   "variants": {
     "dark": {
-      "density": {
-        "spacing": {
-          "space0": "0px",
-          "space1": "4px",
-          "space2": "8px",
-          "space3": "12px",
-          "space4": "16px",
-          "space5": "20px",
-          "space6": "24px",
-          "space7": "32px",
-          "space8": "40px",
-          "space9": "48px",
-          "space10": "56px",
-          "space11": "64px",
-          "space12": "80px"
-        },
-        "buttonHeightSm": "36px",
-        "buttonHeightMd": "40px",
-        "buttonHeightLg": "44px",
-        "inputHeightSm": "36px",
-        "inputHeightMd": "40px",
-        "inputHeightLg": "44px",
-        "rowHeightCompact": "44px",
-        "rowHeightNormal": "56px",
-        "rowHeightSpacious": "64px",
-        "cardPaddingSm": "16px",
-        "cardPaddingMd": "24px",
-        "cardPaddingLg": "32px",
-        "dialogPadding": "32px",
-        "sectionGap": "48px"
-      },
-      "typeScale": {
-        "displayFamily": "\"Fraunces\", \"Charter\", Georgia, serif",
-        "bodyFamily": "\"Inter\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
-        "monoFamily": "\"JetBrains Mono\", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-        "scale": {
-          "xs": {
-            "size": "13px",
-            "lineHeight": "18px"
-          },
-          "sm": {
-            "size": "14px",
-            "lineHeight": "22px"
-          },
-          "base": {
-            "size": "16px",
-            "lineHeight": "28px"
-          },
-          "lg": {
-            "size": "19px",
-            "lineHeight": "30px"
-          },
-          "xl": {
-            "size": "22px",
-            "lineHeight": "32px"
-          },
-          "2xl": {
-            "size": "26px",
-            "lineHeight": "34px"
-          },
-          "3xl": {
-            "size": "30px",
-            "lineHeight": "38px"
-          },
-          "4xl": {
-            "size": "38px",
-            "lineHeight": "46px"
-          },
-          "display-1": {
-            "size": "52px",
-            "lineHeight": "60px"
-          },
-          "display-2": {
-            "size": "68px",
-            "lineHeight": "76px"
-          }
-        },
-        "intents": {
-          "headingMajor": {
-            "slot": "display",
-            "size": "3xl",
-            "weight": "bold"
-          },
-          "headingMinor": {
-            "slot": "display",
-            "size": "xl",
-            "weight": "bold"
-          },
-          "bodyEmphasis": {
-            "slot": "body",
-            "size": "base",
-            "weight": "medium"
-          },
-          "bodyDefault": {
-            "slot": "body",
-            "size": "base",
-            "weight": "normal"
-          },
-          "bodyQuiet": {
-            "slot": "body",
-            "size": "sm",
-            "weight": "normal"
-          },
-          "caption": {
-            "slot": "body",
-            "size": "xs",
-            "weight": "normal"
-          },
-          "numeric": {
-            "slot": "mono",
-            "size": "sm",
-            "weight": "medium"
-          }
-        }
-      },
-      "motion": {
-        "durations": {
-          "instant": "0ms",
-          "fast": "250ms",
-          "normal": "400ms",
-          "slow": "600ms",
-          "dramatic": "900ms"
-        },
-        "easings": {
-          "linear": "linear",
-          "standard": "cubic-bezier(0.2, 0, 0, 1)",
-          "emphasized": "cubic-bezier(0.2, 0, 0, 1)",
-          "spring": "cubic-bezier(0.34, 1.56, 0.64, 1)"
-        }
-      },
-      "iconography": {
-        "family": "phosphor-duotone",
-        "strokeWidth": "1.5",
-        "defaultSize": "20px"
-      },
-      "elevation": {
-        "cardElevation": "var(--shadow-main)",
-        "popoverElevation": "var(--shadow-lg)",
-        "dialogElevation": "var(--shadow-lg)",
-        "toastElevation": "var(--shadow-main)"
-      },
-      "geometry": {
-        "radiusContainer": "12px",
-        "radiusInteractive": "10px",
-        "radiusPill": "var(--radius-full)",
-        "borderHairline": "1px",
-        "borderStandard": "var(--border-width)",
-        "borderHeavy": "var(--border-width-thick)"
-      },
       "colors": {
         "primary": "#c0664a",
         "primary-hover": "#d57a5d",
@@ -399,33 +272,16 @@
         "info": "#7a9ec0",
         "info-foreground": "#14110d"
       },
-      "radii": {
-        "none": "0px",
-        "sm": "6px",
-        "md": "10px",
-        "lg": "12px",
-        "xl": "16px",
-        "full": "9999px"
-      },
-      "shadows": {
-        "none": "none",
-        "sm": "0 1px 2px rgba(0, 0, 0, 0.3)",
-        "main": "0 4px 16px rgba(0, 0, 0, 0.45), 0 2px 4px rgba(0, 0, 0, 0.25)",
-        "lg": "0 16px 48px rgba(0, 0, 0, 0.55), 0 6px 16px rgba(0, 0, 0, 0.3)",
-        "inner": "inset 0 1px 2px rgba(0, 0, 0, 0.4)",
-        "hover": "0 20px 56px rgba(0, 0, 0, 0.6), 0 8px 20px rgba(0, 0, 0, 0.35)",
-        "active": "0 2px 8px rgba(0, 0, 0, 0.4)"
-      },
       "typography": {
         "border-width": "1px",
         "border-width-thin": "1px",
         "border-width-thick": "2px",
-        "font-family": "\"Inter\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "font-family": "\"Newsreader\", Georgia, \"Times New Roman\", serif",
         "font-weight-normal": "400",
         "font-weight-medium": "500",
         "font-weight-bold": "700",
-        "letter-spacing": "-0.005em",
-        "line-height": "1.75",
+        "letter-spacing": "0",
+        "line-height": "1.7",
         "icon-color": "#f5efe6",
         "transition-fast": "250ms",
         "transition-normal": "400ms",

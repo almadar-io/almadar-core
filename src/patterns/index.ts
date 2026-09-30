@@ -86,6 +86,9 @@ export type PatternEntry = {
    *  ({key, header} + typed meta). THE capability every enrichment consumer
    *  keys on — never a hardcoded pattern-name list. */
   fieldsContract?: 'form' | 'display';
+  /** Narrowest rendered width (px) the component stays usable at, from its
+   *  `@minWidth` JSDoc tag. The layout check reports narrower instances. */
+  minUsableWidth?: number;
 };
 
 type PatternsRegistry = {
@@ -239,6 +242,15 @@ export function eventListPropsOf(patternType: string): ReadonlyMap<string, strin
  */
 export function getPatternFieldsContract(patternType: string): 'form' | 'display' | undefined {
   return getPatternDefinition(patternType)?.fieldsContract;
+}
+
+/** Every pattern's declared `minUsableWidth` (`@minWidth` on the component). */
+export function getPatternMinUsableWidths(): Map<string, number> {
+  const out = new Map<string, number>();
+  for (const [name, entry] of Object.entries((patternsRegistry as PatternsRegistry).patterns ?? {})) {
+    if (typeof entry.minUsableWidth === 'number') out.set(name, entry.minUsableWidth);
+  }
+  return out;
 }
 
 export function isDrawablePattern(patternType: string): boolean {

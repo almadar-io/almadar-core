@@ -446,6 +446,8 @@ export interface ClientEffectByTrait {
   effect: ClientEffectTuple;
   event?: string;
   fromState?: string;
+  /** The payload an embedded `@callsitePayload` child was composed with — sticky, so a later repaint of the child resolves its captures the same way. */
+  callsitePayload?: EventPayload;
 }
 
 /**

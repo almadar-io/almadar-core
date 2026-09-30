@@ -311,6 +311,7 @@
     "motion": "gibanje",
     "mounts": "priklopi",
     "name": "ime",
+    "nestedForwardedFrom": "gnezdenoPosredovanoOd",
     "omit": "izloci",
     "onDelete": "obIzbrisi",
     "onEntry": "obVnos",
@@ -437,6 +438,8 @@
     "version": "razlicica",
     "viewType": "tipPogleda",
     "visual_prompt": "vizualno_poziv",
-    "vocabulary": "besednjak"
+    "vocabulary": "besednjak",
+    "displayName": "prikaznoIme",
+    "surface": "povrsina"
   }
 }

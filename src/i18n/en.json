@@ -311,6 +311,7 @@
     "motion": "motion",
     "mounts": "mounts",
     "name": "name",
+    "nestedForwardedFrom": "nestedForwardedFrom",
     "omit": "omit",
     "onDelete": "onDelete",
     "onEntry": "onEntry",
@@ -437,6 +438,8 @@
     "version": "version",
     "viewType": "viewType",
     "visual_prompt": "visual_prompt",
-    "vocabulary": "vocabulary"
+    "vocabulary": "vocabulary",
+    "displayName": "displayName",
+    "surface": "surface"
   }
 }
