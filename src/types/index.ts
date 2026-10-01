@@ -584,6 +584,8 @@ export {
   DeclaredTraitConfigSchema,
   type TraitEventListener,
   type ListenSource,
+  splitEventAddress,
+  joinEventAddress,
   type TraitTick,
   type TraitDataEntity,
   type TraitEntityField,
@@ -697,6 +699,9 @@ export {
   type IllustrationTokens,
   type SurfaceTokens,
   type MotionShapeTokens,
+  type EnterAnimation,
+  type EnterDelayStep,
+  type MotionEntryTokens,
   // SkinSpec composed type + slice aliases (doc §2.3 vocabulary)
   type SkinSpec,
   type ColorSlice,
@@ -767,6 +772,10 @@ export {
   IllustrationTokensSchema,
   SurfaceTokensSchema,
   MotionShapeTokensSchema,
+  ENTER_ANIMATIONS,
+  ENTER_DELAY_STEPS,
+  EnterAnimationSchema,
+  MotionEntryTokensSchema,
   isWellFormedFontStack,
   // SkinSpec composed schema + slice schemas (doc §2.3 vocabulary)
   SkinSpecSchema,
@@ -1076,6 +1085,8 @@ export {
   type ClientEffectByTrait,
   type TransitionRejection,
   type TransitionRejectionCode,
+  type ExternalInputRequest,
+  type ServiceHostPorts,
   OrbitalEventRequestSchema,
   OrbitalEventResponseSchema,
   // Register wire
@@ -1270,3 +1281,6 @@ export {
 // FROM this barrel, so a runtime re-export would cycle; a type re-export
 // cannot.
 export type { PatternNode, PatternValue } from "../render-ui-edit.js";
+
+// Accessibility attribute vocabulary (A11yProps + its registry schema)
+export * from "./a11y.js";

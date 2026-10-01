@@ -440,6 +440,7 @@
     "visual_prompt": "موجه_بصري",
     "vocabulary": "مفردات",
     "displayName": "اسم_معروض",
-    "surface": "سطح"
+    "surface": "سطح",
+    "external": "خارجي"
   }
 }

@@ -173,9 +173,9 @@
       "borderStyleInteractive": "solid"
     },
     "colors": {
-      "primary": "#00ff66",
-      "primary-hover": "#00cc52",
-      "primary-foreground": "#000000",
+      "primary": "#067a3c",
+      "primary-hover": "#05642f",
+      "primary-foreground": "#ffffff",
       "secondary": "#000000",
       "secondary-hover": "#1a1a1a",
       "secondary-foreground": "#ffffff",
@@ -190,7 +190,7 @@
       "surface": "#f2f2f2",
       "border": "#000000",
       "input": "#000000",
-      "ring": "#00ff66",
+      "ring": "#067a3c",
       "table-header": "#000000",
       "table-border": "#000000",
       "table-row-hover": "#f2f2f2",
@@ -246,7 +246,7 @@
       "active-translate-y": "0",
       "focus-ring-width": "2px",
       "focus-ring-offset": "0px",
-      "focus-ring-color": "#00ff66"
+      "focus-ring-color": "#067a3c"
     },
     "surface": {
       "pageImage": "repeating-linear-gradient(0deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 3px)",

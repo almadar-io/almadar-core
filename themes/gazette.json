@@ -173,8 +173,8 @@
       "borderStyleInteractive": "solid"
     },
     "colors": {
-      "primary": "#a85436",
-      "primary-hover": "#8c4329",
+      "primary": "#1f3a5a",
+      "primary-hover": "#172c45",
       "primary-foreground": "#fdfbf6",
       "secondary": "#5c7a4d",
       "secondary-hover": "#4f6c41",
@@ -190,7 +190,7 @@
       "surface": "#f8f3e8",
       "border": "#e6dccb",
       "input": "#e6dccb",
-      "ring": "#a85436",
+      "ring": "#1f3a5a",
       "error": "#b3402c",
       "error-foreground": "#fdfbf6",
       "success": "#5a7a4b",
@@ -240,14 +240,14 @@
       "active-translate-y": "0",
       "focus-ring-width": "2px",
       "focus-ring-offset": "3px",
-      "focus-ring-color": "#a85436"
+      "focus-ring-color": "#1f3a5a"
     }
   },
   "variants": {
     "dark": {
       "colors": {
-        "primary": "#c0664a",
-        "primary-hover": "#d57a5d",
+        "primary": "#8fb0d0",
+        "primary-hover": "#a5c0db",
         "primary-foreground": "#14110d",
         "secondary": "#8aac76",
         "secondary-hover": "#9dbf89",
@@ -263,7 +263,7 @@
         "surface": "#1a1612",
         "border": "#2e2620",
         "input": "#2e2620",
-        "ring": "#c0664a",
+        "ring": "#8fb0d0",
         "error": "#d96650",
         "error-foreground": "#14110d",
         "success": "#8aac76",
@@ -296,7 +296,7 @@
         "active-translate-y": "0",
         "focus-ring-width": "2px",
         "focus-ring-offset": "3px",
-        "focus-ring-color": "#c0664a"
+        "focus-ring-color": "#8fb0d0"
       }
     }
   }

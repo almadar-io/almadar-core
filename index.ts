@@ -148,6 +148,9 @@ export {
   orbitalInlineEntities,
 } from './src/access/entityAccess';
 
+// Declared external inputs: what an outside client may send a trait.
+export { type ExternalInput, externalInputsOf, findExternalInput, findInputByAddress, payloadSchemaToJsonSchema } from './src/access/externalInputs';
+
 // `expects` derivation — compute an orbital's consumer-side requirement
 // declarations from the organism's golden schema (proposal §7; the ONE owner —
 // rabit's factory generation and edit-demote materializer both derive through

@@ -166,6 +166,7 @@
       "radiusPill": "var(--radius-full)",
       "cornerShape": "scoop",
       "cornerShapePill": "round",
+      "cornerShapeInteractive": "round",
       "borderHairline": "1px",
       "borderStandard": "var(--border-width)",
       "borderHeavy": "var(--border-width-thick)",

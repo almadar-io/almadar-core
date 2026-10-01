@@ -16,6 +16,7 @@ import { EntityRowSchema, type EntityRow } from "./entity.js";
 import { PatternConfigSchema, ResolvedPatternPropsSchema, type PatternConfig, type ResolvedPatternProps } from "./effect.js";
 import { RawUserClaimsSchema, type RawUserClaims } from "./user.js";
 import { ServerEffectResultSchema, type ServerEffectResult } from "./effect-result.js";
+import type { ExternalInput } from "../access/externalInputs.js";
 
 /**
  * Declared event key. A trait's event names (INIT, SAVE, CLOSE,
@@ -159,6 +160,13 @@ export interface BusEventSource {
    * there is no client to drive the circuit.
    */
   originClientId?: string;
+  /**
+   * Per-activation key a UI control stamps on the event it emits, so it can
+   * show its own busy state for exactly as long as the dispatches that event
+   * started are in flight (`@almadar/ui` lib/pendingDispatch). Never set by
+   * the bridge or the server.
+   */
+  pendingKey?: string;
 }
 
 // The third type param is `object` on schemas nesting a branded-id
@@ -210,6 +218,7 @@ export const BusEventSourceSchema: z.ZodType<BusEventSource, z.ZodTypeDef, objec
   fromBridge: z.boolean().optional(),
   dispatched: z.boolean().optional(),
   originClientId: z.string().optional(),
+  pendingKey: z.string().optional(),
 });
 
 /** Zod twin of `DeliveryRecord`. */
@@ -417,7 +426,38 @@ export interface OrbitalEventRequest {
 export type TransitionRejectionCode =
   | 'no-matching-transition'
   | 'guard-rejected'
-  | 'no-dispatchable-traits';
+  | 'no-dispatchable-traits'
+  | 'not-an-external-input';
+
+/**
+ * A request on the outside-client input channel (`POST /:orbital/inputs`): an
+ * API caller, an agent acting as the user, an MCP client. Only an event the
+ * target trait declares as an external input (`listens { EVENT -> external { … } }`)
+ * is dispatched; anything else is refused with `not-an-external-input`.
+ */
+export interface ExternalInputRequest {
+  targetTrait: string;
+  event: string;
+  payload?: EventPayload;
+  user?: RawUserClaims;
+  entityId?: string;
+}
+
+/**
+ * What a host lends one service call so the service can act in the running app
+ * AS THE CALLER (an agent operating the app for the signed-in user): the
+ * declared inputs, the outside-client input channel, and a read that applies the
+ * entity's `@read` policy. Built per call, bound to the caller's identity and
+ * position; every dispatch is a full, ordinary dispatch (guards, policies,
+ * listens). The interpreter and the compiled server each supply one.
+ */
+export interface ServiceHostPorts {
+  /** The orbital and trait whose `call-service` is running. */
+  caller: { orbital: string; trait: string };
+  inputs(): ExternalInput[];
+  dispatchInput(orbital: string, request: Omit<ExternalInputRequest, 'user'>): Promise<OrbitalEventResponse>;
+  read(entity: string): Promise<EntityRow[]>;
+}
 
 /**
  * Why a dispatched trait (or the whole request) did not transition —
@@ -557,7 +597,7 @@ export const OrbitalEventResponseSchema: z.ZodType<OrbitalEventResponse, z.ZodTy
   rejections: z
     .array(
       z.object({
-        code: z.enum(['no-matching-transition', 'guard-rejected', 'no-dispatchable-traits']),
+        code: z.enum(['no-matching-transition', 'guard-rejected', 'no-dispatchable-traits', 'not-an-external-input']),
         trait: z.string().optional(),
         from: z.string().optional(),
         event: z.string().optional(),

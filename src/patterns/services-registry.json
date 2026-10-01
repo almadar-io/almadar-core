@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-09-27T02:05:16.940Z",
+  "exportedAt": "2026-10-01T05:17:21.395Z",
   "services": {
     "llm": {
       "name": "llm",
@@ -200,6 +200,125 @@
             "summary": "string",
             "keyPoints": "string[]"
           }
+        },
+        {
+          "name": "call-tools",
+          "description": "Answer a request by operating the running app as the caller: the model may\nfire the declared inputs and read the entities named in `tools`, through the\nhost's ordinary dispatch (guards, policies and listens all apply), until it\nreplies. Hitting `maxSteps` is a failure.",
+          "params": [
+            {
+              "name": "messages",
+              "type": "AgentChatMessage[]",
+              "required": true,
+              "description": "The conversation so far, oldest first; the last turn is the request.",
+              "items": {
+                "type": "AgentChatMessage",
+                "properties": {
+                  "role": {
+                    "type": "\"user\" | \"assistant\"",
+                    "required": true
+                  },
+                  "content": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            },
+            {
+              "name": "tools",
+              "type": "AgentTool[]",
+              "required": true,
+              "description": "The inputs and entities the model may use.",
+              "items": {
+                "type": "AgentTool",
+                "properties": {
+                  "event": {
+                    "type": "string",
+                    "required": false
+                  },
+                  "read": {
+                    "type": "string",
+                    "required": false
+                  }
+                }
+              }
+            },
+            {
+              "name": "instructions",
+              "type": "string",
+              "required": false,
+              "description": "Standing instructions for the model."
+            },
+            {
+              "name": "maxSteps",
+              "type": "number",
+              "required": false,
+              "description": "Model round-trips allowed before the call fails (default 8)."
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": "Model id override."
+            }
+          ],
+          "responseShape": {
+            "reply": "string",
+            "steps": {
+              "type": "AgentStep[]",
+              "items": {
+                "type": "AgentStep",
+                "properties": {
+                  "kind": {
+                    "type": "\"input\" | \"read\" | \"invalid\"",
+                    "required": true,
+                    "description": "`input` fired a declared input, `read` read an entity, `invalid` named nothing the tools allow."
+                  },
+                  "target": {
+                    "type": "string",
+                    "required": true,
+                    "description": "The input address or entity name the model asked for."
+                  },
+                  "args": {
+                    "type": "string",
+                    "required": true,
+                    "description": "The arguments the model gave, as JSON text."
+                  },
+                  "ok": {
+                    "type": "boolean",
+                    "required": true
+                  },
+                  "detail": {
+                    "type": "string",
+                    "required": false,
+                    "description": "Why it did not succeed: the rejection code, failed guard or error."
+                  }
+                }
+              }
+            },
+            "usage": {
+              "type": "object",
+              "properties": {
+                "promptTokens": {
+                  "type": "number",
+                  "required": true
+                },
+                "completionTokens": {
+                  "type": "number",
+                  "required": true
+                },
+                "totalTokens": {
+                  "type": "number",
+                  "required": true
+                },
+                "modelCalls": {
+                  "type": "number",
+                  "required": true
+                }
+              }
+            }
+          },
+          "synonyms": "agent, assistant, tool use, act"
         },
         {
           "name": "embed",
@@ -1335,8 +1454,14 @@
       "actions": [
         {
           "name": "generate",
-          "description": "Generate free-form text from a prompt via the configured LLM provider (default 'You are a helpful assistant.' system prompt).",
+          "description": "Generate text from a prompt.",
           "params": [
+            {
+              "name": "systemPrompt",
+              "type": "string",
+              "required": false,
+              "description": "System prompt steering the model's behavior."
+            },
             {
               "name": "userPrompt",
               "type": "string",
@@ -1344,28 +1469,22 @@
               "description": "The user/task prompt sent to the model."
             },
             {
-              "name": "systemPrompt",
-              "type": "string",
-              "required": false,
-              "description": "System prompt steering the model's behavior; defaults to a generic assistant prompt."
-            },
-            {
               "name": "model",
               "type": "string",
               "required": false,
-              "description": "Model id override; when set, a fresh client is built for this call instead of the shared one."
+              "description": "Model id override."
             },
             {
               "name": "temperature",
               "type": "number",
               "required": false,
-              "description": "Sampling temperature (0-1ish, provider-dependent); higher is more random."
+              "description": "Sampling temperature; higher is more random."
             },
             {
               "name": "maxTokens",
               "type": "number",
               "required": false,
-              "description": "Maximum tokens to generate; defaults to 1024."
+              "description": "Maximum tokens to generate."
             }
           ],
           "responseShape": {
@@ -1375,19 +1494,15 @@
               "properties": {
                 "promptTokens": {
                   "type": "number",
-                  "required": false
+                  "required": true
                 },
                 "completionTokens": {
                   "type": "number",
-                  "required": false
+                  "required": true
                 },
                 "totalTokens": {
                   "type": "number",
-                  "required": false
-                },
-                "tokens": {
-                  "type": "number",
-                  "required": false
+                  "required": true
                 }
               }
             }
@@ -1395,7 +1510,7 @@
         },
         {
           "name": "classify",
-          "description": "Classify text into exactly one of a caller-supplied category list, with a confidence score and reasoning.",
+          "description": "Classify text into one of the given categories.",
           "params": [
             {
               "name": "text",
@@ -1424,7 +1539,7 @@
         },
         {
           "name": "extract",
-          "description": "Extract structured data from text according to a JSON-schema-shaped description; returned data is not validated against the schema.",
+          "description": "Extract structured data from text according to a JSON schema.",
           "params": [
             {
               "name": "text",
@@ -1434,9 +1549,50 @@
             },
             {
               "name": "schema",
-              "type": "IntegrationParams",
+              "type": "JsonSchemaDefinition",
               "required": true,
-              "description": "JSON-schema-like description of the fields to extract; passed to the model as a prompt, not enforced structurally."
+              "description": "JSON Schema describing the fields to extract.",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "required": false
+                },
+                "properties": {
+                  "type": "object",
+                  "required": false,
+                  "description": "Keyed by field name — each named field carries its OWN nested schema\n(real JSON-Schema semantics; a single un-keyed nested schema here would\nsay every field of an object shares one shape).",
+                  "mapValue": {
+                    "type": "JsonSchemaDefinition",
+                    "cyclic": true,
+                    "cyclicTypeName": "JsonSchemaDefinition"
+                  }
+                },
+                "required": {
+                  "type": "string[]",
+                  "required": false
+                },
+                "items": {
+                  "type": "JsonSchemaDefinition",
+                  "required": false,
+                  "cyclic": true,
+                  "cyclicTypeName": "JsonSchemaDefinition"
+                },
+                "additionalProperties": {
+                  "type": "JsonSchemaDefinition",
+                  "required": false,
+                  "cyclic": true,
+                  "cyclicTypeName": "JsonSchemaDefinition"
+                },
+                "description": {
+                  "type": "string",
+                  "required": false
+                },
+                "enum": {
+                  "type": "string[]",
+                  "required": false,
+                  "description": "Enum values are serialized to strings on the wire — pass `[\"a\",\"b\"]` even for non-string enums."
+                }
+              }
             },
             {
               "name": "model",
@@ -1445,11 +1601,18 @@
               "description": "Model id override."
             }
           ],
-          "responseShape": {}
+          "responseShape": {
+            "data": {
+              "type": "ExtractedData",
+              "shapedBy": "schema"
+            },
+            "confidence": "number"
+          },
+          "synonyms": "parse, structure"
         },
         {
           "name": "summarize",
-          "description": "Summarize text, optionally constrained by length and style, returning a summary plus key points.",
+          "description": "Summarize text with optional length and style constraints.",
           "params": [
             {
               "name": "text",
@@ -1467,7 +1630,7 @@
               "name": "style",
               "type": "string",
               "required": false,
-              "description": "Summary style: 'bullet' for bullet points, 'detailed' for thorough, otherwise concise."
+              "description": "Summary style, e.g. 'bullet' or 'detailed'."
             },
             {
               "name": "model",
@@ -1482,8 +1645,127 @@
           }
         },
         {
+          "name": "call-tools",
+          "description": "Answer a request by operating the running app as the caller: the model may\nfire the declared inputs and read the entities named in `tools`, through the\nhost's ordinary dispatch (guards, policies and listens all apply), until it\nreplies. Hitting `maxSteps` is a failure.",
+          "params": [
+            {
+              "name": "messages",
+              "type": "AgentChatMessage[]",
+              "required": true,
+              "description": "The conversation so far, oldest first; the last turn is the request.",
+              "items": {
+                "type": "AgentChatMessage",
+                "properties": {
+                  "role": {
+                    "type": "\"user\" | \"assistant\"",
+                    "required": true
+                  },
+                  "content": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            },
+            {
+              "name": "tools",
+              "type": "AgentTool[]",
+              "required": true,
+              "description": "The inputs and entities the model may use.",
+              "items": {
+                "type": "AgentTool",
+                "properties": {
+                  "event": {
+                    "type": "string",
+                    "required": false
+                  },
+                  "read": {
+                    "type": "string",
+                    "required": false
+                  }
+                }
+              }
+            },
+            {
+              "name": "instructions",
+              "type": "string",
+              "required": false,
+              "description": "Standing instructions for the model."
+            },
+            {
+              "name": "maxSteps",
+              "type": "number",
+              "required": false,
+              "description": "Model round-trips allowed before the call fails (default 8)."
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": "Model id override."
+            }
+          ],
+          "responseShape": {
+            "reply": "string",
+            "steps": {
+              "type": "AgentStep[]",
+              "items": {
+                "type": "AgentStep",
+                "properties": {
+                  "kind": {
+                    "type": "\"input\" | \"read\" | \"invalid\"",
+                    "required": true,
+                    "description": "`input` fired a declared input, `read` read an entity, `invalid` named nothing the tools allow."
+                  },
+                  "target": {
+                    "type": "string",
+                    "required": true,
+                    "description": "The input address or entity name the model asked for."
+                  },
+                  "args": {
+                    "type": "string",
+                    "required": true,
+                    "description": "The arguments the model gave, as JSON text."
+                  },
+                  "ok": {
+                    "type": "boolean",
+                    "required": true
+                  },
+                  "detail": {
+                    "type": "string",
+                    "required": false,
+                    "description": "Why it did not succeed: the rejection code, failed guard or error."
+                  }
+                }
+              }
+            },
+            "usage": {
+              "type": "object",
+              "properties": {
+                "promptTokens": {
+                  "type": "number",
+                  "required": true
+                },
+                "completionTokens": {
+                  "type": "number",
+                  "required": true
+                },
+                "totalTokens": {
+                  "type": "number",
+                  "required": true
+                },
+                "modelCalls": {
+                  "type": "number",
+                  "required": true
+                }
+              }
+            }
+          },
+          "synonyms": "agent, assistant, tool use, act"
+        },
+        {
           "name": "embed",
-          "description": "Generate embedding vectors for an array of texts via the configured embedding model (default baai/bge-base-en-v1.5 on OpenRouter, independent of the chat provider).",
+          "description": "Generate embeddings for an array of texts.",
           "params": [
             {
               "name": "texts",
@@ -5303,66 +5585,6 @@
       "name": "print",
       "description": "Host-provided print service (std-service-print)",
       "category": "infrastructure",
-      "package": "(host-injected)",
-      "backend": "host-injected",
-      "actions": [],
-      "credentials": [],
-      "hooks": []
-    },
-    "builder": {
-      "name": "builder",
-      "description": "Rabit-internal agent service (rabit.lolo)",
-      "category": "ai",
-      "package": "(host-injected)",
-      "backend": "host-injected",
-      "actions": [],
-      "credentials": [],
-      "hooks": []
-    },
-    "composer": {
-      "name": "composer",
-      "description": "Rabit-internal agent service (rabit.lolo)",
-      "category": "ai",
-      "package": "(host-injected)",
-      "backend": "host-injected",
-      "actions": [],
-      "credentials": [],
-      "hooks": []
-    },
-    "coordinator": {
-      "name": "coordinator",
-      "description": "Rabit-internal agent service (rabit.lolo)",
-      "category": "ai",
-      "package": "(host-injected)",
-      "backend": "host-injected",
-      "actions": [],
-      "credentials": [],
-      "hooks": []
-    },
-    "planner": {
-      "name": "planner",
-      "description": "Rabit-internal agent service (rabit.lolo)",
-      "category": "ai",
-      "package": "(host-injected)",
-      "backend": "host-injected",
-      "actions": [],
-      "credentials": [],
-      "hooks": []
-    },
-    "repair": {
-      "name": "repair",
-      "description": "Rabit-internal agent service (rabit.lolo)",
-      "category": "ai",
-      "package": "(host-injected)",
-      "backend": "host-injected",
-      "actions": [],
-      "credentials": [],
-      "hooks": []
-    },
-    "validator": {
-      "name": "validator",
-      "description": "Rabit-internal agent service (rabit.lolo)",
-      "category": "ai",
       "package": "(host-injected)",
       "backend": "host-injected",
       "actions": [],

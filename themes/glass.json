@@ -173,13 +173,13 @@
       "borderStyleInteractive": "solid"
     },
     "colors": {
-      "primary": "#5b5df0",
-      "primary-hover": "#4f46e5",
+      "primary": "#4058d6",
+      "primary-hover": "#3448b8",
       "primary-foreground": "#ffffff",
       "secondary": "rgba(255, 255, 255, 0.55)",
       "secondary-hover": "rgba(255, 255, 255, 0.7)",
       "secondary-foreground": "#3f3d56",
-      "accent": "#8347f3",
+      "accent": "#c2417a",
       "accent-foreground": "#ffffff",
       "muted": "rgba(255, 255, 255, 0.5)",
       "muted-foreground": "#5d6a7f",
@@ -189,8 +189,8 @@
       "card-foreground": "#1e2235",
       "surface": "rgba(255, 255, 255, 0.55)",
       "border": "rgba(255, 255, 255, 0.35)",
-      "input": "rgba(99, 102, 241, 0.25)",
-      "ring": "#6366f1",
+      "input": "rgba(64, 88, 214, 0.25)",
+      "ring": "#4058d6",
       "error": "#e11d48",
       "error-foreground": "#ffffff",
       "success": "#047857",
@@ -228,7 +228,7 @@
       "font-weight-bold": "650",
       "letter-spacing": "-0.005em",
       "line-height": "1.6",
-      "icon-color": "#6366f1",
+      "icon-color": "#4058d6",
       "transition-fast": "120ms",
       "transition-normal": "300ms",
       "transition-slow": "500ms",
@@ -240,25 +240,25 @@
       "active-translate-y": "0",
       "focus-ring-width": "2px",
       "focus-ring-offset": "2px",
-      "focus-ring-color": "#6366f1"
+      "focus-ring-color": "#4058d6"
     },
     "surface": {
       "backdrop": "blur(20px) saturate(1.6)",
       "cardImage": "linear-gradient(135deg, rgba(255,255,255,0.45), rgba(255,255,255,0.05))",
-      "pageImage": "radial-gradient(60% 50% at 15% 10%, rgba(91,93,240,0.35), transparent 70%), radial-gradient(50% 45% at 85% 20%, rgba(236,72,153,0.28), transparent 70%), radial-gradient(55% 50% at 70% 90%, rgba(34,211,238,0.30), transparent 70%), radial-gradient(45% 40% at 10% 85%, rgba(168,85,247,0.25), transparent 70%)",
+      "pageImage": "radial-gradient(60% 50% at 15% 10%, rgba(64,88,214,0.22), transparent 70%), radial-gradient(50% 45% at 85% 20%, rgba(194,65,122,0.14), transparent 70%), radial-gradient(55% 50% at 70% 90%, rgba(56,160,190,0.16), transparent 70%), radial-gradient(45% 40% at 10% 85%, rgba(64,88,214,0.12), transparent 70%)",
       "pageImageSize": "100% 100%"
     }
   },
   "variants": {
     "dark": {
       "colors": {
-        "primary": "#818cf8",
-        "primary-hover": "#6b72f5",
+        "primary": "#8aa0ff",
+        "primary-hover": "#a0b2ff",
         "primary-foreground": "#0b1020",
         "secondary": "rgba(30, 36, 66, 0.55)",
         "secondary-hover": "rgba(38, 45, 80, 0.65)",
         "secondary-foreground": "#e2e5f4",
-        "accent": "#a78bfa",
+        "accent": "#f08cb0",
         "accent-foreground": "#160b2e",
         "muted": "rgba(30, 36, 66, 0.55)",
         "muted-foreground": "#8f96b8",
@@ -269,7 +269,7 @@
         "surface": "rgba(30, 36, 66, 0.55)",
         "border": "rgba(255, 255, 255, 0.35)",
         "input": "rgba(255, 255, 255, 0.2)",
-        "ring": "#818cf8",
+        "ring": "#8aa0ff",
         "error": "#fb7185",
         "error-foreground": "#000000",
         "success": "#34d399",
@@ -290,7 +290,7 @@
         "font-weight-bold": "650",
         "letter-spacing": "-0.005em",
         "line-height": "1.6",
-        "icon-color": "#818cf8",
+        "icon-color": "#8aa0ff",
         "transition-fast": "120ms",
         "transition-normal": "300ms",
         "transition-slow": "500ms",
@@ -302,7 +302,7 @@
         "active-translate-y": "0",
         "focus-ring-width": "2px",
         "focus-ring-offset": "2px",
-        "focus-ring-color": "#818cf8"
+        "focus-ring-color": "#8aa0ff"
       },
       "shadows": {
         "main": "0 8px 32px rgba(0,0,0,0.40)",
@@ -316,7 +316,7 @@
       "surface": {
         "backdrop": "blur(20px) saturate(1.6)",
         "cardImage": "linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.01))",
-        "pageImage": "radial-gradient(60% 50% at 15% 10%, rgba(99,102,241,0.40), transparent 70%), radial-gradient(50% 45% at 85% 20%, rgba(236,72,153,0.28), transparent 70%), radial-gradient(55% 50% at 70% 90%, rgba(34,211,238,0.25), transparent 70%), radial-gradient(45% 40% at 10% 85%, rgba(168,85,247,0.30), transparent 70%)",
+        "pageImage": "radial-gradient(60% 50% at 15% 10%, rgba(138,160,255,0.28), transparent 70%), radial-gradient(50% 45% at 85% 20%, rgba(240,140,176,0.16), transparent 70%), radial-gradient(55% 50% at 70% 90%, rgba(56,160,190,0.16), transparent 70%), radial-gradient(45% 40% at 10% 85%, rgba(138,160,255,0.14), transparent 70%)",
         "pageImageSize": "100% 100%"
       }
     }

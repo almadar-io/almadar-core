@@ -440,6 +440,7 @@
     "visual_prompt": "visual_prompt",
     "vocabulary": "vocabulary",
     "displayName": "displayName",
-    "surface": "surface"
+    "surface": "surface",
+    "external": "external"
   }
 }

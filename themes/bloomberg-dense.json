@@ -173,8 +173,8 @@
       "borderStyleInteractive": "solid"
     },
     "colors": {
-      "primary": "#0e7490",
-      "primary-hover": "#155e75",
+      "primary": "#1e3a6e",
+      "primary-hover": "#172e58",
       "primary-foreground": "#ffffff",
       "secondary": "#eef2f8",
       "secondary-hover": "#e1e7f0",
@@ -190,7 +190,7 @@
       "surface": "#eef2f8",
       "border": "#d6deeb",
       "input": "#c2cee0",
-      "ring": "#0e7490",
+      "ring": "#1e3a6e",
       "table-header": "#eef2f8",
       "table-border": "#d6deeb",
       "table-row-hover": "#eef2f8",
@@ -247,20 +247,20 @@
       "active-translate-y": "0",
       "focus-ring-width": "2px",
       "focus-ring-offset": "2px",
-      "focus-ring-color": "#0e7490"
+      "focus-ring-color": "#1e3a6e"
     }
   },
   "variants": {
     "dark": {
       "colors": {
-        "primary": "#22d3ee",
-        "primary-hover": "#67e8f9",
-        "primary-foreground": "#06131a",
+        "primary": "#f5a524",
+        "primary-hover": "#f7b54a",
+        "primary-foreground": "#1a1206",
         "secondary": "#16233d",
         "secondary-hover": "#1d2d4c",
         "secondary-foreground": "#d6e0ef",
-        "accent": "#fbbf24",
-        "accent-foreground": "#1a1206",
+        "accent": "#5ab0d8",
+        "accent-foreground": "#06131a",
         "muted": "#131f36",
         "muted-foreground": "#8e9db8",
         "background": "#0a0f1c",
@@ -270,7 +270,7 @@
         "surface": "#131f36",
         "border": "#20304e",
         "input": "#2d4163",
-        "ring": "#22d3ee",
+        "ring": "#f5a524",
         "table-header": "#131f36",
         "table-border": "#20304e",
         "table-row-hover": "#16233d",
@@ -310,7 +310,7 @@
         "active-translate-y": "0",
         "focus-ring-width": "2px",
         "focus-ring-offset": "2px",
-        "focus-ring-color": "#22d3ee"
+        "focus-ring-color": "#f5a524"
       }
     }
   }

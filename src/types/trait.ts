@@ -861,6 +861,41 @@ export const ListenSourceSchema = z.union([
     }),
 ]);
 
+/**
+ * Split a `listens`-addressed event (`EVENT`, `Trait.EVENT`, `*.EVENT`,
+ * `Orbital.Trait.EVENT`) into the bare event and its source. The one parser of
+ * the address form, shared by `listens` and event-typed values. Mirrors
+ * `orbital-core` `split_event_address`.
+ */
+export function splitEventAddress(raw: string): { event: string; source?: ListenSource } {
+    const parts = raw.split('.');
+    if (parts.length <= 1) return { event: raw };
+    if (parts.length === 2) {
+        const [src, event] = parts;
+        return src === '*'
+            ? { event, source: { kind: 'any' } }
+            : { event, source: { kind: 'trait', trait: src } };
+    }
+    const n = parts.length;
+    return {
+        event: parts[n - 1],
+        source: { kind: 'orbital', orbital: parts.slice(0, n - 2).join('.'), trait: parts[n - 2] },
+    };
+}
+
+/** Inverse of {@link splitEventAddress}. */
+export function joinEventAddress(event: string, source?: ListenSource): string {
+    if (source === undefined) return event;
+    switch (source.kind) {
+        case 'any':
+            return `*.${event}`;
+        case 'trait':
+            return `${source.trait}.${event}`;
+        case 'orbital':
+            return `${source.orbital}.${source.trait}.${event}`;
+    }
+}
+
 export type TraitEventListener = {
     /** Event key to listen for (bare event name, no source prefix in the new shape) */
     event: string;

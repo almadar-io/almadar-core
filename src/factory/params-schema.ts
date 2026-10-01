@@ -547,7 +547,7 @@ function mapKnobType(knobType: string): JsonSchemaType | null {
   }
 }
 
-function mapEntityFieldType(fieldType: string): JsonSchemaType | null {
+export function mapEntityFieldType(fieldType: string): JsonSchemaType | null {
   switch (fieldType) {
     case 'string':
     case 'date':

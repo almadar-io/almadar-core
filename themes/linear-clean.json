@@ -173,13 +173,13 @@
       "borderStyleInteractive": "solid"
     },
     "colors": {
-      "primary": "#0066ff",
-      "primary-hover": "#0052cc",
+      "primary": "#5e6ad2",
+      "primary-hover": "#4e59b8",
       "primary-foreground": "#ffffff",
       "secondary": "#f4f4f2",
       "secondary-hover": "#ececea",
       "secondary-foreground": "#0a0a0a",
-      "accent": "#0066ff",
+      "accent": "#5e6ad2",
       "accent-foreground": "#ffffff",
       "muted": "#f4f4f2",
       "muted-foreground": "#6b6b66",
@@ -190,7 +190,7 @@
       "surface": "#f7f7f5",
       "border": "#e6e6e2",
       "input": "#d8d8d4",
-      "ring": "#0066ff",
+      "ring": "#5e6ad2",
       "table-header": "#f7f7f5",
       "table-border": "#e6e6e2",
       "table-row-hover": "#f4f4f2",
@@ -247,19 +247,19 @@
       "active-translate-y": "0",
       "focus-ring-width": "2px",
       "focus-ring-offset": "2px",
-      "focus-ring-color": "#0066ff"
+      "focus-ring-color": "#5e6ad2"
     }
   },
   "variants": {
     "dark": {
       "colors": {
-        "primary": "#4d8bff",
-        "primary-hover": "#6ea2ff",
+        "primary": "#8b93e8",
+        "primary-hover": "#a1a8ee",
         "primary-foreground": "#0a0a0c",
         "secondary": "#18181b",
         "secondary-hover": "#222226",
         "secondary-foreground": "#fafafa",
-        "accent": "#4d8bff",
+        "accent": "#8b93e8",
         "accent-foreground": "#0a0a0c",
         "muted": "#18181b",
         "muted-foreground": "#8b8b90",
@@ -270,7 +270,7 @@
         "surface": "#18181b",
         "border": "#26262b",
         "input": "#2e2e34",
-        "ring": "#4d8bff",
+        "ring": "#8b93e8",
         "table-header": "#18181b",
         "table-border": "#26262b",
         "table-row-hover": "#161618",
@@ -310,7 +310,7 @@
         "active-translate-y": "0",
         "focus-ring-width": "2px",
         "focus-ring-offset": "2px",
-        "focus-ring-color": "#4d8bff"
+        "focus-ring-color": "#8b93e8"
       },
       "shadows": {
         "main": "inset 0 1px 0 rgba(255, 255, 255, 0.05)",

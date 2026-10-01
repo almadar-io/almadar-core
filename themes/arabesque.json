@@ -190,9 +190,9 @@
       "primary": "#1f3f8f",
       "primary-hover": "#183275",
       "primary-foreground": "#fff8e7",
-      "secondary": "#2bb3a6",
-      "secondary-hover": "#2fbfb1",
-      "secondary-foreground": "#06302c",
+      "secondary": "#247a74",
+      "secondary-hover": "#1d6964",
+      "secondary-foreground": "#fff8e7",
       "accent": "#7d5a0c",
       "accent-foreground": "#fff8e7",
       "muted": "#ebe0c6",
@@ -445,8 +445,8 @@
         "primary": "#e0b64a",
         "primary-hover": "#efc866",
         "primary-foreground": "#1a1200",
-        "secondary": "#3cc9bb",
-        "secondary-hover": "#56d8cb",
+        "secondary": "#4fb3a9",
+        "secondary-hover": "#66c1b8",
         "secondary-foreground": "#04201d",
         "accent": "#8fb0ff",
         "accent-foreground": "#0a1530",
@@ -459,7 +459,7 @@
         "surface": "#122040",
         "border": "#c9a13a",
         "input": "#c9a13a",
-        "ring": "#3cc9bb",
+        "ring": "#4fb3a9",
         "table-header": "#122040",
         "table-border": "#c9a13a",
         "table-row-hover": "#1a2c55",
@@ -507,7 +507,7 @@
         "active-translate-y": "0px",
         "focus-ring-width": "2px",
         "focus-ring-offset": "2px",
-        "focus-ring-color": "#3cc9bb"
+        "focus-ring-color": "#4fb3a9"
       }
     }
   }

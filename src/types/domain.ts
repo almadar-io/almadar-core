@@ -783,6 +783,12 @@ export type MotionShapeTokens = {
   toastExit?: string;
   /** Page (route) content enter-from transform (pages animate in only). */
   pageEnter?: string;
+  /** `rise` element-entry enter-from transform (`--motion-enter-rise-from-transform`). */
+  enterRise?: string;
+  /** `scale` element-entry enter-from transform. */
+  enterScale?: string;
+  /** `slide` element-entry enter-from transform (inline-start side). */
+  enterSlide?: string;
 };
 
 export const MotionShapeTokensSchema = z.object({
@@ -793,14 +799,47 @@ export const MotionShapeTokensSchema = z.object({
   toastEnter: z.string().optional(),
   toastExit: z.string().optional(),
   pageEnter: z.string().optional(),
+  enterRise: z.string().optional(),
+  enterScale: z.string().optional(),
+  enterSlide: z.string().optional(),
+});
+
+/**
+ * Element-entry vocabulary — how a rendered element animates in when it mounts.
+ * One list for both layers: a theme's `motion.entry.default` and a render-ui
+ * node's own `enter` (which always wins; `none` opts out).
+ */
+export const ENTER_ANIMATIONS = ["none", "fade", "rise", "scale", "slide"] as const;
+export type EnterAnimation = (typeof ENTER_ANIMATIONS)[number];
+export const EnterAnimationSchema = z.enum(ENTER_ANIMATIONS);
+
+/** Stagger steps a node may declare as `enterDelay` (each step = `--motion-enter-stagger`). */
+export const ENTER_DELAY_STEPS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
+export type EnterDelayStep = (typeof ENTER_DELAY_STEPS)[number];
+
+/** Theme-level element entry: the default for slot content + the stagger step. */
+export type MotionEntryTokens = {
+  /** Entry every slot's content plays when it changes (`--motion-enter-default`); `none` = off. */
+  default?: EnterAnimation;
+  /** Delay between consecutive staggered entries (`--motion-enter-stagger`), e.g. `40ms`. */
+  stagger?: string;
+};
+
+export const MotionEntryTokensSchema = z.object({
+  default: EnterAnimationSchema.optional(),
+  stagger: z.string().optional(),
 });
 
 export type MotionTokens = {
   durations?: MotionDurationPalette;
   easings?: MotionEasingPalette;
   intents?: MotionIntentMap;
-  /** Per-surface motion shapes (modal, popover, toast, page). */
+  /** Per-surface motion shapes (modal, popover, toast, page, element entry). */
   shapes?: MotionShapeTokens;
+  /** Element entry: the default for slot content and the stagger step. */
+  entry?: MotionEntryTokens;
+  /** How long an action must run before its control shows a spinner (`--motion-busy-delay`, e.g. `300ms`). */
+  busyDelay?: string;
 };
 
 export const MotionTokensSchema = z.object({
@@ -808,6 +847,8 @@ export const MotionTokensSchema = z.object({
   easings: MotionEasingPaletteSchema.optional(),
   intents: MotionIntentMapSchema.optional(),
   shapes: MotionShapeTokensSchema.optional(),
+  entry: MotionEntryTokensSchema.optional(),
+  busyDelay: z.string().optional(),
 });
 
 /** Icon family selector */
@@ -883,6 +924,8 @@ export type GeometryTokens = {
   cornerShape?: string;
   /** CSS `corner-shape` for pill/circle boxes (`rounded-full`) — keeps avatars round under a bevel theme. */
   cornerShapePill?: string;
+  /** CSS `corner-shape` for interactive controls (buttons, inputs) — round controls inside a scoop/notch frame. Falls back to `cornerShape`. */
+  cornerShapeInteractive?: string;
   /** CSS `border-style` for every bordered box (`solid`, `dashed`, `double`, `dotted`, `groove`, `ridge`, `inset`, `outset`). */
   borderStyle?: string;
   /** CSS `border-style` for interactive controls (buttons) — `outset` for bevelled chrome. */
@@ -898,6 +941,7 @@ export const GeometryTokensSchema = z.object({
   borderHeavy: z.string().optional(),
   cornerShape: z.string().optional(),
   cornerShapePill: z.string().optional(),
+  cornerShapeInteractive: z.string().optional(),
   borderStyle: z.string().optional(),
   borderStyleInteractive: z.string().optional(),
 });

@@ -440,6 +440,7 @@
     "visual_prompt": "vizualno_poziv",
     "vocabulary": "besednjak",
     "displayName": "prikaznoIme",
-    "surface": "povrsina"
+    "surface": "povrsina",
+    "external": "zunanje"
   }
 }

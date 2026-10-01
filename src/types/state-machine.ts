@@ -170,6 +170,12 @@ export type Event = {
    * (`renamePayloadEntityMarkers`, `reference-resolver.ts`).
    */
   payloadEntity?: string;
+  /**
+   * A declared external input (`listens { EVENT -> external { … } }`): a client
+   * outside the program (an API, an agent, an MCP client) may send this event to
+   * the trait. Absent = not an input. Mirrors Rust `EventDefinition.external`.
+   */
+  external?: boolean;
   /** Domain vs System classification (optional, for analysis) */
   classification?: "domain" | "system";
   /** Semantic role of this event (optional, for analysis) */
@@ -185,6 +191,7 @@ export const EventSchema = z.object({
   tier: z.string().optional(),
   payloadSchema: z.array(PayloadFieldSchema).optional(),
   payloadEntity: z.string().optional(),
+  external: z.boolean().optional(),
   classification: z.enum(["domain", "system"]).optional(),
   semanticRole: z.string().optional(),
 });

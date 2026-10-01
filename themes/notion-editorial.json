@@ -173,13 +173,13 @@
       "borderStyleInteractive": "solid"
     },
     "colors": {
-      "primary": "#c2410c",
-      "primary-hover": "#9a3412",
+      "primary": "#1f6fc5",
+      "primary-hover": "#195ca4",
       "primary-foreground": "#fefdf9",
       "secondary": "#f4f1ea",
       "secondary-hover": "#ebe7dc",
       "secondary-foreground": "#191919",
-      "accent": "#d13f0a",
+      "accent": "#b5462a",
       "accent-foreground": "#fefdf9",
       "muted": "#f4f1ea",
       "muted-foreground": "#6b6660",
@@ -190,7 +190,7 @@
       "surface": "#f9f6ef",
       "border": "#e8e3d6",
       "input": "#d8d2c2",
-      "ring": "#ff6b35",
+      "ring": "#1f6fc5",
       "table-header": "#f4f1ea",
       "table-border": "#e8e3d6",
       "table-row-hover": "#f9f6ef",
@@ -247,19 +247,19 @@
       "active-translate-y": "0",
       "focus-ring-width": "3px",
       "focus-ring-offset": "2px",
-      "focus-ring-color": "#ff6b35"
+      "focus-ring-color": "#1f6fc5"
     }
   },
   "variants": {
     "dark": {
       "colors": {
-        "primary": "#ff8557",
-        "primary-hover": "#ff9a73",
+        "primary": "#529cca",
+        "primary-hover": "#6aaedb",
         "primary-foreground": "#1a1a17",
         "secondary": "#26241f",
         "secondary-hover": "#2f2d27",
         "secondary-foreground": "#f5f1e6",
-        "accent": "#ff8557",
+        "accent": "#e07a5f",
         "accent-foreground": "#1a1a17",
         "muted": "#26241f",
         "muted-foreground": "#a39c8f",
@@ -270,7 +270,7 @@
         "surface": "#26241f",
         "border": "#3a3730",
         "input": "#45413a",
-        "ring": "#ff8557",
+        "ring": "#529cca",
         "table-header": "#26241f",
         "table-border": "#3a3730",
         "table-row-hover": "#201f1b",
@@ -310,7 +310,7 @@
         "active-translate-y": "0",
         "focus-ring-width": "3px",
         "focus-ring-offset": "2px",
-        "focus-ring-color": "#ff8557"
+        "focus-ring-color": "#529cca"
       },
       "shadows": {
         "main": "0 1px 2px rgba(0, 0, 0, 0.30)",
