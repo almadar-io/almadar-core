@@ -41,6 +41,12 @@ import type { EventPayloadValue } from '../types/expression.js';
  *                     name-matching the prop (replacing the `'entity' in
  *                     propsSchema` name check).
  *
+ * - `"entry"`      — universal element-entry prop (`enter`/`enterDelay`):
+ *                     folded into the element's class, never passed on.
+ * - `"skeleton"`   — injected universal `skeleton` prop on a component that
+ *                     declares none: feeds the awaiting-skeleton prediction,
+ *                     never passed on (a declaring component carries no kind).
+ *
  * Reserved for future use: `"config-binding"`. Add here rather than
  * inventing per-consumer markers.
  */
@@ -52,6 +58,8 @@ export const PROP_KINDS = [
   'event-map',
   'callback',
   'entity',
+  'entry',
+  'skeleton',
 ] as const;
 export type PropKind = (typeof PROP_KINDS)[number];
 

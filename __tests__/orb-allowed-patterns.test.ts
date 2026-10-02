@@ -78,19 +78,25 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
   // Re-pinned 2026-09-28 from 103/30/231 — AVL exposed to std (curated avl/patterns.ts):
   //   component +1  avl-glyph                              (one AVL notation symbol)
   //   display   +1  avl-state-machine                      (the converged state machine)
+  it('admits the agent-feed components (the 2026-10-02 component additions) by name', () => {
+    for (const name of ['agent-activity-feed', 'agent-activity-row', 'agent-chat-feed']) {
+      expect(grouped.component.map((p) => p.name)).toContain(name);
+    }
+  });
+
   it('pins the per-category allowed counts', () => {
     const counts = Object.fromEntries(
       Object.entries(grouped).map(([cat, items]) => [cat, items.length]),
     );
     expect(counts).toMatchObject({
-      component: 104,
+      component: 107,
       display: 31,
       filter: 4,
       form: 10,
       game: 36,
       media: 1,
     });
-    expect(names.length).toBe(233);
+    expect(names.length).toBe(236);
   });
 
   it('admits the drifted patterns by name, not just by count', () => {

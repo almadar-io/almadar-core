@@ -7,6 +7,7 @@
  * @packageDocumentation
  */
 
+import { AwaitRenderSchema, type AwaitRender } from "./skeleton.js";
 import { z } from "zod";
 import type { Effect } from "./effect.js";
 import { EffectSchema } from "./effect.js";
@@ -259,6 +260,12 @@ export type Transition = {
   effects?: Effect[];
   /** Description */
   description?: string | null;
+  /**
+   * Predicted renders this transition's server effects lead to, used to draw
+   * awaiting-server skeletons. Computed by orbital-compiler (enrich) in the
+   * resolved schema only — never authored, never persisted in a registry `.orb`.
+   */
+  awaitRender?: AwaitRender[];
 };
 
 export const TransitionSchema = z.object({
@@ -269,6 +276,7 @@ export const TransitionSchema = z.object({
   guard: ExpressionSchema.nullish(),
   effects: z.array(EffectSchema).optional(),
   description: z.string().nullish(),
+  awaitRender: z.array(AwaitRenderSchema).optional(),
 });
 
 // ============================================================================

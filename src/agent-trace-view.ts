@@ -15,10 +15,14 @@
 import type { JsonValue, ToolArgs } from './types/json.js';
 import type { SemanticChangeKind } from './types/changeset.js';
 import type { LlmCallMeta } from './types/sse.js';
+import { EventPayloadSchema, type EventPayload } from './types/expression.js';
 
 // ----------------------------------------------------------------------------
 // Shared leaf shapes
 // ----------------------------------------------------------------------------
+
+/** Which kind of tool an in-app assistant used: a declared input, an entity read, or a name it was not given. Absent for other agents' tools. */
+export type AppToolKind = 'input' | 'read' | 'invalid';
 
 /** Conversational role rendered with an avatar/icon in the trace stream. */
 export type TraceAvatarRole = 'user' | 'assistant' | 'system';
@@ -53,8 +57,10 @@ export interface TraceDiffHunk {
  */
 export type TraceActivity =
   | { type: 'message'; role: TraceAvatarRole; content: string; timestamp: number; isStreaming?: boolean }
-  | { type: 'tool_call'; tool: string; args: ToolArgs; timestamp: number; isExecuting?: boolean }
-  | { type: 'tool_result'; tool: string; result: JsonValue; success: boolean; timestamp: number }
+  /** The agent used a tool. `argsText` is the arguments exactly as the model wrote them. */
+  | { type: 'tool_call'; tool: string; kind?: AppToolKind; argsText: string; timestamp: number; isExecuting?: boolean }
+  /** What the tool answered: whether it took effect, why not, how many rows a read returned, and the full answer the model saw. */
+  | { type: 'tool_result'; tool: string; kind?: AppToolKind; success: boolean; detail?: string; rows?: number; resultText: string; timestamp: number }
   | { type: 'file_operation'; operation: TraceFileOperation; path: string; success?: boolean; timestamp: number }
   | { type: 'schema_diff'; filePath: string; hunks: TraceDiffHunk[]; timestamp: number }
   | { type: 'error'; message: string; code?: string; timestamp: number }
@@ -143,6 +149,14 @@ export function selectTraceActivities(
   });
 }
 
+/**
+ * One activity as the payload a host delivers for a live step
+ * (`ServiceHostPorts.message`): `{ activity }`. Absent optional fields are dropped.
+ */
+export function traceActivityPayload(activity: TraceActivity): EventPayload {
+  return EventPayloadSchema.parse({ activity: JSON.parse(JSON.stringify(activity)) });
+}
+
 // ----------------------------------------------------------------------------
 // TraceActivityItem — the agent-trace `ActivityItem` render union
 // ----------------------------------------------------------------------------
@@ -152,7 +166,8 @@ export function selectTraceActivities(
  * `InlineActivityStream` render. Mirrors `@almadar-io/agent-trace`'s
  * `ActivityItem`. Distinct from `TraceActivity`: `message.role` includes
  * `'tool'` and an optional `label`; it omits the coordinator/plan/question
- * variants. Tool args are `ToolArgs`, results are `JsonValue`.
+ * variants. A tool's arguments and answer are text (`argsText`, `resultText`):
+ * exactly what the agent sent and got back.
  */
 export type TraceActivityItem =
   | {
@@ -163,8 +178,8 @@ export type TraceActivityItem =
       isStreaming?: boolean;
       label?: string;
     }
-  | { type: 'tool_call'; tool: string; args: ToolArgs; timestamp: number; isExecuting?: boolean }
-  | { type: 'tool_result'; tool: string; result: JsonValue; success: boolean; timestamp: number; durationMs?: number }
+  | { type: 'tool_call'; tool: string; argsText: string; timestamp: number; isExecuting?: boolean }
+  | { type: 'tool_result'; tool: string; resultText: string; success: boolean; timestamp: number; durationMs?: number }
   | { type: 'file_operation'; operation: TraceFileOperation; path: string; success?: boolean; timestamp: number }
   | { type: 'schema_diff'; filePath: string; hunks: TraceDiffHunk[]; timestamp: number }
   | { type: 'error'; message: string; code?: string; timestamp: number }

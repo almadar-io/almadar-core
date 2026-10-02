@@ -306,7 +306,7 @@ export const DomainContextSchema = z.object({
 export type UXHints = {
   /** Overall user flow pattern (e.g., 'hub-spoke', 'crud-cycle', 'linear') */
   flowPattern?: string;
-  /** Pattern for displaying lists (e.g., 'entity-table', 'entity-cards', 'dashboard-grid', 'none') */
+  /** Pattern for displaying lists (e.g., 'table-view', 'data-grid', 'dashboard-grid', 'none') */
   listPattern?: string;
   /** Pattern for create/edit forms (e.g., 'modal', 'drawer', 'page', 'none') */
   formPattern?: string;
@@ -840,6 +840,8 @@ export type MotionTokens = {
   entry?: MotionEntryTokens;
   /** How long an action must run before its control shows a spinner (`--motion-busy-delay`, e.g. `300ms`). */
   busyDelay?: string;
+  /** Whether an empty slot shows the predicted skeleton while its server-backed trait awaits a round trip (`--awaiting-skeleton: on | off`). */
+  awaitingSkeleton?: boolean;
 };
 
 export const MotionTokensSchema = z.object({
@@ -849,6 +851,7 @@ export const MotionTokensSchema = z.object({
   shapes: MotionShapeTokensSchema.optional(),
   entry: MotionEntryTokensSchema.optional(),
   busyDelay: z.string().optional(),
+  awaitingSkeleton: z.boolean().optional(),
 });
 
 /** Icon family selector */

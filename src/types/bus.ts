@@ -420,7 +420,26 @@ export interface OrbitalEventRequest {
   delivery?: DeliveryRecord;
   /** The target trait's log so far in that dispatch; absent = empty. */
   dispatchLog?: DispatchLog;
+  /**
+   * A mount batch: one request mounts several traits of the orbital, each
+   * running its OWN lifecycle event, in list order, with the shared
+   * `payload`. `traits`/`entityByTrait` keep their stateless-addressing
+   * meaning; `event` carries the first seed's event.
+   */
+  mount?: MountSeed[];
 }
+
+/** The lifecycle events a trait runs when it enters a page (the first it handles). */
+export const LIFECYCLE_EVENTS = ["INIT", "LOAD", "$MOUNT"] as const;
+export type LifecycleEvent = (typeof LIFECYCLE_EVENTS)[number];
+
+/** One trait of a mount batch and the lifecycle event it runs. */
+export interface MountSeed {
+  trait: string;
+  event: LifecycleEvent;
+}
+
+export const MountSeedSchema = z.object({ trait: z.string(), event: z.enum(LIFECYCLE_EVENTS) });
 
 /** Structured reason one trait (or the whole dispatch) did not transition. */
 export type TransitionRejectionCode =
@@ -457,6 +476,12 @@ export interface ServiceHostPorts {
   inputs(): ExternalInput[];
   dispatchInput(orbital: string, request: Omit<ExternalInputRequest, 'user'>): Promise<OrbitalEventResponse>;
   read(entity: string): Promise<EntityRow[]>;
+  /**
+   * Deliver one message of the running call to the caller's tab, live, as the
+   * call site's `emit.onMessage` event source-stamped to the caller. A no-op
+   * when the call site declares no `onMessage`.
+   */
+  message(payload: EventPayload): void;
 }
 
 /**
@@ -573,6 +598,7 @@ export const OrbitalEventRequestSchema: z.ZodType<OrbitalEventRequest, z.ZodType
   behavior: z.string().optional(),
   delivery: DeliveryRecordSchema.optional(),
   dispatchLog: DispatchLogSchema.optional(),
+  mount: z.array(MountSeedSchema).optional(),
 });
 
 /** Zod twin of `OrbitalEventResponse`. Third type param `object`, see `BusEventSourceSchema`. */

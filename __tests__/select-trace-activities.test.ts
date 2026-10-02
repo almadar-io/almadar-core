@@ -4,7 +4,7 @@ import { selectTraceActivities, TRACE_ACTIVITY_TYPES, type TraceActivity } from 
 const activities: TraceActivity[] = [
   { type: 'message', role: 'user', content: 'hi', timestamp: 1 },
   { type: 'message', role: 'system', content: 'Coordinator state: planning', timestamp: 2 },
-  { type: 'tool_call', tool: 'set_roster', args: {}, timestamp: 3 },
+  { type: 'tool_call', tool: 'set_roster', argsText: '{}', timestamp: 3 },
   { type: 'schema_change', changeKind: 'trait-config-changed', orbitalName: 'Flag', traitName: 'ListingFlag', timestamp: 4 },
   { type: 'schema_change', changeKind: 'guard-changed', orbitalName: 'Flag', timestamp: 5 },
   { type: 'done', orbitalCount: 1, timestamp: 6 },

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-01T13:25:20.619Z",
+  "exportedAt": "2026-10-02T05:56:20.125Z",
   "contracts": {
     "form": {
       "emits": [
@@ -101,104 +101,6 @@
         },
         {
           "event": "NAVIGATE",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        }
-      ],
-      "requires": [],
-      "entityAware": true,
-      "configDriven": true
-    },
-    "entity-table": {
-      "emits": [
-        {
-          "event": "NAVIGATE",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        },
-        {
-          "event": "DESELECT",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        },
-        {
-          "event": "SELECT",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        },
-        {
-          "event": "SORT",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        },
-        {
-          "event": "SEARCH",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        },
-        {
-          "event": "PAGINATE",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        }
-      ],
-      "requires": [],
-      "entityAware": true,
-      "configDriven": true
-    },
-    "entity-cards": {
-      "emits": [
-        {
-          "event": "PAGINATE",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        },
-        {
-          "event": "NAVIGATE",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        }
-      ],
-      "requires": [],
-      "entityAware": true,
-      "configDriven": true
-    },
-    "entity-list": {
-      "emits": [
-        {
-          "event": "NAVIGATE",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        },
-        {
-          "event": "SELECT",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
-        },
-        {
-          "event": "DESELECT",
           "trigger": "action",
           "payload": {
             "type": "object"
@@ -508,19 +410,6 @@
         "CANCEL"
       ],
       "entityAware": false
-    },
-    "master-detail": {
-      "emits": [
-        {
-          "event": "SELECT",
-          "trigger": "click",
-          "payload": {
-            "type": "EntityRow"
-          }
-        }
-      ],
-      "requires": [],
-      "entityAware": true
     },
     "card": {
       "emits": [

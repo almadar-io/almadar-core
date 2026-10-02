@@ -43,7 +43,7 @@ orbital TaskManager {
     state active {
       INIT -> active
         (fetch Task)
-        (render-ui main { type: "entity-table", entity: "Task", fields: ["title", "completed"] })
+        (render-ui main { type: "data-list", entity: "Task", fields: ["title", "completed"] })
       COMPLETE -> active
         (set @entity.completed true)
     }
@@ -126,7 +126,7 @@ describe('localizeLoloSource', () => {
     // `parse_object_literal` reads object keys verbatim, so a prop that spells
     // a keyword (`type`, `entity`, `fields`) must survive untranslated.
     const out = localizeLoloSource(SAMPLE, lang, { operators: operatorsFor(lang) });
-    expect(out).toContain('{ type: "entity-table", entity: "Task", fields: ["title", "completed"] }');
+    expect(out).toContain('{ type: "data-list", entity: "Task", fields: ["title", "completed"] }');
   });
 
   it.each(['ar', 'sl'] as const)('never translates a field name that spells a keyword (%s)', (lang) => {

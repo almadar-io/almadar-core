@@ -23,6 +23,20 @@ import { asEventId } from '../src/types/identity.js';
  * grammar's exact arities so the wire cannot silently drift.
  */
 describe('OrbitalEventRequestSchema', () => {
+  it('accepts a mount batch: each seed names its trait and its own lifecycle event', () => {
+    const request: OrbitalEventRequest = {
+      event: 'INIT',
+      payload: { id: 'inv-1' },
+      mount: [{ trait: 'InvoiceManage', event: 'INIT' }, { trait: 'InvoiceStats', event: 'LOAD' }, { trait: 'Clock', event: '$MOUNT' }],
+      traits: [{ trait: 'InvoiceManage', from: 'loading' }],
+    };
+    expect(OrbitalEventRequestSchema.parse(request)).toEqual(request);
+  });
+
+  it('control: a mount seed with a non-lifecycle event is rejected', () => {
+    expect(OrbitalEventRequestSchema.safeParse({ event: 'INIT', mount: [{ trait: 'A', event: 'SAVE' }] }).success).toBe(false);
+  });
+
   it('accepts a minimal request (only the required `event` field)', () => {
     const request: OrbitalEventRequest = { event: 'INIT' };
     expect(OrbitalEventRequestSchema.parse(request)).toEqual(request);

@@ -292,7 +292,7 @@ export interface ResolvedTraitBinding {
 // ============================================================================
 
 export interface ResolvedPattern {
-  /** Pattern type (e.g., 'page-header', 'entity-list', 'game-canvas') */
+  /** Pattern type (e.g., 'page-header', 'data-list', 'game-canvas') */
   type: string;
 
   /** Pattern configuration */

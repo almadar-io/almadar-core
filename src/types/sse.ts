@@ -64,8 +64,12 @@ export interface StartEvent extends SSEEventBase {
   };
 }
 
-/** The LLM call behind a raw `message` frame — everything the trace records, untruncated. */
-export interface LlmCallMeta {
+/**
+ * The LLM call behind a raw `message` frame — everything the trace records,
+ * untruncated. A type alias (not an interface) so it stays assignable to
+ * `EventPayload` when it rides a service result or a bus payload.
+ */
+export type LlmCallMeta = {
   service: string;
   provider: string;
   model: string;
@@ -78,7 +82,7 @@ export interface LlmCallMeta {
   completionTokens?: number;
   cachedPromptTokens?: number;
   costUSD?: number;
-}
+};
 
 export interface MessageEvent extends SSEEventBase {
   type: 'message';

@@ -52,7 +52,7 @@ const crudOrbital: OrbitalDefinition = {
           effects: [
             ['fetch', 'Inspector', {}],
             ['render-ui', 'main', { type: 'page-header', title: 'Inspectors' }],
-            ['render-ui', 'main', { type: 'entity-list', entity: 'Inspector', fields: ['name', 'surname'] }],
+            ['render-ui', 'main', { type: 'data-list', entity: 'Inspector', fields: ['name', 'surname'] }],
           ],
         },
         {

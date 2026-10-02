@@ -218,11 +218,11 @@ export function recommendPatterns(
       score += 10;
       reasons.push('numeric-fields');
     }
-    if (context.hasRelationFields && ['tabs', 'master-detail'].includes(patternName)) {
+    if (context.hasRelationFields && ['tabs', 'master-detail-layout'].includes(patternName)) {
       score += 10;
       reasons.push('relation-fields');
     }
-    if (context.hasMediaFields && ['entity-cards', 'media-gallery'].includes(patternName)) {
+    if (context.hasMediaFields && ['data-grid', 'media-gallery'].includes(patternName)) {
       score += 10;
       reasons.push('media-fields');
     }

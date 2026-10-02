@@ -24,6 +24,7 @@ export const UI_SLOTS = [
     // App slots
     'main',
     'sidebar',
+    'dock', // Right inline panel that pushes main (narrow screens: a drawer)
     'modal',
     'drawer',
     'overlay',
@@ -50,6 +51,11 @@ export const UI_SLOTS = [
 
 export type UISlot = (typeof UI_SLOTS)[number];
 
+/** The slots a renderer mounts as `#slot-{name}`: every slot except the HUD group key, the `screen` alias and dotted sub-slots. */
+export const RENDERED_SLOTS: readonly UISlot[] = UI_SLOTS.filter(
+  (slot) => !slot.includes('.') && slot !== 'hud' && slot !== 'screen',
+);
+
 export const UISlotSchema = z.enum(UI_SLOTS);
 
 // ============================================================================
@@ -72,14 +78,14 @@ import type {
  *
  * @example
  * // Type-safe with specific pattern type
- * const config: PatternConfig<'entity-table'> = {
- *   patternType: 'entity-table',
- *   columns: ['name', 'email'],  // ✅ Required prop
+ * const config: PatternConfig<'table-view'> = {
+ *   patternType: 'table-view',
+ *   columns: [{ key: 'name', header: 'Name' }],  // ✅ Required prop
  *   entity: 'User',
  * };
  *
  * // Error: Property 'columns' is missing (required prop)
- * const bad: PatternConfig<'entity-table'> = { patternType: 'entity-table' };
+ * const bad: PatternConfig<'table-view'> = { patternType: 'table-view' };
  *
  * // Error: 'fake-pattern' is not assignable to PatternType
  * const invalid: PatternConfig = { patternType: 'fake-pattern' };
@@ -150,9 +156,9 @@ export type TemplatePatternConfig = { type: PatternType | RenderBinding } & Reco
 
 /**
  * Render UI effect - displays a pattern in a UI slot.
- * @example ['render-ui', 'main', { patternType: 'entity-table', columns: ['name'] }]
+ * @example ['render-ui', 'main', { patternType: 'table-view', columns: [{ key: 'name', header: 'Name' }] }]
  * @example ['render-ui', 'main', '@config.bodyContent']  // a {@link RenderBinding} target
- * @example ['render-ui', '@config.reviewSlot', { patternType: 'entity-table' }]  // a {@link SlotBinding} slot
+ * @example ['render-ui', '@config.reviewSlot', { patternType: 'table-view' }]  // a {@link SlotBinding} slot
  */
 export type RenderUIEffect =
     | ['render-ui', UISlot | SlotBinding, AnyPatternConfig]
@@ -368,10 +374,16 @@ export type PersistEffect =
  * @example ['call-service', 'llm', 'generate', { userPrompt: '...' }, { emit: { success: 'OK', failure: 'ERR' } }]
  * @example ['call-service', 'WeatherAPI', { service: 'weather', action: 'get', onSuccess: 'OK' }]
  */
+/** Trailing config on `call-service`: outcome events, plus `onMessage` for
+ *  the live messages a running call delivers to the requesting client. */
+export type CallServiceEmitConfig = {
+    emit?: { success?: string; failure?: string; onMessage?: string };
+};
+
 export type CallServiceEffect =
     | ['call-service', string, string]
     | ['call-service', string, string, ServiceParams]
-    | ['call-service', string, string, ServiceParams, PersistEmitConfig]
+    | ['call-service', string, string, ServiceParams, CallServiceEmitConfig]
     | ['call-service', string, CallServiceConfig];
 
 /**
@@ -875,7 +887,7 @@ export type TypedEffect =
  * @example
  * ["set", "@entity.health", 100]
  * ["emit", "PLAYER_DIED", { "playerId": "@entity.id" }]
- * ["render-ui", "main", { "patternType": "entity-table", "columns": ["name"] }]
+ * ["render-ui", "main", { "patternType": "table-view", "columns": [{ "key": "name", "header": "Name" }] }]
  * ["call-service", "WeatherAPI", { "action": "getWeather", "onSuccess": "OK" }]
  * ["navigate", "/tasks"]
  * ["persist", "create", "Task", { "title": "@payload.title" }]
@@ -1058,7 +1070,7 @@ export function navigateBack(): NavigateBackEffect {
 
 /**
  * Create a render-ui effect
- * @example ["render-ui", "main", { "patternType": "entity-table", "columns": ["name"] }]
+ * @example ["render-ui", "main", { "patternType": "table-view", "columns": [{ "key": "name", "header": "Name" }] }]
  */
 export function renderUI(
     target: UISlot,

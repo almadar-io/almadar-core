@@ -1,26 +1,11 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-01T13:25:20.619Z",
+  "exportedAt": "2026-10-02T05:56:20.125Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
       "importPath": "@/components/core/molecules/PageHeader",
       "category": "header"
-    },
-    "entity-list": {
-      "component": "List",
-      "importPath": "@/components/core/organisms/List",
-      "category": "display"
-    },
-    "entity-table": {
-      "component": "DataTable",
-      "importPath": "@/components/core/organisms/DataTable",
-      "category": "display"
-    },
-    "entity-cards": {
-      "component": "CardGrid",
-      "importPath": "@/components/core/organisms/CardGrid",
-      "category": "display"
     },
     "detail-panel": {
       "component": "DetailPanel",
@@ -120,11 +105,6 @@
     "confirm-dialog": {
       "component": "ConfirmDialog",
       "importPath": "@/components/core/molecules/ConfirmDialog",
-      "category": "layout"
-    },
-    "master-detail": {
-      "component": "MasterDetail",
-      "importPath": "@/components/core/organisms/MasterDetail",
       "category": "layout"
     },
     "runtime-debugger": {
@@ -1302,6 +1282,21 @@
     "avl-glyph": {
       "component": "AvlGlyph",
       "importPath": "@/components/avl/molecules/AvlGlyph",
+      "category": "component"
+    },
+    "agent-activity-feed": {
+      "component": "AgentActivityFeed",
+      "importPath": "@/components/core/molecules/AgentActivityFeed",
+      "category": "component"
+    },
+    "agent-activity-row": {
+      "component": "AgentActivityRow",
+      "importPath": "@/components/core/molecules/AgentActivityFeed",
+      "category": "component"
+    },
+    "agent-chat-feed": {
+      "component": "AgentChatFeed",
+      "importPath": "@/components/core/molecules/AgentChatFeed",
       "category": "component"
     }
   }

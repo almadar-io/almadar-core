@@ -404,6 +404,7 @@ export {
   type FetchOptions,
   type FetchResult,
   type PersistEmitConfig,
+  type CallServiceEmitConfig,
   type PersistData,
   type ForwardEffect,
   type TrainEffect,
@@ -457,6 +458,7 @@ export {
   type EffectOperatorsInSync,
   // Schemas
   UI_SLOTS,
+  RENDERED_SLOTS,
   EffectSchema,
   UISlotSchema,
   // Type guards
@@ -1089,6 +1091,10 @@ export {
   type ServiceHostPorts,
   OrbitalEventRequestSchema,
   OrbitalEventResponseSchema,
+  LIFECYCLE_EVENTS,
+  type LifecycleEvent,
+  type MountSeed,
+  MountSeedSchema,
   // Register wire
   type ServerTopology,
   type OrbitalRegisterResponse,
@@ -1152,6 +1158,7 @@ export {
   type JsonObject,
   type ToolArgs,
   type RuntimeValue,
+  JsonValueSchema,
   isJsonPrimitive,
   isJsonObject,
   isJsonArray,
@@ -1284,3 +1291,19 @@ export type { PatternNode, PatternValue } from "../render-ui-edit.js";
 
 // Accessibility attribute vocabulary (A11yProps + its registry schema)
 export * from "./a11y.js";
+
+export {
+  SKELETON_VARIANTS,
+  SkeletonVariantSchema,
+  SkeletonShapeSchema,
+  SkeletonSpecSchema,
+  SkeletonNodeSchema,
+  AwaitRenderSchema,
+  type SkeletonVariant,
+  type SkeletonShape,
+  type SkeletonSpec,
+  type SkeletonNode,
+  type AwaitRender,
+  type AwaitingTrait,
+} from "./skeleton.js";
+export { SURFACE_MODES, type SurfaceMode } from "./surface.js";
