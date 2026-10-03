@@ -15,6 +15,13 @@ export type LanguageCode = 'en' | 'ar' | 'sl';
 
 export const LANGUAGE_CODES: readonly LanguageCode[] = ['en', 'ar', 'sl'];
 
+/** Locales written right to left (twin of orbital-core `messages::RTL_LOCALES`). */
+export const RTL_LOCALES: readonly string[] = ['ar', 'he', 'fa', 'ur'];
+
+export function localeDirection(locale: string): 'ltr' | 'rtl' {
+  return RTL_LOCALES.includes(locale) ? 'rtl' : 'ltr';
+}
+
 export const I18N_SECTIONS = [
   'keywords',
   'shapes',

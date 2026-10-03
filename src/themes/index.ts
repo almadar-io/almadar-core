@@ -12,6 +12,7 @@
  */
 
 import almadarTheme from '../../themes/almadar.json' with { type: 'json' };
+import almadarHeritageTheme from '../../themes/almadar-heritage.json' with { type: 'json' };
 import almadarWebsiteTheme from '../../themes/almadar-website.json' with { type: 'json' };
 import aquaTheme from '../../themes/aqua.json' with { type: 'json' };
 import arabesqueTheme from '../../themes/arabesque.json' with { type: 'json' };
@@ -49,6 +50,7 @@ import neonTheme from '../../themes/neon.json' with { type: 'json' };
 import neumorphicTheme from '../../themes/neumorphic.json' with { type: 'json' };
 import newsprintTheme from '../../themes/newsprint.json' with { type: 'json' };
 import notionEditorialTheme from '../../themes/notion-editorial.json' with { type: 'json' };
+import orbTheme from '../../themes/orb.json' with { type: 'json' };
 import pixelTheme from '../../themes/pixel.json' with { type: 'json' };
 import prismTheme from '../../themes/prism.json' with { type: 'json' };
 import retroTheme from '../../themes/retro.json' with { type: 'json' };
@@ -73,6 +75,7 @@ import type { ThemeDefinition } from '../types/domain.js';
 
 export const THEME_PRESETS: Record<string, ThemeDefinition> = {
   almadar: ThemeDefinitionSchema.parse(almadarTheme),
+  'almadar-heritage': ThemeDefinitionSchema.parse(almadarHeritageTheme),
   'almadar-website': ThemeDefinitionSchema.parse(almadarWebsiteTheme),
   aqua: ThemeDefinitionSchema.parse(aquaTheme),
   arabesque: ThemeDefinitionSchema.parse(arabesqueTheme),
@@ -110,6 +113,7 @@ export const THEME_PRESETS: Record<string, ThemeDefinition> = {
   neumorphic: ThemeDefinitionSchema.parse(neumorphicTheme),
   newsprint: ThemeDefinitionSchema.parse(newsprintTheme),
   'notion-editorial': ThemeDefinitionSchema.parse(notionEditorialTheme),
+  orb: ThemeDefinitionSchema.parse(orbTheme),
   pixel: ThemeDefinitionSchema.parse(pixelTheme),
   prism: ThemeDefinitionSchema.parse(prismTheme),
   retro: ThemeDefinitionSchema.parse(retroTheme),

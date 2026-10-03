@@ -63,6 +63,19 @@ export type OrbitalEntity = {
     identity?: boolean;
 
     /**
+     * `[persistent: x, local]` — the rows live in the browser (IndexedDB), so
+     * `fetch`/`persist` on this entity run client-side on both paths. Orthogonal
+     * like `shared`; meaningful only on a persistent entity.
+     */
+    local?: boolean;
+
+    /**
+     * `[persistent: x, local, mock]` — on first open, an empty browser store is
+     * filled from the shared `@mock` seeder. The other seed source is `instances`.
+     */
+    seedMock?: boolean;
+
+    /**
      * `@read` — a per-row predicate (`@entity` = candidate row, `@user` =
      * viewer) ANDed with any call-site `filter:`. The un-bypassable twin of
      * `filter:`, enforced once for every trait that fetches this entity.
@@ -104,6 +117,12 @@ export type OrbitalEntity = {
     /** Pre-authored instances (seed data or static reference data) */
     instances?: EntityRow[];
 
+    /**
+     * A browser-stored entity's first rows per locale (`instances ar [ … ]`),
+     * keyed by a declared locale; a locale with no block takes `instances`.
+     */
+    localeInstances?: Record<string, EntityRow[]>;
+
     /** Auto-add createdAt/updatedAt timestamps */
     timestamps?: boolean;
 
@@ -132,6 +151,9 @@ export const OrbitalEntitySchema = z.object({
     // than rejecting them, so a Rust-only field works on the compiled path and
     // silently vanishes on the interpreter path.
     identity: z.boolean().optional(),
+    // Rust twins: `EntityDefinition.{local,seed_mock}` (serde `seedMock`).
+    local: z.boolean().optional(),
+    seedMock: z.boolean().optional(),
     // Same "must stay in step with Rust serde" hazard as `identity` above —
     // these four mirror `EntityDefinition.{read,create,update,delete}_policy`.
     // Rust has no `rename_all` on this struct, so the wire key IS snake_case
@@ -154,6 +176,7 @@ export const OrbitalEntitySchema = z.object({
     collection: z.string().optional(),
     fields: z.array(EntityFieldSchema).min(1, 'At least one field is required'),
     instances: z.array(z.record(JsonValueSchema)).optional(),
+    localeInstances: z.record(z.array(z.record(JsonValueSchema))).optional(),
     timestamps: z.boolean().optional(),
     softDelete: z.boolean().optional(),
     description: z.string().optional(),
@@ -172,6 +195,12 @@ export type Entity = OrbitalEntity;
 
 /** Alias for OrbitalEntitySchema - preferred name */
 export const EntitySchema = OrbitalEntitySchema;
+
+/** The rows an entity starts with for a viewer's locale: its locale block, else `instances`. */
+export function instancesForLocale(entity: Pick<OrbitalEntity, 'instances' | 'localeInstances'>, locale: string | undefined): EntityRow[] {
+    const localized = locale !== undefined ? entity.localeInstances?.[locale] : undefined;
+    return localized ?? entity.instances ?? [];
+}
 
 // ============================================================================
 // Utility Functions
@@ -214,6 +243,24 @@ export function deriveCollection(entity: OrbitalEntity): string | undefined {
  */
 export function isRuntimeEntity(entity: OrbitalEntity): boolean {
     return entity.persistence === 'runtime';
+}
+
+/**
+ * Whether an entity's rows live in the client: `[runtime]` (in memory) or
+ * `[persistent: x, local]` (the browser's IndexedDB). Data effects on such an
+ * entity run in the client. Twin of Rust `EntityDefinition::is_client_resident`.
+ */
+export function isClientResident(entity: Pick<OrbitalEntity, 'persistence' | 'local'>): boolean {
+    return entity.persistence === 'runtime' || entity.local === true;
+}
+
+/**
+ * Whether an entity's ROWS live in the browser (`[persistent: x, local]`), so
+ * `fetch`/`persist` on it run client-side. A `[runtime]` entity's rows stay in
+ * the server's per-session store. Twin of Rust `Residence` (`effects/runs_on.rs`).
+ */
+export function storesRowsInBrowser(entity: Pick<OrbitalEntity, 'local'>): boolean {
+    return entity.local === true;
 }
 
 /**

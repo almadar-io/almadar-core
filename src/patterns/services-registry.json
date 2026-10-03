@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-01T05:17:21.395Z",
+  "exportedAt": "2026-10-03T00:45:04.812Z",
   "services": {
     "llm": {
       "name": "llm",
@@ -264,38 +264,7 @@
           ],
           "responseShape": {
             "reply": "string",
-            "steps": {
-              "type": "AgentStep[]",
-              "items": {
-                "type": "AgentStep",
-                "properties": {
-                  "kind": {
-                    "type": "\"input\" | \"read\" | \"invalid\"",
-                    "required": true,
-                    "description": "`input` fired a declared input, `read` read an entity, `invalid` named nothing the tools allow."
-                  },
-                  "target": {
-                    "type": "string",
-                    "required": true,
-                    "description": "The input address or entity name the model asked for."
-                  },
-                  "args": {
-                    "type": "string",
-                    "required": true,
-                    "description": "The arguments the model gave, as JSON text."
-                  },
-                  "ok": {
-                    "type": "boolean",
-                    "required": true
-                  },
-                  "detail": {
-                    "type": "string",
-                    "required": false,
-                    "description": "Why it did not succeed: the rejection code, failed guard or error."
-                  }
-                }
-              }
-            },
+            "steps": "AgentActivity[]",
             "usage": {
               "type": "object",
               "properties": {
@@ -347,13 +316,31 @@
           "envVar": "ANTHROPIC_API_KEY",
           "required": false,
           "oneOf": "provider",
-          "description": "Anthropic API key (use this OR OPENAI_API_KEY)"
+          "description": "anthropic API key (any one provider key suffices)"
+        },
+        {
+          "envVar": "DEEPSEEK_API_KEY",
+          "required": false,
+          "oneOf": "provider",
+          "description": "deepseek API key (any one provider key suffices)"
+        },
+        {
+          "envVar": "KIMI_API_KEY",
+          "required": false,
+          "oneOf": "provider",
+          "description": "kimi API key (any one provider key suffices)"
         },
         {
           "envVar": "OPENAI_API_KEY",
           "required": false,
           "oneOf": "provider",
-          "description": "OpenAI API key (use this OR ANTHROPIC_API_KEY)"
+          "description": "openai API key (any one provider key suffices)"
+        },
+        {
+          "envVar": "OPEN_ROUTER_API_KEY",
+          "required": false,
+          "oneOf": "provider",
+          "description": "openrouter API key (any one provider key suffices)"
         },
         {
           "envVar": "LLM_PROVIDER",
@@ -1707,38 +1694,7 @@
           ],
           "responseShape": {
             "reply": "string",
-            "steps": {
-              "type": "AgentStep[]",
-              "items": {
-                "type": "AgentStep",
-                "properties": {
-                  "kind": {
-                    "type": "\"input\" | \"read\" | \"invalid\"",
-                    "required": true,
-                    "description": "`input` fired a declared input, `read` read an entity, `invalid` named nothing the tools allow."
-                  },
-                  "target": {
-                    "type": "string",
-                    "required": true,
-                    "description": "The input address or entity name the model asked for."
-                  },
-                  "args": {
-                    "type": "string",
-                    "required": true,
-                    "description": "The arguments the model gave, as JSON text."
-                  },
-                  "ok": {
-                    "type": "boolean",
-                    "required": true
-                  },
-                  "detail": {
-                    "type": "string",
-                    "required": false,
-                    "description": "Why it did not succeed: the rejection code, failed guard or error."
-                  }
-                }
-              }
-            },
+            "steps": "AgentActivity[]",
             "usage": {
               "type": "object",
               "properties": {
@@ -1790,13 +1746,31 @@
           "envVar": "ANTHROPIC_API_KEY",
           "required": false,
           "oneOf": "provider",
-          "description": "Anthropic API key"
+          "description": "anthropic API key (any one provider key suffices)"
+        },
+        {
+          "envVar": "DEEPSEEK_API_KEY",
+          "required": false,
+          "oneOf": "provider",
+          "description": "deepseek API key (any one provider key suffices)"
+        },
+        {
+          "envVar": "KIMI_API_KEY",
+          "required": false,
+          "oneOf": "provider",
+          "description": "kimi API key (any one provider key suffices)"
         },
         {
           "envVar": "OPENAI_API_KEY",
           "required": false,
           "oneOf": "provider",
-          "description": "OpenAI API key"
+          "description": "openai API key (any one provider key suffices)"
+        },
+        {
+          "envVar": "OPEN_ROUTER_API_KEY",
+          "required": false,
+          "oneOf": "provider",
+          "description": "openrouter API key (any one provider key suffices)"
         }
       ],
       "hooks": []
@@ -4454,7 +4428,7 @@
       "actions": [
         {
           "name": "list",
-          "description": "List declared credentials and their masked (last-4) configuration status; open to any caller.",
+          "description": "List declared credentials and their masked (last-4) configuration status, plus the integrations mode and each service's status; open to any caller.",
           "params": [
             {
               "name": "service",
@@ -4465,11 +4439,53 @@
           ],
           "responseShape": {
             "enabled": "boolean",
+            "mode": "'mock' | 'real'",
+            "services": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true,
+                    "description": "Row id: the service name."
+                  },
+                  "service": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "configured": {
+                    "type": "boolean",
+                    "required": true,
+                    "description": "The service has a working configuration on this host."
+                  },
+                  "mocked": {
+                    "type": "boolean",
+                    "required": true,
+                    "description": "The service answers with mock data (mock mode)."
+                  },
+                  "status": {
+                    "type": "'real' | 'mocked' | 'not configured'",
+                    "required": true,
+                    "description": "One word for what a call to this service does now."
+                  },
+                  "backend": {
+                    "type": "'production' | 'simulated' | 'stub'",
+                    "required": true
+                  }
+                }
+              }
+            },
             "entries": {
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true,
+                    "description": "Row id: `<service>/<envVar>`."
+                  },
                   "service": {
                     "type": "string",
                     "required": true
@@ -4572,6 +4588,21 @@
             "probed": "boolean",
             "ok": "boolean",
             "message": "string"
+          }
+        },
+        {
+          "name": "mode",
+          "description": "Switch every integration between mock data and its real backend, live. Mock is refused under NODE_ENV=production. Admin/owner role required.",
+          "params": [
+            {
+              "name": "mode",
+              "type": "'mock' | 'real'",
+              "required": true,
+              "description": "Target integrations mode."
+            }
+          ],
+          "responseShape": {
+            "mode": "'mock' | 'real'"
           }
         },
         {

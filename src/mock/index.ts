@@ -28,6 +28,7 @@ export {
   IMAGE_FIELD_NAMES,
   RESERVED_FIELD_NAMES,
   isDeclaredDefaultHonored,
+  projectionOf,
   sampleFieldValue,
   sampleImageUrl,
   sampleRow,

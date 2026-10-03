@@ -8,10 +8,11 @@ Every open gap this repo owns lives here. This file is the source of truth; the 
 - **Close by deleting.** Remove the entry in the same commit as the fix. There is no "closed" section; git history is the record.
 - **Cross-repo gaps don't go here.** If fixing it needs another repo, describe it in your report or PR body; the monorepo coordinator files it.
 
-Next code: `G-CORE-014`
+Next code: `G-CORE-015`
 
 ## Open gaps
 
+- **G-CORE-014** — Two types describe the same event payload field: `PayloadField` (`types/state-machine.ts`) and `EventPayloadField` (`types/trait.ts`), each with its own zod schema. Adding a field to one and not the other broke `@almadar/std`'s DTS build on 2026-10-03 (`projectedFrom`, TS2353 in generated std functions). Converge to one type + schema (the Rust IR has one `PayloadField`). `src/types` [architectural] — found 2026-10-03; prevention rung: none (type duplication — fix by converging)
 ### Foundation / Core tier (`@almadar/core`, patterns, logger, validation, analytics, i18n tables)
 
 - **G-CORE-012** — `OrbitalSchemaSchema`'s inferred output is not assignable to `OrbitalSchema` (the zod `traits` element type ≠ `TraitRef`), so a request body can't be typed `z.ZodType<{ schema: OrbitalSchema }>` from it; `@kflow-builder/shared` had to keep the resolve body's zod check server-side. Converge the zod schema and the TS type (one generated from the other). `src/types/schema.ts` [architectural] — found 2026-09-26

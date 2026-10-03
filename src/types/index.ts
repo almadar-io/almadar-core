@@ -21,6 +21,8 @@ export {
   // Use Declaration (Import System)
   type UseDeclaration,
   UseDeclarationSchema,
+  type LazyPage,
+  LazyPageSchema,
   // Expect Declaration (Consumer-Side Requirements)
   type ExpectDeclaration,
   ExpectDeclarationSchema,
@@ -77,6 +79,7 @@ export {
   type OrbitalSchemaWithTraits,
   type OrbitalSchemaInput,
   type SchemaMetadata,
+  type MessageCatalogs,
   type ConfigProvenanceRecord,
   OrbitalSchemaSchema,
   SchemaMetadataSchema,
@@ -150,6 +153,9 @@ export {
   EntityPersistenceSchema,
   deriveCollection,
   isRuntimeEntity,
+  isClientResident,
+  storesRowsInBrowser,
+  instancesForLocale,
   persistenceModeAllowsOverrides,
   isFieldValue,
   type FieldValue,
@@ -209,6 +215,7 @@ export {
   FieldTypeSchema,
   RelationConfigSchema,
 } from "./field.js";
+export { FieldProjectionSchema, type FieldProjection } from "./projection.js";
 
 // ============================================================================
 // S-Expression Types
@@ -1145,6 +1152,7 @@ export {
   type DrawableDescriptor,
   type OrbitalVerificationAPI,
   PATTERN_PROP_TYPE_ERROR_TESTID,
+  TRAIT_MOUNT_ERROR_TESTID,
   EMPTY_STATE_MARKER,
   LOADING_STATE_MARKER,
 } from "./verification.js";

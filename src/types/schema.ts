@@ -8,8 +8,8 @@
  */
 
 import { z } from "zod";
-import type { Orbital } from "./orbital.js";
-import { OrbitalSchema as OrbitalZodSchema } from "./orbital.js";
+import type { Orbital, LazyPage } from "./orbital.js";
+import { OrbitalSchema as OrbitalZodSchema, LazyPageSchema } from "./orbital.js";
 import type {
   DomainContext,
   DesignPreferences,
@@ -71,7 +71,12 @@ export interface SchemaMetadata {
   updatedAt?: number;
   /** Config→knob provenance keyed by orbital name. See {@link ConfigProvenanceRecord}. */
   configProvenance?: Record<string, ConfigProvenanceRecord[]>;
+  /** For a program with `locales`: each loaded behavior → its source folder, relative to the program's (catalogs at `<folder>/locales/<locale>/<name>.json`). */
+  messageSources?: Record<string, string>;
 }
+
+/** A program's merged message catalogs: locale → qualified key (`<behavior>:<key>`) → message. `orb resolve` writes one `<stem>.<locale>.json` per locale. */
+export type MessageCatalogs = Record<string, Record<string, string>>;
 
 export interface OrbitalSchema {
   /** Application name */
@@ -123,6 +128,15 @@ export interface OrbitalSchema {
   /** Array of orbitals */
   orbitals: Orbital[];
 
+  /** `locales [en, ar, sl]` — the locales this program ships; every `(i18n/t …)` key must exist in each one's catalog. */
+  locales?: string[];
+
+  /** `public "./public"` — a folder beside the program copied verbatim to the built site's root. */
+  publicDir?: string;
+
+  /** Pages served by `uses lazy` behaviors, each loaded from its own `.orb` when opened. */
+  lazyPages?: LazyPage[];
+
   /** External services */
   services?: ServiceDefinition[];
 
@@ -162,6 +176,7 @@ export const SchemaMetadataSchema = z.object({
   source: z.string().optional(),
   updatedAt: z.number().optional(),
   configProvenance: z.record(z.array(ConfigProvenanceRecordSchema)).optional(),
+  messageSources: z.record(z.string()).optional(),
 });
 
 export const OrbitalSchemaSchema = z.object({
@@ -177,6 +192,9 @@ export const OrbitalSchemaSchema = z.object({
   orbitals: z
     .array(OrbitalZodSchema)
     .min(1, "At least one orbital is required"),
+  locales: z.array(z.string().min(1)).optional(),
+  publicDir: z.string().min(1).optional(),
+  lazyPages: z.array(LazyPageSchema).optional(),
   services: z.array(ServiceDefinitionSchema).optional(),
   config: DeclaredTraitConfigSchema.optional(),
   _metadata: SchemaMetadataSchema.optional(),

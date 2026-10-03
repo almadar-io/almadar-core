@@ -71,6 +71,56 @@ function collectTraitRefsFromValue(value: RuntimeValue, into: Set<string>): void
   }
 }
 
+const CONFIG_BINDING_PREFIX = '@config.';
+
+function collectConfigKeysFromValue(value: RuntimeValue, into: Set<string>): void {
+  if (value === null || value === undefined) return;
+  if (typeof value === 'string') {
+    if (value.startsWith(CONFIG_BINDING_PREFIX)) {
+      const key = value.slice(CONFIG_BINDING_PREFIX.length).split('.')[0];
+      if (key.length > 0) into.add(key);
+    }
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) collectConfigKeysFromValue(item, into);
+    return;
+  }
+  if (typeof value === 'object') {
+    for (const v of Object.values(value as Record<string, RuntimeValue>)) collectConfigKeysFromValue(v, into);
+  }
+}
+
+/**
+ * The `@trait.X` children some fired effects compose — directly, or through a
+ * `@config.K` they render whose value (on `trait`) holds `@trait.X`.
+ */
+export function traitsEmbeddedByEffects(trait: Trait, effects: RuntimeValue): ReadonlySet<string> {
+  const refs = new Set<string>();
+  const configKeys = new Set<string>();
+  collectTraitRefsFromValue(effects, refs);
+  collectConfigKeysFromValue(effects, configKeys);
+  const config = trait.config as Record<string, RuntimeValue> | undefined;
+  if (config) for (const key of configKeys) collectTraitRefsFromValue(config[key] ?? null, refs);
+  refs.delete(trait.name);
+  return refs;
+}
+
+/**
+ * The `@trait.X` children a trait's transitions on `eventKey` compose (see
+ * {@link traitsEmbeddedByEffects}). Every arm of the event counts: which guarded
+ * arm fires is decided at runtime.
+ */
+export function traitsEmbeddedByEvent(trait: Trait, eventKey: string): ReadonlySet<string> {
+  const transitions = (trait.stateMachine as { transitions?: Array<{ event?: string; effects?: RuntimeValue }> } | undefined)?.transitions ?? [];
+  const out = new Set<string>();
+  for (const transition of transitions) {
+    if (transition.event !== eventKey) continue;
+    for (const child of traitsEmbeddedByEffects(trait, transition.effects ?? null)) out.add(child);
+  }
+  return out;
+}
+
 /** Resolve a `TraitRef` entry to its target `Trait` — unwraps the runtime
  *  resolver's `{ ref, config, _resolved }` wrapper when present; otherwise
  *  the entry is already a plain inline `Trait` (the compiled path's shape). */
@@ -397,6 +447,11 @@ export function buildResolvedTraitConfigs(
  * `OrbitalServerRuntime.executeEffects`, `@almadar/ui`'s
  * `useTraitStateMachine`).
  */
+/** A trait config (declared defaults merged with a call-site override) that reads `@callsitePayload`. */
+export function configReferencesCallsitePayload(config: TraitConfig | undefined): boolean {
+  return config !== undefined && valueContainsPrefixedString(config as RuntimeValue, CALLSITE_PAYLOAD_PREFIX);
+}
+
 export function traitReferencesCallsitePayload(trait: Trait | undefined | null): boolean {
   if (!trait) return false;
   if (trait.config && valueContainsPrefixedString(trait.config as RuntimeValue, CALLSITE_PAYLOAD_PREFIX)) {

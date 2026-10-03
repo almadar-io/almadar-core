@@ -7,6 +7,7 @@
  * @packageDocumentation
  */
 
+import { FieldProjectionSchema, type FieldProjection } from './projection.js';
 import { z } from 'zod';
 import type { EntityId } from './identity.js';
 import { EntityIdSchema } from './identity.js';
@@ -373,6 +374,8 @@ type EntityFieldBase = {
      * writer's.
      */
     mergedFrom?: string;
+    /** `.lolo` `T.f`: the declared field this field's type was projected from. */
+    projectedFrom?: FieldProjection;
 };
 
 /**
@@ -495,6 +498,7 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
         synonyms: z.string().optional(),
         mock: z.string().optional(),
         mergedFrom: z.string().optional(),
+        projectedFrom: FieldProjectionSchema.optional(),
     };
 
     /** Build a scalar variant schema. `values?` is permitted as a hint;

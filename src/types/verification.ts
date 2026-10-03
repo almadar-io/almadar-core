@@ -326,6 +326,10 @@ export interface OrbitalVerificationAPI {
  *  has a shape no declared type accepts; verifiers count each as a failure. */
 export const PATTERN_PROP_TYPE_ERROR_TESTID = "pattern-prop-type-error";
 
+/** `data-testid` of the error a trait's card shows when its lifecycle step
+ *  (INIT/LOAD/$MOUNT) throws; verifiers count each as a failure. */
+export const TRAIT_MOUNT_ERROR_TESTID = "trait-mount-error";
+
 /** DOM attribute on an empty-state view's root, so a verifier finds empty collections by structure, never by text. */
 export const EMPTY_STATE_MARKER = "data-empty-state";
 

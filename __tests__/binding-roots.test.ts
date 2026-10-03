@@ -16,7 +16,7 @@ describe('binding roots', () => {
 
   it('matches the validator set exactly', () => {
     expect(BINDING_ROOTS.filter((r) => r !== 'other').sort()).toEqual(
-      ['callsitePayload', 'config', 'currentTheme', 'entity', 'event', 'fromState', 'now', 'pages', 'payload', 'prevEvents', 'prevStates', 'state', 'toState', 'trait', 'user'],
+      ['callsitePayload', 'config', 'currentTheme', 'entity', 'event', 'fromState', 'locale', 'now', 'pages', 'payload', 'prevEvents', 'prevStates', 'state', 'toState', 'trait', 'user'],
     );
   });
 

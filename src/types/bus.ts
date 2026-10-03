@@ -389,6 +389,12 @@ export interface OrbitalEventRequest {
   /** Per-tab client identity (UUID) — excludes this request's origin from live-broadcast delivery. */
   clientId?: string;
   /**
+   * The viewer's locale (one of the program's declared `locales`): servers
+   * evaluate `i18n/t` and `@locale` with it. Absent means the program's first
+   * declared locale.
+   */
+  locale?: string;
+  /**
    * Broadcast-class marker (T6, docs/Almadar_Tick_Loop.md §3a): the name of
    * the tick that emitted this event. Tick-stamped dispatches are
    * latest-state broadcasts — the client fires them without awaiting the
@@ -591,6 +597,7 @@ export const OrbitalEventRequestSchema: z.ZodType<OrbitalEventRequest, z.ZodType
   targetTrait: z.string().optional(),
   user: RawUserClaimsSchema.optional(),
   clientId: z.string().optional(),
+  locale: z.string().optional(),
   tick: z.string().optional(),
   sourceTrait: z.string().optional(),
   traits: z.array(z.object({ trait: z.string(), from: z.string() })).optional(),

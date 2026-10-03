@@ -16,6 +16,7 @@ import type {
   UnionEntityField,
 } from '../types/field.js';
 import type { EntityPersistence, EntityRow, FieldValue } from '../types/entity.js';
+import type { FieldProjection } from '../types/projection.js';
 import { isFieldValue } from '../types/entity.js';
 import {
   randomBoolean,
@@ -320,6 +321,15 @@ function sampleUnion(field: UnionEntityField, ctx: SampleContext): FieldValue | 
  * always lands on row 1 and is therefore never affected — singleton state
  * stays fully populated with no separate carve-out needed.
  */
+/**
+ * Where a field's value (each element's, for an array) is projected from: `.lolo` `T.f`.
+ * Twin of `seed.rs` `projection_of`.
+ */
+export function projectionOf(field: EntityField): FieldProjection | undefined {
+  if (field.projectedFrom !== undefined) return field.projectedFrom;
+  return field.type === 'array' ? field.items?.projectedFrom : undefined;
+}
+
 function omitsUndefaultedOptionalFields(ctx: SampleContext): boolean {
   return ctx.strategy === 'seeded' && !ctx.identity && (ctx.depth ?? 0) === 0 && ctx.index % 2 === 0;
 }
@@ -362,6 +372,7 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
     !field.required &&
     field.default === undefined &&
     field.type !== 'relation' &&
+    projectionOf(field) === undefined &&
     omitsUndefaultedOptionalFields(ctx)
   ) {
     return undefined;
@@ -383,6 +394,9 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
     if (members.length > 0) return members[(ordinal - 1) % members.length]!;
     return typedMockValue(field, mockFieldValue(field.mock, ordinal));
   }
+
+  // `T.f`: an unlinked placeholder, filled from `T`'s seeded rows by the caller's link pass.
+  if (projectionOf(field) !== undefined) return field.type === 'array' ? [] : '';
 
   // An enum with no `@mock` rotates its own values (a declared `@mock` wins above).
   const values = declaredValues(field);

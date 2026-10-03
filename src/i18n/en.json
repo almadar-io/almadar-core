@@ -44,7 +44,11 @@
     "only": "only",
     "roles": "roles",
     "entities": "entities",
-    "extend": "extend"
+    "extend": "extend",
+    "lazy": "lazy",
+    "locales": "locales",
+    "public": "public",
+    "instances": "instances"
   },
   "shapes": {
     "Entity": "Entity",
@@ -61,7 +65,8 @@
     "identity": "identity",
     "instance": "instance",
     "collection": "collection",
-    "background": "background"
+    "background": "background",
+    "mock": "mock"
   },
   "categories": {
     "interaction": "interaction",
@@ -110,7 +115,8 @@
     "prevEvents": "prevEvents",
     "prevStates": "prevStates",
     "fromState": "fromState",
-    "toState": "toState"
+    "toState": "toState",
+    "locale": "locale"
   },
   "effects": {
     "set": "set",
@@ -300,16 +306,21 @@
     "kind": "kind",
     "knob": "knob",
     "label": "label",
+    "lazy": "lazy",
+    "lazyPages": "lazyPages",
     "ledger": "ledger",
     "linkedEntity": "linkedEntity",
     "linkedEntityId": "linkedEntityId",
     "listPattern": "listPattern",
     "listens": "listens",
     "local": "local",
+    "locales": "locales",
     "location": "location",
     "max": "max",
     "maxAttempts": "maxAttempts",
     "mergedFrom": "mergedFrom",
+    "projectedFrom": "projectedFrom",
+    "messageSources": "messageSources",
     "min": "min",
     "mock": "mock",
     "motion": "motion",
@@ -321,6 +332,7 @@
     "onEntry": "onEntry",
     "onExit": "onExit",
     "only": "only",
+    "orbRef": "orbRef",
     "orbital": "orbital",
     "orbitalId": "orbitalId",
     "orbitals": "orbitals",
@@ -350,6 +362,7 @@
     "properties": "properties",
     "props": "props",
     "provides": "provides",
+    "publicDir": "publicDir",
     "radii": "radii",
     "read": "read",
     "read_policy": "read_policy",
@@ -447,6 +460,8 @@
     "version": "version",
     "viewType": "viewType",
     "visual_prompt": "visual_prompt",
-    "vocabulary": "vocabulary"
+    "vocabulary": "vocabulary",
+    "seedMock": "seedMock",
+    "localeInstances": "localeInstances"
   }
 }

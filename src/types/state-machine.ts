@@ -9,6 +9,7 @@
 
 import { AwaitRenderSchema, type AwaitRender } from "./skeleton.js";
 import { z } from "zod";
+import { FieldProjectionSchema, type FieldProjection } from "./projection.js";
 import type { Effect } from "./effect.js";
 import { EffectSchema } from "./effect.js";
 import type { Expression } from "./expression.js";
@@ -106,6 +107,12 @@ export type PayloadField = {
    * no declared entity — never inferred from shape or name.
    */
   entity?: string;
+  /**
+   * `.lolo` `T.f` / `[T.f]`: the declared field this field's value — each
+   * element's, for an array type — was projected from. Mirrors Rust
+   * `PayloadField.projected_from`.
+   */
+  projectedFrom?: FieldProjection;
 };
 
 /**
@@ -135,6 +142,7 @@ export const PayloadFieldSchema: z.ZodType<PayloadField> = z.object({
   properties: z.lazy(() => z.array(PayloadFieldSchema)).optional(),
   typeWhen: z.array(PayloadTypeWhenSchema).optional(),
   entity: z.string().min(1).optional(),
+  projectedFrom: FieldProjectionSchema.optional(),
 });
 
 /**

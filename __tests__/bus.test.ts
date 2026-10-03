@@ -37,6 +37,15 @@ describe('OrbitalEventRequestSchema', () => {
     expect(OrbitalEventRequestSchema.safeParse({ event: 'INIT', mount: [{ trait: 'A', event: 'SAVE' }] }).success).toBe(false);
   });
 
+  it('carries the viewer locale so servers resolve i18n/t for that viewer', () => {
+    const request: OrbitalEventRequest = { event: 'INIT', locale: 'ar' };
+    expect(OrbitalEventRequestSchema.parse(request)).toEqual(request);
+  });
+
+  it('control: a non-string locale is rejected', () => {
+    expect(OrbitalEventRequestSchema.safeParse({ event: 'INIT', locale: 3 }).success).toBe(false);
+  });
+
   it('accepts a minimal request (only the required `event` field)', () => {
     const request: OrbitalEventRequest = { event: 'INIT' };
     expect(OrbitalEventRequestSchema.parse(request)).toEqual(request);

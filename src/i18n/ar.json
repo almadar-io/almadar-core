@@ -44,7 +44,11 @@
     "only": "فقط",
     "roles": "أدوار",
     "entities": "كيانات",
-    "extend": "امتداد"
+    "extend": "امتداد",
+    "lazy": "مؤجل",
+    "locales": "لغات",
+    "public": "عام",
+    "instances": "نسخ"
   },
   "shapes": {
     "Entity": "كيان",
@@ -61,7 +65,8 @@
     "identity": "هوية",
     "instance": "نسخة",
     "collection": "مجموعة",
-    "background": "خلفي"
+    "background": "خلفي",
+    "mock": "وهمي"
   },
   "categories": {
     "interaction": "تفاعل",
@@ -110,7 +115,8 @@
     "prevEvents": "الأحداث_السابقة",
     "prevStates": "الحالات_السابقة",
     "fromState": "من_حالة",
-    "toState": "إلى_حالة"
+    "toState": "إلى_حالة",
+    "locale": "اللغة"
   },
   "effects": {
     "set": "تعيين",
@@ -300,16 +306,21 @@
     "kind": "صنف",
     "knob": "مقبض",
     "label": "تسمية",
+    "lazy": "مؤجل",
+    "lazyPages": "صفحات_مؤجلة",
     "ledger": "سجل",
     "linkedEntity": "كيان_مرتبط",
     "linkedEntityId": "معرف_الكيان_المرتبط",
     "listPattern": "نمط_القائمة",
     "listens": "يستمع",
     "local": "محلي",
+    "locales": "لغات",
     "location": "موقع",
     "max": "أقصى",
     "maxAttempts": "أقصى_عدد_محاولات",
     "mergedFrom": "مدمج_من",
+    "projectedFrom": "مسقط_من",
+    "messageSources": "مصادر_الرسائل",
     "min": "أدنى",
     "mock": "وهمي",
     "motion": "حركة",
@@ -321,6 +332,7 @@
     "onEntry": "عند_الدخول",
     "onExit": "عند_الخروج",
     "only": "فقط",
+    "orbRef": "مرجع_المدار",
     "orbital": "مدار",
     "orbitalId": "معرف_المدار",
     "orbitals": "مدارات",
@@ -350,6 +362,7 @@
     "properties": "خصائص",
     "props": "خواص",
     "provides": "يوفر",
+    "publicDir": "مجلد_عام",
     "radii": "أنصاف_أقطار",
     "read": "قراءة",
     "read_policy": "سياسة_القراءة",
@@ -447,6 +460,8 @@
     "version": "إصدار",
     "viewType": "نوع_العرض",
     "visual_prompt": "موجه_بصري",
-    "vocabulary": "مفردات"
+    "vocabulary": "مفردات",
+    "seedMock": "بذر_وهمي",
+    "localeInstances": "نسخ_اللغة"
   }
 }

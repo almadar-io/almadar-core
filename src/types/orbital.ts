@@ -95,6 +95,9 @@ export type UseDeclaration = {
 
   /** `uses A from "…" { config { … } }` override of the upstream schema's declared `config {}` — keys must exist in `OrbitalSchema.config`. */
   config?: DeclaredTraitConfig;
+
+  /** `uses lazy A from "…"` — the imported behavior is compiled to its own `.orb` and loaded when one of its pages is opened; see {@link LazyPage}. */
+  lazy?: boolean;
 };
 
 export const UseDeclarationSchema = z.object({
@@ -107,6 +110,25 @@ export const UseDeclarationSchema = z.object({
       'Alias must be PascalCase (e.g., "Health", "GameCore")',
     ),
   config: DeclaredTraitConfigSchema.optional(),
+  lazy: z.boolean().optional(),
+});
+
+/**
+ * A page served by a lazily-used behavior. The importer's `.orb` lists the
+ * page so routing and prerender know it; the behavior itself lives in the
+ * `.orb` at `orbRef` (relative to the importer's `.orb`) and is fetched when
+ * the page is opened.
+ */
+export type LazyPage = {
+  path: string;
+  orbital: string;
+  orbRef: string;
+};
+
+export const LazyPageSchema = z.object({
+  path: z.string().min(1),
+  orbital: z.string().min(1),
+  orbRef: z.string().min(1),
 });
 
 // ============================================================================

@@ -50,6 +50,7 @@ export type BindingRoot =
   | 'callsitePayload'
   | 'pages'
   | 'currentTheme'
+  | 'locale'
   | 'event'
   | 'prevEvents'
   | 'prevStates'
@@ -69,6 +70,7 @@ export const BINDING_ROOTS: readonly BindingRoot[] = [
   'callsitePayload',
   'pages',
   'currentTheme',
+  'locale',
   'event',
   'prevEvents',
   'prevStates',

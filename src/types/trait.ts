@@ -8,6 +8,7 @@
  */
 
 import { z } from 'zod';
+import { FieldProjectionSchema, type FieldProjection } from './projection.js';
 import type { TraitId, EntityId, EventId, PageId, OrbitalId } from './identity.js';
 import { TraitIdSchema, EntityIdSchema, EventIdSchema, PageIdSchema, OrbitalIdSchema } from './identity.js';
 import type { StateMachine, PayloadTypeWhen } from './state-machine.js';
@@ -15,7 +16,7 @@ import { StateMachineSchema, PayloadTypeWhenSchema } from './state-machine.js';
 import type { Effect } from './effect.js';
 import { EffectSchema } from './effect.js';
 import type { Entity } from './entity.js';
-import { EntitySchema, isRuntimeEntity } from './entity.js';
+import { EntitySchema, isClientResident } from './entity.js';
 import type { AnyPatternConfig } from '../patterns/index.js';
 import type { Expression, SExpr } from './expression.js';
 import { ExpressionSchema, SExprSchema } from './expression.js';
@@ -338,6 +339,8 @@ export type ConfigFieldDeclaration = {
      * `@payload(<knob>)` sentinel. Compiled-path wire key `payloadFor`.
      */
     readonly payloadFor?: string;
+    /** `.lolo` `T.f`: the declared field this knob's type was projected from. */
+    readonly projectedFrom?: FieldProjection;
 };
 
 export type ConfigFieldItemsDeclaration = {
@@ -374,6 +377,7 @@ export const ConfigFieldDeclarationSchema: z.ZodType<ConfigFieldDeclaration> = z
     forwardedFrom: z.string().optional(),
     nestedForwardedFrom: z.array(z.string()).optional(),
     payloadFor: z.string().optional(),
+    projectedFrom: FieldProjectionSchema.optional(),
 });
 
 /**
@@ -653,6 +657,8 @@ export type EventPayloadField = {
      * composed; the emitted `.orb` carries only the resolved truth.
      */
     typeWhen?: ReadonlyArray<PayloadTypeWhen>;
+    /** `.lolo` `T.f` / `[T.f]`: the declared field this value — each element's, for an array — was projected from. */
+    projectedFrom?: FieldProjection;
 };
 
 export const EventPayloadFieldSchema: z.ZodType<EventPayloadField> = z.object({
@@ -673,6 +679,7 @@ export const EventPayloadFieldSchema: z.ZodType<EventPayloadField> = z.object({
     entity: z.string().optional(),
     properties: z.lazy(() => z.array(EventPayloadFieldSchema)).optional(),
     typeWhen: z.array(PayloadTypeWhenSchema).optional(),
+    projectedFrom: FieldProjectionSchema.optional(),
 });
 
 // ============================================================================
@@ -1363,7 +1370,7 @@ export function computeTraitDispatchMode(
     entity: Entity | undefined,
     touchesServer: boolean,
 ): DispatchMode {
-    return computeDispatchMode(trait.local ?? false, entity !== undefined && isRuntimeEntity(entity), touchesServer);
+    return computeDispatchMode(trait.local ?? false, entity !== undefined && isClientResident(entity), touchesServer);
 }
 
 export type Trait = {
