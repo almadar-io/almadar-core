@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-03T00:45:04.812Z",
+  "exportedAt": "2026-10-04T09:53:55.088Z",
   "services": {
     "llm": {
       "name": "llm",
@@ -8,6 +8,10 @@
       "category": "ai",
       "package": "@almadar/llm",
       "backend": "production",
+      "runtimes": [
+        "node",
+        "browser"
+      ],
       "actions": [
         {
           "name": "generate",
@@ -233,11 +237,15 @@
                 "type": "AgentTool",
                 "properties": {
                   "event": {
-                    "type": "string",
+                    "type": "EventAddress",
                     "required": false
                   },
                   "read": {
                     "type": "string",
+                    "required": false
+                  },
+                  "scope": {
+                    "type": "\"declared\"",
                     "required": false
                   }
                 }
@@ -356,6 +364,9 @@
       "category": "ai",
       "package": "@almadar/llm",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "infer",
@@ -401,6 +412,9 @@
       "category": "infrastructure",
       "package": "@almadar/server",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "list",
@@ -517,6 +531,9 @@
       "category": "infrastructure",
       "package": "@almadar/server",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "emit",
@@ -562,6 +579,9 @@
       "category": "infrastructure",
       "package": "@almadar/server",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "register",
@@ -694,6 +714,9 @@
       "category": "infrastructure",
       "package": "@almadar-io/migration",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "listDocuments",
@@ -820,6 +843,9 @@
       "category": "ai",
       "package": "@almadar/skills",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "generateOrbitals",
@@ -947,6 +973,9 @@
       "category": "devtools",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "cloneRepo",
@@ -1342,6 +1371,9 @@
       "category": "payment",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "createPaymentIntent",
@@ -1438,6 +1470,9 @@
       "category": "ai",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "generate",
@@ -1663,11 +1698,15 @@
                 "type": "AgentTool",
                 "properties": {
                   "event": {
-                    "type": "string",
+                    "type": "EventAddress",
                     "required": false
                   },
                   "read": {
                     "type": "string",
+                    "required": false
+                  },
+                  "scope": {
+                    "type": "\"declared\"",
                     "required": false
                   }
                 }
@@ -1781,6 +1820,9 @@
       "category": "media",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "search",
@@ -1858,6 +1900,9 @@
       "category": "messaging",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "sendSMS",
@@ -1936,6 +1981,9 @@
       "category": "messaging",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "send",
@@ -2017,6 +2065,9 @@
       "category": "messaging",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "send",
@@ -2077,6 +2128,9 @@
       "category": "messaging",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "send",
@@ -2165,6 +2219,9 @@
       "category": "infrastructure",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "listEvents",
@@ -2508,6 +2565,9 @@
       "category": "infrastructure",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "listFiles",
@@ -2705,6 +2765,9 @@
       "category": "marketing",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "getSpend",
@@ -2801,6 +2864,9 @@
       "category": "finance",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "exportInvoices",
@@ -2932,6 +2998,9 @@
       "category": "finance",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "createRequisition",
@@ -3055,6 +3124,9 @@
       "category": "infrastructure",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "sendEnvelope",
@@ -3149,6 +3221,9 @@
       "category": "devtools",
       "package": "@almadar/integrations",
       "backend": "simulated",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "build",
@@ -3484,6 +3559,9 @@
       "category": "infrastructure",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "query",
@@ -3526,6 +3604,9 @@
       "category": "infrastructure",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "upload",
@@ -3876,6 +3957,9 @@
       "category": "infrastructure",
       "package": "@almadar/integrations",
       "backend": "simulated",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "enqueue",
@@ -4078,6 +4162,9 @@
       "category": "infrastructure",
       "package": "@almadar/integrations",
       "backend": "simulated",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "get",
@@ -4278,6 +4365,9 @@
       "category": "auth",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "authorize",
@@ -4425,6 +4515,9 @@
       "category": "auth",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "list",
@@ -4636,6 +4729,9 @@
       "category": "infrastructure",
       "package": "@almadar/integrations",
       "backend": "simulated",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "startSpan",
@@ -4795,6 +4891,9 @@
       "category": "devtools",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "validate",
@@ -4824,6 +4923,9 @@
       "category": "ai",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "sendMessage",
@@ -4968,6 +5070,9 @@
       "category": "reference",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "getPage",
@@ -5008,6 +5113,9 @@
       "category": "reference",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "svgExists",
@@ -5081,6 +5189,9 @@
       "category": "reference",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "search",
@@ -5150,6 +5261,9 @@
       "category": "media",
       "package": "@almadar/integrations",
       "backend": "production",
+      "runtimes": [
+        "node"
+      ],
       "actions": [
         {
           "name": "health",
@@ -5562,12 +5676,428 @@
       ],
       "hooks": []
     },
+    "page": {
+      "name": "page",
+      "description": "Browser tabs — open, navigate, query, watch, treat and interact with page elements (generic; selectors are parameters)",
+      "category": "infrastructure",
+      "package": "@almadar/integrations",
+      "backend": "production",
+      "runtimes": [
+        "browser"
+      ],
+      "actions": [
+        {
+          "name": "listTabs",
+          "description": "List open tabs, optionally only those whose URL matches a match pattern.",
+          "params": [
+            {
+              "name": "match",
+              "type": "string",
+              "required": false,
+              "description": "URL match pattern, e.g. \"https://example.com/*\"."
+            }
+          ],
+          "responseShape": {
+            "tabs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "tab": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "url": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "title": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "active": {
+                    "type": "boolean",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "openTab",
+          "description": "Open a URL in a new tab.",
+          "params": [
+            {
+              "name": "url",
+              "type": "string",
+              "required": true,
+              "description": "URL to open."
+            },
+            {
+              "name": "params",
+              "type": "object",
+              "required": false,
+              "description": "Query parameters added to the URL, encoded (e.g. a search term).",
+              "mapValue": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "match",
+              "type": "string",
+              "required": false,
+              "description": "URL match pattern of the pages this tab will be read from (query/apply/act). The URL must match\nit, and a browser extension asks for access to these pages."
+            },
+            {
+              "name": "active",
+              "type": "boolean",
+              "required": true,
+              "description": "Whether the new tab takes focus."
+            }
+          ],
+          "responseShape": {
+            "tab": "number"
+          }
+        },
+        {
+          "name": "closeTab",
+          "description": "Close a tab the program opened.",
+          "params": [
+            {
+              "name": "tab",
+              "type": "number",
+              "required": true,
+              "description": "Tab id from openTab or listTabs."
+            }
+          ],
+          "responseShape": {
+            "closed": "boolean"
+          }
+        },
+        {
+          "name": "navigate",
+          "description": "Load a URL in an existing tab.",
+          "params": [
+            {
+              "name": "tab",
+              "type": "number",
+              "required": true,
+              "description": "Tab id."
+            },
+            {
+              "name": "url",
+              "type": "string",
+              "required": true,
+              "description": "URL to load."
+            }
+          ],
+          "responseShape": {
+            "url": "string"
+          }
+        },
+        {
+          "name": "query",
+          "description": "Read the elements of a tab's page that match a selector, with the requested fields.",
+          "params": [
+            {
+              "name": "tab",
+              "type": "number",
+              "required": true,
+              "description": "Tab id."
+            },
+            {
+              "name": "selector",
+              "type": "string",
+              "required": true,
+              "description": "CSS selector of the elements to read."
+            },
+            {
+              "name": "fields",
+              "type": "object",
+              "required": true,
+              "description": "Field name to how to read it from each element.",
+              "mapValue": {
+                "type": "PageFieldSpec",
+                "properties": {
+                  "selector": {
+                    "type": "string",
+                    "required": false,
+                    "description": "Descendant selector within the matched element; absent reads the element itself."
+                  },
+                  "attr": {
+                    "type": "string",
+                    "required": false,
+                    "description": "Attribute to read; absent reads the text content."
+                  },
+                  "resolve": {
+                    "type": "boolean",
+                    "required": false,
+                    "description": "The attribute is a URL: return it resolved against the page (a relative link becomes absolute)."
+                  }
+                }
+              }
+            },
+            {
+              "name": "limit",
+              "type": "number",
+              "required": false,
+              "description": "Maximum elements to return."
+            },
+            {
+              "name": "waitMs",
+              "type": "number",
+              "required": false,
+              "description": "Wait up to this many milliseconds for the page to load and a first match to appear."
+            }
+          ],
+          "responseShape": {
+            "tab": "number",
+            "elements": {
+              "type": "PageElement[]",
+              "items": {
+                "type": "PageElement",
+                "properties": {
+                  "elementId": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "fields": {
+                    "type": "object",
+                    "required": true,
+                    "mapValue": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "watch",
+          "description": "Report every element that matches a selector, now and as the page changes, in every tab whose URL\nmatches. Each element arrives once as the program's declared external input `event`, carrying\n`{ tab, elementId, url, fields }`.",
+          "params": [
+            {
+              "name": "match",
+              "type": "string",
+              "required": true,
+              "description": "URL match pattern of the tabs to watch."
+            },
+            {
+              "name": "selector",
+              "type": "string",
+              "required": true,
+              "description": "CSS selector of the elements to report."
+            },
+            {
+              "name": "fields",
+              "type": "object",
+              "required": true,
+              "description": "Field name to how to read it from each element.",
+              "mapValue": {
+                "type": "PageFieldSpec",
+                "properties": {
+                  "selector": {
+                    "type": "string",
+                    "required": false,
+                    "description": "Descendant selector within the matched element; absent reads the element itself."
+                  },
+                  "attr": {
+                    "type": "string",
+                    "required": false,
+                    "description": "Attribute to read; absent reads the text content."
+                  },
+                  "resolve": {
+                    "type": "boolean",
+                    "required": false,
+                    "description": "The attribute is a URL: return it resolved against the page (a relative link becomes absolute)."
+                  }
+                }
+              }
+            },
+            {
+              "name": "event",
+              "type": "EventAddress",
+              "required": true,
+              "description": "The declared external input each element fires, addressed like a `listens` source from the calling trait."
+            }
+          ],
+          "responseShape": {
+            "watchId": "string"
+          }
+        },
+        {
+          "name": "unwatch",
+          "description": "Stop a watch.",
+          "params": [
+            {
+              "name": "watchId",
+              "type": "string",
+              "required": true,
+              "description": "Id returned by watch."
+            }
+          ],
+          "responseShape": {
+            "stopped": "boolean"
+          }
+        },
+        {
+          "name": "apply",
+          "description": "Apply a declared visual treatment to an element, with an optional visible label.",
+          "params": [
+            {
+              "name": "tab",
+              "type": "number",
+              "required": true,
+              "description": "Tab id."
+            },
+            {
+              "name": "elementId",
+              "type": "string",
+              "required": true,
+              "description": "Element id from query or watch."
+            },
+            {
+              "name": "treatment",
+              "type": "'hide' | 'blur' | 'highlight' | 'label' | 'restore'",
+              "required": true,
+              "description": "The treatment; `restore` undoes any earlier one."
+            },
+            {
+              "name": "label",
+              "type": "string",
+              "required": false,
+              "description": "Text shown with the treatment (e.g. why it was applied)."
+            }
+          ],
+          "responseShape": {
+            "applied": "boolean",
+            "tab": "number",
+            "elementId": "string",
+            "treatment": "'hide' | 'blur' | 'highlight' | 'label' | 'restore'"
+          }
+        },
+        {
+          "name": "act",
+          "description": "Interact with an element: click it, focus it, or type text into it.",
+          "params": [
+            {
+              "name": "tab",
+              "type": "number",
+              "required": true,
+              "description": "Tab id."
+            },
+            {
+              "name": "elementId",
+              "type": "string",
+              "required": true,
+              "description": "Element id from query or watch."
+            },
+            {
+              "name": "action",
+              "type": "'click' | 'focus' | 'type'",
+              "required": true,
+              "description": "The interaction."
+            },
+            {
+              "name": "text",
+              "type": "string",
+              "required": false,
+              "description": "Text to type (action \"type\" only)."
+            }
+          ],
+          "responseShape": {
+            "done": "boolean",
+            "tab": "number",
+            "elementId": "string"
+          }
+        }
+      ],
+      "credentials": [],
+      "hooks": []
+    },
+    "knowledge": {
+      "name": "knowledge",
+      "description": "Learner knowledge source — connection status, sign-in, and the topics currently being learned",
+      "category": "ai",
+      "package": "@almadar/integrations",
+      "backend": "production",
+      "runtimes": [
+        "browser"
+      ],
+      "actions": [
+        {
+          "name": "status",
+          "description": "Whether a learner account is connected, without starting a sign-in.",
+          "params": [],
+          "responseShape": {
+            "connected": "boolean",
+            "account": "string"
+          }
+        },
+        {
+          "name": "connect",
+          "description": "Sign in to the knowledge source and keep the session.",
+          "params": [],
+          "responseShape": {
+            "connected": "boolean",
+            "account": "string"
+          }
+        },
+        {
+          "name": "currentTopics",
+          "description": "The topics the learner is currently working on, most current first.",
+          "params": [
+            {
+              "name": "limit",
+              "type": "number",
+              "required": false,
+              "description": "Maximum topics to return."
+            },
+            {
+              "name": "sinceDays",
+              "type": "number",
+              "required": false,
+              "description": "Only topics touched within this many days."
+            }
+          ],
+          "responseShape": {
+            "topics": {
+              "type": "KnowledgeTopic[]",
+              "items": {
+                "type": "KnowledgeTopic",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "keywords": {
+                    "type": "string[]",
+                    "required": true
+                  },
+                  "weight": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "credentials": [],
+      "hooks": []
+    },
     "calendar-ical": {
       "name": "calendar-ical",
       "description": "Host-provided .ics generation service (std-service-calendar-ical)",
       "category": "infrastructure",
       "package": "(host-injected)",
       "backend": "host-injected",
+      "runtimes": [
+        "node"
+      ],
       "actions": [],
       "credentials": [],
       "hooks": []
@@ -5578,6 +6108,9 @@
       "category": "infrastructure",
       "package": "(host-injected)",
       "backend": "host-injected",
+      "runtimes": [
+        "node"
+      ],
       "actions": [],
       "credentials": [],
       "hooks": []
@@ -5588,16 +6121,9 @@
       "category": "infrastructure",
       "package": "(host-injected)",
       "backend": "host-injected",
-      "actions": [],
-      "credentials": [],
-      "hooks": []
-    },
-    "knowledge": {
-      "name": "knowledge",
-      "description": "Host-provided knowledge/research service",
-      "category": "ai",
-      "package": "(host-injected)",
-      "backend": "host-injected",
+      "runtimes": [
+        "node"
+      ],
       "actions": [],
       "credentials": [],
       "hooks": []
@@ -5608,6 +6134,9 @@
       "category": "infrastructure",
       "package": "(host-injected)",
       "backend": "host-injected",
+      "runtimes": [
+        "node"
+      ],
       "actions": [],
       "credentials": [],
       "hooks": []
@@ -5618,6 +6147,9 @@
       "category": "infrastructure",
       "package": "(host-injected)",
       "backend": "host-injected",
+      "runtimes": [
+        "node"
+      ],
       "actions": [],
       "credentials": [],
       "hooks": []

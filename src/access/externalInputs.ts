@@ -14,6 +14,14 @@ import type { PayloadField } from '../types/state-machine.js';
 import type { JsonSchema } from '../factory/types.js';
 import { mapEntityFieldType } from '../factory/params-schema.js';
 import { isInlineTrait, splitEventAddress } from '../types/trait.js';
+import { orbitalInlineEntities } from './entityAccess.js';
+
+/**
+ * An event written with `listens` addressing (`EVENT`, `Trait.EVENT`,
+ * `Orbital.Trait.EVENT`) as a value. A service contract param of this type is
+ * checked by `orb validate` against the program's declared external inputs.
+ */
+export type EventAddress = string;
 
 export interface ExternalInput {
   orbital: string;
@@ -42,6 +50,23 @@ export function externalInputsOf(schema: OrbitalSchema): ExternalInput[] {
           ...(ev.tier !== undefined ? { tier: ev.tier } : {}),
         });
       }
+    }
+  }
+  return out;
+}
+
+/**
+ * The entities a `call-service` provider acting as the caller may read: every
+ * persisted entity, once, in schema order. Rows stay filtered by each entity's
+ * `@read` policy at read time. Mirrors the compiled host's `ENTITY_READS`
+ * (`orbital-shell-typescript` `orbital_route.rs`).
+ */
+export function readableEntitiesOf(schema: OrbitalSchema): string[] {
+  const out: string[] = [];
+  for (const orbital of schema.orbitals ?? []) {
+    for (const entity of orbitalInlineEntities(orbital)) {
+      if (entity.persistence === 'runtime' || out.includes(entity.name)) continue;
+      out.push(entity.name);
     }
   }
   return out;

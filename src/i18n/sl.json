@@ -462,6 +462,8 @@
     "visual_prompt": "vizualno_poziv",
     "vocabulary": "besednjak",
     "seedMock": "lazniZacetek",
-    "localeInstances": "jezikovniPrimerki"
+    "localeInstances": "jezikovniPrimerki",
+    "diagram": "diagram",
+    "scene": "prizor"
   }
 }

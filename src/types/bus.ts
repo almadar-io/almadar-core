@@ -480,6 +480,8 @@ export interface ServiceHostPorts {
   /** The orbital and trait whose `call-service` is running. */
   caller: { orbital: string; trait: string };
   inputs(): ExternalInput[];
+  /** The entities `read` serves: every persisted entity of the program (`readableEntitiesOf`). */
+  readableEntities(): string[];
   dispatchInput(orbital: string, request: Omit<ExternalInputRequest, 'user'>): Promise<OrbitalEventResponse>;
   read(entity: string): Promise<EntityRow[]>;
   /**

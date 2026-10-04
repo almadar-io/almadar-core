@@ -22,6 +22,17 @@ export function localeDirection(locale: string): 'ltr' | 'rtl' {
   return RTL_LOCALES.includes(locale) ? 'rtl' : 'ltr';
 }
 
+/** The declared locale a path's first segment names, if any. */
+export function pathLocale(path: string, locales: readonly string[]): string | undefined {
+  const first = path.replace(/^\/+/, '').split('/')[0] ?? '';
+  return locales.find((l) => l === first);
+}
+
+/** The locale a page renders under: the one its path names, else the first declared one (twin of orbital-core `OirModule::locale_of_path`). */
+export function localeOfPath(path: string, locales: readonly string[]): string | undefined {
+  return pathLocale(path, locales) ?? locales[0];
+}
+
 export const I18N_SECTIONS = [
   'keywords',
   'shapes',

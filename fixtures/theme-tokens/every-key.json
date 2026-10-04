@@ -40,5 +40,35 @@
     "loadingAsset": "loadingAsset.svg",
     "errorAsset": "errorAsset.svg",
     "onboardingAsset": "onboardingAsset.svg"
+  },
+  "diagram": {
+    "strokeThin": "0",
+    "strokeNormal": "1",
+    "strokeBold": "2",
+    "lineCap": "round",
+    "lineJoin": "bevel",
+    "dash": "5",
+    "dot": "6",
+    "fillStyle": "hatch",
+    "fillOpacity": "8",
+    "roughness": "9",
+    "glow": "10",
+    "shadow": "11",
+    "marker": "open",
+    "labelFont": "mono",
+    "labelSize": "14",
+    "labelWeight": "15",
+    "labelCase": "uppercase",
+    "corner": "17"
+  },
+  "scene": {
+    "materialRoughness": "0",
+    "materialMetalness": "1",
+    "materialFlat": "2",
+    "materialOutline": "3",
+    "lightAmbient": "4",
+    "lightKey": "5",
+    "lightKeyColor": "6",
+    "fog": "7"
   }
 }

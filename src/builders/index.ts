@@ -1,17 +1,9 @@
 /**
  * Builders Module
  *
- * Utilities for composing orbital definitions into applications.
- *
- * @deprecated Phase 0 of the Lolo v3 plan moved the canonical implementation
- * to `@almadar/runtime/composition`. These files remain as a temporary mirror
- * to keep existing callers working without a coordinated migration. Both
- * copies are byte-identical. Phase 4 will delete this directory and migrate
- * the four production callers to import from `@almadar/runtime` instead.
- *
- * Why core does not re-export from runtime: `@almadar/runtime` depends on
- * `@almadar/core`, so a re-export from core to runtime would create a circular
- * package dependency. The duplication is intentional and temporary.
+ * Composing orbital definitions into applications. Core owns these: `@almadar/runtime`'s
+ * `effects/composition` still carries an older copy of `composeBehaviors` / event wiring /
+ * layout detection for the `behavior/compose` effect (ledger: converge it onto this module).
  *
  * @packageDocumentation
  */
@@ -26,9 +18,44 @@ export { type EventWiringEntry, applyEventWiring } from './event-wiring.js';
 export {
   type ComposeBehaviorsInput,
   type ComposeBehaviorsResult,
+  asDefinitions,
   composeBehaviors,
   mergeLedgers,
 } from './compose-behaviors.js';
+
+// An app composed from its per-orbital files (rabit's composer, the studio's app load, seeding)
+export {
+  type ComposeAppFromFilesOptions,
+  type ComposeAppFromFilesResult,
+  type ComposedSurface,
+  type ComposeSurfaceOptions,
+  type ConfigNavItemsNarrowResult,
+  type IdentityDedupeResult,
+  type IdentityDemotion,
+  type IdentityExpectsRewrite,
+  type IdentityRelationRetarget,
+  type IdentityRoleUnion,
+  type LandingNavResult,
+  type OrganismRename,
+  type UnrenamableCollision,
+  type NavItemsNarrowResult,
+  type SurfaceRename,
+  asEntityObject,
+  composeAppFromFiles,
+  composeOrbitalSurface,
+  dedupeComposedIdentity,
+  dedupeComposedSurface,
+  orbitalEntityName,
+} from './compose-app.js';
+export { type EntityRenameBlocker, type RenameEntityOptions, atomTraitResolver, entityRenameBlockers, renameEntity, renameEntityInSchema, renameOrbital } from './rename-entity.js';
+export { orbitalRouteSlug } from './route-slug.js';
+export { collectOwnedSurface, findDanglingRefs } from './owned-surface.js';
+export {
+  type FieldBindingContext,
+  collectFieldComparisonLiterals,
+  collectOwnerComparedFields,
+  collectOwnerStampedFields,
+} from './field-comparison-literals.js';
 
 // Phase 4.2 reference-form builders (mirrored from ../builders.ts for the
 // dual-export convention so both `@almadar/core/builders` and consumers

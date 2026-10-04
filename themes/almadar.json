@@ -64,7 +64,22 @@
       "warning-foreground": "#000000",
       "info": "#0369a1",
       "info-foreground": "#ffffff",
-      "scrim": "rgba(0, 0, 0, 0.6)"
+      "scrim": "rgba(0, 0, 0, 0.6)",
+      "series-1": "#0f766e",
+      "series-2": "#2b92a3",
+      "series-3": "#4f46e5",
+      "series-4": "#a739eb",
+      "series-5": "#b45309",
+      "series-6": "#be185d",
+      "series-7": "#65807a",
+      "series-8": "#1e6db9",
+      "diagram-ink": "#0f2a3a",
+      "diagram-label": "#334155",
+      "diagram-guide": "#8590a0",
+      "diagram-axis": "#64748b",
+      "diagram-grid": "#dbe7ee",
+      "diagram-highlight": "#0e7490",
+      "diagram-fill": "#0f766e"
     },
     "radii": {
       "none": "0px",
@@ -109,6 +124,36 @@
     },
     "surface": {
       "cardImage": "linear-gradient(160deg, rgba(20,184,166,0.07), rgba(20,184,166,0) 55%)"
+    },
+    "diagram": {
+      "strokeThin": "1px",
+      "strokeNormal": "2px",
+      "strokeBold": "3px",
+      "lineCap": "round",
+      "lineJoin": "round",
+      "dash": "6 4",
+      "dot": "1 4",
+      "fillStyle": "tint",
+      "fillOpacity": "0.18",
+      "roughness": "0",
+      "glow": "0",
+      "shadow": "0 2px 8px rgba(20, 184, 166, 0.18)",
+      "marker": "triangle",
+      "labelFont": "body",
+      "labelSize": "sm",
+      "labelWeight": "500",
+      "labelCase": "none",
+      "corner": "8px"
+    },
+    "scene": {
+      "materialRoughness": "0.45",
+      "materialMetalness": "0.35",
+      "materialFlat": "0",
+      "materialOutline": "0",
+      "lightAmbient": "0.55",
+      "lightKey": "1.1",
+      "lightKeyColor": "#e6fffb",
+      "fog": "0.08"
     }
   },
   "variants": {
@@ -175,7 +220,22 @@
         "warning-foreground": "#000000",
         "info": "#38bdf8",
         "info-foreground": "#000000",
-        "scrim": "rgba(0, 0, 0, 0.7)"
+        "scrim": "rgba(0, 0, 0, 0.7)",
+        "series-1": "#1fa399",
+        "series-2": "#1d90b8",
+        "series-3": "#9584e4",
+        "series-4": "#c56ddd",
+        "series-5": "#e17019",
+        "series-6": "#e26499",
+        "series-7": "#7d9690",
+        "series-8": "#608ac4",
+        "diagram-ink": "#e2e8f0",
+        "diagram-label": "#cbd5e1",
+        "diagram-guide": "#7a8aa3",
+        "diagram-axis": "#94a3b8",
+        "diagram-grid": "#2f3e55",
+        "diagram-highlight": "#06b6d4",
+        "diagram-fill": "#14b8a6"
       },
       "radii": {
         "none": "0px",

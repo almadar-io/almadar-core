@@ -341,13 +341,14 @@ export function isEntityReferenceAny(
 }
 
 /**
- * Validate entity reference format: "Alias.entity"
+ * Validate entity reference format: "Alias.entity", or the placeholder a
+ * reference-form orbital carries before inline, "Alias.orbitals.Name.entity".
  */
 export const EntityRefStringSchema = z
   .string()
   .regex(
-    /^[A-Z][a-zA-Z0-9]*\.entity$/,
-    'Entity reference must be in format "Alias.entity" (e.g., "Goblin.entity")',
+    /^[A-Z][a-zA-Z0-9]*(\.orbitals\.[A-Z][a-zA-Z0-9]*)?\.entity$/,
+    'Entity reference must be in format "Alias.entity" (e.g., "Goblin.entity") or "Alias.orbitals.Name.entity"',
   );
 
 /**
@@ -1147,7 +1148,8 @@ export const OrbitalDefinitionSchema = z.object({
   // reference-resolver.ts`'s `mergeImportedEntityFieldsIntoOrbital`).
   auxiliaryEntities: z.array(EntityRefSchema).optional(),
   traits: z.array(TraitRefSchema),
-  pages: z.array(PageRefSchema),
+  // A reference-form orbital's pages come from its upstream until inline.
+  pages: z.array(PageRefSchema).default([]),
   // Event interface (trait-centric model) - computed by resolver
   emits: z.array(ComputedEventContractSchema).optional(),
   listens: z.array(ComputedEventListenerSchema).optional(),

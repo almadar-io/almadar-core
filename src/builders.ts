@@ -33,6 +33,38 @@ export {
   composeBehaviors,
   mergeLedgers,
 } from './builders/compose-behaviors.js';
+export {
+  type ComposeAppFromFilesOptions,
+  type ComposeAppFromFilesResult,
+  type ComposedSurface,
+  type ComposeSurfaceOptions,
+  type ConfigNavItemsNarrowResult,
+  type IdentityDedupeResult,
+  type IdentityDemotion,
+  type IdentityExpectsRewrite,
+  type IdentityRelationRetarget,
+  type IdentityRoleUnion,
+  type LandingNavResult,
+  type OrganismRename,
+  type UnrenamableCollision,
+  type NavItemsNarrowResult,
+  type SurfaceRename,
+  asEntityObject,
+  composeAppFromFiles,
+  composeOrbitalSurface,
+  dedupeComposedIdentity,
+  dedupeComposedSurface,
+  orbitalEntityName,
+} from './builders/compose-app.js';
+export { type EntityRenameBlocker, type RenameEntityOptions, atomTraitResolver, entityRenameBlockers, renameEntity, renameEntityInSchema, renameOrbital } from './builders/rename-entity.js';
+export { orbitalRouteSlug } from './builders/route-slug.js';
+export { collectOwnedSurface, findDanglingRefs } from './builders/owned-surface.js';
+export {
+  type FieldBindingContext,
+  collectFieldComparisonLiterals,
+  collectOwnerComparedFields,
+  collectOwnerStampedFields,
+} from './builders/field-comparison-literals.js';
 // LayoutTrait + slot-embedding helpers (Phase 7.6 — atom-composition recipe path).
 export {
   type MakeLayoutTraitOpts,

@@ -200,7 +200,22 @@
         "warning-foreground": "#1a1408",
         "info": "#3ea6ff",
         "info-foreground": "#071018",
-        "scrim": "rgba(0, 0, 0, 0.7)"
+        "scrim": "rgba(0, 0, 0, 0.7)",
+        "diagram-ink": "#dbe7ff",
+        "diagram-label": "#b8c6e0",
+        "diagram-guide": "#5a6f94",
+        "diagram-axis": "#8b9bb6",
+        "diagram-grid": "#22314c",
+        "diagram-highlight": "#7df9ff",
+        "diagram-fill": "#1c2942",
+        "series-1": "#3ea6ff",
+        "series-2": "#ff7ab6",
+        "series-3": "#b6f36a",
+        "series-4": "#c49bff",
+        "series-5": "#ff9f43",
+        "series-6": "#5ef1d2",
+        "series-7": "#ece86e",
+        "series-8": "#dd4b6c"
       },
       "radii": {
         "none": "0px",

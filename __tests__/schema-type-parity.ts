@@ -35,8 +35,8 @@ import type { AnimationDef, AssetCatalogEntry, Camera, ManifestEntry, ScenePos, 
 import { AnimationDefSchema, AssetCatalogEntrySchema, CameraSchema, ManifestEntrySchema, ScenePosSchema, SemanticAssetRefSchema, SoundEntrySchema, SpriteSheetAtlasSchema, SubTextureSchema, TextureAtlasSchema, TilesheetSchema } from '../src/types/asset.js';
 import type { BusEventSource, EmittedEvent, LiveBroadcastItem, OrbitalEventRequest, OrbitalEventResponse } from '../src/types/bus.js';
 import { BusEventSourceSchema, EmittedEventSchema, LiveBroadcastItemSchema, OrbitalEventRequestSchema, OrbitalEventResponseSchema } from '../src/types/bus.js';
-import type { ColorTokens, CustomPatternDefinition, DensityTokens, DesignPreferences, DomainContext, ElevationTokens, GeometryTokens, IconographyTokens, IllustrationTokens, MotionDurationPalette, MotionEasingPalette, MotionIntent, MotionIntentMap, MotionTokens, RelatedLink, SpacingScale, SuggestedGuard, ThemeDefinition, ThemeTokens, ThemeVariant, TypeIntent, TypeIntentMap, TypeScale, TypeScaleEntry, TypeScaleTokens, UserPersona, UXHints } from '../src/types/domain.js';
-import { ColorTokensSchema, CustomPatternDefinitionSchema, DensityTokensSchema, DesignPreferencesSchema, DomainContextSchema, ElevationTokensSchema, GeometryTokensSchema, IconographyTokensSchema, IllustrationTokensSchema, MotionDurationPaletteSchema, MotionEasingPaletteSchema, MotionIntentSchema, MotionIntentMapSchema, MotionTokensSchema, RelatedLinkSchema, SpacingScaleSchema, SuggestedGuardSchema, ThemeDefinitionSchema, ThemeTokensSchema, ThemeVariantSchema, TypeIntentSchema, TypeIntentMapSchema, TypeScaleSchema, TypeScaleEntrySchema, TypeScaleTokensSchema, UserPersonaSchema, UXHintsSchema } from '../src/types/domain.js';
+import type { ColorTokens, CustomPatternDefinition, DensityTokens, DesignPreferences, DomainContext, ElevationTokens, GeometryTokens, IconographyTokens, IllustrationTokens, DiagramTokens, SceneTokens, SurfaceTokens, MotionDurationPalette, MotionEasingPalette, MotionIntent, MotionIntentMap, MotionTokens, RelatedLink, SpacingScale, SuggestedGuard, ThemeDefinition, ThemeTokens, ThemeVariant, TypeIntent, TypeIntentMap, TypeScale, TypeScaleEntry, TypeScaleTokens, UserPersona, UXHints } from '../src/types/domain.js';
+import { ColorTokensSchema, CustomPatternDefinitionSchema, DensityTokensSchema, DesignPreferencesSchema, DomainContextSchema, ElevationTokensSchema, GeometryTokensSchema, IconographyTokensSchema, IllustrationTokensSchema, DiagramTokensSchema, SceneTokensSchema, SurfaceTokensSchema, MotionDurationPaletteSchema, MotionEasingPaletteSchema, MotionIntentSchema, MotionIntentMapSchema, MotionTokensSchema, RelatedLinkSchema, SpacingScaleSchema, SuggestedGuardSchema, ThemeDefinitionSchema, ThemeTokensSchema, ThemeVariantSchema, TypeIntentSchema, TypeIntentMapSchema, TypeScaleSchema, TypeScaleEntrySchema, TypeScaleTokensSchema, UserPersonaSchema, UXHintsSchema } from '../src/types/domain.js';
 import type { ServerBatchSummary, ServerEffectResult } from '../src/types/effect-result.js';
 import { ServerBatchSummarySchema, ServerEffectResultSchema } from '../src/types/effect-result.js';
 import type { OrbitalEntity } from '../src/types/entity.js';
@@ -115,6 +115,12 @@ const _checkIconographyTokens: SchemaCoversType<IconographyTokens, typeof Iconog
 void _checkIconographyTokens;
 const _checkIllustrationTokens: SchemaCoversType<IllustrationTokens, typeof IllustrationTokensSchema> = true;
 void _checkIllustrationTokens;
+const _checkDiagramTokens: SchemaCoversType<DiagramTokens, typeof DiagramTokensSchema> = true;
+void _checkDiagramTokens;
+const _checkSceneTokens: SchemaCoversType<SceneTokens, typeof SceneTokensSchema> = true;
+void _checkSceneTokens;
+const _checkSurfaceTokens: SchemaCoversType<SurfaceTokens, typeof SurfaceTokensSchema> = true;
+void _checkSurfaceTokens;
 const _checkMotionDurationPalette: SchemaCoversType<MotionDurationPalette, typeof MotionDurationPaletteSchema> = true;
 void _checkMotionDurationPalette;
 const _checkMotionEasingPalette: SchemaCoversType<MotionEasingPalette, typeof MotionEasingPaletteSchema> = true;

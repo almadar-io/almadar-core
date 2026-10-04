@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import type { DeclaredTraitConfig, OrbitalSchema, TraitRef } from '../src/types/index.js';
-import { collectForwardedConfigKeys, filterConfigToForwardedKeys, unionOrganismConfigs } from '../src/embedded-trait-config.js';
+import { collectForwardedConfigKeys, filterConfigToForwardedKeys, orbitalFileOf, unionOrganismConfigs } from '../src/embedded-trait-config.js';
 
 const nav = [{ href: '/contacts', label: 'Contacts' }];
 const organism: DeclaredTraitConfig = {
@@ -67,5 +67,64 @@ describe('unionOrganismConfigs', () => {
 
   it('is undefined when no file declares config', () => {
     expect(unionOrganismConfigs([file(), file()])).toBeUndefined();
+  });
+});
+
+describe('unionOrganismConfigs — [NavItem] lists across organisms', () => {
+  const file = (config?: DeclaredTraitConfig): OrbitalSchema => ({ name: 'f', version: '1.0.0', orbitals: [], ...(config ? { config } : {}) });
+  const navOf = (...hrefs: string[]): DeclaredTraitConfig[string] => ({ type: '[NavItem]', default: hrefs.map((href) => ({ href, label: href })) });
+
+  it('concatenates every file\'s list in roster order, dropping an href already listed', () => {
+    const merged = unionOrganismConfigs([file({ navItems: navOf('/contacts', '/deals') }), file({ navItems: navOf('/employees', '/contacts') })]);
+    expect(merged?.navItems).toEqual(navOf('/contacts', '/deals', '/employees'));
+  });
+
+  it('two orbitals of one organism carry the same list: no entry repeats', () => {
+    const merged = unionOrganismConfigs([file({ navItems: navOf('/a', '/b') }), file({ navItems: navOf('/a', '/b') })]);
+    expect(merged?.navItems).toEqual(navOf('/a', '/b'));
+  });
+
+  it('control: a scalar knob still keeps its first declaration', () => {
+    const merged = unionOrganismConfigs([file({ appName: { type: 'string', default: 'CRM' } }), file({ appName: { type: 'string', default: 'HR' } })]);
+    expect(merged?.appName).toEqual({ type: 'string', default: 'CRM' });
+  });
+
+  it('a [NavItem] knob whose default is not a list (the @pages binding) keeps its first declaration', () => {
+    const pages: DeclaredTraitConfig[string] = { type: '[NavItem]', default: '@pages' };
+    const merged = unionOrganismConfigs([file({ navItems: pages }), file({ navItems: navOf('/x') })]);
+    expect(merged?.navItems).toEqual(pages);
+  });
+
+  it('an entry without a readable href is kept, never guessed away', () => {
+    const odd: DeclaredTraitConfig[string] = { type: '[NavItem]', default: [{ label: 'Divider' }] };
+    const merged = unionOrganismConfigs([file({ navItems: navOf('/a') }), file({ navItems: odd })]);
+    expect(merged?.navItems).toEqual({ type: '[NavItem]', default: [{ href: '/a', label: '/a' }, { label: 'Divider' }] });
+  });
+});
+
+describe('orbitalFileOf — one orbital\'s own file', () => {
+  const app: OrbitalSchema = {
+    name: 'crm',
+    version: '1.2.0',
+    config: organism,
+    orbitals: [
+      { name: 'Contacts', entity: 'Contacts.entity', traits: [layout], pages: [] },
+      { name: 'Plain', entity: 'Plain.entity', traits: [], pages: [] },
+    ],
+  };
+
+  it('keeps the organism knobs this orbital\'s traits forward', () => {
+    expect(orbitalFileOf(app, app.orbitals[0]!).config).toEqual({ navItems: organism.navItems, appName: organism.appName });
+  });
+
+  it('carries no config when the orbital forwards none, or the app declares none', () => {
+    expect('config' in orbitalFileOf(app, app.orbitals[1]!)).toBe(false);
+    expect('config' in orbitalFileOf({ ...app, config: undefined }, app.orbitals[0]!)).toBe(false);
+  });
+
+  it('wraps exactly one orbital with the app version', () => {
+    const file = orbitalFileOf(app, app.orbitals[0]!);
+    expect(file).toMatchObject({ name: 'Contacts', version: '1.2.0' });
+    expect(file.orbitals.map((o) => o.name)).toEqual(['Contacts']);
   });
 });

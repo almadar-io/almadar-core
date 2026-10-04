@@ -23,7 +23,7 @@ function isSchema(input: OrbitalDefinition | OrbitalSchema): input is OrbitalSch
 }
 
 /** Unwrap OrbitalSchema | OrbitalDefinition inputs to a flat OrbitalDefinition[]. */
-function asDefinitions(inputs: (OrbitalDefinition | OrbitalSchema)[]): OrbitalDefinition[] {
+export function asDefinitions(inputs: (OrbitalDefinition | OrbitalSchema)[]): OrbitalDefinition[] {
   return inputs.flatMap(input =>
     isSchema(input) ? (input.orbitals as OrbitalDefinition[]) : [input],
   );

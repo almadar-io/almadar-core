@@ -200,7 +200,22 @@
         "warning-foreground": "#1a1108",
         "info": "#d99a4e",
         "info-foreground": "#1a1108",
-        "scrim": "rgba(0, 0, 0, 0.7)"
+        "scrim": "rgba(0, 0, 0, 0.7)",
+        "diagram-ink": "#fbfcd8",
+        "diagram-label": "#e0cba8",
+        "diagram-guide": "#a8875c",
+        "diagram-axis": "#c9ad7f",
+        "diagram-grid": "#4a3520",
+        "diagram-highlight": "#e9e990",
+        "diagram-fill": "#3a2a18",
+        "series-1": "#d99a4e",
+        "series-2": "#7fb0d9",
+        "series-3": "#9ccf6a",
+        "series-4": "#d98ab0",
+        "series-5": "#b4ad64",
+        "series-6": "#7fd0c0",
+        "series-7": "#ea8368",
+        "series-8": "#b39ddb"
       },
       "radii": {
         "none": "0px",
@@ -250,7 +265,8 @@
       "surface": {
         "cardImage": "linear-gradient(180deg, rgba(240,200,105,0.10) 0%, rgba(0,0,0,0.12) 100%)",
         "pageImage": "radial-gradient(ellipse at 50% 0%, rgba(240,200,105,0.10), transparent 60%)",
-        "pageImageSize": "100% 100%"
+        "pageImageSize": "100% 100%",
+        "diagram": "#22170c"
       }
     }
   }

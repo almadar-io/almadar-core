@@ -44,11 +44,14 @@ export {
   configForwardTokens,
   filterConfigToForwardedKeys,
   unionOrganismConfigs,
+  orbitalFileOf,
+  navItemHref,
 } from './src/embedded-trait-config';
 
 // Dot-notation nested value lookup — shared by `@almadar/ui` and emitted
 // SERVER code (which cannot import the UI render substrate).
 export { getNestedValue } from './src/lib/get-nested-value';
+export { INDISTINCT_DELTA_E, themeModes, toneColor, hexToLab, ciede2000, colorDifference, type ThemeMode, type Lab } from './src/lib/theme-tone-colors';
 
 // Listen-route `with { ... }` payload mapping — shared by the server runtime
 // (`@almadar/runtime`) and the client cross-trait wiring (`@almadar/ui`).
@@ -152,7 +155,7 @@ export {
 } from './src/access/entityAccess';
 
 // Declared external inputs: what an outside client may send a trait.
-export { type ExternalInput, externalInputsOf, findExternalInput, findInputByAddress, payloadSchemaToJsonSchema } from './src/access/externalInputs';
+export { type EventAddress, type ExternalInput, externalInputsOf, findExternalInput, findInputByAddress, payloadSchemaToJsonSchema, readableEntitiesOf } from './src/access/externalInputs';
 
 // `expects` derivation — compute an orbital's consumer-side requirement
 // declarations from the organism's golden schema (proposal §7; the ONE owner —

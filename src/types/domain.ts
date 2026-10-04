@@ -963,6 +963,8 @@ export type SurfaceTokens = {
   pageImage?: string;
   /** CSS `background-size` for `pageImage`. */
   pageImageSize?: string;
+  /** Ground a canvas, chart or diagram draws on (`var(--color-card)`, a chalkboard green, blueprint blue). */
+  diagram?: string;
 };
 
 export const SurfaceTokensSchema = z.object({
@@ -970,6 +972,136 @@ export const SurfaceTokensSchema = z.object({
   cardImage: z.string().optional(),
   pageImage: z.string().optional(),
   pageImageSize: z.string().optional(),
+  diagram: z.string().optional(),
+});
+
+export type DiagramLineCap = 'butt' | 'round' | 'square';
+export const DiagramLineCapSchema = z.enum(['butt', 'round', 'square']);
+
+export type DiagramLineJoin = 'miter' | 'round' | 'bevel';
+export const DiagramLineJoinSchema = z.enum(['miter', 'round', 'bevel']);
+
+/** How a closed mark is filled: a solid fill, a translucent tint, no fill, or hatching. */
+export type DiagramFillStyle = 'solid' | 'tint' | 'outline' | 'hatch';
+export const DiagramFillStyleSchema = z.enum(['solid', 'tint', 'outline', 'hatch']);
+
+export type DiagramMarker = 'triangle' | 'open' | 'line' | 'dot';
+export const DiagramMarkerSchema = z.enum(['triangle', 'open', 'line', 'dot']);
+
+/** Which of the theme's three faces diagram labels are set in. */
+export type DiagramLabelFont = 'body' | 'display' | 'mono';
+export const DiagramLabelFontSchema = z.enum(['body', 'display', 'mono']);
+
+export type DiagramLabelCase = 'none' | 'uppercase';
+export const DiagramLabelCaseSchema = z.enum(['none', 'uppercase']);
+
+/**
+ * Diagram axis — how marks are drawn on every drawing surface (canvas, chart, diagram, game
+ * board): stroke weights and character, fill treatment, hand-drawn wobble, glow, arrowheads and
+ * label voice. Colors ride the `colors` map (`series-1…8`, `diagram-ink/guide/axis/grid/
+ * highlight/label/fill`); the ground is `surface.diagram`.
+ */
+export type DiagramTokens = {
+  /** Guide and construction lines. */
+  strokeThin?: string;
+  /** Ordinary marks. */
+  strokeNormal?: string;
+  /** Emphasized marks. */
+  strokeBold?: string;
+  lineCap?: DiagramLineCap;
+  lineJoin?: DiagramLineJoin;
+  /** Dash pattern of a dashed mark, as space-separated lengths (`6 4`). */
+  dash?: string;
+  /** Dash pattern of a dotted mark (`1 4`). */
+  dot?: string;
+  fillStyle?: DiagramFillStyle;
+  /** Opacity of a `tint` fill, 0–1. */
+  fillOpacity?: string;
+  /** Hand-drawn wobble in px; `0` draws exact geometry. */
+  roughness?: string;
+  /** Glow blur in px around strokes; `0` is none. */
+  glow?: string;
+  /** CSS box-shadow recipe applied to filled marks (`none`, a hard offset, a soft drop). */
+  shadow?: string;
+  marker?: DiagramMarker;
+  labelFont?: DiagramLabelFont;
+  /** A type-scale step (`xs`, `sm`, `base`, …) labels are set at. */
+  labelSize?: string;
+  labelWeight?: string;
+  labelCase?: DiagramLabelCase;
+  /** Corner radius of rects and bars in px. */
+  corner?: string;
+};
+
+const DIAGRAM_TOKEN_KEY_LIST = [
+  'strokeThin', 'strokeNormal', 'strokeBold', 'lineCap', 'lineJoin', 'dash', 'dot', 'fillStyle',
+  'fillOpacity', 'roughness', 'glow', 'shadow', 'marker', 'labelFont', 'labelSize', 'labelWeight',
+  'labelCase', 'corner',
+] as const satisfies readonly (keyof DiagramTokens)[];
+
+/** Every `DiagramTokens` key — see `COLOR_TOKEN_KEYS`. */
+export const DIAGRAM_TOKEN_KEYS: KeysComplete<DiagramTokens, typeof DIAGRAM_TOKEN_KEY_LIST> = DIAGRAM_TOKEN_KEY_LIST;
+export type DiagramTokenKey = (typeof DIAGRAM_TOKEN_KEYS)[number];
+
+export const DiagramTokensSchema = z.object({
+  strokeThin: z.string().optional(),
+  strokeNormal: z.string().optional(),
+  strokeBold: z.string().optional(),
+  lineCap: DiagramLineCapSchema.optional(),
+  lineJoin: DiagramLineJoinSchema.optional(),
+  dash: z.string().optional(),
+  dot: z.string().optional(),
+  fillStyle: DiagramFillStyleSchema.optional(),
+  fillOpacity: z.string().optional(),
+  roughness: z.string().optional(),
+  glow: z.string().optional(),
+  shadow: z.string().optional(),
+  marker: DiagramMarkerSchema.optional(),
+  labelFont: DiagramLabelFontSchema.optional(),
+  labelSize: z.string().optional(),
+  labelWeight: z.string().optional(),
+  labelCase: DiagramLabelCaseSchema.optional(),
+  corner: z.string().optional(),
+});
+
+/**
+ * Scene axis — the look of 3D drawing surfaces: material response (clay, glass, metal, flat
+ * toon) and lighting. Numbers are carried as strings like every other token.
+ */
+export type SceneTokens = {
+  /** 0 (mirror) – 1 (matte). */
+  materialRoughness?: string;
+  /** 0 (dielectric) – 1 (metal). */
+  materialMetalness?: string;
+  /** `1` flat-shades every face (low-poly, pixel, toon); `0` smooth. */
+  materialFlat?: string;
+  /** Toon outline width in px; `0` is none. */
+  materialOutline?: string;
+  lightAmbient?: string;
+  lightKey?: string;
+  lightKeyColor?: string;
+  /** Depth haze 0–1. */
+  fog?: string;
+};
+
+const SCENE_TOKEN_KEY_LIST = [
+  'materialRoughness', 'materialMetalness', 'materialFlat', 'materialOutline', 'lightAmbient',
+  'lightKey', 'lightKeyColor', 'fog',
+] as const satisfies readonly (keyof SceneTokens)[];
+
+/** Every `SceneTokens` key — see `COLOR_TOKEN_KEYS`. */
+export const SCENE_TOKEN_KEYS: KeysComplete<SceneTokens, typeof SCENE_TOKEN_KEY_LIST> = SCENE_TOKEN_KEY_LIST;
+export type SceneTokenKey = (typeof SCENE_TOKEN_KEYS)[number];
+
+export const SceneTokensSchema = z.object({
+  materialRoughness: z.string().optional(),
+  materialMetalness: z.string().optional(),
+  materialFlat: z.string().optional(),
+  materialOutline: z.string().optional(),
+  lightAmbient: z.string().optional(),
+  lightKey: z.string().optional(),
+  lightKeyColor: z.string().optional(),
+  fog: z.string().optional(),
 });
 
 /**
@@ -1136,6 +1268,10 @@ export type ThemeTokens = {
   illustration?: IllustrationTokens;
   /** Surface axis — panel/page material (glass, gloss, paper, pattern) */
   surface?: SurfaceTokens;
+  /** Diagram axis — how marks are drawn on every drawing surface */
+  diagram?: DiagramTokens;
+  /** Scene axis — 3D material and lighting */
+  scene?: SceneTokens;
 
   // ── Legacy free-form maps (pre-Layer-1). Kept for back-compat with
   //    older callers that emit raw `--color-*` / `--radius-*` etc. as
@@ -1162,6 +1298,8 @@ export const ThemeTokensSchema = z.object({
   geometry: GeometryTokensSchema.optional(),
   illustration: IllustrationTokensSchema.optional(),
   surface: SurfaceTokensSchema.optional(),
+  diagram: DiagramTokensSchema.optional(),
+  scene: SceneTokensSchema.optional(),
   // Legacy
   colors: z.record(z.string(), z.string()).optional(),
   radii: z.record(z.string(), z.string()).optional(),
@@ -1193,6 +1331,10 @@ export type ThemeVariant = {
   illustration?: IllustrationTokens;
   /** Surface axis overrides */
   surface?: SurfaceTokens;
+  /** Diagram axis overrides */
+  diagram?: DiagramTokens;
+  /** Scene axis overrides */
+  scene?: SceneTokens;
 
   // ── Legacy free-form maps (pre-Layer-1). See ThemeTokens for guidance.
   /** @deprecated Use `color`. */
@@ -1217,6 +1359,8 @@ export const ThemeVariantSchema = z.object({
   geometry: GeometryTokensSchema.optional(),
   illustration: IllustrationTokensSchema.optional(),
   surface: SurfaceTokensSchema.optional(),
+  diagram: DiagramTokensSchema.optional(),
+  scene: SceneTokensSchema.optional(),
   colors: z.record(z.string(), z.string()).optional(),
   radii: z.record(z.string(), z.string()).optional(),
   spacing: z.record(z.string(), z.string()).optional(),

@@ -462,6 +462,8 @@
     "visual_prompt": "visual_prompt",
     "vocabulary": "vocabulary",
     "seedMock": "seedMock",
-    "localeInstances": "localeInstances"
+    "localeInstances": "localeInstances",
+    "diagram": "diagram",
+    "scene": "scene"
   }
 }

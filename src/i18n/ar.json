@@ -462,6 +462,8 @@
     "visual_prompt": "موجه_بصري",
     "vocabulary": "مفردات",
     "seedMock": "بذر_وهمي",
-    "localeInstances": "نسخ_اللغة"
+    "localeInstances": "نسخ_اللغة",
+    "diagram": "مخطط",
+    "scene": "مشهد"
   }
 }

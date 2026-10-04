@@ -175,7 +175,8 @@
       "backdrop": "blur(14px) saturate(1.4)",
       "cardImage": "linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,0) 45%)",
       "pageImage": "radial-gradient(circle at 12% 18%, rgba(255,255,255,.85) 0 5%, transparent 5.5%), radial-gradient(circle at 84% 10%, rgba(255,255,255,.7) 0 3.5%, transparent 4%), radial-gradient(circle at 72% 72%, rgba(255,255,255,.45) 0 7%, transparent 7.5%), radial-gradient(circle at 25% 80%, rgba(255,255,255,.4) 0 4%, transparent 4.5%), radial-gradient(ellipse at 50% 115%, rgba(90,200,120,.5), transparent 55%), linear-gradient(180deg, #8fd3ff 0%, #d9f2ff 55%, #e9fbe8 100%)",
-      "pageImageSize": "cover"
+      "pageImageSize": "cover",
+      "diagram": "#f4fbff"
     },
     "colors": {
       "primary": "#0873b8",
@@ -210,7 +211,22 @@
       "warning-foreground": "#2a1e00",
       "info": "#0873b8",
       "info-foreground": "#ffffff",
-      "scrim": "rgba(0, 0, 0, 0.6)"
+      "scrim": "rgba(0, 0, 0, 0.6)",
+      "series-1": "#5081f4",
+      "series-2": "#3f9d4c",
+      "series-3": "#0e8fa0",
+      "series-4": "#b8820a",
+      "series-5": "#c84a8a",
+      "series-6": "#6a5ac8",
+      "series-7": "#dc6a14",
+      "series-8": "#e26144",
+      "diagram-ink": "#0d3350",
+      "diagram-label": "#0d3350",
+      "diagram-guide": "#7a9ab0",
+      "diagram-axis": "#3a6a8a",
+      "diagram-grid": "#cfe6f2",
+      "diagram-highlight": "#0873b8",
+      "diagram-fill": "#0873b8"
     },
     "radii": {
       "none": "0px",
@@ -252,6 +268,36 @@
       "focus-ring-width": "3px",
       "focus-ring-offset": "2px",
       "focus-ring-color": "#0873b8"
+    },
+    "diagram": {
+      "strokeThin": "1.5px",
+      "strokeNormal": "2.5px",
+      "strokeBold": "4px",
+      "lineCap": "round",
+      "lineJoin": "round",
+      "dash": "6 4",
+      "dot": "1 4",
+      "fillStyle": "tint",
+      "fillOpacity": "0.28",
+      "roughness": "0",
+      "glow": "3",
+      "shadow": "0 3px 8px rgba(10, 90, 150, 0.25)",
+      "marker": "dot",
+      "labelFont": "body",
+      "labelSize": "sm",
+      "labelWeight": "600",
+      "labelCase": "none",
+      "corner": "12px"
+    },
+    "scene": {
+      "materialRoughness": "0.2",
+      "materialMetalness": "0.1",
+      "materialFlat": "0",
+      "materialOutline": "0",
+      "lightAmbient": "0.7",
+      "lightKey": "1.1",
+      "lightKeyColor": "#f0fbff",
+      "fog": "0.2"
     }
   },
   "variants": {
@@ -384,7 +430,22 @@
         "warning-foreground": "#2a1e00",
         "info": "#5cc4ff",
         "info-foreground": "#04243a",
-        "scrim": "rgba(0, 0, 0, 0.7)"
+        "scrim": "rgba(0, 0, 0, 0.7)",
+        "series-1": "#3394cf",
+        "series-2": "#93c842",
+        "series-3": "#0b9f82",
+        "series-4": "#c97505",
+        "series-5": "#bb7a9b",
+        "series-6": "#8e77ae",
+        "series-7": "#eb621a",
+        "series-8": "#bf7a5f",
+        "diagram-ink": "#ffffff",
+        "diagram-label": "#cdeaff",
+        "diagram-guide": "#7ab4d8",
+        "diagram-axis": "#9ad0f0",
+        "diagram-grid": "#1f5a8c",
+        "diagram-highlight": "#719e38",
+        "diagram-fill": "#5cc4ff"
       },
       "shadows": {
         "main": "0 8px 24px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.2)",

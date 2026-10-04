@@ -174,7 +174,8 @@
     },
     "surface": {
       "pageImage": "linear-gradient(rgba(26, 74, 138, 0.14) 1px, transparent 1px), linear-gradient(90deg, rgba(26, 74, 138, 0.14) 1px, transparent 1px), linear-gradient(rgba(26, 74, 138, 0.26) 1px, transparent 1px), linear-gradient(90deg, rgba(26, 74, 138, 0.26) 1px, transparent 1px)",
-      "pageImageSize": "8px 8px, 8px 8px, 40px 40px, 40px 40px"
+      "pageImageSize": "8px 8px, 8px 8px, 40px 40px, 40px 40px",
+      "diagram": "#1a4a8a"
     },
     "colors": {
       "primary": "#1a4a8a",
@@ -209,7 +210,22 @@
       "warning-foreground": "#332600",
       "info": "#1a4a8a",
       "info-foreground": "#ffffff",
-      "scrim": "rgba(0, 0, 0, 0.6)"
+      "scrim": "rgba(0, 0, 0, 0.6)",
+      "series-1": "#b3c4ca",
+      "series-2": "#7fe3ff",
+      "series-3": "#c6ac2f",
+      "series-4": "#8ff0b0",
+      "series-5": "#ffa3a3",
+      "series-6": "#d2b4ff",
+      "series-7": "#ffb36b",
+      "series-8": "#ff9ed2",
+      "diagram-ink": "#e8f3ff",
+      "diagram-label": "#cfe6ff",
+      "diagram-guide": "#7fb2e8",
+      "diagram-axis": "#a9cdf5",
+      "diagram-grid": "#3a6aa8",
+      "diagram-highlight": "#fafa53",
+      "diagram-fill": "#cfe6ff"
     },
     "radii": {
       "none": "0px",
@@ -251,6 +267,36 @@
       "focus-ring-width": "2px",
       "focus-ring-offset": "2px",
       "focus-ring-color": "#087391"
+    },
+    "diagram": {
+      "strokeThin": "1px",
+      "strokeNormal": "1.5px",
+      "strokeBold": "2.5px",
+      "lineCap": "butt",
+      "lineJoin": "miter",
+      "dash": "10 4",
+      "dot": "2 4",
+      "fillStyle": "outline",
+      "fillOpacity": "0.12",
+      "roughness": "0",
+      "glow": "0",
+      "shadow": "none",
+      "marker": "open",
+      "labelFont": "mono",
+      "labelSize": "xs",
+      "labelWeight": "400",
+      "labelCase": "uppercase",
+      "corner": "0px"
+    },
+    "scene": {
+      "materialRoughness": "0.9",
+      "materialMetalness": "0",
+      "materialFlat": "1",
+      "materialOutline": "1",
+      "lightAmbient": "0.7",
+      "lightKey": "0.9",
+      "lightKeyColor": "#cfe6ff",
+      "fog": "0"
     }
   },
   "variants": {
@@ -288,7 +334,22 @@
         "warning-foreground": "#332600",
         "info": "#7fe3ff",
         "info-foreground": "#0e2f5e",
-        "scrim": "rgba(0, 0, 0, 0.7)"
+        "scrim": "rgba(0, 0, 0, 0.7)",
+        "series-1": "#b2c5c3",
+        "series-2": "#7fe3ff",
+        "series-3": "#c6ac2f",
+        "series-4": "#68c88b",
+        "series-5": "#f9a2c3",
+        "series-6": "#d2b4ff",
+        "series-7": "#ffb36b",
+        "series-8": "#fc87e5",
+        "diagram-ink": "#eafdfb",
+        "diagram-label": "#cfe6ff",
+        "diagram-guide": "#7fb2e8",
+        "diagram-axis": "#a9cdf5",
+        "diagram-grid": "#3a6aa8",
+        "diagram-highlight": "#fafa53",
+        "diagram-fill": "#cfe6ff"
       },
       "shadows": {
         "none": "none",
@@ -325,7 +386,8 @@
       },
       "surface": {
         "pageImage": "linear-gradient(rgba(207, 230, 255, 0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(207, 230, 255, 0.12) 1px, transparent 1px), linear-gradient(rgba(207, 230, 255, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(207, 230, 255, 0.3) 1px, transparent 1px)",
-        "pageImageSize": "8px 8px, 8px 8px, 40px 40px, 40px 40px"
+        "pageImageSize": "8px 8px, 8px 8px, 40px 40px, 40px 40px",
+        "diagram": "#143f7c"
       }
     }
   }
