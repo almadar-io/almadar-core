@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-04T09:53:55.088Z",
+  "exportedAt": "2026-10-04T18:05:15.173Z",
   "integrators": {
     "github": {
       "name": "github",
@@ -4341,7 +4341,17 @@
                   "resolve": {
                     "type": "boolean",
                     "required": false,
-                    "description": "The attribute is a URL: return it resolved against the page (a relative link becomes absolute)."
+                    "description": "The value is a URL: return it resolved against the page (a relative link becomes absolute)."
+                  },
+                  "template": {
+                    "type": "string",
+                    "required": false,
+                    "description": "Compose the value from other fields of the same element instead of reading it: `{name}` stands\nfor that field's value (a read field, not another template). Empty when any named field is empty.\nExcludes `selector` and `attr`."
+                  },
+                  "required": {
+                    "type": "boolean",
+                    "required": false,
+                    "description": "Leave the element out until this field reads non-empty; a watch reports it once it fills in."
                   }
                 }
               }
@@ -4419,7 +4429,17 @@
                   "resolve": {
                     "type": "boolean",
                     "required": false,
-                    "description": "The attribute is a URL: return it resolved against the page (a relative link becomes absolute)."
+                    "description": "The value is a URL: return it resolved against the page (a relative link becomes absolute)."
+                  },
+                  "template": {
+                    "type": "string",
+                    "required": false,
+                    "description": "Compose the value from other fields of the same element instead of reading it: `{name}` stands\nfor that field's value (a read field, not another template). Empty when any named field is empty.\nExcludes `selector` and `attr`."
+                  },
+                  "required": {
+                    "type": "boolean",
+                    "required": false,
+                    "description": "Leave the element out until this field reads non-empty; a watch reports it once it fills in."
                   }
                 }
               }
