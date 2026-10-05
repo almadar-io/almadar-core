@@ -121,7 +121,7 @@ const CONFIG_DECLARATION_META_KEYS = ['label', 'description', 'tier', 'synonyms'
  * key (e.g. `{ type: "tabs", items: … }`) carries none of these metadata keys
  * and is therefore left untouched as a plain value.
  */
-function isConfigFieldSchema(entry: CallSiteConfigEntry): entry is ConfigFieldDeclaration {
+export function isConfigFieldSchema(entry: CallSiteConfigEntry): entry is ConfigFieldDeclaration {
     if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) return false;
     if (!('type' in entry) || typeof (entry as { type?: TraitConfigValue }).type !== 'string') return false;
     return 'default' in entry || CONFIG_DECLARATION_META_KEYS.some((k) => k in entry);
@@ -446,7 +446,7 @@ export const TraitCategorySchema = z.enum([
 // `scalar` and `union` are the closed transport/variant types — real
 // .lolo/.orb types, so the trait-side mirror must carry them or generated
 // factories fail DTS.
-export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum' | 'email' | 'url' | 'phone' | 'uuid' | 'image' | 'trait' | 'slot' | 'pattern' | 'node' | 'event' | 'scalar' | 'union';
+export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum' | 'email' | 'url' | 'phone' | 'uuid' | 'image' | 'trait' | 'slot' | 'pattern' | 'node' | 'event' | 'scalar' | 'SExpr' | 'union';
 
 /** Every `TraitFieldType`, as a runtime array — the ONE list `TraitEntityFieldSchema`
  *  and `RequiredFieldSchema` both read. Two separate inline copies of this enum had
@@ -473,6 +473,7 @@ export const TRAIT_FIELD_TYPES = [
     'node',
     'event',
     'scalar',
+    'SExpr',
     'union',
 ] as const satisfies readonly TraitFieldType[];
 

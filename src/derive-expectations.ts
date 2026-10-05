@@ -461,6 +461,10 @@ export function deriveExpectations(
     }
   }
 
+  // An orbital import's `entities {}` remap targets: entities a sibling declares that the
+  // imported closure binds once resolved (G-ORB-103).
+  for (const target of Object.values(orbital.reference?.entities ?? {})) addEntityRef(target);
+
   // 3. Traits: guards, effects, ticks, listens; linkedEntity bindings.
   const walkTraitRef = (t: TraitRef): void => {
     if (typeof t === 'string') return;

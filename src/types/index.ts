@@ -256,6 +256,12 @@ export {
   collectBindings,
   // Constants
   CORE_BINDINGS,
+  // quote — an S-expression held as data (G-CROSS-041)
+  QUOTE_HEAD,
+  encodeQuoteBody,
+  decodeQuoteBody,
+  quoteExpr,
+  quoteBodyOf,
   // Runtime evaluation types
   type EvalContext,
   type EventPayload,
@@ -395,6 +401,7 @@ export {
   type FetchStreamEffect,
   type FetchStreamOptions,
   type CallServiceEffect,
+  type CancelCallEffect,
   type SpawnEffect,
   type DespawnEffect,
   type LogEffect,
@@ -582,6 +589,7 @@ export {
   type CallSiteConfigEntry,
   type CallSiteConfig,
   isCallSiteConfigDeclaration,
+  isConfigFieldSchema,
   normalizeCallSiteConfigToValues,
   CONFIG_REF_EVENT_PATTERN,
   configRefEventKnob,
@@ -1120,6 +1128,9 @@ export {
   OrbitalEventResponseSchema,
   LIFECYCLE_EVENTS,
   type LifecycleEvent,
+  SYSTEM_UI_EVENTS,
+  type SystemUiEvent,
+  isSystemUiEvent,
   type MountSeed,
   MountSeedSchema,
   // Register wire

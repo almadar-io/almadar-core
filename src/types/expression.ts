@@ -327,6 +327,8 @@ export function formatSExpr(expr: SExpr): string {
   if (typeof expr === 'string') return isBinding(expr) ? expr : JSON.stringify(expr);
   if (typeof expr === 'number' || typeof expr === 'boolean') return String(expr);
   if (Array.isArray(expr)) {
+    const quoted = quoteBodyOf(expr);
+    if (quoted !== undefined) return `(${QUOTE_HEAD} ${formatSExpr(decodeQuoteBody(quoted))})`;
     const op = getOperator(expr);
     if (op !== null) return `(${[op, ...expr.slice(1).map(formatSExpr)].join(' ')})`;
     return `[${expr.map(formatSExpr).join(' ')}]`;
@@ -539,3 +541,49 @@ export function isStaticallyFalse(expr: SExpr, resolve?: (binding: string) => SE
   return false;
 }
 
+
+// ============================================================================
+// quote — an S-expression held as data (G-CROSS-041)
+// ============================================================================
+
+/** The special form that holds an S-expression as data: `(quote x)`. */
+export const QUOTE_HEAD = 'quote';
+
+function canonicalQuoteValue(expr: SExpr): SExpr {
+  if (Array.isArray(expr)) return expr.map(canonicalQuoteValue);
+  if (expr !== null && typeof expr === 'object') {
+    const out: SExprObject = {};
+    for (const key of Object.keys(expr).sort()) out[key] = canonicalQuoteValue(expr[key]);
+    return out;
+  }
+  return expr;
+}
+
+/**
+ * The IR body of `(quote x)`: canonical JSON of `x` (object keys sorted) with
+ * every `@` written as the JSON escape `@`. The body therefore carries no
+ * raw `@`, so no binding interpolation, scan or rewrite can reach inside it;
+ * any JSON parser restores the original. orbital-core's
+ * `schema::quote::encode_quote_body` produces the same bytes.
+ */
+export function encodeQuoteBody(expr: SExpr): string {
+  return JSON.stringify(canonicalQuoteValue(expr)).replace(/@/g, '\\u0040');
+}
+
+/** Decode a `(quote x)` body back to `x`. */
+export function decodeQuoteBody(body: string): SExpr {
+  const value: SExpr = JSON.parse(body);
+  return value;
+}
+
+/** The IR call `["quote", <body>]` for `expr`. */
+export function quoteExpr(expr: SExpr): [typeof QUOTE_HEAD, string] {
+  return [QUOTE_HEAD, encodeQuoteBody(expr)];
+}
+
+/** The encoded body when `expr` is a `(quote x)` call, else undefined. */
+export function quoteBodyOf(expr: SExpr): string | undefined {
+  return Array.isArray(expr) && expr.length === 2 && expr[0] === QUOTE_HEAD && typeof expr[1] === 'string'
+    ? expr[1]
+    : undefined;
+}

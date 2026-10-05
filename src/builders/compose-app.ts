@@ -672,10 +672,7 @@ function isNavItemsConfigField(entry: JsonValue): entry is JsonObject & { defaul
  * page↔orbital ownership source, not a second text-matching walker. An entry
  * whose `href` cannot be read at all is kept, never guessed away.
  */
-function narrowNavItemsToOwnedPages(orbitals: OrbitalDefinition[]): NavItemsNarrowResult[] {
-  const ownedPages = new Set<string>();
-  const ignoredTraitNames = new Set<string>();
-  for (const orbital of orbitals) collectOwnedSurface(cloneOrbitalNode(orbital), ownedPages, ignoredTraitNames);
+function narrowNavItemsToOwnedPages(orbitals: OrbitalDefinition[], ownedPages: ReadonlySet<string>): NavItemsNarrowResult[] {
 
   const drops: NavItemsNarrowResult[] = [];
   for (let i = 0; i < orbitals.length; i += 1) {
@@ -715,6 +712,51 @@ function narrowNavItemsToOwnedPages(orbitals: OrbitalDefinition[]): NavItemsNarr
   }
 
   return drops;
+}
+
+/**
+ * Every page path the surface owns: each orbital's own pages, and for an orbital IMPORT (pages
+ * empty until `orb resolve` expands it) its source orbital's pages through the import's `pages`
+ * remap (G-CORE-017).
+ */
+function collectOwnedPages(
+  orbitals: ReadonlyArray<OrbitalDefinition>,
+  importedOrbitalOf: ((orbital: OrbitalDefinition) => OrbitalDefinition | undefined) | undefined,
+): Set<string> {
+  const owned = new Set<string>();
+  const traitNames = new Set<string>();
+  for (const orbital of orbitals) {
+    collectOwnedSurface(cloneOrbitalNode(orbital), owned, traitNames);
+    if (orbital.reference === undefined || importedOrbitalOf === undefined) continue;
+    const remap = orbital.reference.pages ?? {};
+    for (const page of importedOrbitalOf(orbital)?.pages ?? []) {
+      if (isPageReference(page) || typeof page.path !== 'string') continue;
+      owned.add(remap[page.path] ?? page.path);
+    }
+  }
+  return owned;
+}
+
+/**
+ * `importedOrbitalOf` for a registry: an import's `reference.ref` (`Alias.orbitals.Name`)
+ * resolved through the orbital's `uses` to the behavior it imports, then to that behavior's
+ * orbital `Name`. `loadBehaviorOrb` is the caller's registry; each behavior is loaded once.
+ */
+export function orbitalImportResolver(
+  loadBehaviorOrb: (behaviorName: string) => OrbitalSchema | null,
+): (orbital: OrbitalDefinition) => OrbitalDefinition | undefined {
+  const loaded = new Map<string, OrbitalSchema | null>();
+  return (orbital) => {
+    const ref = orbital.reference?.ref;
+    if (ref === undefined) return undefined;
+    const [alias, kind, name] = ref.split('.');
+    if (kind !== 'orbitals' || name === undefined) return undefined;
+    const use = (orbital.uses ?? []).find((u) => u.as === alias);
+    if (use === undefined) return undefined;
+    const behavior = use.from.split('/').pop() ?? use.from;
+    if (!loaded.has(behavior)) loaded.set(behavior, loadBehaviorOrb(behavior));
+    return loaded.get(behavior)?.orbitals.find((o) => o.name === name);
+  };
 }
 
 /** A `[NavItem]` list dropped entries from the organisms' unioned config (`config.<knob>`). */
@@ -781,13 +823,17 @@ function firstInlinePage(orbital: OrbitalDefinition): { name: string; path: stri
 /**
  * Inside its organism an organism's first page boots the app, reachable by construction; composed
  * behind another organism it boots nothing. Each such landing page nothing links joins the app's
- * one `[NavItem]` list, labelled by its declared page name (owner ruling 2026-10-04). Parameterized
- * pages are reached through their list pages and never listed.
+ * one `[NavItem]` list, labelled by its declared page name (owner ruling 2026-10-04). An organism
+ * whose files declare no nav of its own (free-composed lines, a reused atom) links none of its
+ * orbitals, so each of them is one. Entries keep roster order. Parameterized pages are reached
+ * through their list pages and never listed.
  */
 function linkLandingPages(
   orbitals: ReadonlyArray<OrbitalDefinition>,
   config: DeclaredTraitConfig,
   organismOf: (orbitalName: string) => string | undefined,
+  /** Orbitals whose own file declares a `[NavItem]` list — their organism links its other orbitals itself. */
+  navDeclaringOrbitals: ReadonlySet<string>,
 ): { config: DeclaredTraitConfig; added: LandingNavResult[] } {
   const navKnobs = Object.entries(config).filter(([, field]) => field.type === '[NavItem]' && Array.isArray(field.default));
   if (navKnobs.length !== 1) return { config, added: [] };
@@ -797,28 +843,49 @@ function linkLandingPages(
   collectLinkedPaths(orbitals, linked);
   collectLinkedPaths(config, linked);
 
+  // Each entry sits in roster order: after every entry owned by an earlier orbital.
+  const ownerIndex = new Map<string, number>();
+  orbitals.forEach((orbital, i) => {
+    for (const page of orbital.pages ?? []) {
+      if (!isPageReference(page) && typeof page.path === 'string' && !ownerIndex.has(page.path)) ownerIndex.set(page.path, i);
+    }
+  });
+  const indexOf = (entry: TraitConfigValue): number => {
+    const href = navItemHref(entry);
+    return href !== undefined ? (ownerIndex.get(href) ?? -1) : -1;
+  };
+
   const added: LandingNavResult[] = [];
-  const entries: TraitConfigValue[] = [];
+  const next: TraitConfigValue[] = [...list];
+  const navOrganisms = new Set<string>();
+  for (const name of navDeclaringOrbitals) {
+    const organism = organismOf(name);
+    if (organism !== undefined) navOrganisms.add(organism);
+  }
   const seenOrganisms = new Set<string>();
   let booted = false;
-  for (const orbital of orbitals) {
+  orbitals.forEach((orbital, i) => {
     const page = firstInlinePage(orbital);
-    if (page === undefined) continue;
+    if (page === undefined) return;
     const organism = organismOf(orbital.name);
     if (!booted) {
       booted = true;
       if (organism !== undefined) seenOrganisms.add(organism);
-      continue;
+      return;
     }
-    if (organism === undefined || seenOrganisms.has(organism)) continue;
+    if (organism === undefined || (navOrganisms.has(organism) && seenOrganisms.has(organism))) return;
     seenOrganisms.add(organism);
-    if (linked.has(page.path) || page.path.split('/').some((segment) => segment.startsWith(':'))) continue;
-    entries.push({ href: page.path, label: page.name });
+    if (linked.has(page.path) || page.path.split('/').some((segment) => segment.startsWith(':'))) return;
+    let at = 0;
+    next.forEach((entry, p) => {
+      if (indexOf(entry) < i) at = p + 1;
+    });
+    next.splice(at, 0, { href: page.path, label: page.name });
     linked.add(page.path);
     added.push({ organism, href: page.path });
-  }
-  if (entries.length === 0) return { config, added };
-  return { config: { ...config, [knob]: { ...field, default: [...list, ...entries] } }, added };
+  });
+  if (added.length === 0) return { config, added };
+  return { config: { ...config, [knob]: { ...field, default: next } }, added };
 }
 
 /** The app surface composed from its files: deduped orbitals, unioned config and ledger. */
@@ -1054,6 +1121,8 @@ export interface ComposeSurfaceOptions {
   organismOf?: (orbitalName: string) => string | undefined;
   /** The atom's declaration of a referenced trait (see `RenameEntityOptions.atomTraitOf`); namespacing reads it. */
   atomTraitOf?: (orbital: OrbitalDefinition, traitRef: string) => Trait | undefined;
+  /** An orbital import's source orbital (`orbitalImportResolver`); its pages count as owned when nav is narrowed. */
+  importedOrbitalOf?: (orbital: OrbitalDefinition) => OrbitalDefinition | undefined;
 }
 
 /** `[NavItem]` lists in `config` with every `from` href rewritten to `to`; the same object when none matched. */
@@ -1127,15 +1196,26 @@ export function composeOrbitalSurface(
     if (!('orbitals' in file) || file.config === undefined) return file;
     const ownNames = new Set(file.orbitals.map((o) => o.name));
     const organisms = organismOfFile(file);
+    // Paths this file's own orbitals still own after the renames — another orbital's rename
+    // of the same path never retargets this file's entry for its own page.
+    const ownPaths = new Set<string>();
+    for (const o of orbitals) {
+      if (!ownNames.has(o.name)) continue;
+      for (const page of o.pages ?? []) {
+        if (!isPageReference(page) && typeof page.path === 'string') ownPaths.add(page.path);
+      }
+    }
     let config = file.config;
     for (const r of surfaceRenames.routes) {
       const organism = options.organismOf?.(r.orbitalName);
+      if (!ownNames.has(r.orbitalName) && ownPaths.has(r.from)) continue;
       if (ownNames.has(r.orbitalName) || (organism !== undefined && organisms.has(organism))) config = renameNavHrefs(config, r.from, r.to);
     }
     return config === file.config ? file : { ...file, config };
   });
   const identity = dedupeComposedIdentity(orbitals);
-  const navItemsNarrowed = narrowNavItemsToOwnedPages(orbitals);
+  const ownedPages = collectOwnedPages(orbitals, options.importedOrbitalOf);
+  const navItemsNarrowed = narrowNavItemsToOwnedPages(orbitals, ownedPages);
 
   let ledger = mergeLedgers([...renamedFiles]);
   if (ledger !== undefined) {
@@ -1148,16 +1228,19 @@ export function composeOrbitalSurface(
   let config: DeclaredTraitConfig | undefined;
   let configNavItemsNarrowed: ConfigNavItemsNarrowResult[] = [];
   if (unioned !== undefined) {
-    const ownedPages = new Set<string>();
-    const traitNames = new Set<string>();
-    for (const orbital of orbitals) collectOwnedSurface(cloneOrbitalNode(orbital), ownedPages, traitNames);
     const narrowed = narrowConfigNavItems(unioned, ownedPages);
     config = narrowed.config;
     configNavItemsNarrowed = narrowed.drops;
   }
   let landingNavAdded: LandingNavResult[] = [];
   if (config !== undefined && options.organismOf !== undefined) {
-    const linked = linkLandingPages(orbitals, config, options.organismOf);
+    const navDeclaringOrbitals = new Set<string>();
+    for (const f of renamedFiles) {
+      if (!('orbitals' in f) || f.config === undefined) continue;
+      if (!Object.values(f.config).some((entry) => entry.type === '[NavItem]')) continue;
+      for (const o of f.orbitals) navDeclaringOrbitals.add(o.name);
+    }
+    const linked = linkLandingPages(orbitals, config, options.organismOf, navDeclaringOrbitals);
     config = linked.config;
     landingNavAdded = linked.added;
   }
@@ -1200,6 +1283,7 @@ export function composeAppFromFiles(
   const { orbitals, config, ledger, ...outcomes } = composeOrbitalSurface(files, {
     ...(options.organismOf !== undefined ? { organismOf: options.organismOf } : {}),
     ...(options.atomTraitOf !== undefined ? { atomTraitOf: options.atomTraitOf } : {}),
+    ...(options.importedOrbitalOf !== undefined ? { importedOrbitalOf: options.importedOrbitalOf } : {}),
   });
   const result = composeBehaviors({
     appName: options.appName,

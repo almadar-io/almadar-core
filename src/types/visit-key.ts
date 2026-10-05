@@ -22,12 +22,17 @@ function canonicalJson(value: EventPayloadValue): string {
   return JSON.stringify(value);
 }
 
-/** `(trait, event, from, payload)`: only an exact repeat of all four is a cycle. */
+/**
+ * `(trait, event, from, payload, frame)`: only an exact repeat of all five is a cycle. The frame is the
+ * trait's entity row as it stands when the step is taken — a loop whose row moved on is progress even
+ * when an effect hands back the same result twice; `null` when the trait has no row.
+ */
 export function dispatchVisitKey(
   trait: string,
   event: string,
   from: string,
   payload: EventPayload | null | undefined,
+  frame: EventPayload | null,
 ): string {
-  return `${trait}\u0000${event}\u0000${from}\u0000${canonicalJson(payload)}`;
+  return `${trait}\u0000${event}\u0000${from}\u0000${canonicalJson(payload)}\u0000${canonicalJson(frame)}`;
 }

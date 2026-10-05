@@ -98,3 +98,24 @@ describe('ConfigFieldDeclaration metadata round-trips through Zod', () => {
         expect('forwardedFrom' in parsed).toBe(false);
     });
 });
+
+describe('applyTraitConfigOverrides — default-less declarations on a trait reference', () => {
+    it('keeps a default-less declaration a declaration and folds the override into it', () => {
+        const schema: OrbitalSchema = {
+            name: 'layout',
+            orbitals: [
+                {
+                    name: 'LayoutOrbital',
+                    entity: 'LayoutItem',
+                    pages: [],
+                    traits: [{ ref: 'Std.traits.AppLayout', name: 'AppLayout', config: { contentTrait: { type: 'trait', label: 'Content' }, sidebarTrait: { type: 'trait', label: 'Sidebar' } } }],
+                },
+            ],
+        };
+        const out = applyTraitConfigOverrides(schema, { AppLayout: { contentTrait: '@trait.Board' } });
+        const trait = out.orbitals[0]?.traits[0];
+        if (typeof trait !== 'object' || trait === null || 'scope' in trait) throw new Error('expected a trait reference');
+        expect(trait.config?.['contentTrait']).toEqual({ type: 'trait', label: 'Content', default: '@trait.Board' });
+        expect(trait.config?.['sidebarTrait']).toEqual({ type: 'trait', label: 'Sidebar' });
+    });
+});

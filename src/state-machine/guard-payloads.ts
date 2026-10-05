@@ -138,6 +138,9 @@ const SYNTHESIZED_GUARD_OPERATORS = new Set([
  */
 const ACKNOWLEDGED_UNSYNTHESIZED_GUARD_OPERATORS = new Set(['if', 'let', 'array/some', 'grid/in-bounds']);
 
+/** A `(quote …)` guard is constant data that is never evaluated, so it has no payload to synthesize. */
+const CONSTANT_GUARD_FORMS = new Set(['quote']);
+
 /**
  * True when `op` is a guard operator this module has consciously
  * accounted for — either with real synthesis or as a tracked gap.
@@ -150,6 +153,7 @@ export function isRecognizedGuardOperator(op: string): boolean {
   return (
     SYNTHESIZED_GUARD_OPERATORS.has(op) ||
     ACKNOWLEDGED_UNSYNTHESIZED_GUARD_OPERATORS.has(op) ||
+    CONSTANT_GUARD_FORMS.has(op) ||
     op.startsWith('agent/')
   );
 }
@@ -448,6 +452,9 @@ export function buildGuardPayloads(guard: unknown): GuardPayload {
   // A fully-constant guard (post-inline literal fold) is decided by its
   // literals, not by the payload — synthesize nothing for either case.
   if (constTruth(guard) !== null) {
+    return { pass: {}, fail: {} };
+  }
+  if (Array.isArray(guard) && typeof guard[0] === 'string' && CONSTANT_GUARD_FORMS.has(guard[0])) {
     return { pass: {}, fail: {} };
   }
   // Bare-binding existence guard: e.g. `when @payload.row` lowers to

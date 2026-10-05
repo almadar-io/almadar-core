@@ -652,7 +652,7 @@ const ENTITY_FIELD_BASE_PROPS = {
 // Includes the semantic domains: without them an L1 factory HIT cannot express
 // an email field at all, so `fill_params` could never produce one.
 const SCALAR_FIELD_TYPES: ReadonlyArray<string> = [
-  'string', 'number', 'boolean', 'date', 'timestamp', 'datetime', 'object',
+  'string', 'number', 'boolean', 'date', 'timestamp', 'datetime',
   'email', 'url', 'phone', 'uuid', 'image',
 ];
 const SCALAR_FIELD_BRANCH: JsonSchema = {
@@ -706,12 +706,56 @@ const ARRAY_FIELD_BRANCH: JsonSchema = {
     type: { type: 'string', enum: ['array'], description: 'Array field.' },
     items: {
       type: 'object',
-      description: 'Element shape (optional for primitive arrays).',
+      description:
+        'Element shape (optional for primitive arrays). A list of nested records within the entity is an array of a struct: `items: { "type": "object", "properties": { … } }`.',
+    },
+  },
+};
+// A nested structure within the entity: an `object` declares its members
+// (struct) or its value type (map). A shapeless `object` is not offered —
+// `orb validate` rejects it (ORB_T_GENERIC_TYPE_DEPRECATED).
+const STRUCT_FIELD_BRANCH: JsonSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['name', 'type', 'properties'],
+  properties: {
+    ...ENTITY_FIELD_BASE_PROPS,
+    type: { type: 'string', enum: ['object'], description: 'Struct field — fixed members.' },
+    properties: {
+      type: 'object',
+      description:
+        'The struct\'s members keyed by name, each a field shape (e.g. { "name": { "type": "string" }, "sets": { "type": "number" } }).',
+      additionalProperties: {
+        type: 'object',
+        required: ['type'],
+        description: 'Member field shape (same form as an entity field, without `name`).',
+      },
+    },
+  },
+};
+const MAP_FIELD_BRANCH: JsonSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['name', 'type', 'items'],
+  properties: {
+    ...ENTITY_FIELD_BASE_PROPS,
+    type: { type: 'string', enum: ['object'], description: 'Map field — dynamic keys.' },
+    items: {
+      type: 'object',
+      required: ['type'],
+      description: 'The value shape every key maps to (e.g. { "type": "number" }).',
     },
   },
 };
 const ENTITY_FIELD_SCHEMA: JsonSchema = {
-  oneOf: [SCALAR_FIELD_BRANCH, ENUM_FIELD_BRANCH, RELATION_FIELD_BRANCH, ARRAY_FIELD_BRANCH],
+  oneOf: [
+    SCALAR_FIELD_BRANCH,
+    ENUM_FIELD_BRANCH,
+    RELATION_FIELD_BRANCH,
+    ARRAY_FIELD_BRANCH,
+    STRUCT_FIELD_BRANCH,
+    MAP_FIELD_BRANCH,
+  ],
 };
 
 const EXTRA_TRAIT_SCHEMA: JsonSchema = {

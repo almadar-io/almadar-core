@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import type { EventPayload } from '../src/types/expression.js';
 import { dispatchVisitKey } from '../src/types/visit-key.js';
 
-const key = (p: EventPayload | null | undefined): string => dispatchVisitKey('Search', 'STEP', 'searching', p);
+const key = (p: EventPayload | null | undefined): string => dispatchVisitKey('Search', 'STEP', 'searching', p, null);
 
 describe('dispatchVisitKey', () => {
   it('object key order does not change the key', () => {
@@ -25,14 +25,14 @@ describe('dispatchVisitKey', () => {
   });
 
   it('each component is part of the identity', () => {
-    const base = dispatchVisitKey('T', 'E', 's', null);
-    expect(dispatchVisitKey('U', 'E', 's', null)).not.toBe(base);
-    expect(dispatchVisitKey('T', 'F', 's', null)).not.toBe(base);
-    expect(dispatchVisitKey('T', 'E', 't', null)).not.toBe(base);
+    const base = dispatchVisitKey('T', 'E', 's', null, null);
+    expect(dispatchVisitKey('U', 'E', 's', null, null)).not.toBe(base);
+    expect(dispatchVisitKey('T', 'F', 's', null, null)).not.toBe(base);
+    expect(dispatchVisitKey('T', 'E', 't', null, null)).not.toBe(base);
   });
 
   it('a colon in a name cannot collide across components', () => {
-    expect(dispatchVisitKey('a:b', 'c', 's', null)).not.toBe(dispatchVisitKey('a', 'b:c', 's', null));
+    expect(dispatchVisitKey('a:b', 'c', 's', null, null)).not.toBe(dispatchVisitKey('a', 'b:c', 's', null, null));
   });
 
   it('a missing payload, a null payload and an undefined field are all the same absence', () => {
@@ -43,5 +43,21 @@ describe('dispatchVisitKey', () => {
   it('a date keys by its instant', () => {
     expect(key({ at: new Date(0) })).toBe(key({ at: new Date(0) }));
     expect(key({ at: new Date(0) })).not.toBe(key({ at: new Date(1) }));
+  });
+});
+
+describe('dispatchVisitKey: the trait frame is part of the identity (G-CROSS-057)', () => {
+  it('the same step against a different frame is a different delivery', () => {
+    expect(dispatchVisitKey('Judge', 'SAVED', 'saving', { totalCount: 12 }, { batch: 'a' }))
+      .not.toBe(dispatchVisitKey('Judge', 'SAVED', 'saving', { totalCount: 12 }, { batch: 'b' }));
+  });
+
+  it('control: the same step against the same frame is the same delivery (a true cycle)', () => {
+    expect(dispatchVisitKey('Judge', 'SAVED', 'saving', { totalCount: 12 }, { batch: 'a', n: 1 }))
+      .toBe(dispatchVisitKey('Judge', 'SAVED', 'saving', { totalCount: 12 }, { n: 1, batch: 'a' }));
+  });
+
+  it('edge: no frame and an empty frame are different identities', () => {
+    expect(dispatchVisitKey('T', 'E', 's', {}, null)).not.toBe(dispatchVisitKey('T', 'E', 's', {}, {}));
   });
 });

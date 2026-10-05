@@ -29,9 +29,9 @@ export {
 export { SELF_OVERLAY_PATTERN_TYPES } from './self-overlay.js';
 
 // Backwards compatible alias - registry refers to patterns registry
-export const registry = patternsRegistry;
+export const registry: PatternsRegistry = patternsRegistry as PatternsRegistry;
 
-export const PATTERN_REGISTRY = patternsRegistry;
+export const PATTERN_REGISTRY: PatternsRegistry = patternsRegistry as PatternsRegistry;
 export const INTEGRATORS_REGISTRY = integratorsRegistry;
 export const COMPONENT_MAPPING = componentMapping;
 export const EVENT_CONTRACTS = eventContracts;
@@ -91,7 +91,7 @@ export type PatternEntry = {
   minUsableWidth?: number;
 };
 
-type PatternsRegistry = {
+export type PatternsRegistry = {
   version?: string;
   exportedAt?: string;
   patterns: Record<string, PatternEntry>;

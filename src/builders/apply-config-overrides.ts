@@ -16,7 +16,7 @@
 
 import type { OrbitalSchema } from '../types/schema.js';
 import type { TraitRef, TraitConfig, CallSiteConfig, CallSiteConfigEntry, ConfigFieldDeclaration } from '../types/trait.js';
-import { isCallSiteConfigDeclaration } from '../types/trait.js';
+import { isConfigFieldSchema } from '../types/trait.js';
 
 function overrideTrait(trait: Exclude<TraitRef, string>, values: TraitConfig): Exclude<TraitRef, string> {
   // `scope` is required on a full `Trait`; the `{ ref, config }` reference has none.
@@ -43,7 +43,7 @@ function overrideTrait(trait: Exclude<TraitRef, string>, values: TraitConfig): E
   const base: CallSiteConfig = trait.config !== undefined ? { ...trait.config } : {};
   const next: Record<string, CallSiteConfigEntry> = {};
   for (const [field, entry] of Object.entries(base)) {
-    next[field] = isCallSiteConfigDeclaration(entry)
+    next[field] = isConfigFieldSchema(entry)
       ? entry
       : { type: 'unknown', default: entry };
   }
@@ -52,7 +52,7 @@ function overrideTrait(trait: Exclude<TraitRef, string>, values: TraitConfig): E
     // objects). Fold over a declared field; otherwise wrap so Rust serde
     // parses it as a ConfigField with the value in `default`.
     const existing = base[field];
-    next[field] = existing !== undefined && isCallSiteConfigDeclaration(existing)
+    next[field] = existing !== undefined && isConfigFieldSchema(existing)
       ? { ...existing, default: value }
       : { type: 'unknown', default: value };
   }

@@ -126,13 +126,13 @@ function buildConfigKeyQuestion(
   const isAdvanced = !isPrimaryTier(param.tier);
 
   const out: DomainQuestion = {
-    id: `${call.orbital}.${trait.name}.${param.key}`,
-    orbitalName: call.orbital,
+    id: `${factoryCallPlanOrbitalName(call)}.${trait.name}.${param.key}`,
+    orbitalName: factoryCallPlanOrbitalName(call),
     question,
     inputType: deriveInputType(param),
     mutationTemplate: {
       kind: 'set-trait-override-config',
-      orbitalName: call.orbital,
+      orbitalName: factoryCallPlanOrbitalName(call),
       traitName: trait.name,
       configKey: param.key,
     },
@@ -346,14 +346,14 @@ function entityFieldQuestions(
 
   const weight = tierWeight('domain');
   const q: DomainQuestion = {
-    id: `${call.orbital}.__entityFields`,
-    orbitalName: call.orbital,
+    id: `${factoryCallPlanOrbitalName(call)}.__entityFields`,
+    orbitalName: factoryCallPlanOrbitalName(call),
     question: `Fields for ${entityName}`,
     reason: `Defines the data model for ${entityName}. Pick the fields that matter for your use case.`,
     inputType: 'multiselect',
     mutationTemplate: {
       kind: 'set-orbital-entity-fields',
-      orbitalName: call.orbital,
+      orbitalName: factoryCallPlanOrbitalName(call),
     },
     suggestedAnswers: candidateNames,
     defaultValue: candidateNames,
@@ -457,7 +457,7 @@ function capabilityQuestions(
   ruleCapabilities: ReadonlySet<string>,
 ): DomainQuestion[] {
   const entityName =
-    call.params.entityName ?? signature.entities[0]?.name ?? call.orbital;
+    call.params.entityName ?? signature.entities[0]?.name ?? factoryCallPlanOrbitalName(call);
   const seen = new Set<string>();
   const out: DomainQuestion[] = [];
   for (const trait of signature.traits) {
@@ -473,8 +473,8 @@ function capabilityQuestions(
       // Skip if a policy-tier knob on this trait already surfaces the toggle.
       if (policyKnobKeys.has(cap)) continue;
       out.push({
-        id: `${call.orbital}.capability.${cap}`,
-        orbitalName: call.orbital,
+        id: `${factoryCallPlanOrbitalName(call)}.capability.${cap}`,
+        orbitalName: factoryCallPlanOrbitalName(call),
         question: capabilityPrompt(cap, entityName),
         helpText: capabilityHelp(cap, trait),
         capability: cap,
@@ -527,4 +527,9 @@ function collectRuleCapabilities(
     if (typeof r.capability === 'string') out.add(r.capability);
   }
   return out;
+}
+
+/** The plan's name for a call site's orbital — `orbitalName` when it differs from the catalog `orbital`. */
+export function factoryCallPlanOrbitalName(call: FactoryCallSite): string {
+  return call.orbitalName ?? call.orbital;
 }

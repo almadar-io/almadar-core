@@ -160,3 +160,28 @@ describe('healEntityLedgerRows — factory rebuild ledger agreement', () => {
     expect(healEntityLedgerRows(schema, '2026-08-06T11:09:26.000Z')).toBe(schema);
   });
 });
+
+// A declaration with no `default` (e.g. `contentTrait : trait`) is still a
+// declaration: wrapping it as a bare value put the schema object in `default`,
+// which then rendered as a pattern of type "trait" (std-app-layout with ANY
+// config override → ORB_RUI_INVALID_PATTERN; G-RABIT-017 builder flow).
+describe('mergeCallSiteConfigOverrides — default-less declarations', () => {
+  const contentTrait = { type: 'trait', label: 'Content trait', tier: 'presentation' };
+
+  it('keeps a default-less declaration as-is when another field is overridden', () => {
+    const merged = mergeCallSiteConfigOverrides({ contentTrait, appName: { type: 'string', default: 'App' } }, { appName: 'Fitness' });
+    expect(merged['contentTrait']).toEqual(contentTrait);
+    expect(merged['appName']).toEqual({ type: 'string', default: 'Fitness' });
+  });
+
+  it('folds an override into a default-less declaration', () => {
+    const merged = mergeCallSiteConfigOverrides({ contentTrait }, { contentTrait: '@trait.Board' });
+    expect(merged['contentTrait']).toEqual({ ...contentTrait, default: '@trait.Board' });
+  });
+
+  it('still wraps a render-value object that only happens to carry a `type` key (control)', () => {
+    const tabs = { type: 'tabs', items: [] };
+    const merged = mergeCallSiteConfigOverrides({ view: tabs }, {});
+    expect(merged['view']).toEqual({ type: 'unknown', default: tabs });
+  });
+});

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-04T18:05:15.173Z",
+  "exportedAt": "2026-10-05T16:53:08.486Z",
   "services": {
     "llm": {
       "name": "llm",
@@ -96,6 +96,65 @@
             "category": "string",
             "confidence": "number",
             "reasoning": "string"
+          }
+        },
+        {
+          "name": "classifyMany",
+          "description": "Classify many texts in one model call. Every item's id comes back exactly once with a category from\nthe declared set; there is no reasoning, so the reply stays short.",
+          "params": [
+            {
+              "name": "items",
+              "type": "array",
+              "required": true,
+              "description": "The texts, each with the id its verdict comes back under.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "text": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            },
+            {
+              "name": "categories",
+              "type": "string[]",
+              "required": true,
+              "description": "Closed set of category labels the model must choose from."
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": "Model id override."
+            }
+          ],
+          "responseShape": {
+            "verdicts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "category": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "confidence": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            }
           }
         },
         {
@@ -1557,6 +1616,65 @@
             "category": "string",
             "confidence": "number",
             "reasoning": "string"
+          }
+        },
+        {
+          "name": "classifyMany",
+          "description": "Classify many texts in one model call. Every item's id comes back exactly once with a category from\nthe declared set; there is no reasoning, so the reply stays short.",
+          "params": [
+            {
+              "name": "items",
+              "type": "array",
+              "required": true,
+              "description": "The texts, each with the id its verdict comes back under.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "text": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            },
+            {
+              "name": "categories",
+              "type": "string[]",
+              "required": true,
+              "description": "Closed set of category labels the model must choose from."
+            },
+            {
+              "name": "model",
+              "type": "string",
+              "required": false,
+              "description": "Model id override."
+            }
+          ],
+          "responseShape": {
+            "verdicts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "category": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "confidence": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            }
           }
         },
         {
@@ -5999,6 +6117,77 @@
           }
         },
         {
+          "name": "applyMany",
+          "description": "Apply treatments to many elements at once, one command per tab. An element that has left its\npage, or whose tab has closed, is listed in `missing`; it does not fail the others.",
+          "params": [
+            {
+              "name": "items",
+              "type": "array",
+              "required": true,
+              "description": "",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "tab": {
+                    "type": "number",
+                    "required": true,
+                    "description": "Tab id."
+                  },
+                  "elementId": {
+                    "type": "string",
+                    "required": true,
+                    "description": "Element id from query or watch."
+                  },
+                  "treatment": {
+                    "type": "'hide' | 'blur' | 'highlight' | 'label' | 'restore'",
+                    "required": true,
+                    "description": "The treatment; `restore` undoes any earlier one."
+                  },
+                  "label": {
+                    "type": "string",
+                    "required": false,
+                    "description": "Text shown with the treatment (e.g. why it was applied)."
+                  }
+                }
+              }
+            }
+          ],
+          "responseShape": {
+            "applied": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "tab": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "elementId": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            },
+            "missing": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "tab": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "elementId": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
           "name": "act",
           "description": "Interact with an element: click it, focus it, or type text into it.",
           "params": [
@@ -6044,6 +6233,7 @@
       "package": "@almadar/integrations",
       "backend": "production",
       "runtimes": [
+        "node",
         "browser"
       ],
       "actions": [
@@ -6103,6 +6293,1495 @@
                 }
               }
             }
+          }
+        },
+        {
+          "name": "listPaths",
+          "description": "The learner's paths, filtered, sorted and paged; `search` ranks by meaning.",
+          "params": [
+            {
+              "name": "search",
+              "type": "string",
+              "required": false,
+              "description": "Free-text search; ranks paths semantically."
+            },
+            {
+              "name": "sort",
+              "type": "'recent' | 'oldest' | 'az' | 'za'",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "clusterId",
+              "type": "string",
+              "required": false,
+              "description": "Only paths in this cluster."
+            },
+            {
+              "name": "page",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "limit",
+              "type": "number",
+              "required": false,
+              "description": "Paths per page (1–48, default 9)."
+            }
+          ],
+          "responseShape": {
+            "items": {
+              "type": "KnowledgePath[]",
+              "items": {
+                "type": "KnowledgePath",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "title": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "description": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "conceptCount": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "learnedCount": {
+                    "type": "number",
+                    "required": true,
+                    "description": "Concepts the viewer has learned (mastery 3)."
+                  },
+                  "levelCount": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "seedConcept": {
+                    "type": "string",
+                    "required": true,
+                    "description": "Name of the concept the path grew from; empty when it has none."
+                  },
+                  "clusterId": {
+                    "type": "string",
+                    "required": true,
+                    "description": "The path's cluster id; empty when unclustered."
+                  },
+                  "createdAt": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "updatedAt": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            },
+            "total": "number",
+            "page": "number",
+            "totalPages": "number",
+            "clusters": {
+              "type": "KnowledgePathCluster[]",
+              "items": {
+                "type": "KnowledgePathCluster",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "size": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "pathMap",
+          "description": "Every path with how they relate: similarity edges, shared-concept edges and clusters.",
+          "params": [],
+          "responseShape": {
+            "paths": {
+              "type": "KnowledgePath[]",
+              "items": {
+                "type": "KnowledgePath",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "title": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "description": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "conceptCount": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "learnedCount": {
+                    "type": "number",
+                    "required": true,
+                    "description": "Concepts the viewer has learned (mastery 3)."
+                  },
+                  "levelCount": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "seedConcept": {
+                    "type": "string",
+                    "required": true,
+                    "description": "Name of the concept the path grew from; empty when it has none."
+                  },
+                  "clusterId": {
+                    "type": "string",
+                    "required": true,
+                    "description": "The path's cluster id; empty when unclustered."
+                  },
+                  "createdAt": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "updatedAt": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            },
+            "similarity": {
+              "type": "object[]",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "target": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "weight": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            },
+            "sharedConcepts": {
+              "type": "object[]",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "target": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "weight": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "shared": {
+                    "type": "string[]",
+                    "required": true
+                  }
+                }
+              }
+            },
+            "clusters": {
+              "type": "KnowledgePathCluster[]",
+              "items": {
+                "type": "KnowledgePathCluster",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "size": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "deletePath",
+          "description": "Delete a path with everything derived from it.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "deleted": "boolean"
+          }
+        },
+        {
+          "name": "conceptsByLayer",
+          "description": "A path's goal and its levels of concepts.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "graphId": "string",
+            "title": "string",
+            "goal": "string",
+            "seedConcept": "string",
+            "layers": {
+              "type": "KnowledgeLayer[]",
+              "items": {
+                "type": "KnowledgeLayer",
+                "properties": {
+                  "layerNumber": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "goal": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "review": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "concepts": {
+                    "type": "KnowledgeConcept[]",
+                    "required": true,
+                    "items": {
+                      "type": "KnowledgeConcept",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "required": true
+                        },
+                        "name": {
+                          "type": "string",
+                          "required": true
+                        },
+                        "description": {
+                          "type": "string",
+                          "required": true
+                        },
+                        "layer": {
+                          "type": "number",
+                          "required": true
+                        },
+                        "isSeed": {
+                          "type": "boolean",
+                          "required": true
+                        },
+                        "sequence": {
+                          "type": "number",
+                          "required": true
+                        },
+                        "prerequisites": {
+                          "type": "string[]",
+                          "required": true
+                        },
+                        "masteryLevel": {
+                          "type": "number",
+                          "required": true,
+                          "description": "0 not started … 3 learned."
+                        },
+                        "hasLesson": {
+                          "type": "boolean",
+                          "required": true,
+                          "description": "Whether a lesson has been generated for the concept."
+                        },
+                        "canonicalKey": {
+                          "type": "string",
+                          "required": true,
+                          "description": "The graph engine's canonical key for the concept; peers address it as `concept:<canonicalKey>`."
+                        },
+                        "routeKey": {
+                          "type": "string",
+                          "required": true,
+                          "description": "URL-safe key for the concept's page (concept ids are free text); `conceptDetail` takes it."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "expand",
+          "description": "Generate the path's next level of concepts. Streams progress: `delta`s, then one `step` per added concept name.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "numConcepts",
+              "type": "number",
+              "required": false,
+              "description": "How many concepts to add (default 10)."
+            }
+          ],
+          "responseShape": {
+            "levelName": "string",
+            "added": {
+              "type": "KnowledgeConcept[]",
+              "items": {
+                "type": "KnowledgeConcept",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "description": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "layer": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "isSeed": {
+                    "type": "boolean",
+                    "required": true
+                  },
+                  "sequence": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "prerequisites": {
+                    "type": "string[]",
+                    "required": true
+                  },
+                  "masteryLevel": {
+                    "type": "number",
+                    "required": true,
+                    "description": "0 not started … 3 learned."
+                  },
+                  "hasLesson": {
+                    "type": "boolean",
+                    "required": true,
+                    "description": "Whether a lesson has been generated for the concept."
+                  },
+                  "canonicalKey": {
+                    "type": "string",
+                    "required": true,
+                    "description": "The graph engine's canonical key for the concept; peers address it as `concept:<canonicalKey>`."
+                  },
+                  "routeKey": {
+                    "type": "string",
+                    "required": true,
+                    "description": "URL-safe key for the concept's page (concept ids are free text); `conceptDetail` takes it."
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "layerPractice",
+          "description": "Generate the practice and review for one level. Streams progress.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "layerNumber",
+              "type": "number",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "review": "string"
+          }
+        },
+        {
+          "name": "conceptDetail",
+          "description": "One concept with its lesson, notes, questions and neighbours.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "routeKey",
+              "type": "string",
+              "required": true,
+              "description": "The concept's `routeKey` (from any concept or concept ref); pages carry it in their URL."
+            }
+          ],
+          "responseShape": {
+            "concept": {
+              "type": "KnowledgeConcept",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "required": true
+                },
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "description": {
+                  "type": "string",
+                  "required": true
+                },
+                "layer": {
+                  "type": "number",
+                  "required": true
+                },
+                "isSeed": {
+                  "type": "boolean",
+                  "required": true
+                },
+                "sequence": {
+                  "type": "number",
+                  "required": true
+                },
+                "prerequisites": {
+                  "type": "string[]",
+                  "required": true
+                },
+                "masteryLevel": {
+                  "type": "number",
+                  "required": true,
+                  "description": "0 not started … 3 learned."
+                },
+                "hasLesson": {
+                  "type": "boolean",
+                  "required": true,
+                  "description": "Whether a lesson has been generated for the concept."
+                },
+                "canonicalKey": {
+                  "type": "string",
+                  "required": true,
+                  "description": "The graph engine's canonical key for the concept; peers address it as `concept:<canonicalKey>`."
+                },
+                "routeKey": {
+                  "type": "string",
+                  "required": true,
+                  "description": "URL-safe key for the concept's page (concept ids are free text); `conceptDetail` takes it."
+                }
+              }
+            },
+            "pathTitle": "string",
+            "lessonId": "string",
+            "lesson": "string",
+            "prerequisites": {
+              "type": "KnowledgeConceptRef[]",
+              "items": {
+                "type": "KnowledgeConceptRef",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "routeKey": {
+                    "type": "string",
+                    "required": true,
+                    "description": "URL-safe key for the concept's page; `conceptDetail` takes it."
+                  }
+                }
+              }
+            },
+            "previous": {
+              "type": "KnowledgeConceptRef[]",
+              "items": {
+                "type": "KnowledgeConceptRef",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "routeKey": {
+                    "type": "string",
+                    "required": true,
+                    "description": "URL-safe key for the concept's page; `conceptDetail` takes it."
+                  }
+                }
+              }
+            },
+            "next": {
+              "type": "KnowledgeConceptRef[]",
+              "items": {
+                "type": "KnowledgeConceptRef",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "routeKey": {
+                    "type": "string",
+                    "required": true,
+                    "description": "URL-safe key for the concept's page; `conceptDetail` takes it."
+                  }
+                }
+              }
+            },
+            "notes": {
+              "type": "KnowledgeNote[]",
+              "items": {
+                "type": "KnowledgeNote",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "text": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "selectedText": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "timestamp": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            },
+            "questions": {
+              "type": "KnowledgeQuestion[]",
+              "items": {
+                "type": "KnowledgeQuestion",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "question": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "answer": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "selectedText": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "timestamp": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "explain",
+          "description": "Generate (or regenerate) the lesson for a concept. Streams progress.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "conceptId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "simple",
+              "type": "boolean",
+              "required": false,
+              "description": "A shorter, simpler lesson."
+            }
+          ],
+          "responseShape": {
+            "lessonId": "string",
+            "lesson": "string"
+          }
+        },
+        {
+          "name": "saveLesson",
+          "description": "Save an edited lesson.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "lessonId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "content",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "saved": "boolean"
+          }
+        },
+        {
+          "name": "answerQuestion",
+          "description": "Answer a question about a lesson and keep it with the lesson. Streams progress.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "conceptId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "question",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "selectedText",
+              "type": "string",
+              "required": false,
+              "description": "The lesson text the question is about."
+            }
+          ],
+          "responseShape": {
+            "question": {
+              "type": "KnowledgeQuestion",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "required": true
+                },
+                "question": {
+                  "type": "string",
+                  "required": true
+                },
+                "answer": {
+                  "type": "string",
+                  "required": true
+                },
+                "selectedText": {
+                  "type": "string",
+                  "required": true
+                },
+                "timestamp": {
+                  "type": "number",
+                  "required": true
+                }
+              }
+            },
+            "relatedConcepts": {
+              "type": "KnowledgeRelatedConcept[]",
+              "items": {
+                "type": "KnowledgeRelatedConcept",
+                "properties": {
+                  "graphId": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "conceptId": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "routeKey": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "text": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "addNote",
+          "description": "Attach a note to a lesson.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "lessonId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "text",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "selectedText",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "note": {
+              "type": "KnowledgeNote",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "required": true
+                },
+                "text": {
+                  "type": "string",
+                  "required": true
+                },
+                "selectedText": {
+                  "type": "string",
+                  "required": true
+                },
+                "timestamp": {
+                  "type": "number",
+                  "required": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "deleteNote",
+          "description": "Remove a note from a lesson.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "lessonId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "noteId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "deleted": "boolean"
+          }
+        },
+        {
+          "name": "deleteQuestion",
+          "description": "Remove a question and its answer from a lesson.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "lessonId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "questionId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "deleted": "boolean"
+          }
+        },
+        {
+          "name": "recordLessonProgress",
+          "description": "Record what the learner did on a concept (activation answer, reflection, a Bloom-level answer) and\nrecompute its mastery: 0 nothing recorded, 1 one signal, 2 two or three, 3 four (an activation answer, a reflection, any Bloom\nanswer, three Bloom answers); once at 2 or above it is kept. A Bloom answer counts once per level; `correct` defaults to false and only a\ncorrect answer adds the level to the completed levels. `markLearned` stays authoritative (3 / 0).",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "conceptId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "activationResponse",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "reflection",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "bloomLevel",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "correct",
+              "type": "boolean",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "masteryLevel": "number"
+          }
+        },
+        {
+          "name": "markLearned",
+          "description": "Mark a concept learned (mastery 3) or not yet (0).",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "conceptId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "learned",
+              "type": "boolean",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "masteryLevel": "number"
+          }
+        },
+        {
+          "name": "visualization",
+          "description": "Choose a std learning instrument for a concept and generate its roster. Streams progress: `start`, then one `step` naming the chosen instrument.\nNo result is cached: every call generates afresh.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "conceptId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "markerDescription",
+              "type": "string",
+              "required": false,
+              "description": "What the lesson asks to visualise."
+            }
+          ],
+          "responseShape": {
+            "mode": "string",
+            "rosterJson": "string"
+          }
+        },
+        {
+          "name": "createGoalWithGraph",
+          "description": "Create a learning goal and its path from what the learner wants to learn. Streams progress: `delta`s, then one `step` carrying the goal title before it is saved.",
+          "params": [
+            {
+              "name": "anchorAnswer",
+              "type": "string",
+              "required": true,
+              "description": "The learner's answer to \"what do you want to learn?\"."
+            }
+          ],
+          "responseShape": {
+            "graphId": "string",
+            "goalTitle": "string"
+          }
+        },
+        {
+          "name": "importPreview",
+          "description": "Stage an import without writing anything.",
+          "params": [
+            {
+              "name": "adapter",
+              "type": "'markdown' | 'paste'",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "documents",
+              "type": "KnowledgeImportDocument[]",
+              "required": true,
+              "description": "",
+              "items": {
+                "type": "KnowledgeImportDocument",
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "title": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "raw": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
+          ],
+          "responseShape": {
+            "units": {
+              "type": "KnowledgeImportUnit[]",
+              "items": {
+                "type": "KnowledgeImportUnit",
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "targetEntity": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "title": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "parentRef": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            },
+            "errors": {
+              "type": "object[]",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "message": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "importCommit",
+          "description": "Import documents into a path (a new one when `graphId` is omitted).",
+          "params": [
+            {
+              "name": "adapter",
+              "type": "'markdown' | 'paste'",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "documents",
+              "type": "KnowledgeImportDocument[]",
+              "required": true,
+              "description": "",
+              "items": {
+                "type": "KnowledgeImportDocument",
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "title": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "raw": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            },
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "graphId": "string",
+            "committed": "number",
+            "failed": {
+              "type": "object[]",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "reason": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "importItems",
+          "description": "Commit an approved, already-structured proposal (items the learner reviewed) into a path (a new one when `graphId` is omitted; `title` names it, else the first item's title).\nEach item is `{ ref, targetEntity, title, parentRef, content, front?, back? }`, all strings: `ref` is the item's id inside the proposal; `parentRef` is another item's `ref`, or `''` for top level.\n`Concept` (title = name, content = its lesson text) may sit under a `LearningGoal` or `Concept`; `Lesson` (content = lesson text) and `FlashCard` (`front`/`back`, defaulting to title/content when omitted or blank) need a parent `Concept`; `LearningGoal` (title = name, content = description) is top level.\nItems are validated one by one: a blank title, duplicate `ref`, dangling or cyclic `parentRef`, or a parent of the wrong kind fails that item (and its descendants) in `failed` while the rest commit. A new path with nothing committed is removed and the call fails.",
+          "params": [
+            {
+              "name": "items",
+              "type": "KnowledgeImportItem[]",
+              "required": true,
+              "description": "",
+              "items": {
+                "type": "KnowledgeImportItem",
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "targetEntity": {
+                    "type": "'Concept' | 'Lesson' | 'FlashCard' | 'LearningGoal'",
+                    "required": true
+                  },
+                  "title": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "parentRef": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "content": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "front": {
+                    "type": "string",
+                    "required": false
+                  },
+                  "back": {
+                    "type": "string",
+                    "required": false
+                  }
+                }
+              }
+            },
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "title",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "graphId": "string",
+            "committed": "number",
+            "failed": {
+              "type": "object[]",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "reason": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "peers",
+          "description": "Other learners on the same concept or path. `nodeKey` is `concept:<canonicalKey>` (the concept's `canonicalKey`) or `path:<id>`.",
+          "params": [
+            {
+              "name": "nodeKey",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "peers": {
+              "type": "KnowledgePeer[]",
+              "items": {
+                "type": "KnowledgePeer",
+                "properties": {
+                  "peerRef": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "handle": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "conceptsCompleted": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "convergencePct": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "activeNow": {
+                    "type": "boolean",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "touchNode",
+          "description": "Record that the learner is on this concept or path, so peers can find them. `nodeKey` is `concept:<canonicalKey>` (the concept's `canonicalKey`) or `path:<id>`.",
+          "params": [
+            {
+              "name": "nodeKey",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "touched": "boolean"
+          }
+        },
+        {
+          "name": "openConnection",
+          "description": "Open an anonymous discussion with a peer.",
+          "params": [
+            {
+              "name": "peerRef",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "originKind",
+              "type": "'concept' | 'path'",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "canonicalId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "connectionId": "string"
+          }
+        },
+        {
+          "name": "connection",
+          "description": "One discussion with its topics and messages.",
+          "params": [
+            {
+              "name": "connectionId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "status": "'active' | 'archived'",
+            "peerHandle": "string",
+            "originKind": "'concept' | 'path'",
+            "originLabel": "string",
+            "badges": {
+              "type": "KnowledgeBadge[]",
+              "items": {
+                "type": "KnowledgeBadge",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "label": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "kind": {
+                    "type": "'subtopic' | 'friction'",
+                    "required": true
+                  },
+                  "active": {
+                    "type": "boolean",
+                    "required": true
+                  }
+                }
+              }
+            },
+            "messages": {
+              "type": "KnowledgeMessage[]",
+              "items": {
+                "type": "KnowledgeMessage",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "fromViewer": {
+                    "type": "boolean",
+                    "required": true
+                  },
+                  "content": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "createdAt": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "flagged": {
+                    "type": "boolean",
+                    "required": true
+                  },
+                  "moderationReason": {
+                    "type": "string",
+                    "required": true,
+                    "description": "Why moderation flagged it; empty when it has no reason."
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "setActiveBadge",
+          "description": "Choose the discussion topic.",
+          "params": [
+            {
+              "name": "connectionId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "badgeId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "saved": "boolean"
+          }
+        },
+        {
+          "name": "sendMessage",
+          "description": "Send a message in a discussion.",
+          "params": [
+            {
+              "name": "connectionId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "content",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "activeBadgeId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "messageId": "string"
+          }
+        },
+        {
+          "name": "conceptPersona",
+          "description": "The real person behind a concept, grounded in their public biography, for an in-character chat.",
+          "params": [
+            {
+              "name": "conceptLabel",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "context",
+              "type": "string",
+              "required": false,
+              "description": "The learner's subject, so an ambiguous concept resolves in the right field."
+            }
+          ],
+          "responseShape": {
+            "name": "string",
+            "description": "string",
+            "portraitUrl": "string",
+            "greeting": "string",
+            "instructions": "string"
+          }
+        },
+        {
+          "name": "conceptIcon",
+          "description": "An icon for a concept label.",
+          "params": [
+            {
+              "name": "label",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "icon": "string",
+            "tone": "'themed' | 'dark' | 'light' | 'none'"
+          }
+        },
+        {
+          "name": "getPreferences",
+          "description": "The learner's model choices for generating levels and lessons.",
+          "params": [],
+          "responseShape": {
+            "expandModel": "string",
+            "explainModel": "string"
+          }
+        },
+        {
+          "name": "setPreferences",
+          "description": "Change the learner's model choices.",
+          "params": [
+            {
+              "name": "expandModel",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "explainModel",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "saved": "boolean"
           }
         }
       ],

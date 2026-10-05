@@ -10,7 +10,7 @@ import { describe, it, expect } from 'vitest';
 import { asTraitId, isEntityReferenceAny } from '../src/types/index.js';
 import type { OrbitalDefinition, OrbitalPage, OrbitalSchema, PageTraitRef, Trait, TraitConfigValue, TraitReference } from '../src/types/index.js';
 import { navItemHref } from '../src/embedded-trait-config.js';
-import { composeAppFromFiles, composeOrbitalSurface, dedupeComposedIdentity, dedupeComposedSurface } from '../src/builders/compose-app.js';
+import { composeAppFromFiles, composeOrbitalSurface, dedupeComposedIdentity, dedupeComposedSurface, orbitalImportResolver } from '../src/builders/compose-app.js';
 import { composeBehaviors } from '../src/builders/compose-behaviors.js';
 
 
@@ -755,6 +755,56 @@ describe('composeAppFromFiles — per-orbital files composed into one app', () =
     expect(out.configNavItemsNarrowed).toEqual([]);
   });
 
+  // G-CORE-017 — an orbital IMPORT (`orbital X = Agent.orbitals.AgentAssistantOrbital { … }`) has
+  // `pages: []` until `orb resolve` expands it; its pages are its source's. Narrowing against the
+  // file's own pages alone dropped std-notes' `/assistant` entry and the published app failed
+  // ORB_PAGE_UNREACHABLE.
+  const assistantSource: OrbitalSchema = {
+    name: 'std-agent-assistant',
+    version: '1.0.0',
+    orbitals: [{ name: 'AgentAssistantOrbital', entity: 'AgentChat', traits: [], pages: [{ name: 'AssistantPage', path: '/assistant', traits: [] }] }],
+  };
+  const loadBehavior = (name: string): OrbitalSchema | null => (name === 'std-agent-assistant' ? assistantSource : null);
+  const importFile = (pages?: Record<string, string>): OrbitalSchema => ({
+    name: 'NotesAssistantOrbital',
+    version: '1.0.0',
+    orbitals: [{
+      name: 'NotesAssistantOrbital',
+      entity: 'Agent.orbitals.AgentAssistantOrbital.entity',
+      reference: { ref: 'Agent.orbitals.AgentAssistantOrbital', ...(pages !== undefined ? { pages } : {}) },
+      uses: [{ from: 'std/behaviors/std-agent-assistant', as: 'Agent' }],
+      traits: [],
+      pages: [],
+    }],
+  });
+
+  it("an imported orbital owns its source's pages: its nav entry survives, an unowned one is still dropped", () => {
+    const out = composeAppFromFiles([
+      organismFile('NoteOrbital', '/notes', navOf('/notes', '/assistant', '/gone')),
+      importFile(),
+    ], { appName: 'Notes', importedOrbitalOf: orbitalImportResolver(loadBehavior) });
+    expect(out.schema.config?.navItems).toEqual(navOf('/notes', '/assistant'));
+    expect(out.configNavItemsNarrowed).toEqual([{ knob: 'navItems', droppedHrefs: ['/gone'] }]);
+  });
+
+  it("an import's page remap is the path it owns", () => {
+    const out = composeAppFromFiles([
+      organismFile('NoteOrbital', '/notes', navOf('/notes', '/help', '/assistant')),
+      importFile({ '/assistant': '/help' }),
+    ], { appName: 'Notes', importedOrbitalOf: orbitalImportResolver(loadBehavior) });
+    expect(out.schema.config?.navItems).toEqual(navOf('/notes', '/help'));
+    expect(out.configNavItemsNarrowed).toEqual([{ knob: 'navItems', droppedHrefs: ['/assistant'] }]);
+  });
+
+  it('orbitalImportResolver: the source orbital through the import\'s uses alias; unknown alias or behavior resolves nothing', () => {
+    const resolve = orbitalImportResolver(loadBehavior);
+    const [declared] = importFile().orbitals;
+    expect(resolve(declared!)?.name).toBe('AgentAssistantOrbital');
+    expect(resolve({ ...declared!, uses: [] })).toBeUndefined();
+    expect(resolve({ ...declared!, uses: [{ from: 'std/behaviors/std-missing', as: 'Agent' }] })).toBeUndefined();
+    expect(resolve({ name: 'Plain', entity: 'Plain', traits: [], pages: [] })).toBeUndefined();
+  });
+
   it('control: bare definitions compose exactly as composeBehaviors does (no config, no ledger)', () => {
     const defs: OrbitalDefinition[] = [
       { name: 'A', entity: 'A.entity', traits: [], pages: [{ name: 'APage', path: '/', traits: [] }] },
@@ -923,8 +973,67 @@ describe('composeOrbitalSurface — every organism\'s landing page stays reachab
       file('PlannerPersonOrbital', 'TeamMembers', '/team-members', ['/workload']),
       file('WorkloadOrbital', 'Workload', '/workload', ['/workload']),
     ], { organismOf: (name) => organisms[name] });
-    expect(out.config?.navItems).toEqual({ type: '[NavItem]', default: [{ href: '/billing', label: '/billing' }, { href: '/workload', label: '/workload' }, { href: '/team-members', label: 'TeamMembers' }] });
+    // In roster order: the planner landing (orbital 1) sits ahead of Workload's entry (orbital 2).
+    expect(out.config?.navItems).toEqual({ type: '[NavItem]', default: [{ href: '/billing', label: '/billing' }, { href: '/team-members', label: 'TeamMembers' }, { href: '/workload', label: '/workload' }] });
     expect(out.landingNavAdded).toEqual([{ organism: 'planner', href: '/team-members' }]);
+  });
+
+  it('an earlier orbital\'s landing entry stays ahead of a later organism\'s nav (marketplace + added chat)', () => {
+    const bare = (orbital: string, pageName: string, path: string): OrbitalSchema => ({
+      name: orbital,
+      version: '1.0.0',
+      orbitals: [{ name: orbital, entity: `${orbital}.entity`, traits: [], pages: [{ name: pageName, path, traits: [] }] }],
+    });
+    const owners: Record<string, string> = { ListingOrbital: 'market', OfferOrbital: 'OfferOrbital', ChatOrbital: 'chat' };
+    const out = composeOrbitalSurface([
+      file('ListingOrbital', 'Listings', '/listings', ['/listings']),
+      bare('OfferOrbital', 'Offers', '/offer'),
+      file('ChatOrbital', 'Chat', '/chat', ['/chat']),
+    ], { organismOf: (name) => owners[name] });
+    const hrefs = (out.config?.navItems?.default as Array<{ href: string }>).map((n) => n.href);
+    expect(hrefs).toEqual(['/listings', '/offer', '/chat']);
+  });
+
+  it('links every orbital of an organism that declares no nav of its own (free-composed lines, a reused atom)', () => {
+    const bare = (orbital: string, pageName: string, path: string): OrbitalSchema => ({
+      name: orbital,
+      version: '1.0.0',
+      orbitals: [{ name: orbital, entity: `${orbital}.entity`, traits: [], pages: [{ name: pageName, path, traits: [] }] }],
+    });
+    const owners: Record<string, string> = {
+      ListingOrbital: 'market',
+      OfferOrbital: 'free-lolo',
+      ReviewOrbital: 'free-lolo',
+      WorkoutLogOrbital: 'std-browse',
+      FitnessGoalOrbital: 'std-browse',
+    };
+    const out = composeOrbitalSurface([
+      file('ListingOrbital', 'Listings', '/listings', ['/listings']),
+      bare('OfferOrbital', 'Offers', '/offers'),
+      bare('ReviewOrbital', 'Reviews', '/reviews'),
+      bare('WorkoutLogOrbital', 'Workouts', '/workouts'),
+      bare('FitnessGoalOrbital', 'Goals', '/goals'),
+    ], { organismOf: (name) => owners[name] });
+    const hrefs = (out.config?.navItems?.default as Array<{ href: string }>).map((n) => n.href);
+    expect(hrefs).toEqual(['/listings', '/offers', '/reviews', '/workouts', '/goals']);
+  });
+
+  it("a route rename never rewrites another file's nav entry for its OWN page (one atom backing two lines)", () => {
+    const own = (orbital: string, pageName: string, path: string): OrbitalSchema => ({
+      name: orbital,
+      version: '1.0.0',
+      config: { navItems: navOf(path) },
+      orbitals: [{ name: orbital, entity: `${orbital}.entity`, traits: [], pages: [{ name: pageName, path, traits: [] }] }],
+    });
+    const owners: Record<string, string> = { WorkoutLogOrbital: 'std-browse', FitnessGoalOrbital: 'std-browse' };
+    const out = composeOrbitalSurface(
+      [own('WorkoutLogOrbital', 'Workouts', '/browseitems'), own('FitnessGoalOrbital', 'Goals', '/browseitems')],
+      { organismOf: (name) => owners[name] },
+    );
+    const goalPath = (out.orbitals[1]!.pages![0] as { path: string }).path;
+    expect(goalPath).not.toBe('/browseitems');
+    const hrefs = (out.config?.navItems?.default as Array<{ href: string }>).map((n) => n.href);
+    expect(hrefs).toEqual(['/browseitems', goalPath]);
   });
 
   it('control: a landing page its organism already links is left alone', () => {

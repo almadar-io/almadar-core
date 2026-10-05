@@ -35,6 +35,7 @@ import type {
 } from '../types/index.js';
 import {
   isCallSiteConfigDeclaration,
+  isConfigFieldSchema,
   overrideDeclaredKnobs,
   persistenceModeAllowsOverrides,
   ledgerRename,
@@ -466,7 +467,7 @@ export function mergeCallSiteConfigOverrides(
 ): Record<string, CallSiteConfigEntry> {
   const next: Record<string, CallSiteConfigEntry> = {};
   for (const [k, entry] of Object.entries(base)) {
-    next[k] = isCallSiteConfigDeclaration(entry)
+    next[k] = isConfigFieldSchema(entry)
       ? entry
       : { type: 'unknown', default: entry };
   }
@@ -476,7 +477,7 @@ export function mergeCallSiteConfigOverrides(
       continue;
     }
     const existing = base[k];
-    next[k] = existing !== undefined && isCallSiteConfigDeclaration(existing)
+    next[k] = existing !== undefined && isConfigFieldSchema(existing)
       ? { ...existing, default: v }
       : { type: 'unknown', default: v };
   }

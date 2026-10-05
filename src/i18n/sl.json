@@ -85,7 +85,8 @@
     "delete": "izbrisi",
     "notify": "obvesti",
     "schedule": "razporedi",
-    "invoke": "sprozi"
+    "invoke": "sprozi",
+    "batch": "paket"
   },
   "annotations": {
     "key": "kljuc",
@@ -129,12 +130,14 @@
     "notify": "obvesti",
     "ref": "sklic",
     "call-service": "poklici-storitev",
+    "cancel-call": "preklici-klic",
     "invoke": "sprozi",
     "do": "naredi",
     "if": "ce",
     "let": "naj",
     "fn": "fn",
     "lambda": "lambda",
+    "quote": "citat",
     "match": "ujemaj",
     "when": "ko"
   },

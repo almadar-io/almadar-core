@@ -492,3 +492,44 @@ describe('deriveExpectations — atom-contributed entities', () => {
         expect(entityNames(schema, 'WriterOrbital', { loadBehavior })).not.toContain('ModQueueItm');
     });
 });
+
+// G-ORB-103 — an orbital IMPORT's `entities { Up: Own }` retargets onto an entity a SIBLING
+// declares (an organism's assistant records live as auxiliaries on the identity orbital).
+// Validated as its own file, the import promises those targets with `expects entity`.
+describe('deriveExpectations — an orbital import expects its remap targets', () => {
+    const app = (target: string): OrbitalSchema => ({
+        name: 'fixture-crm',
+        orbitals: [
+            {
+                name: 'TeamMemberOrbital',
+                entity: { name: 'TeamMember', identity: true, fields: [{ name: 'id', type: 'string', required: true }] },
+                auxiliaryEntities: [{ name: 'CrmAssistantChat', fields: [{ name: 'id', type: 'string', required: true }] }],
+                traits: [],
+                pages: [],
+            },
+            {
+                name: 'CrmAssistantOrbital',
+                entity: 'Agent.orbitals.AgentAssistantOrbital.entity',
+                uses: [{ as: 'Agent', from: 'std/behaviors/std-agent-assistant' }],
+                reference: { ref: 'Agent.orbitals.AgentAssistantOrbital', entities: { AgentChat: target } },
+                traits: [],
+                pages: [],
+            },
+        ],
+    });
+
+    it('a target a sibling declares becomes `expects entity`', () => {
+        const { expectations } = deriveExpectations(app('CrmAssistantChat'), 'CrmAssistantOrbital');
+        expect(expectations).toEqual([{ kind: 'entity', name: 'CrmAssistantChat' }]);
+    });
+
+    it('control: a target nobody declares is not invented', () => {
+        const { expectations } = deriveExpectations(app('NoSuchEntity'), 'CrmAssistantOrbital');
+        expect(expectations).toEqual([]);
+    });
+
+    it('control: the provider orbital itself expects nothing for its own entity', () => {
+        const { expectations } = deriveExpectations(app('CrmAssistantChat'), 'TeamMemberOrbital');
+        expect(expectations.filter((e) => e.kind === 'entity')).toEqual([]);
+    });
+});

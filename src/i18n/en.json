@@ -85,7 +85,8 @@
     "delete": "delete",
     "notify": "notify",
     "schedule": "schedule",
-    "invoke": "invoke"
+    "invoke": "invoke",
+    "batch": "batch"
   },
   "annotations": {
     "key": "key",
@@ -129,12 +130,14 @@
     "notify": "notify",
     "ref": "ref",
     "call-service": "call-service",
+    "cancel-call": "cancel-call",
     "invoke": "invoke",
     "do": "do",
     "if": "if",
     "let": "let",
     "fn": "fn",
     "lambda": "lambda",
+    "quote": "quote",
     "match": "match",
     "when": "when"
   },

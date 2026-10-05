@@ -235,7 +235,7 @@ export type EmitEffect = ['emit', string] | ['emit', string, EventPayload | stri
  * |------------------|---------------------------|
  * | `fetch`          | `success`, `failure`      |
  * | `persist`        | `success`, `failure`      |
- * | `call-service`   | `success`, `failure`      |
+ * | `call-service`   | `success`, `failure`, `cancelled` |
  * | `set`            | `success`                 |
  * | `ref`            | `on_change`, `failure`    |
  * | `os/watch-*`     | `on_message`, `failure`   |
@@ -252,6 +252,8 @@ export interface EmitConfig {
     success?: string;
     /** Fires when the effect throws; payload is `{ error: string }`. */
     failure?: string;
+    /** `call-service` only: fires when `cancel-call` aborts the call; payload is `{ key }`. */
+    cancelled?: string;
     /** Reactive-subscription event (per update for `ref`). */
     on_change?: string;
     /** Per-event fire for `os/watch-*` streams. */
@@ -354,7 +356,9 @@ export type PersistEffect =
     | ['persist', 'delete', string, PersistData, PersistEmitConfig]
     | ['persist', 'clear', string]
     | ['persist', 'clear', string, PersistData]
-    | ['persist', 'clear', string, PersistData, PersistEmitConfig];
+    | ['persist', 'clear', string, PersistData, PersistEmitConfig]
+    | ['persist', 'batch', SExpr]
+    | ['persist', 'batch', SExpr, PersistEmitConfig];
 
 /**
  * Call service effect - invokes an external service.
@@ -377,8 +381,18 @@ export type PersistEffect =
 /** Trailing config on `call-service`: outcome events, plus `onMessage` for
  *  the live messages a running call delivers to the requesting client. */
 export type CallServiceEmitConfig = {
-    emit?: { success?: string; failure?: string; onMessage?: string };
+    /** Expression evaluated at call time to a string; names the call for `cancel-call`. */
+    key?: SExpr;
+    emit?: { success?: string; failure?: string; cancelled?: string; onMessage?: string };
 };
+
+/**
+ * Cancel-call effect - aborts the in-flight `call-service` started with that
+ * key in the same running app; no-op when none is in flight. The cancelled
+ * call emits its `emit.cancelled` event with `{ key }`, never success/failure.
+ * @example ['cancel-call', '@entity.id']
+ */
+export type CancelCallEffect = ['cancel-call', SExpr];
 
 export type CallServiceEffect =
     | ['call-service', string, string]
@@ -802,6 +816,7 @@ export type TypedEffect =
     | SetEffect
     | PersistEffect
     | CallServiceEffect
+    | CancelCallEffect
     | SpawnEffect
     | DespawnEffect
     | DoEffect
@@ -896,7 +911,7 @@ export type Effect = TypedEffect;
 
 /** Every literal effect operator the {@link Effect} union declares, as runtime data. */
 export const EFFECT_OPERATORS = [
-  'render-ui', 'navigate', 'navigate-back', 'emit', 'set', 'persist', 'call-service', 'spawn',
+  'render-ui', 'navigate', 'navigate-back', 'emit', 'set', 'persist', 'call-service', 'cancel-call', 'spawn',
   'despawn', 'do', 'fetch', 'fetch-stream', 'if', 'when', 'let', 'log', 'wait', 'ref', 'deref',
   'swap', 'watch', 'atomic', 'async/delay', 'async/debounce', 'async/throttle', 'async/interval',
   'async/race', 'async/all', 'async/sequence', 'forward', 'train', 'evaluate', 'checkpoint/save',

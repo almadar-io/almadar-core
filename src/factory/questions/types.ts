@@ -51,8 +51,8 @@ export interface DomainQuestion {
    * Undefined when no distinct rationale exists.
    */
   reason?: string;
-  /** Orbital this question scopes to (matches
-   *  `FactoryCallSite.orbital`). */
+  /** Plan orbital this question scopes to (`FactoryCallSite.orbitalName`,
+   *  else `FactoryCallSite.orbital`). */
   orbitalName: string;
   /** Free-form capability tag this question explores. Set when the
    *  question was emitted from a factory trait's `capabilities[]`

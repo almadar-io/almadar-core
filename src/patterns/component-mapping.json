@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-04T14:06:38.010Z",
+  "exportedAt": "2026-10-05T16:34:46.367Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -1297,6 +1297,11 @@
     "agent-chat-feed": {
       "component": "AgentChatFeed",
       "importPath": "@/components/core/molecules/AgentChatFeed",
+      "category": "component"
+    },
+    "avl-transition-explainer": {
+      "component": "AvlTransitionExplainer",
+      "importPath": "@/components/avl/molecules/AvlTransitionExplainer",
       "category": "component"
     }
   }

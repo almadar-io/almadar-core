@@ -41,6 +41,7 @@ export type {
 } from './questions/index.js';
 export {
   deriveInputType,
+  factoryCallPlanOrbitalName,
   generateQuestions,
   answerToMutations,
   answersToMutations,

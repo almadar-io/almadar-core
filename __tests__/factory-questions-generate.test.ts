@@ -465,3 +465,25 @@ describe('generateQuestions — structural carriers', () => {
     expect(Object.keys(q?.objectSchema ?? {})).toEqual(['width', 'height']);
   });
 });
+
+// A plan line may hold a catalog orbital under the user's own name (rabit's
+// `catalogOrbital`). Its questions — and the mutations that answer them —
+// belong to that plan orbital; the signature is still the catalog one.
+describe('generateQuestions — a call site under the plan\'s own orbital name', () => {
+  it('keys ids and mutations on `orbitalName`, resolving the signature through `orbital`', () => {
+    const call: FactoryCallSite = { ...makeCall(), orbitalName: 'CatalogItemOrbital' };
+    const result = generateQuestions([call], [ecommerceSignature]);
+    const navQ = result.find((q) => q.id === 'CatalogItemOrbital.ProductCatalog.navItems');
+    expect(navQ?.orbitalName).toBe('CatalogItemOrbital');
+    expect(result.every((q) => q.orbitalName === 'CatalogItemOrbital')).toBe(true);
+    expect(result.some((q) => q.id.startsWith('ProductOrbital.'))).toBe(false);
+  });
+
+  it('two plan orbitals from one catalog orbital get distinct questions', () => {
+    const a: FactoryCallSite = { ...makeCall(), orbitalName: 'WorkoutLogOrbital' };
+    const b: FactoryCallSite = { ...makeCall(), orbitalName: 'FitnessGoalOrbital' };
+    const ids = generateQuestions([a, b], [ecommerceSignature]).map((q) => q.id);
+    expect(ids).toContain('WorkoutLogOrbital.ProductCatalog.navItems');
+    expect(ids).toContain('FitnessGoalOrbital.ProductCatalog.navItems');
+  });
+});

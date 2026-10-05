@@ -37,6 +37,7 @@ import glassTheme from '../../themes/glass.json' with { type: 'json' };
 import gothicTheme from '../../themes/gothic.json' with { type: 'json' };
 import inkWashTheme from '../../themes/ink-wash.json' with { type: 'json' };
 import kawaiiTheme from '../../themes/kawaii.json' with { type: 'json' };
+import kflowTheme from '../../themes/kflow.json' with { type: 'json' };
 import kioskTheme from '../../themes/kiosk.json' with { type: 'json' };
 import linearCleanTheme from '../../themes/linear-clean.json' with { type: 'json' };
 import luxuryTheme from '../../themes/luxury.json' with { type: 'json' };
@@ -100,6 +101,7 @@ export const THEME_PRESETS: Record<string, ThemeDefinition> = {
   gothic: ThemeDefinitionSchema.parse(gothicTheme),
   'ink-wash': ThemeDefinitionSchema.parse(inkWashTheme),
   kawaii: ThemeDefinitionSchema.parse(kawaiiTheme),
+  kflow: ThemeDefinitionSchema.parse(kflowTheme),
   kiosk: ThemeDefinitionSchema.parse(kioskTheme),
   'linear-clean': ThemeDefinitionSchema.parse(linearCleanTheme),
   luxury: ThemeDefinitionSchema.parse(luxuryTheme),

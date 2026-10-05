@@ -89,14 +89,14 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
       Object.entries(grouped).map(([cat, items]) => [cat, items.length]),
     );
     expect(counts).toMatchObject({
-      component: 107,
+      component: 108,
       display: 31,
       filter: 4,
       form: 10,
       game: 36,
       media: 1,
     });
-    expect(names.length).toBe(236);
+    expect(names.length).toBe(237);
   });
 
   it('admits the drifted patterns by name, not just by count', () => {

@@ -46,6 +46,7 @@ export {
   dedupeComposedIdentity,
   dedupeComposedSurface,
   orbitalEntityName,
+  orbitalImportResolver,
 } from './compose-app.js';
 export { type EntityRenameBlocker, type RenameEntityOptions, atomTraitResolver, entityRenameBlockers, renameEntity, renameEntityInSchema, renameOrbital } from './rename-entity.js';
 export { orbitalRouteSlug } from './route-slug.js';

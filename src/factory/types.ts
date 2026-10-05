@@ -540,7 +540,14 @@ export interface FactorySignatureCatalog {
  */
 export interface FactoryCallSite {
   organism: string;
+  /** The catalog orbital the factory builds (signature key). */
   orbital: string;
+  /**
+   * The plan's own name for this orbital when it differs from `orbital` — a
+   * line built from a catalog orbital under the user's name. Questions and
+   * the answers that mutate the plan key on it; absent ⇒ `orbital`.
+   */
+  orbitalName?: string;
   factoryPath: string;
   params: FactoryCallSiteParams;
 }

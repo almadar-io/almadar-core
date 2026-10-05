@@ -68,6 +68,9 @@ export type FieldType =
     // Rust compiler accepts; the TS mirror must carry them or generated
     // factories fail DTS (docs/Almadar_LOLO_Gaps.md L-6).
     | 'scalar'
+    // An S-expression as data — atom, list or options object (a transition's
+    // guard / effect args); config-only (G-ORB-093).
+    | 'SExpr'
     | 'union';
 
 /** Every `FieldType`, as a runtime array. Downstream imports this instead of
@@ -96,6 +99,7 @@ export const FIELD_TYPES = [
     'node',
     'event',
     'scalar',
+    'SExpr',
     'union',
 ] as const satisfies readonly FieldType[];
 
@@ -118,7 +122,6 @@ export const FieldTypeSchema = z.enum(FIELD_TYPES);
  *  held together by a one-directional pinned test (see G-i18n-5). */
 export const TYPE_POSITION_ONLY = [
     'Map',
-    'SExpr',
     'any',
     'asset',
     'bool',
@@ -323,7 +326,8 @@ type ScalarFieldType =
     // Closed scalar transport union (`ControlValue`) — a real .lolo/.orb type
     // the compiler accepts in payloads and map values; the TS mirror must carry
     // it or generated factories fail DTS (docs/Almadar_LOLO_Gaps.md L-6).
-    | 'scalar';
+    | 'scalar'
+    | 'SExpr';
 
 /** Fields shared across every variant. */
 type EntityFieldBase = {
@@ -552,6 +556,7 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
             scalarVariant('money'),
             scalarVariant('file'),
             scalarVariant('scalar'),
+            scalarVariant('SExpr'),
             // Enum variant — REQUIRES non-empty values.
             z.object({
                 ...baseFieldShape,
