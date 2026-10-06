@@ -753,14 +753,31 @@ function collectOwnedPages(
   const traitNames = new Set<string>();
   for (const orbital of orbitals) {
     collectOwnedSurface(cloneOrbitalNode(orbital), owned, traitNames);
-    if (orbital.reference === undefined || importedOrbitalOf === undefined) continue;
-    const remap = orbital.reference.pages ?? {};
-    for (const page of importedOrbitalOf(orbital)?.pages ?? []) {
-      if (isPageReference(page) || typeof page.path !== 'string') continue;
-      owned.add(remap[page.path] ?? page.path);
-    }
+    if (importedOrbitalOf === undefined) continue;
+    for (const path of importedPagePaths(orbital, importedOrbitalOf, new Set())) owned.add(path);
   }
   return owned;
+}
+
+/** The local page paths an orbital import owns: its upstream's pages (through nested imports), minus `omit`, remapped. */
+function importedPagePaths(
+  orbital: OrbitalDefinition,
+  importedOrbitalOf: (orbital: OrbitalDefinition) => OrbitalDefinition | undefined,
+  seen: Set<OrbitalDefinition>,
+): string[] {
+  const reference = orbital.reference;
+  if (reference === undefined || seen.has(orbital)) return [];
+  seen.add(orbital);
+  const upstream = importedOrbitalOf(orbital);
+  if (upstream === undefined) return [];
+  const upstreamPaths: string[] = [];
+  for (const page of upstream.pages ?? []) {
+    if (!isPageReference(page) && typeof page.path === 'string') upstreamPaths.push(page.path);
+  }
+  upstreamPaths.push(...importedPagePaths(upstream, importedOrbitalOf, seen));
+  const omitted = new Set(reference.omit ?? []);
+  const remap = reference.pages ?? {};
+  return upstreamPaths.filter((path) => !omitted.has(path)).map((path) => remap[path] ?? path);
 }
 
 /**

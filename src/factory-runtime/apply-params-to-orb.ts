@@ -659,6 +659,13 @@ export function applyDeclarationTraitRenames(
   return { ...schema, orbitals, ...(ledger !== schema.ledger ? { ledger } : {}) };
 }
 
+/** The entity name an orbital declares: its inline entity's, or an import's `reference.entity`. */
+export function declaredEntityName(orbital: OrbitalDefinition): string | null {
+  const entity = orbital.entity;
+  if (typeof entity === 'object' && entity !== null && typeof entity.name === 'string') return entity.name;
+  return orbital.reference?.entity ?? null;
+}
+
 /** A single entity display rename: `from` (canonical name at stamp) → `to`. */
 export interface EntityDeclarationRename {
   readonly from: string;
@@ -702,6 +709,15 @@ export function applyDeclarationEntityRename(
   const renamedEntityIds: string[] = [];
   const orbitals = schema.orbitals.map((orbital) => {
     const entity = orbital.entity;
+    if (orbital.reference !== undefined && orbital.reference.entity === rename.from) {
+      return {
+        ...orbital,
+        reference: { ...orbital.reference, entity: rename.to },
+        traits: orbital.traits.map((t): TraitInput =>
+          typeof t === 'object' && t !== null && linkedEntityIsFrom(t) ? { ...t, linkedEntity: rename.to } : t,
+        ),
+      };
+    }
     if (typeof entity !== 'object' || entity === null || entity.name !== rename.from) {
       return orbital;
     }

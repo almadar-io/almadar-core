@@ -218,6 +218,35 @@ function contributedEntitiesOf(
   return undefined;
 }
 
+/**
+ * The `[identity]` roster a reference-form orbital (`orbital X = A.orbitals.Y
+ * { entity E }`) brings in, named as the import renames it — the same entity
+ * the compiler materializes when it inlines the import.
+ */
+function importedIdentityOf(
+  o: OrbitalSchema['orbitals'][number],
+  loadBehavior: (behaviorName: string) => OrbitalSchema | null,
+  seen: Set<string>,
+): OrbitalEntity | undefined {
+  const reference = o.reference;
+  if (reference === undefined) return undefined;
+  const [alias, , upstreamName] = reference.ref.split('.');
+  const from = (o.uses ?? []).find((u) => u.as === alias)?.from;
+  if (from === undefined || upstreamName === undefined) return undefined;
+  const behaviorName = behaviorNameOf(from);
+  const key = `${behaviorName}.${upstreamName}`;
+  if (seen.has(key)) return undefined;
+  seen.add(key);
+  const upstream = loadBehavior(behaviorName)?.orbitals.find((u) => u.name === upstreamName);
+  if (upstream === undefined) return undefined;
+  const primary = asOrbitalEntity(upstream.entity);
+  const def = primary !== undefined
+    ? (primary.identity === true ? primary : undefined)
+    : importedIdentityOf(upstream, loadBehavior, seen);
+  if (def === undefined) return undefined;
+  return reference.entity !== undefined ? { ...def, name: reference.entity } : def;
+}
+
 /** Narrow an `EntityRef` to its inline definition, or undefined for a string ref. */
 function asOrbitalEntity(ref: EntityRef | undefined): OrbitalEntity | undefined {
   if (typeof ref === 'object' && ref !== null && 'fields' in ref) return ref as OrbitalEntity;
@@ -312,6 +341,12 @@ export function deriveExpectations(
   if (identityDef === undefined) {
     for (const o of schema.orbitals) {
       identityDef = inlineEntitiesOf(o).find((def) => def.identity === true);
+      if (identityDef !== undefined) break;
+    }
+  }
+  if (identityDef === undefined && loadBehavior !== undefined) {
+    for (const o of schema.orbitals) {
+      identityDef = importedIdentityOf(o, loadBehavior, new Set());
       if (identityDef !== undefined) break;
     }
   }

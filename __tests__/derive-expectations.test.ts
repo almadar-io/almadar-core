@@ -533,3 +533,89 @@ describe('deriveExpectations — an orbital import expects its remap targets', (
         expect(expectations.filter((e) => e.kind === 'entity')).toEqual([]);
     });
 });
+
+describe('deriveExpectations — an [identity] roster an orbital import supplies', () => {
+    const personFields: EntityField[] = [
+        { name: 'id', type: 'string', required: true },
+        { name: 'name', type: 'string', required: true },
+        { name: 'role', type: 'enum', values: ['member', 'staff'], default: 'member' },
+    ];
+    const identityAtom = (identity: boolean): OrbitalSchema => ({
+        name: 'std-identity',
+        orbitals: [{
+            name: 'IdentityOrbital',
+            entity: { name: 'Person', ...(identity ? { identity: true } : {}), fields: personFields.map((f) => ({ ...f })) },
+            traits: [],
+            pages: [],
+        }],
+    });
+    const wrapperAtom: OrbitalSchema = {
+        name: 'std-account-wrapper',
+        orbitals: [{
+            name: 'WrappedIdentityOrbital',
+            entity: 'Inner.orbitals.IdentityOrbital.entity',
+            uses: [{ as: 'Inner', from: 'almadar-behaviors/std-identity' }],
+            reference: { ref: 'Inner.orbitals.IdentityOrbital' },
+            traits: [],
+            pages: [],
+        }],
+    };
+    const greeter: Trait = {
+        name: 'Greeter',
+        scope: 'instance',
+        linkedEntity: 'Note',
+        stateMachine: {
+            states: [{ name: 'idle', isInitial: true }],
+            events: [{ key: 'INIT', name: 'Init' }],
+            transitions: [{ from: 'idle', to: 'idle', event: 'INIT', effects: [['render-ui', 'main', { type: 'typography', content: '@user.name' }]] }],
+        },
+    };
+    const app = (ref: string, from: string, rename?: string): OrbitalSchema => ({
+        name: 'shop',
+        orbitals: [
+            {
+                name: 'NotesPage',
+                entity: { name: 'Note', fields: [{ name: 'id', type: 'string', required: true }] },
+                traits: [greeter],
+                pages: [],
+            },
+            {
+                name: 'AccountPage',
+                entity: `${ref.split('.')[0]}.orbitals.${ref.split('.')[2]}.entity`,
+                uses: [{ as: ref.split('.')[0], from }],
+                reference: { ref, ...(rename !== undefined ? { entity: rename } : {}) },
+                traits: [],
+                pages: [],
+            },
+        ],
+    });
+    const loader = (identity: boolean) => (name: string): OrbitalSchema | null =>
+        name === 'std-identity' ? identityAtom(identity) : name === 'std-account-wrapper' ? wrapperAtom : null;
+    const identityOf = (schema: OrbitalSchema, identity: boolean) =>
+        deriveExpectations(schema, 'NotesPage', { loadBehavior: loader(identity) }).expectations.filter((e) => e.kind === 'identity');
+
+    it('names the identity after the import\'s local entity rename', () => {
+        const app1 = app('Identity.orbitals.IdentityOrbital', 'almadar-behaviors/std-identity', 'Customer');
+        expect(identityOf(app1, true)).toEqual([{ kind: 'identity', name: 'Customer', shape: [personFields[1]] }]);
+    });
+
+    it('keeps the upstream name when the import does not rename the entity', () => {
+        const app1 = app('Identity.orbitals.IdentityOrbital', 'almadar-behaviors/std-identity');
+        expect(identityOf(app1, true)).toEqual([{ kind: 'identity', name: 'Person', shape: [personFields[1]] }]);
+    });
+
+    it('follows a nested import down to the roster', () => {
+        const app1 = app('Wrap.orbitals.WrappedIdentityOrbital', 'almadar-behaviors/std-account-wrapper', 'Customer');
+        expect(identityOf(app1, true)).toEqual([{ kind: 'identity', name: 'Customer', shape: [personFields[1]] }]);
+    });
+
+    it('control: an imported entity that is not [identity] leaves the expectation bare', () => {
+        const app1 = app('Identity.orbitals.IdentityOrbital', 'almadar-behaviors/std-identity', 'Customer');
+        expect(identityOf(app1, false)).toEqual([{ kind: 'identity' }]);
+    });
+
+    it('control: without a loader the import cannot be seen, so the expectation stays bare', () => {
+        const app1 = app('Identity.orbitals.IdentityOrbital', 'almadar-behaviors/std-identity', 'Customer');
+        expect(deriveExpectations(app1, 'NotesPage').expectations.filter((e) => e.kind === 'identity')).toEqual([{ kind: 'identity' }]);
+    });
+});

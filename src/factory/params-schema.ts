@@ -52,6 +52,8 @@ export function signatureToParamsSchema(
   const traitRefValues = signature.traits.map((t) => `@trait.${t.name}`).sort();
   const traitProps: { [key: string]: JsonSchema } = {};
   for (const trait of signature.traits) {
+    // An imported trait is carried, not overridable at the call site.
+    if (trait.importedFrom !== undefined) continue;
     // A trait can never be its OWN content/sidebar slot — the compiler rejects
     // it as `ORB_BINDING_TRAIT_SELF_REFERENCE`. Offering it is an always-invalid
     // value in a closed enum: measured 1,238 of 1,238 trait-typed knobs carried

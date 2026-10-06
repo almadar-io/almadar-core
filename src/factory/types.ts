@@ -249,6 +249,10 @@ export interface FactoryTraitSignature {
    *  so each call-site `overridableConfigKeys` entry gets `type` /
    *  `items` / `properties` filled in from the canonical declaration. */
   ref?: string;
+  /** Set when the trait arrives through an orbital import
+   *  (`orbital X = A.orbitals.Y { … }`): the import's upstream orbital path. The trait is part of
+   *  what the orbital carries, but the import form cannot override it at the call site. */
+  importedFrom?: string;
   /** Event keys this trait emits (post-rename). */
   emittedEvents: ReadonlyArray<string>;
   /** Event keys this trait listens for. */
@@ -376,10 +380,12 @@ export interface FactoryPageSignature {
 
 /**
  * Which coordinator surface may see this entry: `'app'` = pickable factory
- * organism catalog, `'palette'` = free-lolo compose palette, `'both'`,
- * `'internal'` = neither.
+ * organism catalog (the domain's admin/back-office organism), `'experience'` =
+ * pickable as the user-facing product of a domain (composes the same atoms as
+ * its `'app'` organism; design and flow only), `'palette'` = free-lolo compose
+ * palette, `'both'`, `'internal'` = neither.
  */
-export type FactoryExposure = 'app' | 'palette' | 'both' | 'internal';
+export type FactoryExposure = 'app' | 'experience' | 'palette' | 'both' | 'internal';
 
 /**
  * `'generated'` = machine-emitted 1:1 wrapper (lolo-ui), `'authored'` =

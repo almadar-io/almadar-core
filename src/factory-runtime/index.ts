@@ -17,6 +17,7 @@ export {
   applyParamsToOrb,
   applyDeclarationTraitRenames,
   applyDeclarationEntityRename,
+  declaredEntityName,
   healEntityLedgerRows,
   healTraitLedgerRows,
   rebindInlineTraitEntity,

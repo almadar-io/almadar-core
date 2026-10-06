@@ -913,6 +913,58 @@ describe('composeAppFromFiles — per-orbital files composed into one app', () =
     expect(out.configNavItemsNarrowed).toEqual([{ knob: 'navItems', droppedHrefs: ['/assistant'] }]);
   });
 
+  const wrapperSource: OrbitalSchema = {
+    name: 'std-assistant-page',
+    version: '1.0.0',
+    orbitals: [{
+      name: 'AssistantPageOrbital',
+      entity: 'Agent.orbitals.AgentAssistantOrbital.entity',
+      reference: { ref: 'Agent.orbitals.AgentAssistantOrbital', pages: { '/assistant': '/ask' } },
+      uses: [{ from: 'std/behaviors/std-agent-assistant', as: 'Agent' }],
+      traits: [],
+      pages: [],
+    }],
+  };
+  const loadNested = (name: string): OrbitalSchema | null => (name === 'std-assistant-page' ? wrapperSource : loadBehavior(name));
+  const nestedImportFile = (reference: { pages?: Record<string, string>; omit?: string[] }): OrbitalSchema => ({
+    name: 'HelpOrbital',
+    version: '1.0.0',
+    orbitals: [{
+      name: 'HelpOrbital',
+      entity: 'Page.orbitals.AssistantPageOrbital.entity',
+      reference: { ref: 'Page.orbitals.AssistantPageOrbital', ...reference },
+      uses: [{ from: 'almadar-behaviors/std-assistant-page', as: 'Page' }],
+      traits: [],
+      pages: [],
+    }],
+  });
+
+  it('a nested import owns the pages its upstream import remaps, through every remap', () => {
+    const out = composeAppFromFiles([
+      organismFile('NoteOrbital', '/notes', navOf('/notes', '/help', '/ask', '/assistant')),
+      nestedImportFile({ pages: { '/ask': '/help' } }),
+    ], { appName: 'Notes', importedOrbitalOf: orbitalImportResolver(loadNested) });
+    expect(out.schema.config?.navItems).toEqual(navOf('/notes', '/help'));
+    expect(out.configNavItemsNarrowed).toEqual([{ knob: 'navItems', droppedHrefs: ['/ask', '/assistant'] }]);
+  });
+
+  it('a nested import without its own remap owns the upstream import\'s local path', () => {
+    const out = composeAppFromFiles([
+      organismFile('NoteOrbital', '/notes', navOf('/notes', '/ask')),
+      nestedImportFile({}),
+    ], { appName: 'Notes', importedOrbitalOf: orbitalImportResolver(loadNested) });
+    expect(out.schema.config?.navItems).toEqual(navOf('/notes', '/ask'));
+    expect(out.configNavItemsNarrowed).toEqual([]);
+  });
+
+  it('control: a page the import omits is not owned', () => {
+    const out = composeAppFromFiles([
+      organismFile('NoteOrbital', '/notes', navOf('/notes', '/assistant')),
+      { ...importFile(), orbitals: importFile().orbitals.map((o) => ({ ...o, reference: { ...o.reference!, omit: ['/assistant'] } })) },
+    ], { appName: 'Notes', importedOrbitalOf: orbitalImportResolver(loadBehavior) });
+    expect(out.configNavItemsNarrowed).toEqual([{ knob: 'navItems', droppedHrefs: ['/assistant'] }]);
+  });
+
   it('orbitalImportResolver: the source orbital through the import\'s uses alias; unknown alias or behavior resolves nothing', () => {
     const resolve = orbitalImportResolver(loadBehavior);
     const [declared] = importFile().orbitals;

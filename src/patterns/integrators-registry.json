@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-05T16:53:08.486Z",
+  "exportedAt": "2026-10-06T17:27:52.588Z",
   "integrators": {
     "github": {
       "name": "github",
@@ -3220,13 +3220,18 @@
                     "description": "The service answers with mock data (mock mode)."
                   },
                   "status": {
-                    "type": "'real' | 'mocked' | 'not configured'",
+                    "type": "'real' | 'emulated' | 'mocked' | 'not configured'",
                     "required": true,
-                    "description": "One word for what a call to this service does now."
+                    "description": "One word for what a call to this service does now; `emulated` runs on the local Firebase emulator."
                   },
                   "backend": {
                     "type": "'production' | 'simulated' | 'stub'",
                     "required": true
+                  },
+                  "needs": {
+                    "type": "string",
+                    "required": true,
+                    "description": "What a not-configured service is missing (env var names); empty otherwise."
                   }
                 }
               }
@@ -5082,7 +5087,7 @@
         },
         {
           "name": "expand",
-          "description": "Generate the path's next level of concepts. Streams progress: `delta`s, then one `step` per added concept name.",
+          "description": "Generate the path's next level of concepts. Streams progress: `delta`s, and one `step` per concept name as the model writes it.",
           "params": [
             {
               "name": "graphId",
@@ -5095,6 +5100,12 @@
               "type": "number",
               "required": false,
               "description": "How many concepts to add (default 10)."
+            },
+            {
+              "name": "difficulty",
+              "type": "GraphDifficulty",
+              "required": false,
+              "description": "The level the learner chose; recorded on the path's goal and used from then on."
             }
           ],
           "responseShape": {
@@ -5718,7 +5729,7 @@
         },
         {
           "name": "createGoalWithGraph",
-          "description": "Create a learning goal and its path from what the learner wants to learn. Streams progress: `delta`s, then one `step` carrying the goal title before it is saved.",
+          "description": "Create a learning goal and its path from what the learner wants to learn. Streams progress: `delta`s, and `step`s as the goal is read: its `title` and `description` as they grow, then each `milestone` once.",
           "params": [
             {
               "name": "anchorAnswer",
@@ -5729,7 +5740,10 @@
           ],
           "responseShape": {
             "graphId": "string",
-            "goalTitle": "string"
+            "goalTitle": "string",
+            "description": "string",
+            "milestones": "string[]",
+            "difficulty": "GraphDifficulty"
           }
         },
         {
