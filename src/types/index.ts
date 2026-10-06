@@ -326,9 +326,6 @@ export {
 export {
   ANONYMOUS_USER,
   DEFAULT_VIEWER,
-  DEV_TOKEN_PREFIX,
-  decodeDevIdentityToken,
-  encodeDevIdentityToken,
   findPersonaInRoster,
   normalizeUserContext,
   personaFromIdentityRow,
@@ -1042,6 +1039,7 @@ export {
   type StoreFilter,
   type RowPageRequest,
   type RowPage,
+  type PersistenceAdapter,
   type StoreContract,
   // Typed EventBus wrapper
   createTypedEventBus,

@@ -10,9 +10,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   ANONYMOUS_USER,
-  DEV_TOKEN_PREFIX,
-  decodeDevIdentityToken,
-  encodeDevIdentityToken,
   findPersonaInRoster,
   normalizeUserContext,
   personaFromIdentityRow,
@@ -71,41 +68,6 @@ describe('normalizeUserContext', () => {
   });
 });
 
-describe('dev identity token', () => {
-  const persona: UserContext = {
-    id: 'member-1',
-    name: 'Maya Member',
-    email: 'maya@example.com',
-    role: 'member',
-    permissions: ['read'],
-  };
-
-  it('round-trips the whole identity, not just the subject', () => {
-    const decoded = decodeDevIdentityToken(encodeDevIdentityToken(persona));
-    expect(decoded).toEqual(persona);
-    expect(decoded?.role).toBe('member');
-  });
-
-  it('produces a header-safe token', () => {
-    const token = encodeDevIdentityToken(persona);
-    expect(token.startsWith(DEV_TOKEN_PREFIX)).toBe(true);
-    expect(token).not.toMatch(/[\s"]/);
-  });
-
-  it('fails closed on anything that is not a well-formed dev token', () => {
-    expect(decodeDevIdentityToken('some.real.jwt')).toBeUndefined();
-    expect(decodeDevIdentityToken(DEV_TOKEN_PREFIX)).toBeUndefined();
-    expect(decodeDevIdentityToken(`${DEV_TOKEN_PREFIX}not-json`)).toBeUndefined();
-    expect(decodeDevIdentityToken(`${DEV_TOKEN_PREFIX}${encodeURIComponent('{"role":"admin"}')}`))
-      .toBeUndefined();
-  });
-
-  it('round-trips every declared persona', () => {
-    for (const p of ROSTER) {
-      expect(decodeDevIdentityToken(encodeDevIdentityToken(p))).toEqual(p);
-    }
-  });
-});
 
 describe('resolvePersonaSpec', () => {
   it('accepts a bare declared id or role', () => {

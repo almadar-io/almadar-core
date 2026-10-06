@@ -14,6 +14,7 @@
 
 import type { EventPayload, EventPayloadValue, LogMeta } from './types/expression.js';
 import type { ServiceParams } from './types/service.js';
+import type { EntityRow, FieldValue } from './types/entity.js';
 
 // ============================================================================
 // Service Action Names (generated from services-registry.json)
@@ -297,7 +298,7 @@ export type StoreFilterOp =
 export interface StoreFilter<T> {
   field: keyof T & string;
   op: StoreFilterOp;
-  value: unknown;
+  value: FieldValue | undefined;
 }
 
 /** One page of rows from a store: filters, then search, then sort, then the page. */
@@ -317,6 +318,24 @@ export interface RowPage<T> {
   rows: T[];
   /** Rows matching the filters and search, across all pages. */
   total: number;
+}
+
+/**
+ * Storage contract for CRUD operations on entity rows. The runtime's effect
+ * handlers and every database backend (`@almadar/db`) speak this interface.
+ */
+export interface PersistenceAdapter {
+  create(entityType: string, data: EntityRow): Promise<{ id: string }>;
+  update(entityType: string, id: string, data: EntityRow): Promise<void>;
+  delete(entityType: string, id: string): Promise<void>;
+  getById(entityType: string, id: string): Promise<EntityRow | null>;
+  list(entityType: string): Promise<EntityRow[]>;
+  /** Number of rows of `entityType`, without reading them; needed by a row quota. */
+  countRows?(entityType: string): Promise<number>;
+  /** Rows matching every filter, pushed down to the store where it can; absent = filter over `list`. */
+  query?(entityType: string, filters: readonly StoreFilter<EntityRow>[]): Promise<EntityRow[]>;
+  /** One page, pushed down to the store where it can; absent = page over `list`. */
+  listPage?(entityType: string, request: RowPageRequest<EntityRow>): Promise<RowPage<EntityRow>>;
 }
 
 /**
