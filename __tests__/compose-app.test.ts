@@ -10,7 +10,7 @@ import { describe, it, expect } from 'vitest';
 import { asTraitId, isEntityReferenceAny } from '../src/types/index.js';
 import type { OrbitalDefinition, OrbitalPage, OrbitalSchema, PageTraitRef, Trait, TraitConfigValue, TraitReference } from '../src/types/index.js';
 import { navItemHref } from '../src/embedded-trait-config.js';
-import { composeAppFromFiles, composeOrbitalSurface, dedupeComposedIdentity, dedupeComposedSurface, orbitalImportResolver } from '../src/builders/compose-app.js';
+import { composeAppFromFiles, composeOrbitalSurface, dedupeComposedIdentity, dedupeComposedSurface, orbitalImportResolver, organismOrderResolver } from '../src/builders/compose-app.js';
 import { composeBehaviors } from '../src/builders/compose-behaviors.js';
 
 
@@ -549,6 +549,123 @@ describe('dedupeComposedSurface — FIX-M (@trait.<old> tokens rewritten on inli
   });
 });
 
+// G-CORE-018 — an orbital imported from another organism expects THAT organism's identity, which
+// the composed app may hold only as a plain record (time tracking's `Employee` next to HR's
+// non-identity `Employee`) or not at all (the executive dashboard's `ExecutivePerson`). After
+// compose `@user` is the one winning identity either way.
+describe('dedupeComposedIdentity — an expected identity no orbital provides as identity', () => {
+  function roster(): OrbitalDefinition[] {
+    return [
+      {
+        name: 'TeamMemberOrbital',
+        entity: {
+          name: 'TeamMember',
+          persistence: 'persistent',
+          identity: true,
+          fields: [
+            { name: 'id', type: 'string', required: true },
+            { name: 'role', type: 'enum', values: ['manager'] },
+          ],
+        },
+        traits: [],
+        pages: [],
+      },
+      {
+        name: 'EmployeeOrbital',
+        entity: { name: 'Employee', persistence: 'persistent', fields: [{ name: 'id', type: 'string', required: true }] },
+        traits: [],
+        pages: [],
+      },
+      {
+        name: 'TimesheetOrbital',
+        entity: { name: 'Timesheet', persistence: 'persistent', fields: [{ name: 'id', type: 'string', required: true }] },
+        expects: [{ kind: 'identity', name: 'Employee', shape: [{ name: 'role', type: 'enum', values: ['employee', 'approver'] }] }],
+        traits: [],
+        pages: [],
+      },
+      {
+        name: 'ExecutiveOverviewOrbital',
+        entity: { name: 'ExecInvoice', persistence: 'persistent', fields: [{ name: 'id', type: 'string', required: true }] },
+        expects: [{ kind: 'identity', name: 'ExecutivePerson', shape: [{ name: 'role', type: 'enum', values: ['executive', 'department-head'] }] }],
+        traits: [],
+        pages: [],
+      },
+    ];
+  }
+
+  it('an expected identity held only as a plain record becomes `expects entity`, with no demotion needed', () => {
+    const orbitals = roster();
+    const { demotions, expectsRewrites } = dedupeComposedIdentity(orbitals);
+    expect(demotions).toEqual([]);
+    expect(expectsRewrites).toEqual([{ orbitalName: 'TimesheetOrbital', entityName: 'Employee' }]);
+    expect(orbitals[2]!.expects).toEqual([
+      { kind: 'entity', name: 'Employee', shape: [{ name: 'role', type: 'enum', values: ['employee', 'approver'] }] },
+    ]);
+  });
+
+  it("a rewritten expectation carries each shape field as the providing record declares it", () => {
+    const orbitals = roster();
+    orbitals[1] = {
+      ...orbitals[1]!,
+      entity: { name: 'Employee', persistence: 'persistent', fields: [{ name: 'id', type: 'string', required: true }, { name: 'email', type: 'email' }] },
+    };
+    orbitals[2] = { ...orbitals[2]!, expects: [{ kind: 'identity', name: 'Employee', shape: [{ name: 'email', type: 'email', required: true }, { name: 'badge', type: 'string', required: true }] }] };
+    dedupeComposedIdentity(orbitals);
+    expect(orbitals[2]!.expects).toEqual([
+      { kind: 'entity', name: 'Employee', shape: [{ name: 'email', type: 'email' }, { name: 'badge', type: 'string', required: true }] },
+    ]);
+  });
+
+  it("each such expectation's role vocabulary joins the winning identity's", () => {
+    const orbitals = roster();
+    const { roleUnions } = dedupeComposedIdentity(orbitals);
+    expect(roleUnions).toEqual([
+      { orbitalName: 'TeamMemberOrbital', entityName: 'TeamMember', field: 'role', addedLiterals: ['approver', 'department-head', 'employee', 'executive'] },
+    ]);
+  });
+
+  it('an expected identity no orbital provides at all stays an identity expectation', () => {
+    const orbitals = roster();
+    dedupeComposedIdentity(orbitals);
+    expect(orbitals[3]!.expects).toEqual([
+      { kind: 'identity', name: 'ExecutivePerson', shape: [{ name: 'role', type: 'enum', values: ['executive', 'department-head'] }] },
+    ]);
+  });
+
+  it('control: expectations naming the winner change nothing', () => {
+    const orbitals = roster().slice(0, 2);
+    orbitals.push({ ...roster()[2]!, expects: [{ kind: 'identity', name: 'TeamMember', shape: [{ name: 'role', type: 'enum', values: ['manager'] }] }] });
+    expect(dedupeComposedIdentity(orbitals)).toEqual({ demotions: [], roleUnions: [], expectsRewrites: [], relationsRetargeted: [] });
+  });
+
+  it("an owner field related to such an expected identity is retargeted to the winner; a data relation stays", () => {
+    const orbitals = roster();
+    orbitals[2] = {
+      ...orbitals[2]!,
+      entity: {
+        name: 'Timesheet',
+        persistence: 'persistent',
+        update_policy: ['==', '@entity.employeeId', '@user.id'],
+        fields: [
+          { name: 'id', type: 'string', required: true },
+          { name: 'employeeId', type: 'relation', relation: { entity: 'Employee', cardinality: 'one' } },
+          { name: 'approver', type: 'relation', relation: { entity: 'Employee', cardinality: 'one' } },
+        ],
+      },
+    };
+    const { relationsRetargeted } = dedupeComposedIdentity(orbitals);
+    expect(relationsRetargeted).toEqual([
+      { orbitalName: 'TimesheetOrbital', entityName: 'Timesheet', field: 'employeeId', fromEntity: 'Employee', toEntity: 'TeamMember' },
+    ]);
+  });
+
+  it('edge: without any identity in the app nothing is rewritten', () => {
+    const orbitals = roster().slice(1);
+    expect(dedupeComposedIdentity(orbitals).expectsRewrites).toEqual([]);
+    expect(orbitals[1]!.expects?.[0]?.kind).toBe('identity');
+  });
+});
+
 describe('dedupeComposedIdentity — FIX-N (owner-relation retarget on identity demotion)', () => {
   /**
    * The add-cross-organism-chat shape: Task.assignee / Task.reporter are
@@ -1036,6 +1153,28 @@ describe('composeOrbitalSurface — every organism\'s landing page stays reachab
     expect(hrefs).toEqual(['/browseitems', goalPath]);
   });
 
+  // G-CORE-018 — the roster took Workload before PlannerPerson; the planner organism DECLARES
+  // PlannerPerson first, so `/team-members` is its boot page and its own nav never links it.
+  const declared: Record<string, number> = { PlannerPersonOrbital: 0, WorkloadOrbital: 1 };
+  const plannerAfterWorkload = () => [
+    file('BillingOrbital', 'Billing', '/billing', ['/billing']),
+    file('WorkloadOrbital', 'Workload', '/workload', ['/workload']),
+    file('PlannerPersonOrbital', 'TeamMembers', '/team-members', ['/workload']),
+  ];
+
+  it("the organism's DECLARED first orbital is its landing, whatever the roster order", () => {
+    const out = composeOrbitalSurface(plannerAfterWorkload(), {
+      organismOf: (name) => organisms[name],
+      organismOrderOf: (name) => declared[name],
+    });
+    expect(out.landingNavAdded).toEqual([{ organism: 'planner', href: '/team-members' }]);
+  });
+
+  it('control: without declared order the first composed orbital stands in for the landing', () => {
+    const out = composeOrbitalSurface(plannerAfterWorkload(), { organismOf: (name) => organisms[name] });
+    expect(out.landingNavAdded).toEqual([]);
+  });
+
   it('control: a landing page its organism already links is left alone', () => {
     const out = composeOrbitalSurface([
       file('BillingOrbital', 'Billing', '/billing', ['/billing']),
@@ -1201,5 +1340,36 @@ describe('composeOrbitalSurface — two organisms bringing one atom\'s entity im
   it('control: the same atom with the same arguments is one entity, shared without a report', () => {
     const out = composeOrbitalSurface(files({ p: 'Deployment' }), { organismOf: (n) => organisms[n], atomTraitOf });
     expect(out.unrenamableCollisions).toEqual([]);
+  });
+});
+
+describe('organismOrderResolver — declared position by catalog orbital (G-CORE-018)', () => {
+  const planner: OrbitalSchema = {
+    name: 'std-capacity-planner',
+    orbitals: [
+      { name: 'PlannerPersonOrbital', entity: 'PlannerPerson', traits: [], pages: [] },
+      { name: 'CapacityPlannerOrbital', entity: 'CapacityTask', traits: [], pages: [] },
+    ],
+  };
+  const sources: Record<string, { organism: string; orbital: string }> = {
+    PlannerPersonOrbital: { organism: 'std-capacity-planner', orbital: 'PlannerPersonOrbital' },
+    WorkloadOrbital: { organism: 'std-capacity-planner', orbital: 'CapacityPlannerOrbital' },
+    GoneOrbital: { organism: 'std-missing', orbital: 'GoneOrbital' },
+  };
+  let loads = 0;
+  const orderOf = organismOrderResolver((name) => sources[name], (organism) => {
+    loads += 1;
+    return organism === 'std-capacity-planner' ? planner : null;
+  });
+
+  it('a renamed line keeps its catalog orbital\'s position; the organism loads once', () => {
+    expect(orderOf('PlannerPersonOrbital')).toBe(0);
+    expect(orderOf('WorkloadOrbital')).toBe(1);
+    expect(loads).toBe(1);
+  });
+
+  it('control: no catalog source, or an organism the registry lacks, has no position', () => {
+    expect(orderOf('FreeOrbital')).toBeUndefined();
+    expect(orderOf('GoneOrbital')).toBeUndefined();
   });
 });

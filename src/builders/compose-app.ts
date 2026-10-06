@@ -319,6 +319,10 @@ export function dedupeComposedSurface(orbitals: OrbitalDefinition[]): {
  *   A literal compared against a field the winner does not declare is a
  *   shape mismatch: compose fails with a deterministic error rather than
  *   silently shipping dead policy branches.
+ * A loser is a demoted identity, or an identity an orbital `expects` by name that no orbital
+ * provides as identity (composed from another organism): its role vocabulary joins the winner's,
+ * and its expectation is rewritten when the app holds it as a plain record.
+ *
  * - FIX-L — a composed `expects identity <Loser>` would fail the link-check
  *   (`ORB_S_EXPECTATION_PROVIDER_MISMATCH`) on every recompose; it is
  *   rewritten to `expects entity <Loser>` — the compiled path's own
@@ -350,12 +354,34 @@ export function dedupeComposedIdentity(orbitals: OrbitalDefinition[]): IdentityD
     demotions.push({ orbitalName: def.name, entityName: entity.name });
     demotedEntities.push(demoted);
   }
-  if (winnerIndex === -1 || demotions.length === 0) {
+  if (winnerIndex === -1) {
     return { demotions, roleUnions: [], expectsRewrites: [], relationsRetargeted: [] };
   }
-  const roleUnions = unionDemotedRoleVocabularies(orbitals, winnerIndex, demotedEntities);
-  const expectsRewrites = rewriteDemotedIdentityExpects(orbitals, demotions);
-  const relationsRetargeted = retargetDemotedOwnerRelations(orbitals, winnerIndex, demotions);
+  // An orbital composed from another organism expects that organism's identity by name; after
+  // compose `@user` is the winner, so a named identity nothing provides as identity is a loser too.
+  const winnerName = orbitalEntityName(orbitals[winnerIndex]!);
+  const demotedNames = new Set(demotions.map((d) => d.entityName));
+  const strayExpects: Array<{ name: string; shape: EntityField[] }> = [];
+  for (const def of orbitals) {
+    for (const e of def.expects ?? []) {
+      if (e.kind !== 'identity' || e.name === undefined || e.name === winnerName || demotedNames.has(e.name)) continue;
+      strayExpects.push({ name: e.name, shape: e.shape ?? [] });
+    }
+  }
+  if (demotions.length === 0 && strayExpects.length === 0) {
+    return { demotions, roleUnions: [], expectsRewrites: [], relationsRetargeted: [] };
+  }
+  const providedNames = new Set(orbitals.flatMap((def) => inlineEntitiesOf(def).map((e) => e.name)));
+  const roleUnions = unionDemotedRoleVocabularies(orbitals, winnerIndex, [
+    ...demotedEntities.map((d) => ({ name: d.name, fields: d.fields })),
+    ...strayExpects.map((e) => ({ name: e.name, fields: e.shape })),
+  ]);
+  const loserNames = new Set([
+    ...demotedNames,
+    ...strayExpects.map((e) => e.name).filter((name) => providedNames.has(name)),
+  ]);
+  const expectsRewrites = rewriteDemotedIdentityExpects(orbitals, loserNames);
+  const relationsRetargeted = retargetDemotedOwnerRelations(orbitals, winnerIndex, loserNames);
   return { demotions, roleUnions, expectsRewrites, relationsRetargeted };
 }
 
@@ -389,7 +415,8 @@ function withUnionedVocabulary(field: EntityField, missing: readonly string[]): 
 function unionDemotedRoleVocabularies(
   orbitals: OrbitalDefinition[],
   winnerIndex: number,
-  demotedEntities: ReadonlyArray<Entity>,
+  /** Each losing identity's fields: a demoted entity's, or a stray expectation's shape. */
+  demotedEntities: ReadonlyArray<{ name: string; fields: ReadonlyArray<EntityField> }>,
 ): IdentityRoleUnion[] {
   const winnerDef = orbitals[winnerIndex]!;
   const winnerEntity = winnerDef.entity;
@@ -493,14 +520,13 @@ function collectPersistedFields(node: unknown, entityName: string, out: Set<stri
 
 /**
  * FIX-L — rewrite composed-surface `expects identity <demoted>` → `expects entity <demoted>`.
- * An identity shape never bounded what the orbital persists; an entity shape does, so each field
- * the orbital persists to the entity joins the shape, declared as the entity declares it.
+ * An identity shape described `@user`, not the record; as an entity shape each field it names is
+ * carried as the entity declares it, and each field the orbital persists to the entity joins it.
  */
 function rewriteDemotedIdentityExpects(
   orbitals: OrbitalDefinition[],
-  demotions: readonly IdentityDemotion[],
+  demotedNames: ReadonlySet<string>,
 ): IdentityExpectsRewrite[] {
-  const demotedNames = new Set(demotions.map((d) => d.entityName));
   const entityByName = new Map<string, Entity>();
   for (const def of orbitals) for (const entity of inlineEntitiesOf(def)) entityByName.set(entity.name, entity);
   const rewrites: IdentityExpectsRewrite[] = [];
@@ -518,12 +544,13 @@ function rewriteDemotedIdentityExpects(
       collectPersistedFields(def.traits ?? [], e.name, persisted);
       const declared = new Set(e.shape.map((f) => f.name));
       const entity = entityByName.get(e.name);
+      const asDeclared = (field: EntityField): EntityField => entity?.fields.find((f) => f.name === field.name) ?? field;
       const added = [...persisted].sort().flatMap((field) => {
         if (declared.has(field)) return [];
         const own = entity?.fields.find((f) => f.name === field);
         return own !== undefined ? [own] : [];
       });
-      return { kind: 'entity', name: e.name, shape: [...e.shape, ...added] };
+      return { kind: 'entity', name: e.name, shape: [...e.shape.map(asDeclared), ...added] };
     });
     if (mutated) orbitals[i] = { ...def, expects: next };
   }
@@ -574,12 +601,11 @@ function retargetOwnerRelationFields(
 function retargetDemotedOwnerRelations(
   orbitals: OrbitalDefinition[],
   winnerIndex: number,
-  demotions: readonly IdentityDemotion[],
+  demotedNames: ReadonlySet<string>,
 ): IdentityRelationRetarget[] {
   const winnerDef = orbitals[winnerIndex]!;
   const winnerEntity = winnerDef.entity;
   if (winnerEntity === undefined || isEntityReferenceAny(winnerEntity)) return [];
-  const demotedNames = new Set(demotions.map((d) => d.entityName));
 
   const candidates = new Map<string, Set<string>>();
   const addAll = (entityName: string, fields: ReadonlySet<string>) => {
@@ -738,6 +764,27 @@ function collectOwnedPages(
 }
 
 /**
+ * `organismOrderOf` for a registry: an orbital's position among its organism's declared orbitals,
+ * by the catalog orbital it was built from (`catalogOrbitalOf`, rename-stable). Each organism is
+ * loaded once.
+ */
+export function organismOrderResolver(
+  catalogOrbitalOf: (orbitalName: string) => { organism: string; orbital: string } | undefined,
+  loadOrganism: (organism: string) => OrbitalSchema | null,
+): (orbitalName: string) => number | undefined {
+  const declared = new Map<string, string[] | null>();
+  return (orbitalName) => {
+    const source = catalogOrbitalOf(orbitalName);
+    if (source === undefined) return undefined;
+    if (!declared.has(source.organism)) {
+      declared.set(source.organism, loadOrganism(source.organism)?.orbitals.map((o) => o.name) ?? null);
+    }
+    const index = declared.get(source.organism)?.indexOf(source.orbital) ?? -1;
+    return index >= 0 ? index : undefined;
+  };
+}
+
+/**
  * `importedOrbitalOf` for a registry: an import's `reference.ref` (`Alias.orbitals.Name`)
  * resolved through the orbital's `uses` to the behavior it imports, then to that behavior's
  * orbital `Name`. `loadBehaviorOrb` is the caller's registry; each behavior is loaded once.
@@ -834,6 +881,8 @@ function linkLandingPages(
   organismOf: (orbitalName: string) => string | undefined,
   /** Orbitals whose own file declares a `[NavItem]` list — their organism links its other orbitals itself. */
   navDeclaringOrbitals: ReadonlySet<string>,
+  /** An orbital's position in its organism's declared orbitals; absent, composed order stands in. */
+  organismOrderOf?: (orbitalName: string) => number | undefined,
 ): { config: DeclaredTraitConfig; added: LandingNavResult[] } {
   const navKnobs = Object.entries(config).filter(([, field]) => field.type === '[NavItem]' && Array.isArray(field.default));
   if (navKnobs.length !== 1) return { config, added: [] };
@@ -862,7 +911,16 @@ function linkLandingPages(
     const organism = organismOf(name);
     if (organism !== undefined) navOrganisms.add(organism);
   }
-  const seenOrganisms = new Set<string>();
+  // Each organism's landing: its taken orbital declared first in the organism.
+  const landingOf = new Map<string, { name: string; rank: number }>();
+  orbitals.forEach((orbital, i) => {
+    const organism = organismOf(orbital.name);
+    if (organism === undefined || firstInlinePage(orbital) === undefined) return;
+    const rank = organismOrderOf?.(orbital.name) ?? orbitals.length + i;
+    const current = landingOf.get(organism);
+    if (current === undefined || rank < current.rank) landingOf.set(organism, { name: orbital.name, rank });
+  });
+  let bootOrganism: string | undefined;
   let booted = false;
   orbitals.forEach((orbital, i) => {
     const page = firstInlinePage(orbital);
@@ -870,11 +928,11 @@ function linkLandingPages(
     const organism = organismOf(orbital.name);
     if (!booted) {
       booted = true;
-      if (organism !== undefined) seenOrganisms.add(organism);
+      bootOrganism = organism;
       return;
     }
-    if (organism === undefined || (navOrganisms.has(organism) && seenOrganisms.has(organism))) return;
-    seenOrganisms.add(organism);
+    if (organism === undefined) return;
+    if (navOrganisms.has(organism) && (organism === bootOrganism || landingOf.get(organism)?.name !== orbital.name)) return;
     if (linked.has(page.path) || page.path.split('/').some((segment) => segment.startsWith(':'))) return;
     let at = 0;
     next.forEach((entry, p) => {
@@ -1119,6 +1177,12 @@ export interface ComposeSurfaceOptions {
    * own file follows.
    */
   organismOf?: (orbitalName: string) => string | undefined;
+  /**
+   * An orbital's position in its organism's declared orbitals. The first declared orbital boots
+   * the organism standalone, so composed behind another organism it is the landing page the nav
+   * must link; without it, the first composed orbital of the organism stands in.
+   */
+  organismOrderOf?: (orbitalName: string) => number | undefined;
   /** The atom's declaration of a referenced trait (see `RenameEntityOptions.atomTraitOf`); namespacing reads it. */
   atomTraitOf?: (orbital: OrbitalDefinition, traitRef: string) => Trait | undefined;
   /** An orbital import's source orbital (`orbitalImportResolver`); its pages count as owned when nav is narrowed. */
@@ -1240,7 +1304,7 @@ export function composeOrbitalSurface(
       if (!Object.values(f.config).some((entry) => entry.type === '[NavItem]')) continue;
       for (const o of f.orbitals) navDeclaringOrbitals.add(o.name);
     }
-    const linked = linkLandingPages(orbitals, config, options.organismOf, navDeclaringOrbitals);
+    const linked = linkLandingPages(orbitals, config, options.organismOf, navDeclaringOrbitals, options.organismOrderOf);
     config = linked.config;
     landingNavAdded = linked.added;
   }
@@ -1284,6 +1348,7 @@ export function composeAppFromFiles(
     ...(options.organismOf !== undefined ? { organismOf: options.organismOf } : {}),
     ...(options.atomTraitOf !== undefined ? { atomTraitOf: options.atomTraitOf } : {}),
     ...(options.importedOrbitalOf !== undefined ? { importedOrbitalOf: options.importedOrbitalOf } : {}),
+    ...(options.organismOrderOf !== undefined ? { organismOrderOf: options.organismOrderOf } : {}),
   });
   const result = composeBehaviors({
     appName: options.appName,
