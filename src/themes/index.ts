@@ -135,3 +135,5 @@ export const THEME_PRESETS: Record<string, ThemeDefinition> = {
   wireframe: ThemeDefinitionSchema.parse(wireframeTheme),
   zine: ThemeDefinitionSchema.parse(zineTheme),
 };
+
+export { MIN_TEXT_CONTRAST, contrastRatio, themeOverrideIssues, type ThemeOverrideIssue } from './contrast.js';

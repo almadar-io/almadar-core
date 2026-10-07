@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { mergeEntityFrame, omitFrameFields, resolveEntityView } from '../src/shared-entity/merge.js';
-import type { EntityFrameState } from '../src/shared-entity/merge.js';
+import type { EntityFieldWrite, EntityFrameState } from '../src/shared-entity/merge.js';
 
 describe('mergeEntityFrame', () => {
     it('preserves fields untouched by the writes (field-level, not whole-object replace)', () => {
@@ -92,4 +92,20 @@ describe('omitFrameFields', () => {
         expect(result).toEqual({ id: 'r1', name: 'Ada' });
         expect(row).toEqual({ id: 'r1', name: 'Ada', draftTitle: 'x', otherField: 'y' });
     });
+});
+
+/**
+ * A write carries the frame's own value type (`EntityRow`'s `FieldValue | undefined`):
+ * a compiled `[shared]` tick writer copies a frame read straight back
+ * (`value: lost ? lives - 1 : scratch.lives`), and `scratch.lives` may be absent.
+ * Pinned at the type level (core's typecheck covers this file) and at runtime.
+ */
+describe('EntityFieldWrite value type', () => {
+  it('accepts a value read back from the frame, absent included', () => {
+    const frame: EntityFrameState = { lives: 3 };
+    const writes: EntityFieldWrite[] = [{ field: 'lives', value: frame.score }, { field: 'score', value: 1 }];
+    const next = mergeEntityFrame(frame, writes);
+    expect(next.lives).toBeUndefined();
+    expect(next.score).toBe(1);
+  });
 });

@@ -8,9 +8,10 @@ Every open gap this repo owns lives here. This file is the source of truth; the 
 - **Close by deleting.** Remove the entry in the same commit as the fix. There is no "closed" section; git history is the record.
 - **Cross-repo gaps don't go here.** If fixing it needs another repo, describe it in your report or PR body; the monorepo coordinator files it.
 
-Next code: `G-CORE-020`
+Next code: `G-CORE-022`
 
 ## Open gaps
+
 
 - **G-CORE-019** — Seeded mock dates straddle today by ±120 days (`SEEDED_DATE_WINDOW_DAYS`, twin `seed.rs`) and a field cannot declare its tense, so a "posted at" timestamp seeds future dates (a social feed shows posts dated next month). Needs a declared, non-heuristic way to say a datetime records the past or the future: core `mock/sampleValue.ts`, orbital-core `runtime/seed.rs` and the `.lolo` surface. [owner-decision] — found 2026-10-06
 - **G-CORE-016** — `OrbitalDefinition.traits` is typed `TraitRef[]`, whose object form omits fields a `.orb` reference trait carries and `TraitReference` declares (`typeArgs`, `linkedEntityId`, `eventIds`, `from`, …). Code reading a parsed `.orb` (rename, composition) cannot type a reference's `typeArgs` without a JSON round trip. Converge `TraitRef`'s object form onto `TraitReference` (contract change, owner sign-off; Rust twin `orbital-core` `TraitReference`). `@almadar/core` `src/types/orbital.ts` + `trait.ts` [architectural] — found 2026-10-04 (renameEntity typeArgs)

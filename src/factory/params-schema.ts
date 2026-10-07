@@ -436,6 +436,15 @@ function knobToSchema(
 // ============================================================================
 
 function entityFieldToSchema(field: EntityField): JsonSchema {
+  // A union's `properties` are its VARIANTS by name, not members: offer one
+  // closed shape per variant so a value is exactly one of them.
+  if (field.type === 'union') {
+    const variants = field.values
+      .map((name) => field.properties?.[name])
+      .filter((v): v is EntityField => v !== undefined);
+    if (variants.length === 0) return {};
+    return { oneOf: variants.map((v) => ({ ...entityFieldToSchema(v), additionalProperties: false })) };
+  }
   const out: JsonSchema = {};
   const baseType = mapEntityFieldType(field.type);
   if (baseType !== null) out.type = baseType;
@@ -523,6 +532,7 @@ function mapKnobType(knobType: string): JsonSchemaType | null {
     case 'icon':
     case 'asset':
     case 'event':
+    case 'EventAddress':
     case 'date':
       return 'string';
     case 'render-ui':
@@ -585,6 +595,7 @@ export function mapEntityFieldType(fieldType: string): JsonSchemaType | null {
     // — this function fell to `default: null`, leaving struct-field
     // `event` members with NO json-schema type — was the bug).
     case 'event':
+    case 'EventAddress':
       return 'string';
     // Polymorphic renderable content: a node accepts a string leaf OR a
     // render-ui tree — no JSON-Schema `type` constraint, mirroring

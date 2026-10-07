@@ -19,7 +19,8 @@ import type { EntityRow, FieldValue } from '../types/entity.js';
  */
 export interface EntityFieldWrite {
   readonly field: string;
-  readonly value: FieldValue;
+  /** The frame's own value type (`EntityRow`'s): a writer may copy an absent field back. */
+  readonly value: FieldValue | undefined;
 }
 
 /**

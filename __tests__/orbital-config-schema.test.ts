@@ -30,6 +30,36 @@ const baseOrbital = {
 };
 
 describe('OrbitalSchemaSchema.config (organism-level declared knobs)', () => {
+    it.each(['EventAddress', 'event', 'string'])('round-trips nested tool input type %s', (type) => {
+        const tools = {
+            type: '[AgentTool]',
+            default: [{ event: 'Tasks.Persistor.CREATE' }],
+            items: {
+                type: 'union',
+                values: ['AgentToolInput'],
+                properties: {
+                    AgentToolInput: {
+                        name: 'AgentToolInput',
+                        type: 'object',
+                        properties: { event: { name: 'event', type, required: true } },
+                    },
+                },
+            },
+        };
+        const parsed = OrbitalSchemaSchema.parse({
+            name: 'assistant', orbitals: [{ ...baseOrbital, config: { tools } }],
+        });
+        expect(parsed.orbitals[0].config?.tools).toEqual(tools);
+    });
+
+    it('rejects an unsupported nested tool field type', () => {
+        const result = OrbitalSchemaSchema.safeParse({
+            name: 'assistant', orbitals: [baseOrbital],
+            config: { tool: { type: 'object', properties: { event: { name: 'event', type: 'InvalidAddressType' } } } },
+        });
+        expect(result.success).toBe(false);
+    });
+
     it('round-trips a declared config block', () => {
         const input = {
             name: 'std-notes',

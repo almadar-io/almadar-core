@@ -1,3 +1,4 @@
+import { isPageReference, type OrbitalSchema, type Page } from './types/index.js';
 /**
  * Route matching — the one resolver from a concrete path to a declared page
  * pattern (`/appointments/:id`), shared by the UI router, the verifiers and
@@ -107,4 +108,17 @@ export function matchPathAmong<T>(
   }
 
   return best === null ? null : { candidate: best.candidate, params: best.params };
+}
+
+/**
+ * The page an app shows when no page matches its route: the first inline page of the first orbital
+ * that declares one. The runtime's navigation default and runtime-verify's boot probe both read it.
+ */
+export function defaultPage(schema: OrbitalSchema): { page: Page; orbitalName: string } | null {
+  for (const orbital of schema.orbitals) {
+    for (const page of orbital.pages ?? []) {
+      if (!isPageReference(page)) return { page, orbitalName: orbital.name };
+    }
+  }
+  return null;
 }

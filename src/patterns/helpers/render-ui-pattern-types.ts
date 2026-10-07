@@ -70,7 +70,7 @@ function collectRenderUiEntries(effect: EffectNode, out: RenderUiEntry[]): void 
 }
 
 /** The effects a control form runs; empty for every other effect. */
-function controlBody(effect: Effect | SExpr[]): readonly EffectNode[] {
+export function controlBody(effect: Effect | SExpr[]): readonly EffectNode[] {
   switch (effect[0]) {
     case 'do':
     case 'atomic':

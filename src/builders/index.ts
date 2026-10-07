@@ -44,6 +44,8 @@ export {
   composeAppFromFiles,
   composeOrbitalSurface,
   dedupeComposedIdentity,
+  identityVocabularyDelta,
+  type IdentityVocabularyDelta,
   dedupeComposedSurface,
   orbitalEntityName,
   orbitalImportResolver,

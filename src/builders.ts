@@ -54,6 +54,8 @@ export {
   composeOrbitalSurface,
   dedupeComposedIdentity,
   dedupeComposedSurface,
+  identityVocabularyDelta,
+  type IdentityVocabularyDelta,
   orbitalEntityName,
   orbitalImportResolver,
   organismOrderResolver,

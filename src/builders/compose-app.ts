@@ -404,6 +404,34 @@ function withUnionedVocabulary(field: EntityField, missing: readonly string[]): 
   return field;
 }
 
+export interface IdentityVocabularyDelta {
+  /** The identity's closed-vocabulary fields, widened — a same-named field delta replaces the canonical one. */
+  fields: EntityField[];
+  added: Array<{ field: string; literals: string[] }>;
+}
+
+/**
+ * The literals other orbitals compare `@user.<field>` against that the identity's closed vocabulary
+ * lacks, as a field delta the plan applies to the identity line (G-RABIT-036).
+ */
+export function identityVocabularyDelta(identity: Entity, others: ReadonlyArray<OrbitalDefinition>): IdentityVocabularyDelta {
+  const delta: IdentityVocabularyDelta = { fields: [], added: [] };
+  for (const field of identity.fields ?? []) {
+    if (typeof field.name !== 'string') continue;
+    const vocab = fieldVocabulary(field);
+    if (vocab === null) continue;
+    const referenced = new Set<string>();
+    for (const def of others) {
+      collectFieldComparisonLiterals(def, { entityName: identity.name, isIdentity: true, scopeEntityName: orbitalEntityName(def), field: field.name }, referenced);
+    }
+    const missing = [...referenced].filter((l) => !vocab.includes(l)).sort();
+    if (missing.length === 0) continue;
+    delta.fields.push(withUnionedVocabulary(field, missing));
+    delta.added.push({ field: field.name, literals: missing });
+  }
+  return delta;
+}
+
 /**
  * FIX-K — union the role literals a demoted identity's organism hardcoded in
  * its baked policies into the winning identity entity's vocabulary. Field

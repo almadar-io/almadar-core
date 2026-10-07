@@ -5,7 +5,8 @@
  * comparator left `/appointments/:id` ahead of it.
  */
 import { describe, it, expect } from 'vitest';
-import { matchPathAmong, pathMatchesPattern } from '../index';
+import { defaultPage, matchPathAmong, pathMatchesPattern } from '../index';
+import type { OrbitalDefinition, OrbitalSchema } from '../index';
 
 const healthcare = ['/patients', '/patients/upload', '/patients/:id', '/appointments/waitlist', '/appointments',
   '/appointments/reminder', '/appointments/:id', '/my-appointments', '/intake', '/prescriptions/refill-requests',
@@ -39,5 +40,24 @@ describe('pathMatchesPattern follows the same matcher', () => {
   it('matches with a trailing slash and rejects a segment-count mismatch', () => {
     expect(pathMatchesPattern('/appointments/7/', '/appointments/:id')).toBe(true);
     expect(pathMatchesPattern('/appointments', '/appointments/:id')).toBe(false);
+  });
+});
+
+describe('defaultPage — the page an app shows when no page matches its route', () => {
+  const page = (name: string, path: string) => ({ name, path, traits: [{ ref: `${name}View` }] });
+  const orbital = (name: string, pages: OrbitalDefinition['pages']): OrbitalDefinition => ({ name, entity: { name: `${name}Item`, fields: [] }, traits: [], pages });
+
+  it('is the first inline page of the first orbital that declares one', () => {
+    const schema: OrbitalSchema = { name: 'shop', orbitals: [orbital('Shop', [page('Shop', '/shop'), page('Cart', '/cart')]), orbital('Orders', [page('Orders', '/orders')])] };
+    expect(defaultPage(schema)).toEqual({ page: page('Shop', '/shop'), orbitalName: 'Shop' });
+  });
+
+  it('skips page references and orbitals without pages', () => {
+    const schema: OrbitalSchema = { name: 'app', orbitals: [orbital('Rules', []), orbital('Shell', ['Other.pages.Home', page('Desk', '/desk')])] };
+    expect(defaultPage(schema)?.page.name).toBe('Desk');
+  });
+
+  it('control: no inline page anywhere, no default', () => {
+    expect(defaultPage({ name: 'atom', orbitals: [orbital('Rules', [])] })).toBeNull();
   });
 });

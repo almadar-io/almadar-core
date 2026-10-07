@@ -44,6 +44,8 @@ const lines: string[] = [
   ...names.map((n) => `  ${key(n)}: ThemeDefinitionSchema.parse(${identifier(n)}),`),
   '};',
   '',
+  "export { MIN_TEXT_CONTRAST, contrastRatio, themeOverrideIssues, type ThemeOverrideIssue } from './contrast.js';",
+  '',
 ];
 writeFileSync(OUT, lines.join('\n'));
 console.log(`✓ Generated ${OUT} (${names.length} presets)`);

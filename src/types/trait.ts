@@ -446,7 +446,7 @@ export const TraitCategorySchema = z.enum([
 // `scalar` and `union` are the closed transport/variant types — real
 // .lolo/.orb types, so the trait-side mirror must carry them or generated
 // factories fail DTS.
-export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum' | 'email' | 'url' | 'phone' | 'uuid' | 'image' | 'trait' | 'slot' | 'pattern' | 'node' | 'event' | 'scalar' | 'SExpr' | 'union';
+export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum' | 'email' | 'url' | 'phone' | 'uuid' | 'image' | 'trait' | 'slot' | 'pattern' | 'node' | 'event' | 'EventAddress' | 'scalar' | 'SExpr' | 'union' | 'tuple';
 
 /** Every `TraitFieldType`, as a runtime array — the ONE list `TraitEntityFieldSchema`
  *  and `RequiredFieldSchema` both read. Two separate inline copies of this enum had
@@ -472,9 +472,11 @@ export const TRAIT_FIELD_TYPES = [
     'pattern',
     'node',
     'event',
+    'EventAddress',
     'scalar',
     'SExpr',
     'union',
+    'tuple',
 ] as const satisfies readonly TraitFieldType[];
 
 /**
@@ -1172,18 +1174,8 @@ export const TraitReferenceSchema = z
  * Phase F adds `name` and `events` to the reference object form so callers
  * can rename the trait and remap atom event keys.
  */
-export type TraitRef =
-    | string
-    | {
-        ref: string;
-        config?: CallSiteConfig;
-        linkedEntity?: string;
-        name?: string;
-        events?: Record<string, string>;
-        /** Preprocess-output carrier (`preprocessSchema` only, never in a `.orb`). */
-        _resolved?: Trait;
-    }
-    | Trait;
+/** A trait in an orbital: a bare name, a reference (the full `TraitReference` the wire carries), or an inline trait. */
+export type TraitRef = string | TraitReference | Trait;
 
 // TraitRefSchema is defined after TraitSchema (see below) to avoid forward reference
 

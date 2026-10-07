@@ -137,6 +137,14 @@ function summarizeField(f: EntityField): EntityField {
       ...(f.required ? { required: true } : {}),
     };
   }
+  if (f.type === 'tuple') {
+    return {
+      ...(f.name !== undefined ? { name: f.name } : {}),
+      type: 'tuple',
+      properties: f.properties,
+      ...(f.required ? { required: true } : {}),
+    };
+  }
   return {
     ...(f.name !== undefined ? { name: f.name } : {}),
     type: f.type,

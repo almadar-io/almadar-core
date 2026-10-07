@@ -63,6 +63,9 @@ export type FieldType =
     // event key rather than free text (Phase B / SCAN-EVENT-KNOB-2). Legal
     // on struct-alias fields consumed by config knobs (e.g. `ItemAction.event`).
     | 'event'
+    // A value addressing a declared external input (`Trait.EVENT`,
+    // `Orbital.Trait.EVENT`) — never a bare name. See `EventAddress` in access/externalInputs.
+    | 'EventAddress'
     // Closed scalar transport union (`ControlValue`) and tagged struct union
     // (`type DrawItem = DrawShape | DrawText`) — real .lolo/.orb types the
     // Rust compiler accepts; the TS mirror must carry them or generated
@@ -71,7 +74,9 @@ export type FieldType =
     // An S-expression as data — atom, list or options object (a transition's
     // guard / effect args); config-only (G-ORB-093).
     | 'SExpr'
-    | 'union';
+    | 'union'
+    // Fixed-length tuple (`.lolo` `[T1, T2, …]`); slots ride `properties`, keyed by index.
+    | 'tuple';
 
 /** Every `FieldType`, as a runtime array. Downstream imports this instead of
  *  re-listing the union — five copies had already drifted apart. */
@@ -98,9 +103,11 @@ export const FIELD_TYPES = [
     'pattern',
     'node',
     'event',
+    'EventAddress',
     'scalar',
     'SExpr',
     'union',
+    'tuple',
 ] as const satisfies readonly FieldType[];
 
 /** The semantic string domains — constrained strings, validatable by value. */
@@ -323,6 +330,7 @@ type ScalarFieldType =
     | 'pattern'
     | 'node'
     | 'event'
+    | 'EventAddress'
     // Closed scalar transport union (`ControlValue`) — a real .lolo/.orb type
     // the compiler accepts in payloads and map values; the TS mirror must carry
     // it or generated factories fail DTS (docs/Almadar_LOLO_Gaps.md L-6).
@@ -413,8 +421,9 @@ export type RelationEntityField = EntityFieldBase & {
  * `type: 'union'` — a TAGGED union of struct variants (`.lolo`
  * `type DrawItem = DrawShape | DrawText`). `values` carries the variant NAMES
  * in declaration order; `properties` (from the base shape) carries each
- * variant's shape keyed by that name. The discriminator is the variant's own
- * literal-typed tag field, so selection is data-driven. Recursion is carried
+ * variant's shape keyed by that name. A value selects its variant by the
+ * variant's literal-typed tag field, else by the one closed shape it fits
+ * (orbital-core `select_union_variant`). Recursion is carried
  * BY NAME: a variant referring back to the union gets `values` with no
  * `properties` (mirrors `FieldType::Union` in orbital-core).
  */
@@ -432,6 +441,13 @@ export type ArrayEntityField = EntityFieldBase & {
     type: 'array';
     /** Element schema for the array. */
     items?: EntityField;
+};
+
+/** `type: 'tuple'` — a fixed-length tuple (`.lolo` `[T1, T2, …]`, Rust
+ *  `FieldType::Tuple`): each slot's schema rides `properties`, keyed `"0"`, `"1"`, …. */
+export type TupleEntityField = EntityFieldBase & {
+    type: 'tuple';
+    properties: Record<string, EntityField>;
 };
 
 /**
@@ -463,6 +479,7 @@ export type EntityField =
     | RelationEntityField
     | UnionEntityField
     | ArrayEntityField
+    | TupleEntityField
     | ObjectEntityField;
 
 /**
@@ -553,6 +570,7 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
             scalarVariant('pattern'),
             scalarVariant('node'),
             scalarVariant('event'),
+            scalarVariant('EventAddress'),
             scalarVariant('money'),
             scalarVariant('file'),
             scalarVariant('scalar'),
@@ -581,6 +599,12 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
                 ...baseFieldShape,
                 type: z.literal('array'),
                 items: EntityFieldSchema.optional(),
+            }),
+            // Tuple variant — slots in `properties`, keyed by index (at least one).
+            z.object({
+                ...baseFieldShape,
+                type: z.literal('tuple'),
+                properties: z.record(EntityFieldSchema).refine((p) => Object.keys(p).length > 0, 'Tuple field requires slots in `properties`'),
             }),
             // Object variant — fixed-key struct (`properties`) or dynamic-key
             // map (`Map K V`, uniform value schema in `items`).
