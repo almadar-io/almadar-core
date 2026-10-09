@@ -16,11 +16,15 @@
 import type { Entity, EntityPersistence, EntityRow } from './types/entity.js';
 import type { EntityField } from './types/field.js';
 import type { Page } from './types/page.js';
-import type { EntityRef, ExpectDeclaration, OrbitalDefinition, PageRef, PageRefObject, UseDeclaration } from './types/orbital.js';
+import type { EntityRef, ExpectDeclaration, OrbitalDefinition, OrbitalRefTraitOverride, PageRef, PageRefObject, UseDeclaration } from './types/orbital.js';
 import { isEntityCall, isEntityReference, parseEntityRef } from './types/orbital.js';
 import type { OrbitalSchema } from './types/schema.js';
-import type { TraitEventContract, TraitEventListener, Trait, TraitRef, TraitReference, TraitConfig, CallSiteConfig } from './types/trait.js';
+import type { TraitEventContract, TraitEventListener, Trait, TraitRef, TraitReference, TraitConfig, CallSiteConfig, DeclaredTraitConfig } from './types/trait.js';
 import type { SExpr } from './types/expression.js';
+import type { RuntimeValue } from './types/json.js';
+import { isOrbitalValue, OrbitalValueSchema, type OrbitalValue } from './types/behavior-value.js';
+import { mergeCallSiteConfigOverrides } from './types/trait.js';
+import { parseOrbitalSchema } from './types/schema.js';
 import type { EntityId } from './types/identity.js';
 
 // Re-export compose-behaviors module
@@ -397,6 +401,8 @@ export interface MakeOrbitalWithUsesOpts {
   traits: TraitRef[];
   /** Optional page references (omitted entirely when not provided). */
   pages?: PageRef[];
+  /** The orbital's own declared config knobs, threaded verbatim; omitted when not provided. */
+  config?: DeclaredTraitConfig;
 }
 
 /**
@@ -416,8 +422,60 @@ export function makeOrbitalWithUses(opts: MakeOrbitalWithUsesOpts): OrbitalDefin
     ...(opts.auxiliaryEntities !== undefined ? { auxiliaryEntities: opts.auxiliaryEntities } : {}),
     traits: opts.traits,
     pages: opts.pages ?? [],
+    ...(opts.config !== undefined ? { config: opts.config } : {}),
   };
   return orbital;
+}
+
+/** The alias an orbital value's import binds its source under (one import per orbital, so a fixed name is unambiguous). */
+export const ORBITAL_VALUE_IMPORT_ALIAS = 'Source';
+
+/**
+ * The import orbital an orbital value stands for (LOLO §8b): the value's
+ * behavior imported under {@link ORBITAL_VALUE_IMPORT_ALIAS}, its orbital
+ * referenced, and its recorded body as the reference body. Plain config values
+ * are wrapped into the IR's declaration form here.
+ */
+export function orbitalImportFromValue(value: OrbitalValue): OrbitalDefinition {
+  const { behavior, orbital, name, app, config, traits, ...body } = value;
+  const ref = `${ORBITAL_VALUE_IMPORT_ALIAS}.orbitals.${orbital}`;
+  const traitOverrides =
+    traits === undefined
+      ? undefined
+      : Object.fromEntries(
+          Object.entries(traits).map(([trait, overrides]): [string, OrbitalRefTraitOverride] => {
+            const { config: traitConfig, ...rest } = overrides;
+            return [trait, { ...rest, ...(traitConfig !== undefined ? { config: mergeCallSiteConfigOverrides({}, traitConfig) } : {}) }];
+          }),
+        );
+  return {
+    name: name ?? orbital,
+    uses: [{ from: behavior, as: ORBITAL_VALUE_IMPORT_ALIAS, ...(app !== undefined ? { config: mergeCallSiteConfigOverrides({}, app) } : {}) }],
+    entity: `${ref}.entity`,
+    traits: [],
+    pages: [],
+    reference: {
+      ref,
+      ...body,
+      ...(config !== undefined ? { config: mergeCallSiteConfigOverrides({}, config) } : {}),
+      ...(traitOverrides !== undefined ? { traits: traitOverrides } : {}),
+    },
+  };
+}
+
+/**
+ * Parse a program held as data: an orbital value at `orbitals[i]` is the import
+ * orbital it stands for ({@link orbitalImportFromValue}); everything else must
+ * already be IR.
+ */
+export function parseProgram(data: RuntimeValue): OrbitalSchema {
+  if (data === null || typeof data !== 'object' || Array.isArray(data) || !('orbitals' in data) || !Array.isArray(data.orbitals)) {
+    return parseOrbitalSchema(data);
+  }
+  return parseOrbitalSchema({
+    ...data,
+    orbitals: data.orbitals.map((entry) => (isOrbitalValue(entry) ? orbitalImportFromValue(OrbitalValueSchema.parse(entry)) : entry)),
+  });
 }
 
 /**

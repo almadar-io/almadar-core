@@ -293,6 +293,13 @@
       "lightKey": "0.85",
       "lightKeyColor": "#fffaf0",
       "fog": "0"
+    },
+    "surface": {
+      "edgeMask": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100' preserveAspectRatio='none'><path d='M0 100 Q720 0 1440 100 Z'/></svg>\")",
+      "edgeHeight": "clamp(16px, 4vw, 56px)",
+      "textureMask": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><path d='M0 31.5H32' stroke='black' stroke-width='1'/></svg>\")",
+      "textureSize": "32px 32px",
+      "accentImage": "linear-gradient(180deg, color-mix(in oklab, var(--color-primary) 8%, var(--color-background)), var(--color-background))"
     }
   },
   "variants": {

@@ -260,10 +260,14 @@ describe.each(STRATEGIES)('mock-seed policy [%s]', (strategy) => {
       expect(sampleFieldValue(many, ctx(strategy))).toEqual([]);
     });
 
-    it('omits trait, slot and pattern fields', () => {
-      for (const type of ['trait', 'slot', 'pattern'] as const) {
+    it('omits slot and pattern fields', () => {
+      for (const type of ['slot', 'pattern'] as const) {
         expect(sampleFieldValue({ name: 'x', type }, ctx(strategy))).toBeUndefined();
       }
+    });
+
+    it('seeds a trait field unbound (null), a value held as data', () => {
+      expect(sampleFieldValue({ name: 'widget', type: 'trait' }, ctx(strategy))).toBeNull();
     });
 
     it('populates every declared property of an object field', () => {
@@ -601,5 +605,31 @@ describe.each(STRATEGIES)('a declared @mock on an enum [%s]', (strategy) => {
   it('control: an enum without @mock still rotates its own values', () => {
     const plain: EntityField = { ...status, mock: undefined };
     expect([1, 2, 3, 4].map((i) => sampleFieldValue(plain, ctx(strategy, i)))).toEqual(['draft', 'sent', 'paid', 'draft']);
+  });
+});
+
+describe('relative @mock dates (G-CORE-019)', () => {
+  const DAY = 86_400_000;
+  const INDEX_ANCHOR = Date.parse('2026-06-15T00:00:00.000Z');
+
+  it('index strategy: a signed offset resolves against the fixed anchor, in the field\'s own format', () => {
+    const posted: EntityField = { name: 'postedAt', type: 'datetime', mock: '-1d, -2h, -3w' };
+    expect(sampleFieldValue(posted, ctx('index', 1))).toBe(new Date(INDEX_ANCHOR - DAY).toISOString());
+    expect(sampleFieldValue(posted, ctx('index', 2))).toBe(new Date(INDEX_ANCHOR - 2 * 3_600_000).toISOString());
+    expect(sampleFieldValue(posted, ctx('index', 3))).toBe(new Date(INDEX_ANCHOR - 21 * DAY).toISOString());
+    expect(sampleFieldValue({ name: 'dueOn', type: 'date', mock: '+2d' }, ctx('index', 1))).toBe('2026-06-17');
+  });
+
+  it('seeded strategy: a past offset is in the past and a future one in the future', () => {
+    const before = Date.now();
+    const past = sampleFieldValue({ name: 'postedAt', type: 'datetime', mock: '-1d' }, ctx('seeded'));
+    const future = sampleFieldValue({ name: 'dueAt', type: 'timestamp', mock: '+1w' }, ctx('seeded'));
+    expect(typeof past === 'string' && Date.parse(past) < before).toBe(true);
+    expect(typeof future === 'string' && Date.parse(future) > before).toBe(true);
+  });
+
+  it('control: a fixed date literal is used as written (no index suffix), and a non-date field keeps "-1d" literally', () => {
+    expect(sampleFieldValue({ name: 'opened', type: 'date', mock: '2026-01-02' }, ctx('index', 2))).toBe('2026-01-02');
+    expect(sampleFieldValue({ name: 'code', type: 'string', mock: '-1d, x' }, ctx('index', 1))).toBe('-1d');
   });
 });

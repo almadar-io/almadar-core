@@ -281,8 +281,10 @@ export function storesRowsInBrowser(entity: Pick<OrbitalEntity, 'local'>): boole
  */
 export function persistenceModeAllowsOverrides(
     persistence: EntityPersistence | undefined,
+    dataBearing = false,
 ): boolean {
-    return persistence === 'persistent' || persistence === undefined;
+    // A runtime record a data atom fetches or persists may be saved; other runtime state may not.
+    return persistence === 'persistent' || persistence === undefined || (persistence === 'runtime' && dataBearing);
 }
 
 // ============================================================================

@@ -16,6 +16,16 @@
 import { z } from 'zod';
 import { FieldValueSchema, type FieldValue } from './entity.js';
 
+/**
+ * What a host's auth provider has resolved the viewer to be — from session
+ * resolution only, never from an interactive sign-in action: `pending` until
+ * the session is known; `anonymous` / `authenticated` once it is; `failed`
+ * when connecting or resolving the session failed; `unavailable` when the host
+ * has no sign-in configured. An `access: authenticated` page mounts only on
+ * `authenticated`.
+ */
+export type ViewerAuthority = 'pending' | 'anonymous' | 'authenticated' | 'failed' | 'unavailable';
+
 /** Authenticated user / agent identity behind `@user.x` bindings. */
 export interface UserContext {
   /** Stable subject identifier. `@user.id` — the ownership key. */

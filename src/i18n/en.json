@@ -45,10 +45,26 @@
     "roles": "roles",
     "entities": "entities",
     "extend": "extend",
+    "retype": "retype",
+    "traits": "traits",
+    "mock": "mock",
     "lazy": "lazy",
     "locales": "locales",
     "public": "public",
-    "instances": "instances"
+    "instances": "instances",
+    "access": "access",
+    "indexing": "indexing",
+    "title": "title",
+    "description": "description",
+    "origin": "origin",
+    "icon": "icon",
+    "siteName": "siteName",
+    "signIn": "signIn",
+    "authenticated": "authenticated",
+    "index": "index",
+    "noindex": "noindex",
+    "version": "version",
+    "translationOf": "translationOf"
   },
   "shapes": {
     "Entity": "Entity",
@@ -138,6 +154,8 @@
     "fn": "fn",
     "lambda": "lambda",
     "quote": "quote",
+    "quasiquote": "quasiquote",
+    "unquote": "unquote",
     "match": "match",
     "when": "when"
   },
@@ -174,6 +192,7 @@
     "null": "null",
     "any": "any",
     "trait": "trait",
+    "orbital": "orbital",
     "entity": "entity",
     "event": "event",
     "EventAddress": "EventAddress",
@@ -276,6 +295,7 @@
     "expects": "expects",
     "exposes": "exposes",
     "extend": "extend",
+    "retype": "retype",
     "extends": "extends",
     "extendsId": "extendsId",
     "external": "external",
@@ -469,6 +489,13 @@
     "seedMock": "seedMock",
     "localeInstances": "localeInstances",
     "diagram": "diagram",
-    "scene": "scene"
+    "scene": "scene",
+    "access": "access",
+    "indexing": "indexing",
+    "origin": "origin",
+    "signIn": "signIn",
+    "sourcePage": "sourcePage",
+    "translationOf": "translationOf",
+    "pageModifiers": "pageModifiers"
   }
 }

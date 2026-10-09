@@ -293,6 +293,13 @@
       "lightKey": "0.8",
       "lightKeyColor": "#f0f6ff",
       "fog": "0"
+    },
+    "surface": {
+      "edgeMask": "none",
+      "edgeHeight": "0px",
+      "textureMask": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><path d='M0 .5H40M.5 0V40' stroke='black' stroke-width='1' fill='none'/></svg>\")",
+      "textureSize": "40px 40px",
+      "accentImage": "none"
     }
   },
   "variants": {

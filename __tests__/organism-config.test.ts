@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import type { DeclaredTraitConfig, OrbitalSchema, TraitRef } from '../src/types/index.js';
-import { collectForwardedConfigKeys, filterConfigToForwardedKeys, orbitalFileOf, unionOrganismConfigs } from '../src/embedded-trait-config.js';
+import { collectForwardedConfigKeys, collectOrbitalForwardedConfigKeys, filterConfigToForwardedKeys, orbitalFileOf, unionOrganismConfigs } from '../src/embedded-trait-config.js';
 
 const nav = [{ href: '/contacts', label: 'Contacts' }];
 const organism: DeclaredTraitConfig = {
@@ -41,6 +41,24 @@ describe('collectForwardedConfigKeys', () => {
 
   it('ignores string refs and traits without config', () => {
     expect([...collectForwardedConfigKeys(['Plain', { ref: 'A.traits.B', name: 'Y' }])]).toEqual([]);
+  });
+});
+
+describe('collectOrbitalForwardedConfigKeys', () => {
+  const importForward = { from: 'almadar-behaviors/std-chat', as: 'Desk', config: { appName: { type: 'unknown', default: '@config.appName' }, navItems: { type: 'unknown', default: '@config.navItems' } } };
+
+  it('an import forwarding the app config through its uses entry counts those knobs', () => {
+    expect([...collectOrbitalForwardedConfigKeys({ traits: [], uses: [importForward] })].sort()).toEqual(['appName', 'navItems']);
+  });
+
+  it('unions trait forwards and uses forwards; control: a plain uses entry adds nothing', () => {
+    expect([...collectOrbitalForwardedConfigKeys({ traits: [layout], uses: [{ from: 'std/behaviors/std-browse', as: 'Browse' }] })].sort()).toEqual(['appName', 'navItems']);
+    expect([...collectOrbitalForwardedConfigKeys({ traits: [], uses: [{ from: 'std/behaviors/std-browse', as: 'Browse' }] })]).toEqual([]);
+  });
+
+  it('an import orbital\'s own file keeps the app knobs its uses entry forwards', () => {
+    const schema: OrbitalSchema = { name: 's', version: '1.0.0', config: organism, orbitals: [{ name: 'ChannelOrbital', entity: 'Desk.orbitals.ChannelOrbital.entity', uses: [importForward], traits: [], pages: [] }] };
+    expect(Object.keys(orbitalFileOf(schema, schema.orbitals[0]!).config ?? {}).sort()).toEqual(['appName', 'navItems']);
   });
 });
 

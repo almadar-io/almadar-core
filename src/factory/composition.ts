@@ -10,7 +10,7 @@ import type { AnyPatternConfig } from '../patterns/index.js';
 import { controlBody } from '../patterns/helpers/render-ui-pattern-types.js';
 import type { Effect } from '../types/effect.js';
 import type { SExpr } from '../types/expression.js';
-import { configRefEventKnob, isCallSiteConfigDeclaration, isInlineTrait, resolveConfigRefEventName } from '../types/index.js';
+import { configRefEventKnob, isCallSiteConfigDeclaration, isInlineTrait, mergeCallSiteConfigOverrides, resolveConfigRefEventName } from '../types/index.js';
 import type { DeclaredTraitConfig, OrbitalDefinition, OrbitalEntity, Trait, TraitConfigValue, TraitEventListener, TraitRef, UseDeclaration } from '../types/index.js';
 import type { FactoryParamValue } from './types.js';
 
@@ -349,7 +349,7 @@ export function assembleComposition(spec: CompositionSpec, ctx: CompositionConte
       name: b.name,
       ...(rebind !== undefined ? { linkedEntity: rebind } : {}),
       ...(b.config !== undefined
-        ? { config: Object.fromEntries(Object.entries(b.config).map(([k, v]) => [k, { type: 'unknown', default: v }])) }
+        ? { config: mergeCallSiteConfigOverrides({}, b.config) }
         : {}),
       ...(listens !== undefined ? { listens } : {}),
     });

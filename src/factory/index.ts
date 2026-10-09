@@ -43,6 +43,7 @@ export {
   deriveInputType,
   factoryCallPlanOrbitalName,
   generateQuestions,
+  humanizeKey,
   answerToMutations,
   answersToMutations,
 } from './questions/index.js';
@@ -78,6 +79,7 @@ export type {
 } from './mutate.js';
 
 export {
+  ENTITY_FIELD_SCHEMA,
   signatureToParamsSchema,
   assertNoUnsatisfiableEnum,
 } from './params-schema.js';

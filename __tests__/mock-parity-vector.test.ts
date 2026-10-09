@@ -53,13 +53,15 @@ describe('mock-seed parity vector', () => {
       'falseBool', 'dateOnly', 'withTime', 'stampish', 'emptyArray',
       'scalarItems', 'objectItems', 'emptyObject', 'propObject',
       'relOne', 'relMany', 'intrinsicNoDefault', 'intrinsicWithDefault', 'traitField',
-      'moneyField', 'fileField',
+      'orbitalField', 'moneyField', 'fileField',
     ]) {
       expect(names).toContain(required);
     }
     // Omitted keys are part of the contract, not an accident.
     expect(rows[0]).not.toHaveProperty('intrinsicNoDefault');
-    expect(rows[0]).not.toHaveProperty('traitField');
+    // A trait or orbital value held as data seeds unbound (`none`), on both paths.
+    expect(rows[0]).toHaveProperty('traitField', null);
+    expect(rows[0]).toHaveProperty('orbitalField', null);
     // `id` and the timestamps are the caller's to stamp, and the two paths use
     // different id schemes by design ("Member Id 1" vs "Member-1").
     expect(rows[0]).not.toHaveProperty('id');

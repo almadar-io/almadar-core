@@ -5,7 +5,7 @@ function isPayloadList(value: EventPayloadValue): value is readonly EventPayload
   return Array.isArray(value);
 }
 
-function canonicalJson(value: EventPayloadValue): string {
+export function canonicalJson(value: EventPayloadValue): string {
   if (value === undefined || value === null) return 'null';
   if (value instanceof Date) return JSON.stringify(value.toISOString());
   if (isPayloadList(value)) {

@@ -75,6 +75,37 @@ export interface SchemaMetadata {
   messageSources?: Record<string, string>;
 }
 
+/** App-level site modifiers: `origin`, `icon`, `siteName` (→ `name`), `signIn`. */
+export interface SiteMeta {
+  /** Canonical production origin, e.g. `https://orb.almadar.io`. */
+  origin?: string;
+  /** Site icon path served from the public folder. */
+  icon?: string;
+  /** Site name (og:site_name). */
+  name?: string;
+  /** Route an `access: authenticated` page sends a non-admitted viewer to. */
+  signIn?: string;
+}
+
+/**
+ * The sign-in route every host provides itself (the compiled shell's login form, the
+ * runtime host's sign-in surface). `signIn:` may name it without a page, and no page
+ * may be declared on it. Mirrors `orbital-core` `HOST_SIGN_IN_ROUTE`.
+ */
+export const HOST_SIGN_IN_ROUTE = '/login';
+
+/** Whether `path` is {@link HOST_SIGN_IN_ROUTE}, ignoring a trailing slash. */
+export function isHostSignInRoute(path: string): boolean {
+  return path.replace(/\/+$/, '') === HOST_SIGN_IN_ROUTE;
+}
+
+export const SiteMetaSchema = z.object({
+  origin: z.string().url().optional(),
+  icon: z.string().min(1).optional(),
+  name: z.string().min(1).optional(),
+  signIn: z.string().startsWith('/').optional(),
+}).strict();
+
 /** A program's merged message catalogs: locale → qualified key (`<behavior>:<key>`) → message. `orb resolve` writes one `<stem>.<locale>.json` per locale. */
 export type MessageCatalogs = Record<string, Record<string, string>>;
 
@@ -131,8 +162,11 @@ export interface OrbitalSchema {
   /** `locales [en, ar, sl]` — the locales this program ships; every `(i18n/t …)` key must exist in each one's catalog. */
   locales?: string[];
 
-  /** `public "./public"` — a folder beside the program copied verbatim to the built site's root. */
+  /** `public: "./public"` — a folder beside the program copied verbatim to the built site's root. */
   publicDir?: string;
+
+  /** Site modifiers from the app bracket (`origin`, `icon`, `siteName`, `signIn`). */
+  site?: SiteMeta;
 
   /** Pages served by `uses lazy` behaviors, each loaded from its own `.orb` when opened. */
   lazyPages?: LazyPage[];
@@ -194,6 +228,7 @@ export const OrbitalSchemaSchema = z.object({
     .min(1, "At least one orbital is required"),
   locales: z.array(z.string().min(1)).optional(),
   publicDir: z.string().min(1).optional(),
+  site: SiteMetaSchema.optional(),
   lazyPages: z.array(LazyPageSchema).optional(),
   services: z.array(ServiceDefinitionSchema).optional(),
   config: DeclaredTraitConfigSchema.optional(),

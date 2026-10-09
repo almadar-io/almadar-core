@@ -17,6 +17,7 @@
  * @packageDocumentation
  */
 
+import type { TraitConfig } from "./trait.js";
 import type { EntityRow } from "./entity.js";
 import type { EvalTrace, EventPayload, SExpr } from "./expression.js";
 import type { BusEventSource } from "./bus.js";
@@ -212,6 +213,7 @@ export type AssetLoadStatus = "loaded" | "failed" | "pending";
 export interface EventLogEntry {
   type: string;
   payload?: EventPayload;
+  source?: BusEventSource;
   timestamp: number;
 }
 
@@ -262,6 +264,7 @@ export interface DrawableDescriptor {
  * the core readers.
  */
 export interface OrbitalVerificationAPI {
+  applyConfig?: (traitName: string, config: TraitConfig) => void | Promise<void>;
   getSnapshot: () => VerificationSnapshot;
   getChecks: () => VerificationCheck[];
   getTransitions: () => TransitionTrace[];

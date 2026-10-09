@@ -176,7 +176,12 @@
       "backdrop": "none",
       "cardImage": "none",
       "pageImage": "conic-gradient(from 200deg at 100% 0%, rgba(242,193,78,0.16), transparent 22%, rgba(242,193,78,0.10) 34%, transparent 48%), radial-gradient(ellipse at 0% 100%, rgba(46,125,79,0.14), transparent 55%)",
-      "pageImageSize": "100% 100%, 100% 100%"
+      "pageImageSize": "100% 100%, 100% 100%",
+      "edgeMask": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100' preserveAspectRatio='none'><path d='M0 60 C240 100 480 100 720 60 C960 20 1200 20 1440 60 V100 H0 Z'/></svg>\")",
+      "edgeHeight": "clamp(24px, 6vw, 96px)",
+      "textureMask": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><circle cx='3' cy='3' r='1.5'/></svg>\")",
+      "textureSize": "24px 24px",
+      "accentImage": "radial-gradient(60% 80% at 15% 20%, color-mix(in oklab, var(--color-primary) 22%, transparent), transparent 70%), radial-gradient(50% 70% at 85% 30%, color-mix(in oklab, var(--color-accent) 20%, transparent), transparent 70%)"
     },
     "radii": {
       "none": "0px",
@@ -476,7 +481,12 @@
         "backdrop": "none",
         "cardImage": "none",
         "pageImage": "conic-gradient(from 200deg at 100% 0%, rgba(242,193,78,0.10), transparent 22%, rgba(242,193,78,0.06) 34%, transparent 48%), radial-gradient(ellipse at 0% 100%, rgba(127,217,154,0.10), transparent 55%)",
-        "pageImageSize": "100% 100%, 100% 100%"
+        "pageImageSize": "100% 100%, 100% 100%",
+        "edgeMask": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100' preserveAspectRatio='none'><path d='M0 60 C240 100 480 100 720 60 C960 20 1200 20 1440 60 V100 H0 Z'/></svg>\")",
+        "edgeHeight": "clamp(24px, 6vw, 96px)",
+        "textureMask": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><circle cx='3' cy='3' r='1.5'/></svg>\")",
+        "textureSize": "24px 24px",
+        "accentImage": "radial-gradient(60% 80% at 15% 20%, color-mix(in oklab, var(--color-primary) 22%, transparent), transparent 70%), radial-gradient(50% 70% at 85% 30%, color-mix(in oklab, var(--color-accent) 20%, transparent), transparent 70%)"
       },
       "radii": {
         "none": "0px",

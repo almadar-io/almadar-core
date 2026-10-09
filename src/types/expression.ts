@@ -329,6 +329,8 @@ export function formatSExpr(expr: SExpr): string {
   if (Array.isArray(expr)) {
     const quoted = quoteBodyOf(expr);
     if (quoted !== undefined) return `(${QUOTE_HEAD} ${formatSExpr(decodeQuoteBody(quoted))})`;
+    const qq = quasiquoteOf(expr);
+    if (qq !== undefined) return `(${QUASIQUOTE_HEAD} ${formatTemplate(decodeQuoteBody(qq.body), qq.holes)})`;
     const op = getOperator(expr);
     if (op !== null) return `(${[op, ...expr.slice(1).map(formatSExpr)].join(' ')})`;
     return `[${expr.map(formatSExpr).join(' ')}]`;
@@ -586,4 +588,125 @@ export function quoteBodyOf(expr: SExpr): string | undefined {
   return Array.isArray(expr) && expr.length === 2 && expr[0] === QUOTE_HEAD && typeof expr[1] === 'string'
     ? expr[1]
     : undefined;
+}
+
+// ============================================================================
+// quasiquote — a quoted template with live `(unquote e)` holes
+// ============================================================================
+
+/** A quoted template: `(quasiquote x)`. */
+export const QUASIQUOTE_HEAD = 'quasiquote';
+/** A live hole inside a quasiquote template: `(unquote e)`. */
+export const UNQUOTE_HEAD = 'unquote';
+
+function isHeadedCall(expr: SExpr, head: string): expr is SExpr[] {
+  return Array.isArray(expr) && expr.length > 0 && expr[0] === head;
+}
+
+function containsHead(expr: SExpr, head: string): boolean {
+  if (isHeadedCall(expr, head)) return true;
+  if (Array.isArray(expr)) return expr.some((e) => containsHead(e, head));
+  if (expr !== null && typeof expr === 'object') return Object.values(expr).some((e) => containsHead(e, head));
+  return false;
+}
+
+function extractHoles(expr: SExpr, holes: SExpr[]): SExpr {
+  if (isHeadedCall(expr, QUASIQUOTE_HEAD)) throw new Error('quasiquote: nested quasiquote is not supported');
+  if (isHeadedCall(expr, UNQUOTE_HEAD)) {
+    if (expr.length !== 2) throw new Error('quasiquote: (unquote e) takes exactly one expression');
+    if (containsHead(expr[1], UNQUOTE_HEAD)) throw new Error('quasiquote: unquote inside an unquote');
+    holes.push(expr[1]);
+    return [UNQUOTE_HEAD, holes.length - 1];
+  }
+  if (Array.isArray(expr)) return expr.map((e) => extractHoles(e, holes));
+  if (expr !== null && typeof expr === 'object') {
+    // Canonical key order, so hole numbering matches the body bytes on every path.
+    const out: SExprObject = {};
+    for (const k of Object.keys(expr).sort()) out[k] = extractHoles(expr[k], holes);
+    return out;
+  }
+  return expr;
+}
+
+/**
+ * The IR call `["quasiquote", <body>, hole0, hole1, …]` for `template`. The
+ * body is a quote body in which each `(unquote e)` became the marker
+ * `["unquote", i]`; hole `i` is `e`, left live so bindings resolve in it.
+ * orbital-core's `schema::quote::quasiquote_expr` produces the same IR.
+ */
+export function quasiquoteExpr(template: SExpr): [typeof QUASIQUOTE_HEAD, string, ...SExpr[]] {
+  const holes: SExpr[] = [];
+  const body = encodeQuoteBody(extractHoles(template, holes));
+  return [QUASIQUOTE_HEAD, body, ...holes];
+}
+
+/** The body and holes when `expr` is a `(quasiquote x)` call, else undefined. */
+export function quasiquoteOf(expr: SExpr): { body: string; holes: SExpr[] } | undefined {
+  if (!Array.isArray(expr) || expr.length < 2 || expr[0] !== QUASIQUOTE_HEAD || typeof expr[1] !== 'string') {
+    return undefined;
+  }
+  return { body: expr[1], holes: expr.slice(2) };
+}
+
+function countMarkers(expr: SExpr): number {
+  if (isHeadedCall(expr, UNQUOTE_HEAD) && expr.length === 2 && typeof expr[1] === 'number') return 1;
+  if (Array.isArray(expr)) return expr.reduce<number>((n, e) => n + countMarkers(e), 0);
+  if (expr !== null && typeof expr === 'object') return Object.values(expr).reduce<number>((n, e) => n + countMarkers(e), 0);
+  return 0;
+}
+
+function fillMarkers(expr: SExpr, values: readonly SExpr[]): SExpr {
+  if (isHeadedCall(expr, UNQUOTE_HEAD) && expr.length === 2 && typeof expr[1] === 'number') return values[expr[1]];
+  if (Array.isArray(expr)) return expr.map((e) => fillMarkers(e, values));
+  if (expr !== null && typeof expr === 'object') {
+    const out: SExprObject = {};
+    for (const [k, v] of Object.entries(expr)) out[k] = fillMarkers(v, values);
+    return out;
+  }
+  return expr;
+}
+
+/**
+ * A hole's evaluated value as program data: JSON scalars, arrays and plain
+ * objects pass; anything a program cannot hold (a function, a Date, …) throws.
+ * Both paths guard `(quasiquote …)` holes with this — orbital-core's
+ * `QuasiquoteOp` refuses a lambda the same way.
+ */
+export function toProgramData(value: RuntimeValue): SExpr {
+  if (value === null || typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return value;
+  }
+  if (Array.isArray(value)) return value.map((v: RuntimeValue) => toProgramData(v));
+  if (typeof value === 'object' && !(value instanceof Date) && Object.getPrototypeOf(value) === Object.prototype) {
+    const out: SExprObject = {};
+    for (const [k, v] of Object.entries(value)) out[k] = toProgramData(v);
+    return out;
+  }
+  throw new Error(`quasiquote: a hole evaluated to a ${typeof value} value, which cannot be held as program data`);
+}
+
+/** Decode a quasiquote body and splice `values` (the evaluated holes, in order) into it. */
+export function instantiateQuasiquote(body: string, values: readonly SExpr[]): SExpr {
+  const template = decodeQuoteBody(body);
+  const holes = countMarkers(template);
+  if (holes !== values.length) {
+    throw new Error(`quasiquote: template has ${holes} hole(s), got ${values.length} value(s)`);
+  }
+  return fillMarkers(template, values);
+}
+
+function formatTemplate(expr: SExpr, holes: readonly SExpr[]): string {
+  if (isHeadedCall(expr, UNQUOTE_HEAD) && expr.length === 2 && typeof expr[1] === 'number') {
+    return `(${UNQUOTE_HEAD} ${formatSExpr(holes[expr[1]])})`;
+  }
+  if (Array.isArray(expr)) {
+    const op = getOperator(expr);
+    if (op !== null) return `(${[op, ...expr.slice(1).map((e) => formatTemplate(e, holes))].join(' ')})`;
+    return `[${expr.map((e) => formatTemplate(e, holes)).join(' ')}]`;
+  }
+  if (expr !== null && typeof expr === 'object') {
+    const entries = Object.entries(expr).map(([k, v]) => `${k}: ${formatTemplate(v, holes)}`);
+    return entries.length === 0 ? '{}' : `{ ${entries.join(', ')} }`;
+  }
+  return formatSExpr(expr);
 }

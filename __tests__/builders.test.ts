@@ -144,6 +144,18 @@ describe('makePageRef', () => {
 // ============================================================================
 
 describe('makeOrbitalWithUses', () => {
+    it('carries the orbital\'s own config knobs verbatim; control: none declared adds no config key', () => {
+        const base = {
+            name: 'LandingPage',
+            uses: [{ from: 'std/behaviors/atoms/std-browse', as: 'Browse' }],
+            entity: BROWSE_ENTITY,
+            traits: [{ ref: 'Browse.traits.BrowseItemBrowse' }],
+        };
+        const config = { heroTitle: { type: 'string', default: 'Made to last', label: 'Headline' } };
+        expect(makeOrbitalWithUses({ ...base, config }).config).toEqual(config);
+        expect('config' in makeOrbitalWithUses(base)).toBe(false);
+    });
+
     it('returns an orbital with uses, entity, traits, and empty pages', () => {
         const result = makeOrbitalWithUses({
             name: 'BrowseItemOrbital',

@@ -150,6 +150,12 @@ describe('OrbitalRefObjectSchema', () => {
         expect(parsed).toEqual(full);
     });
 
+    it('keeps an import mock override; control: a non-string sample list is refused', () => {
+        const withMock = { ref: 'Identity.orbitals.IdentityOrbital', mock: { role: 'customer, staff' } };
+        expect(OrbitalRefObjectSchema.parse(withMock)).toEqual(withMock);
+        expect(() => OrbitalRefObjectSchema.parse({ ...withMock, mock: { role: 3 } })).toThrow();
+    });
+
     it('rejects a malformed ref string', () => {
         expect(() =>
             OrbitalRefObjectSchema.parse({ ref: 'timeTracking.orbitals.TimesheetPanelOrbital' }),

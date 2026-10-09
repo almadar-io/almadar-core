@@ -273,7 +273,7 @@ export function deriveInputType(
  *   `owner-field`   → `"Owner Field"`
  *   `URL`           → `"URL"` (preserves all-caps runs)
  */
-function humanizeKey(key: string): string {
+export function humanizeKey(key: string): string {
   const parts = key
     .replace(/[-_]+/g, ' ')
     .replace(/([a-z0-9])([A-Z])/g, '$1 $2')

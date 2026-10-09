@@ -8,11 +8,13 @@
  *
  * App assembly, not the `behavior/compose` operator: `composeBehaviors` itself is unchanged.
  */
+import { mergeExpectationShape } from '../derive-expectations.js';
 import type { DeclaredTraitConfig, Entity, EntityField, ExpectDeclaration, IdentityLedger, JsonObject, JsonValue, OrbitalDefinition, OrbitalSchema, Trait, TraitConfigValue } from '../types/index.js';
 import { entityRenameBlockers, renameEntity, renameEntityInSchema, type EntityRenameBlocker } from './rename-entity.js';
 import { isEntityReferenceAny, isJsonObject, isPageReference, ledgerRename } from '../types/index.js';
 import { rewriteTraitRefsInTree } from '../factory-runtime/apply-params-to-orb.js';
-import { navItemHref, unionOrganismConfigs } from '../embedded-trait-config.js';
+import { collectOrbitalForwardedConfigKeys, navItemHref, unionOrganismConfigs } from '../embedded-trait-config.js';
+import { humanizeKey } from '../factory/questions/generate.js';
 import { asDefinitions, composeBehaviors, mergeLedgers, type ComposeBehaviorsResult } from './compose-behaviors.js';
 import type { EventWiringEntry } from './event-wiring.js';
 import type { LayoutStrategy } from './layout-strategy.js';
@@ -360,6 +362,7 @@ export function dedupeComposedIdentity(orbitals: OrbitalDefinition[]): IdentityD
   // An orbital composed from another organism expects that organism's identity by name; after
   // compose `@user` is the winner, so a named identity nothing provides as identity is a loser too.
   const winnerName = orbitalEntityName(orbitals[winnerIndex]!);
+  if (winnerName === null) throw new Error("identity dedupe requires a named identity entity");
   const demotedNames = new Set(demotions.map((d) => d.entityName));
   const strayExpects: Array<{ name: string; shape: EntityField[] }> = [];
   for (const def of orbitals) {
@@ -380,7 +383,7 @@ export function dedupeComposedIdentity(orbitals: OrbitalDefinition[]): IdentityD
     ...demotedNames,
     ...strayExpects.map((e) => e.name).filter((name) => providedNames.has(name)),
   ]);
-  const expectsRewrites = rewriteDemotedIdentityExpects(orbitals, loserNames);
+  const expectsRewrites = rewriteDemotedIdentityExpects(orbitals, loserNames, winnerName);
   const relationsRetargeted = retargetDemotedOwnerRelations(orbitals, winnerIndex, loserNames);
   return { demotions, roleUnions, expectsRewrites, relationsRetargeted };
 }
@@ -554,6 +557,7 @@ function collectPersistedFields(node: unknown, entityName: string, out: Set<stri
 function rewriteDemotedIdentityExpects(
   orbitals: OrbitalDefinition[],
   demotedNames: ReadonlySet<string>,
+  winnerName: string,
 ): IdentityExpectsRewrite[] {
   const entityByName = new Map<string, Entity>();
   for (const def of orbitals) for (const entity of inlineEntitiesOf(def)) entityByName.set(entity.name, entity);
@@ -563,8 +567,10 @@ function rewriteDemotedIdentityExpects(
     const expects = def.expects;
     if (expects === undefined) continue;
     let mutated = false;
+    let viewerShape: EntityField[] | undefined;
     const next: ExpectDeclaration[] = expects.map((e): ExpectDeclaration => {
       if (e.kind !== 'identity' || e.name === undefined || !demotedNames.has(e.name)) return e;
+      viewerShape = mergeExpectationShape(viewerShape, e.shape);
       mutated = true;
       rewrites.push({ orbitalName: def.name, entityName: e.name });
       if (e.shape === undefined) return { kind: 'entity', name: e.name };
@@ -580,7 +586,15 @@ function rewriteDemotedIdentityExpects(
       });
       return { kind: 'entity', name: e.name, shape: [...e.shape.map(asDeclared), ...added] };
     });
-    if (mutated) orbitals[i] = { ...def, expects: next };
+    if (mutated) {
+      const viewerIndex = next.findIndex(e => e.kind === 'identity' && (e.name === winnerName || e.name === undefined));
+      const viewer = next[viewerIndex];
+      const shape = mergeExpectationShape(viewer?.kind === 'identity' ? viewer.shape : undefined, viewerShape);
+      const requirement: ExpectDeclaration = { kind: 'identity', name: winnerName, ...(shape !== undefined ? { shape } : {}) };
+      if (viewerIndex < 0) next.push(requirement);
+      else next[viewerIndex] = requirement;
+      orbitals[i] = { ...def, expects: next };
+    }
   }
   return rewrites;
 }
@@ -915,7 +929,7 @@ function firstInlinePage(orbital: OrbitalDefinition): { name: string; path: stri
 /**
  * Inside its organism an organism's first page boots the app, reachable by construction; composed
  * behind another organism it boots nothing. Each such landing page nothing links joins the app's
- * one `[NavItem]` list, labelled by its declared page name (owner ruling 2026-10-04). An organism
+ * one `[NavItem]` list, labelled by its declared page name as words (owner ruling 2026-10-04). An organism
  * whose files declare no nav of its own (free-composed lines, a reused atom) links none of its
  * orbitals, so each of them is one. Entries keep roster order. Parameterized pages are reached
  * through their list pages and never listed.
@@ -983,7 +997,7 @@ function linkLandingPages(
     next.forEach((entry, p) => {
       if (indexOf(entry) < i) at = p + 1;
     });
-    next.splice(at, 0, { href: page.path, label: page.name });
+    next.splice(at, 0, { href: page.path, label: humanizeKey(page.name) });
     linked.add(page.path);
     added.push({ organism, href: page.path });
   });
@@ -1333,7 +1347,28 @@ export function composeOrbitalSurface(
     }
   }
 
-  const unioned = unionOrganismConfigs(renamedFiles.flatMap((f) => ('orbitals' in f ? [f] : [])));
+  // D32: an orbital's own `[NavItem]` knob its traits forward as `@config.<key>` is the app's nav —
+  // it joins the one app list in roster order instead of shadowing it on that orbital alone.
+  const hoistedNav = new Map<string, DeclaredTraitConfig>();
+  for (let i = 0; i < orbitals.length; i += 1) {
+    const orbital = orbitals[i]!;
+    if (orbital.config === undefined) continue;
+    const forwarded = collectOrbitalForwardedConfigKeys(orbital);
+    const lifted = Object.entries(orbital.config).filter(([key, field]) => field.type === '[NavItem]' && forwarded.has(key));
+    if (lifted.length === 0) continue;
+    hoistedNav.set(orbital.name, Object.fromEntries(lifted));
+    const kept = Object.fromEntries(Object.entries(orbital.config).filter(([key]) => !lifted.some(([k]) => k === key)));
+    const { config: _dropped, ...rest } = orbital;
+    orbitals[i] = Object.keys(kept).length > 0 ? { ...rest, config: kept } : rest;
+  }
+  const configSources = renamedFiles.flatMap((f): Array<Pick<OrbitalSchema, 'config'>> => [
+    ...('orbitals' in f ? [f] : []),
+    ...asDefinitions([f]).flatMap((o) => {
+      const config = hoistedNav.get(o.name);
+      return config === undefined ? [] : [{ config }];
+    }),
+  ]);
+  const unioned = unionOrganismConfigs(configSources);
   let config: DeclaredTraitConfig | undefined;
   let configNavItemsNarrowed: ConfigNavItemsNarrowResult[] = [];
   if (unioned !== undefined) {

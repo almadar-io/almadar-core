@@ -90,6 +90,8 @@ export type PayloadField = {
    */
   type: string;
   required?: boolean;
+  /** Closed value set (`"a" | "b"`) — element-wise for an array type. Mirrors Rust `PayloadField.values`. */
+  values?: ReadonlyArray<string>;
   /** Structured property schema for object-typed payload fields (recursive). */
   properties?: ReadonlyArray<PayloadField>;
   /**
@@ -139,6 +141,7 @@ export const PayloadFieldSchema: z.ZodType<PayloadField> = z.object({
   name: z.string().min(1),
   type: z.string().min(1),
   required: z.boolean().optional(),
+  values: z.array(z.string()).optional(),
   properties: z.lazy(() => z.array(PayloadFieldSchema)).optional(),
   typeWhen: z.array(PayloadTypeWhenSchema).optional(),
   entity: z.string().min(1).optional(),

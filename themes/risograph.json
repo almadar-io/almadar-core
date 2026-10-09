@@ -173,7 +173,12 @@
     },
     "surface": {
       "pageImage": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .09 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>\")",
-      "pageImageSize": "160px 160px"
+      "pageImageSize": "160px 160px",
+      "edgeMask": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100' preserveAspectRatio='none'><path d='M0 60 C240 100 480 100 720 60 C960 20 1200 20 1440 60 V100 H0 Z'/></svg>\")",
+      "edgeHeight": "clamp(24px, 6vw, 96px)",
+      "textureMask": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><circle cx='3' cy='3' r='1.5'/></svg>\")",
+      "textureSize": "24px 24px",
+      "accentImage": "radial-gradient(60% 80% at 15% 20%, color-mix(in oklab, var(--color-primary) 22%, transparent), transparent 70%), radial-gradient(50% 70% at 85% 30%, color-mix(in oklab, var(--color-accent) 20%, transparent), transparent 70%)"
     },
     "colors": {
       "primary": "#ff48b0",

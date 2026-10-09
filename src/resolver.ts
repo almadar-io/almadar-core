@@ -237,6 +237,7 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
         featureName: page.name.toLowerCase(),
         viewType: page.viewType && ['list', 'detail', 'create', 'edit', 'dashboard'].includes(page.viewType) ?
           page.viewType as ('list' | 'detail' | 'create' | 'edit' | 'dashboard') : undefined,
+        ...pageModifiers(page),
         sections: [],
         traits: (page.traits || []).map((traitRef: PageTraitRef) => {
           const resolvedTrait = resolveTraitRef(traitRef, ir.traits, orbital.traits as Trait[] || []);
@@ -448,4 +449,18 @@ export function getEntity(ir: ResolvedIR, entityName: string): ResolvedEntity | 
  */
 export function getTrait(ir: ResolvedIR, traitName: string): ResolvedTrait | undefined {
   return ir.traits.get(traitName);
+}
+
+/** The declared page modifiers, omitting absent ones (never defaulted). */
+export function pageModifiers(
+  page: Pick<Page, 'access' | 'indexing' | 'title' | 'description' | 'sourcePage' | 'translationOf'>,
+): Pick<ResolvedPage, 'access' | 'indexing' | 'title' | 'description' | 'sourcePage' | 'translationOf'> {
+  return {
+    ...(page.access !== undefined ? { access: page.access } : {}),
+    ...(page.indexing !== undefined ? { indexing: page.indexing } : {}),
+    ...(page.sourcePage !== undefined ? { sourcePage: page.sourcePage } : {}),
+    ...(page.translationOf !== undefined ? { translationOf: page.translationOf } : {}),
+    ...(page.title !== undefined ? { title: page.title } : {}),
+    ...(page.description !== undefined ? { description: page.description } : {}),
+  };
 }

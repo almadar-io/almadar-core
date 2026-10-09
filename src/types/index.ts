@@ -82,6 +82,10 @@ export {
   type MessageCatalogs,
   type ConfigProvenanceRecord,
   OrbitalSchemaSchema,
+  type SiteMeta,
+  SiteMetaSchema,
+  HOST_SIGN_IN_ROUTE,
+  isHostSignInRoute,
   SchemaMetadataSchema,
   ConfigProvenanceRecordSchema,
   parseOrbitalSchema,
@@ -180,6 +184,15 @@ export {
   OrbitalPageStrictSchema,
   PageTraitRefSchema,
   ViewTypeSchema,
+  type PageAccess,
+  type PageIndexing,
+  type PageMeta,
+  PageAccessSchema,
+  PageIndexingSchema,
+  PageMetaSchema,
+  type PageModifiers,
+  PageModifiersSchema,
+  resolvePageMeta,
 } from "./page.js";
 
 // ============================================================================
@@ -262,6 +275,12 @@ export {
   decodeQuoteBody,
   quoteExpr,
   quoteBodyOf,
+  QUASIQUOTE_HEAD,
+  UNQUOTE_HEAD,
+  quasiquoteExpr,
+  quasiquoteOf,
+  instantiateQuasiquote,
+  toProgramData,
   // Runtime evaluation types
   type EvalContext,
   type EventPayload,
@@ -332,6 +351,7 @@ export {
   resolveDefaultViewer,
   resolvePersonaSpec,
   type UserContext,
+  type ViewerAuthority,
   type RawUserClaims,
   RawUserClaimsSchema,
 } from "./user.js";
@@ -433,10 +453,9 @@ export {
   type OsEffect,
   // Agent-path operator effect types
   type LlmEffect,
-  type BehaviorEffect,
-  type ValidateEffect,
+  type BehaviorReflectionEffect,
+  type ProgramEffect,
   type SessionEffect,
-  type ComposeEffect,
   type TraceEffect,
   type MemoryEffect,
   type ApplicationEffect,
@@ -458,7 +477,6 @@ export {
   type WorkspaceWriteSchemaEffect,
   type WorkspaceWritePlanEffect,
   type WorkspaceArchiveOrbitalEffect,
-  type LoloEmitBodyEffect,
   type IntegrationHttpEffect,
   type IntegrationGithubGetRepoEffect,
   type IntegrationGithubCreateIssueEffect,
@@ -516,12 +534,8 @@ export {
   type LlmToolDef,
   type LlmCallToolsResult,
   type LlmTokenUsage,
-  type BuilderResult,
   type ValidateResult,
-  type ComposeAllResult,
-  type ComposeChildrenResult,
   type RepairResult,
-  type LoloEmitResult,
   type PlannerResult,
   type ExecutePlanResult,
   type DispatchUpdatesResult,
@@ -586,7 +600,9 @@ export {
   type CallSiteConfigEntry,
   type CallSiteConfig,
   isCallSiteConfigDeclaration,
+  isConfigRedeclaration,
   isConfigFieldSchema,
+  mergeCallSiteConfigOverrides,
   normalizeCallSiteConfigToValues,
   CONFIG_REF_EVENT_PATTERN,
   configRefEventKnob,
@@ -1345,3 +1361,6 @@ export {
 } from "./skeleton.js";
 export { SURFACE_MODES, type SurfaceMode } from "./surface.js";
 export * from "./canvas-theme.js";
+
+// Behaviors as first-class values (language trio)
+export * from "./behavior-value.js";

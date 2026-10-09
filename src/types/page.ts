@@ -62,6 +62,36 @@ export const PageTraitRefSchema = z.object({
 });
 
 // ============================================================================
+// Page modifiers (access, indexing, metadata)
+// ============================================================================
+
+/** `access:` — `public` admits anonymous viewers; `authenticated` mounts the
+ * page circuit only for a resolved signed-in viewer. Absent = no gate. */
+export type PageAccess = 'public' | 'authenticated';
+export const PageAccessSchema = z.enum(['public', 'authenticated']);
+
+/** `indexing:` — a search-engine directive, never access control. */
+export type PageIndexing = 'index' | 'noindex';
+export const PageIndexingSchema = z.enum(['index', 'noindex']);
+
+/** `title:` / `description:` — a literal, or `["i18n/t", key]` resolved
+ * against the route's locale. No entity/config/viewer bindings. */
+export type PageMeta = string | ['i18n/t', string];
+export const PageMetaSchema = z.union([
+    z.string(),
+    z.tuple([z.literal('i18n/t'), z.string().min(1)]),
+]);
+
+/** Resolve a {@link PageMeta} through a message lookup. */
+export function resolvePageMeta(
+    meta: PageMeta | undefined,
+    lookup: (key: string) => string | undefined,
+): string | undefined {
+    if (meta === undefined) return undefined;
+    return typeof meta === 'string' ? meta : lookup(meta[1]);
+}
+
+// ============================================================================
 // Orbital Page
 // ============================================================================
 
@@ -83,8 +113,27 @@ export type OrbitalPage = {
     /** View type (optional in trait-driven mode) */
     viewType?: ViewType;
 
-    /** Page title (optional, defaults to derived from name) */
-    title?: string;
+    /** `title:` page modifier — the document title. */
+    title?: PageMeta;
+
+    /** `description:` page modifier — the document meta description. */
+    description?: PageMeta;
+
+    /** `access:` page modifier. */
+    access?: PageAccess;
+
+    /** `indexing:` page modifier. */
+    indexing?: PageIndexing;
+
+    /**
+     * The upstream page this one was imported from (its id, kept through nested
+     * imports). Imports of one page in different locales are language
+     * alternates. Set by import resolution, never authored.
+     */
+    sourcePage?: string;
+
+    /** `translationOf:` page modifier — pages sharing it in different locales are language alternates (ahead of `sourcePage`). */
+    translationOf?: string;
 
     /** Primary entity for this page */
     primaryEntity?: string;
@@ -110,13 +159,35 @@ export type OrbitalPage = {
  * Strict Zod schema for trait-driven pages.
  * Rejects unknown properties like 'sections'.
  */
+/** The page modifiers a `pages {}` remap entry declares for one imported page. */
+export interface PageModifiers {
+    access?: PageAccess;
+    indexing?: PageIndexing;
+    title?: PageMeta;
+    description?: PageMeta;
+    translationOf?: string;
+}
+
+export const PageModifiersSchema = z.object({
+    access: PageAccessSchema.optional(),
+    indexing: PageIndexingSchema.optional(),
+    title: PageMetaSchema.optional(),
+    description: PageMetaSchema.optional(),
+    translationOf: z.string().min(1).optional(),
+}).strict();
+
 export const OrbitalPageStrictSchema = z.object({
     id: PageIdSchema.optional(),
     name: z.string().min(1, 'Page name is required'),
     path: z.string().min(1, 'Page path is required').startsWith('/', 'Path must start with /'),
     primaryEntity: z.string().min(1, 'Primary entity is required'),
     traits: z.array(PageTraitRefSchema).min(1, 'Page must have at least one trait'),
-    title: z.string().optional(),
+    title: PageMetaSchema.optional(),
+    description: PageMetaSchema.optional(),
+    access: PageAccessSchema.optional(),
+    indexing: PageIndexingSchema.optional(),
+    sourcePage: z.string().min(1).optional(),
+    translationOf: z.string().min(1).optional(),
     icon: z.string().optional(),
     label: z.string().optional(),
 }).strict(); // Reject unknown keys like 'sections'
@@ -131,7 +202,12 @@ export const OrbitalPageSchema = z.object({
     name: z.string().min(1, 'Page name is required'),
     path: z.string().min(1, 'Page path is required').startsWith('/', 'Path must start with /'),
     viewType: ViewTypeSchema.optional(),
-    title: z.string().optional(),
+    title: PageMetaSchema.optional(),
+    description: PageMetaSchema.optional(),
+    access: PageAccessSchema.optional(),
+    indexing: PageIndexingSchema.optional(),
+    sourcePage: z.string().min(1).optional(),
+    translationOf: z.string().min(1).optional(),
     primaryEntity: z.string().optional(),
     traits: z.array(PageTraitRefSchema).optional(),
     isInitial: z.boolean().optional(),

@@ -965,6 +965,18 @@ export type SurfaceTokens = {
   pageImageSize?: string;
   /** Ground a canvas, chart or diagram draws on (`var(--color-card)`, a chalkboard green, blueprint blue). */
   diagram?: string;
+  /** CSS `mask-image` of a band's curved edge (`url("data:image/svg+xml;…")`); `none` = straight edge. */
+  edgeMask?: string;
+  /** Height of a band's curved edge (`clamp(24px, 6vw, 96px)`). */
+  edgeHeight?: string;
+  /** CSS `mask-image` tiled as a band texture; the theme's primary color shows through it. */
+  textureMask?: string;
+  /** CSS `mask-size` for `textureMask`. */
+  textureSize?: string;
+  /** CSS `background-image` of an accent band (soft mesh, gradient); `none` = flat. */
+  accentImage?: string;
+  /** CSS `background-image` laid over a photo so text on it stays readable. */
+  scrim?: string;
 };
 
 export const SurfaceTokensSchema = z.object({
@@ -973,6 +985,12 @@ export const SurfaceTokensSchema = z.object({
   pageImage: z.string().optional(),
   pageImageSize: z.string().optional(),
   diagram: z.string().optional(),
+  edgeMask: z.string().optional(),
+  edgeHeight: z.string().optional(),
+  textureMask: z.string().optional(),
+  textureSize: z.string().optional(),
+  accentImage: z.string().optional(),
+  scrim: z.string().optional(),
 });
 
 export type DiagramLineCap = 'butt' | 'round' | 'square';

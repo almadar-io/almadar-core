@@ -15,6 +15,7 @@ import type {
   TraitReference,
 } from '../types/index.js';
 import { persistenceModeAllowsOverrides } from '../types/index.js';
+import { orbitalTouchesOwnRecord } from '../data-bearing.js';
 import type { OrbitalParamsManifest, ParamFieldDescriptor } from './manifest-types.js';
 
 const STATIC_PARAM_FIELDS: readonly ParamFieldDescriptor[] = [
@@ -89,7 +90,7 @@ export function paramFieldsFor(
   _orb: OrbitalSchema,
   orbital: OrbitalSchema['orbitals'][number],
 ): readonly ParamFieldDescriptor[] {
-  const allowPersistenceOverride = persistenceModeAllowsOverrides(entityPersistence(orbital.entity));
+  const allowPersistenceOverride = persistenceModeAllowsOverrides(entityPersistence(orbital.entity), orbitalTouchesOwnRecord(orbital));
   const hasConfig = declaredConfigKeys(orbital.config) !== undefined;
   return STATIC_PARAM_FIELDS.filter((f) => {
     if ((f.name === 'persistence' || f.name === 'collection') && !allowPersistenceOverride) {

@@ -580,6 +580,20 @@ export function collectForwardedConfigKeys(traits: ReadonlyArray<TraitRef>): Rea
   return forwarded;
 }
 
+/** The organism-scope knobs an orbital forwards: its traits' forwards plus its `uses` entries' config forwards (an import forwarding the app's config). */
+export function collectOrbitalForwardedConfigKeys(orbital: Pick<OrbitalDefinition, 'traits' | 'uses'>): ReadonlySet<string> {
+  const forwarded = new Set(collectForwardedConfigKeys(orbital.traits ?? []));
+  for (const use of orbital.uses ?? []) {
+    for (const entry of Object.values(use.config ?? {})) {
+      for (const token of configForwardTokens(entry)) {
+        const knob = CONFIG_FORWARD_RE.exec(token)?.[1];
+        if (knob) forwarded.add(knob);
+      }
+    }
+  }
+  return forwarded;
+}
+
 /** `config` narrowed to `forwarded`; undefined when none of its knobs is forwarded. */
 export function filterConfigToForwardedKeys(
   config: DeclaredTraitConfig,
@@ -596,7 +610,7 @@ export function filterConfigToForwardedKeys(
  */
 export function orbitalFileOf(schema: OrbitalSchema, orbital: OrbitalDefinition): OrbitalSchema {
   const config = schema.config !== undefined
-    ? filterConfigToForwardedKeys(schema.config, collectForwardedConfigKeys(orbital.traits ?? []))
+    ? filterConfigToForwardedKeys(schema.config, collectOrbitalForwardedConfigKeys(orbital))
     : undefined;
   return { name: orbital.name, version: schema.version ?? '1.0.0', orbitals: [orbital], ...(config !== undefined ? { config } : {}) };
 }

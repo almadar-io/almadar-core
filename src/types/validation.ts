@@ -214,6 +214,7 @@ export const KNOWN_VALIDATION_ERROR_CODES = {
   // unbound trait knob's embed renders nothing (`trait_validator.rs`,
   // owner ruling 2026-09-13: a `trait`-typed config knob may be `none`).
   ORB_RENDER_UNBOUND_TRAIT_KNOB_EMBEDDED: 'ORB_RENDER_UNBOUND_TRAIT_KNOB_EMBEDDED',
+  ORB_RENDER_ORBITAL_VALUE_EMBEDDED: 'ORB_RENDER_ORBITAL_VALUE_EMBEDDED',
 
   // Render-UI binding + prop validation
   ORB_RUI_BINDING_TYPE_MISMATCH: 'ORB_RUI_BINDING_TYPE_MISMATCH',

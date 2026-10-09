@@ -179,19 +179,6 @@ export interface AgentCodeSearchResult {
 // also needs them — emitted TS code references these types without depending
 // on rabit. rabit's TS implementations produce/consume these shapes.
 
-/** Result of behavior/instantiate (factory path) or subagent build. */
-export interface BuilderResult {
-    method: string;
-    orbitalName: string;
-    success: boolean;
-    orbitalPath?: string;
-    traitCount?: number;
-    traitNames?: string[];
-    transitionCount?: number;
-    childCount?: number;
-    error?: string;
-}
-
 /** Result of validate/validate for a single orbital or the composed schema. */
 export interface ValidateResult {
     valid: boolean;
@@ -200,37 +187,12 @@ export interface ValidateResult {
     orbitalName?: string;
 }
 
-/** Result of compose/compose-all. */
-export interface ComposeAllResult {
-    orbitalCount: number;
-    composedPath: string;
-    success: boolean;
-    layout?: string;
-    wiringConnections?: number;
-}
-
-/** Result of compose/compose-children (recursive builds). */
-export interface ComposeChildrenResult {
-    parentName: string;
-    childCount: number;
-    orbitalName: string;
-    success: boolean;
-}
-
 /** Result of the repair service. */
 export interface RepairResult {
     orbitalName: string;
     success: boolean;
     attempt: number;
     paramsChanged: boolean;
-    error?: string;
-}
-
-/** Result of lolo/emit-body (free-lolo path). */
-export interface LoloEmitResult {
-    orbitalName: string;
-    success: boolean;
-    loloSource: string;
     error?: string;
 }
 
@@ -261,12 +223,8 @@ export interface DispatchUpdatesResult {
 
 /** Discriminated union of all substrate service-call results. */
 export type ServiceCallResult =
-    | BuilderResult
     | ValidateResult
-    | ComposeAllResult
-    | ComposeChildrenResult
     | RepairResult
-    | LoloEmitResult
     | PlannerResult
     | ExecutePlanResult
     | DispatchUpdatesResult;

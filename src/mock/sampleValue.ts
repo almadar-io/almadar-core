@@ -236,6 +236,25 @@ function sampleText(field: EntityField, ctx: SampleContext): string {
     : `${titleCase(fieldName)} ${ctx.index}`;
 }
 
+/** The fixed "now" index-strategy rows resolve relative `@mock` dates against. Twin: `RELATIVE_MOCK_INDEX_ANCHOR_MS` in seed.rs. */
+export const RELATIVE_MOCK_INDEX_ANCHOR = '2026-06-15T00:00:00.000Z';
+
+const RELATIVE_MOCK_UNIT_MS: Readonly<Record<string, number>> = { m: 60_000, h: 3_600_000, d: 86_400_000, w: 604_800_000 };
+
+/**
+ * A date field's `@mock` candidate: a signed offset (`-2h`, `-1d`, `+3w`; units m h d w) is that
+ * far from now (seeded) or from the fixed anchor (index); anything else is used as written.
+ * Twin: `mock_date_value` in seed.rs.
+ */
+export function mockDateValue(dateOnly: boolean, literal: string, strategy: SampleStrategy): string {
+  const m = /^([+-])(\d+)([mhdw])$/.exec(literal.trim());
+  if (m === null) return literal;
+  const anchor = strategy === 'index' ? Date.parse(RELATIVE_MOCK_INDEX_ANCHOR) : Date.now();
+  const offset = (m[1] === '-' ? -1 : 1) * Number(m[2]) * RELATIVE_MOCK_UNIT_MS[m[3]!]!;
+  const iso = new Date(anchor + offset).toISOString();
+  return dateOnly ? iso.split('T')[0]! : iso;
+}
+
 /**
  * Seeded dates fall within this many days either side of today: wide enough that a monthly
  * chart over mock rows has several months, while upcoming views still get future dates.
@@ -392,6 +411,10 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
     // An enum's candidates are its members, used as is: an index suffix would seed a non-member.
     const members = declaredValues(field) ? mockCandidates(field.mock) : [];
     if (members.length > 0) return members[(ordinal - 1) % members.length]!;
+    if (field.type === 'date' || field.type === 'datetime' || field.type === 'timestamp') {
+      const candidates = mockCandidates(field.mock);
+      return mockDateValue(field.type === 'date', candidates[(ordinal - 1) % candidates.length] ?? field.mock, ctx.strategy);
+    }
     return typedMockValue(field, mockFieldValue(field.mock, ordinal));
   }
 
@@ -477,7 +500,10 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
       return sampleObject(field, ctx);
     case 'union':
       return sampleUnion(field, ctx);
+    // A trait or orbital value held as data seeds unbound — `none` (seed.rs twin).
     case 'trait':
+    case 'orbital':
+      return null;
     case 'slot':
     case 'pattern':
     // An event name is authored on the owning struct, never random text (seed.rs twin).

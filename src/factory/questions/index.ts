@@ -16,5 +16,5 @@ export type {
   FactoryCallPlanMutationTemplate,
   FactoryParamValue,
 } from './types.js';
-export { deriveInputType, factoryCallPlanOrbitalName, generateQuestions } from './generate.js';
+export { deriveInputType, factoryCallPlanOrbitalName, generateQuestions, humanizeKey } from './generate.js';
 export { answerToMutations, answersToMutations } from './reducer.js';

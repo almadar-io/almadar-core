@@ -423,13 +423,43 @@ describe('dedupeComposedIdentity — FIX-L (expects rewrite on identity demotion
     ];
   }
 
+  it('preserves full viewer requirements on the surviving identity alongside the demoted record', () => {
+    const orbitals = expectsRoster();
+    const shape = [{ name: 'role', type: 'enum' as const, values: ['manager'], required: true }, { name: 'email', type: 'email' as const, required: true }];
+    orbitals[2]!.expects = [{ kind: 'identity', name: 'TeamMember', shape }];
+    dedupeComposedIdentity(orbitals);
+    expect(orbitals[2]!.expects).toContainEqual({ kind: 'identity', name: 'Author', shape });
+    expect(orbitals[2]!.expects).toContainEqual({ kind: 'entity', name: 'TeamMember', shape });
+  });
+
+  it('unions required viewer vocabulary into one existing winning identity without mutating requirements', () => {
+    const orbitals = expectsRoster();
+    const expects = [{ kind: 'identity' as const, name: 'Author', shape: [{ name: 'role', type: 'string' as const, values: ['member'], description: 'existing' }] }, { kind: 'identity' as const, name: 'TeamMember', shape: [{ name: 'role', type: 'enum' as const, values: ['manager'], required: true }] }];
+    orbitals[2]!.expects = expects;
+    const before = structuredClone(expects);
+    dedupeComposedIdentity(orbitals);
+    const viewer = orbitals[2]!.expects?.filter(e => e.kind === 'identity');
+    expect(viewer).toHaveLength(1);
+    expect(viewer?.[0]).toMatchObject({ name: 'Author', shape: [{ name: 'role', values: ['member', 'manager'], required: true }] });
+    expect(expects).toEqual(before);
+  });
+
+  it('combines multiple demoted viewer contracts once while retaining each record requirement', () => {
+    const orbitals = expectsRoster();
+    orbitals.push({ name: 'GuestOrbital', entity: { name: 'Guest', identity: true, fields: [{ name: 'id', type: 'string' }] }, traits: [], pages: [] });
+    orbitals[2]!.expects?.push({ kind: 'identity', name: 'Guest', shape: [{ name: 'email', type: 'email', required: true }] });
+    dedupeComposedIdentity(orbitals);
+    expect(orbitals[2]!.expects?.filter(e => e.kind === 'identity')).toEqual([{ kind: 'identity', name: 'Author', shape: [{ name: 'role', type: 'enum', values: ['manager'] }, { name: 'email', type: 'email', required: true }] }]);
+    expect(orbitals[2]!.expects?.filter(e => e.kind === 'entity').map(e => e.name)).toEqual(['TeamMember', 'Guest']);
+  });
+
   it('rewrites a dependent\'s `expects identity <demoted>` → `expects entity <demoted>`, shape preserved', () => {
     const orbitals = expectsRoster();
     const { demotions, expectsRewrites } = dedupeComposedIdentity(orbitals);
 
     expect(demotions).toEqual([{ orbitalName: 'TeamMemberOrbital', entityName: 'TeamMember' }]);
     expect(expectsRewrites).toEqual([{ orbitalName: 'ContactOrbital', entityName: 'TeamMember' }]);
-    expect(orbitals[2]!.expects).toEqual([
+    expect(orbitals[2]!.expects?.filter(e => e.kind === 'entity')).toEqual([
       { kind: 'entity', name: 'TeamMember', shape: [{ name: 'role', type: 'enum', values: ['manager'] }] },
     ]);
   });
@@ -598,7 +628,7 @@ describe('dedupeComposedIdentity — an expected identity no orbital provides as
     const { demotions, expectsRewrites } = dedupeComposedIdentity(orbitals);
     expect(demotions).toEqual([]);
     expect(expectsRewrites).toEqual([{ orbitalName: 'TimesheetOrbital', entityName: 'Employee' }]);
-    expect(orbitals[2]!.expects).toEqual([
+    expect(orbitals[2]!.expects?.filter(e => e.kind === 'entity')).toEqual([
       { kind: 'entity', name: 'Employee', shape: [{ name: 'role', type: 'enum', values: ['employee', 'approver'] }] },
     ]);
   });
@@ -611,7 +641,7 @@ describe('dedupeComposedIdentity — an expected identity no orbital provides as
     };
     orbitals[2] = { ...orbitals[2]!, expects: [{ kind: 'identity', name: 'Employee', shape: [{ name: 'email', type: 'email', required: true }, { name: 'badge', type: 'string', required: true }] }] };
     dedupeComposedIdentity(orbitals);
-    expect(orbitals[2]!.expects).toEqual([
+    expect(orbitals[2]!.expects?.filter(e => e.kind === 'entity')).toEqual([
       { kind: 'entity', name: 'Employee', shape: [{ name: 'email', type: 'email' }, { name: 'badge', type: 'string', required: true }] },
     ]);
   });
@@ -863,6 +893,40 @@ describe('composeAppFromFiles — per-orbital files composed into one app', () =
     expect(out.configNavItemsNarrowed).toEqual([{ knob: 'navItems', droppedHrefs: ['/deals'] }]);
   });
 
+  it('D32: an orbital declaring the app nav it forwards at orbital level joins the app\'s one list (and stops shadowing it)', () => {
+    const orbitalLevel: OrbitalSchema = {
+      name: 'EmployeeOrbital',
+      version: '1.0.0',
+      orbitals: [{
+        name: 'EmployeeOrbital',
+        entity: 'EmployeeOrbital.entity',
+        config: { navItems: navOf('/employees') },
+        traits: [{ ref: 'AppShell.traits.AppLayout', name: 'EmployeeOrbitalLayout', config: { navItems: { type: 'unknown', default: '@config.navItems' } } }],
+        pages: [{ name: 'EmployeeOrbitalPage', path: '/employees', traits: [{ ref: 'EmployeeOrbitalLayout' }] }],
+      }],
+    };
+    const out = composeAppFromFiles([organismFile('ContactOrbital', '/contacts', navOf('/contacts')), orbitalLevel], { appName: 'Mixed' });
+    expect(out.schema.config?.navItems).toEqual(navOf('/contacts', '/employees'));
+    expect(out.schema.orbitals.find((o) => o.name === 'EmployeeOrbital')?.config?.navItems).toBeUndefined();
+  });
+
+  it('D32 control: an orbital-level [NavItem] knob no trait forwards as @config stays the orbital\'s own', () => {
+    const local: OrbitalSchema = {
+      name: 'EmployeeOrbital',
+      version: '1.0.0',
+      orbitals: [{
+        name: 'EmployeeOrbital',
+        entity: 'EmployeeOrbital.entity',
+        config: { tabs: navOf('/employees') },
+        traits: [{ ref: 'AppShell.traits.AppLayout', name: 'EmployeeOrbitalLayout', config: { navItems: { type: 'unknown', default: '@config.navItems' } } }],
+        pages: [{ name: 'EmployeeOrbitalPage', path: '/employees', traits: [{ ref: 'EmployeeOrbitalLayout' }] }],
+      }],
+    };
+    const out = composeAppFromFiles([organismFile('ContactOrbital', '/contacts', navOf('/contacts')), local], { appName: 'Mixed' });
+    expect(out.schema.config?.navItems).toEqual(navOf('/contacts'));
+    expect(out.schema.orbitals.find((o) => o.name === 'EmployeeOrbital')?.config?.tabs).toEqual(navOf('/employees'));
+  });
+
   it('control: every listed page owned → concatenated, nothing narrowed', () => {
     const out = composeAppFromFiles([
       organismFile('ContactOrbital', '/contacts', navOf('/contacts')),
@@ -1094,13 +1158,13 @@ describe('dedupeComposedIdentity — FIX-L keeps a rewritten expectation true to
   it('a field the orbital persists to the demoted entity joins the shape, typed from that entity', () => {
     const orbitals = roster(true);
     dedupeComposedIdentity(orbitals);
-    expect(orbitals[1]!.expects).toEqual([{ kind: 'entity', name: 'OnlineUser', shape: [{ name: 'email', type: 'string' }, { name: 'lastActive', type: 'timestamp' }] }]);
+    expect(orbitals[1]!.expects?.filter(e => e.kind === 'entity')).toEqual([{ kind: 'entity', name: 'OnlineUser', shape: [{ name: 'email', type: 'string' }, { name: 'lastActive', type: 'timestamp' }] }]);
   });
 
   it('control: nothing persisted → the shape is carried as declared', () => {
     const orbitals = roster(false);
     dedupeComposedIdentity(orbitals);
-    expect(orbitals[1]!.expects).toEqual([{ kind: 'entity', name: 'OnlineUser', shape: [{ name: 'email', type: 'string' }] }]);
+    expect(orbitals[1]!.expects?.filter(e => e.kind === 'entity')).toEqual([{ kind: 'entity', name: 'OnlineUser', shape: [{ name: 'email', type: 'string' }] }]);
   });
 });
 
@@ -1143,7 +1207,7 @@ describe('composeOrbitalSurface — every organism\'s landing page stays reachab
       file('WorkloadOrbital', 'Workload', '/workload', ['/workload']),
     ], { organismOf: (name) => organisms[name] });
     // In roster order: the planner landing (orbital 1) sits ahead of Workload's entry (orbital 2).
-    expect(out.config?.navItems).toEqual({ type: '[NavItem]', default: [{ href: '/billing', label: '/billing' }, { href: '/team-members', label: 'TeamMembers' }, { href: '/workload', label: '/workload' }] });
+    expect(out.config?.navItems).toEqual({ type: '[NavItem]', default: [{ href: '/billing', label: '/billing' }, { href: '/team-members', label: 'Team Members' }, { href: '/workload', label: '/workload' }] });
     expect(out.landingNavAdded).toEqual([{ organism: 'planner', href: '/team-members' }]);
   });
 

@@ -12,6 +12,7 @@ import type { Entity, EntityRow, FieldValue } from './entity.js';
 import type { JsonValue, RuntimeValue } from './json.js';
 import type { ListenSource } from './trait.js';
 import type { TraitId, EventId } from './identity.js';
+import type { PageAccess, PageIndexing, PageMeta } from './page.js';
 import type { AnyPatternConfig } from '../patterns/index.js';
 
 // ============================================================================
@@ -370,6 +371,22 @@ export interface ResolvedPage {
 
   /** Singleton entities to spawn on this page (runtime singletons) */
   singletonEntities: ResolvedEntity[];
+
+  /** `access:` page modifier; absent = no gate. */
+  access?: PageAccess;
+
+  /** `indexing:` page modifier. */
+  indexing?: PageIndexing;
+  /** The upstream page this one was imported from; see `OrbitalPage.sourcePage`. */
+  sourcePage?: string;
+  /** `translationOf:` page modifier; see `OrbitalPage.translationOf`. */
+  translationOf?: string;
+
+  /** `title:` page modifier. */
+  title?: PageMeta;
+
+  /** `description:` page modifier. */
+  description?: PageMeta;
 }
 
 // ============================================================================

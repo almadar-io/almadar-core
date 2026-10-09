@@ -74,6 +74,9 @@ export {
   makePageRef,
   makeOrbitalWithUses,
   makeAtomOrbital,
+  ORBITAL_VALUE_IMPORT_ALIAS,
+  orbitalImportFromValue,
+  parseProgram,
 } from '../builders.js';
 
 // LayoutTrait + slot-embedding helpers — used by std layout-shell molecules

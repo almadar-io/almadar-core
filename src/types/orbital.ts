@@ -20,8 +20,8 @@ import type { Entity, EntityPersistence } from "./entity.js";
 import { EntitySchema, EntityPersistenceSchema } from "./entity.js";
 import type { EntityField } from "./field.js";
 import { EntityFieldSchema } from "./field.js";
-import type { Page } from "./page.js";
-import { PageSchema } from "./page.js";
+import type { Page, PageAccess, PageIndexing, PageMeta, PageModifiers } from "./page.js";
+import { PageSchema, PageAccessSchema, PageIndexingSchema, PageMetaSchema, PageModifiersSchema } from "./page.js";
 import type {
   TraitRef,
   EventPayloadField,
@@ -449,6 +449,14 @@ export type PageRefObject = {
 
   /** V4 dual-carry id sibling of `traits` — optional until the Phase-7 flip. */
   traitRefIds?: TraitId[];
+
+  /** Explicit page-modifier overrides; absent fields inherit the upstream page's. */
+  access?: PageAccess;
+  indexing?: PageIndexing;
+  title?: PageMeta;
+  description?: PageMeta;
+  /** `translationOf:` — the translation group this page belongs to. */
+  translationOf?: string;
 };
 
 /**
@@ -554,6 +562,11 @@ export const PageRefObjectSchema = z.object({
   linkedEntityId: EntityIdSchema.optional(),
   traits: z.array(TraitRefSchema).optional(),
   traitRefIds: z.array(TraitIdSchema).optional(),
+  access: PageAccessSchema.optional(),
+  indexing: PageIndexingSchema.optional(),
+  title: PageMetaSchema.optional(),
+  description: PageMetaSchema.optional(),
+  translationOf: z.string().min(1).optional(),
 });
 
 export const PageRefSchema = z.union([
@@ -589,6 +602,9 @@ export type OrbitalRefObject = {
 
   /** `pages { "/up": "/local" }` — route remap; unmapped paths keep the upstream value. */
   pages?: Readonly<Record<string, string>>;
+
+  /** `pages { "/up": "/local" [access: …] }` — page modifiers per remap entry, keyed by the upstream path. */
+  pageModifiers?: Readonly<Record<string, PageModifiers>>;
 
   /** Trim the imported trait set to everything but these. */
   omit?: readonly string[];
@@ -645,6 +661,48 @@ export type OrbitalRefObject = {
   extend?: readonly EntityField[];
 
   /**
+   * `mock { field: "a, b" }` — sample data for fields of the materialized
+   * primary entity (named after `fields {}` renames, or an `extend {}` field),
+   * replacing the upstream field's `@mock`. A key naming no such field is
+   * `ORB_O_MOCK_UNKNOWN_FIELD`.
+   */
+  mock?: Readonly<Record<string, string>>;
+
+  /**
+   * `retype { field : type = default }` — replace the type/default of fields the
+   * upstream primary entity already declares (named after `fields {}` renames).
+   * Unlike `extend {}`, every name MUST exist (`ORB_O_RETYPE_UNKNOWN_FIELD`); a
+   * field also in `extend {}` or listed twice is `ORB_O_RETYPE_FIELD_CONFLICT`.
+   */
+  retype?: readonly EntityField[];
+
+  /**
+   * `entity Name [persistent: tbl]` — override the materialized primary entity's
+   * persistence mode. Refused when the upstream entity is not `persistent`
+   * (`ORB_O_ENTITY_PERSISTENCE_LOCKED`), the factory-runtime rule.
+   */
+  persistence?: EntityPersistence;
+
+  /** `entity Name [persistent: tbl]` — override the primary entity's collection. */
+  collection?: string;
+
+  /** Entity-header flags of the `entity` line; each switches the flag ON. */
+  shared?: boolean;
+  identity?: boolean;
+  local?: boolean;
+  /** `[mock]` — seed an empty browser store from the shared mock seeder. */
+  seedMock?: boolean;
+
+  /**
+   * `traits { UpstreamTrait { … } }` — per-imported-trait overrides keyed by the
+   * trait's UPSTREAM name (the §8 trait-reference body). A key naming no upstream
+   * trait is `ORB_O_TRAITS_UNKNOWN_TRAIT`; one `omit`/`only` dropped is
+   * `ORB_O_TRAITS_OMITTED_TRAIT`; a config key the trait never declares is
+   * `ORB_O_CONFIG_UNKNOWN_KEY`.
+   */
+  traits?: Readonly<Record<string, OrbitalRefTraitOverride>>;
+
+  /**
    * `listens { Source.EVENT -> Target.TRIGGER }` — declared routes INTO the
    * imported set. Each entry appends one listen to the imported trait named
    * by `trait` (upstream name). A source naming an imported trait follows
@@ -654,6 +712,18 @@ export type OrbitalRefObject = {
    * (`ORB_O_LISTEN_TARGET_UNKNOWN`).
    */
   listens?: readonly OrbitalRefListen[];
+};
+
+/** One orbital-import `traits {}` entry: the trait-reference override surface for one imported trait. */
+export type OrbitalRefTraitOverride = {
+  /** `-> Entity`: rebinds the trait's linked entity. */
+  linkedEntity?: string;
+  config?: DeclaredTraitConfig;
+  events?: Readonly<Record<string, string>>;
+  fields?: Readonly<Record<string, string>>;
+  /** Replaces the trait's whole `listens` array. */
+  listens?: readonly TraitEventListener[];
+  emitsScope?: EventScope;
 };
 
 /** One orbital-import `listens {}` entry: the target imported trait plus an ordinary listen. */
@@ -675,6 +745,7 @@ export const OrbitalRefObjectSchema = z.object({
   entity: z.string().optional(),
   fields: z.record(z.string()).optional(),
   pages: z.record(z.string()).optional(),
+  pageModifiers: z.record(z.string(), PageModifiersSchema).optional(),
   omit: z.array(z.string()).optional(),
   only: z.array(z.string()).optional(),
   config: DeclaredTraitConfigSchema.optional(),
@@ -683,6 +754,27 @@ export const OrbitalRefObjectSchema = z.object({
   entities: z.record(z.string(), z.string()).optional(),
   mounts: z.record(z.string(), z.array(z.string())).optional(),
   extend: z.array(EntityFieldSchema).optional(),
+  mock: z.record(z.string(), z.string()).optional(),
+  retype: z.array(EntityFieldSchema).optional(),
+  persistence: EntityPersistenceSchema.optional(),
+  collection: z.string().optional(),
+  shared: z.boolean().optional(),
+  identity: z.boolean().optional(),
+  local: z.boolean().optional(),
+  seedMock: z.boolean().optional(),
+  traits: z
+    .record(
+      z.string(),
+      z.object({
+        linkedEntity: z.string().optional(),
+        config: DeclaredTraitConfigSchema.optional(),
+        events: z.record(z.string()).optional(),
+        fields: z.record(z.string()).optional(),
+        listens: z.array(TraitEventListenerSchema).optional(),
+        emitsScope: EventScopeSchema.optional(),
+      }),
+    )
+    .optional(),
   listens: z.array(TraitEventListenerSchema.extend({ trait: z.string() })).optional(),
 });
 

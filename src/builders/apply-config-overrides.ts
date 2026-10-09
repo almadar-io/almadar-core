@@ -15,8 +15,8 @@
  */
 
 import type { OrbitalSchema } from '../types/schema.js';
-import type { TraitRef, TraitConfig, CallSiteConfig, CallSiteConfigEntry, ConfigFieldDeclaration } from '../types/trait.js';
-import { isConfigFieldSchema } from '../types/trait.js';
+import type { TraitRef, TraitConfig, ConfigFieldDeclaration } from '../types/trait.js';
+import { mergeCallSiteConfigOverrides } from '../types/trait.js';
 
 function overrideTrait(trait: Exclude<TraitRef, string>, values: TraitConfig): Exclude<TraitRef, string> {
   // `scope` is required on a full `Trait`; the `{ ref, config }` reference has none.
@@ -34,29 +34,7 @@ function overrideTrait(trait: Exclude<TraitRef, string>, values: TraitConfig): E
     return { ...trait, config: next };
   }
 
-  // Trait reference with call-site config (or none): merge override values.
-  // Existing entries may be plain values or ConfigFieldDeclarations; new
-  // override values are always plain (TraitConfig ⊆ CallSiteConfig). Every
-  // entry in the resulting `config` must be a ConfigField (Rust's
-  // `HashMap<String, ConfigField>`), so bare values — base AND override — are
-  // wrapped as `{ type: 'unknown', default }` when they aren't already a decl.
-  const base: CallSiteConfig = trait.config !== undefined ? { ...trait.config } : {};
-  const next: Record<string, CallSiteConfigEntry> = {};
-  for (const [field, entry] of Object.entries(base)) {
-    next[field] = isConfigFieldSchema(entry)
-      ? entry
-      : { type: 'unknown', default: entry };
-  }
-  for (const [field, value] of Object.entries(values)) {
-    // `value` is always a plain TraitConfigValue (incl. render-ui value
-    // objects). Fold over a declared field; otherwise wrap so Rust serde
-    // parses it as a ConfigField with the value in `default`.
-    const existing = base[field];
-    next[field] = existing !== undefined && isConfigFieldSchema(existing)
-      ? { ...existing, default: value }
-      : { type: 'unknown', default: value };
-  }
-  return { ...trait, config: next };
+  return { ...trait, config: mergeCallSiteConfigOverrides(trait.config ?? {}, values) };
 }
 
 function traitIdentity(trait: Exclude<TraitRef, string>): string | undefined {

@@ -410,9 +410,11 @@ export interface OrbitalEventRequest {
    * case; a listens fan-out that crosses traits carries more than one). The
    * compiled server is stateless-per-trait too (`handlers.rs:510-532` seeds
    * state from `currentState`) — this generalizes that mechanism instead of
-   * the retired single `currentState`/`fields` pair.
+   * the retired single `currentState`/`fields` pair. `event` is the event
+   * that trait fired on in a cascade (the seed's own is `event` above); where
+   * the leg runs follows it.
    */
-  traits?: Array<{ trait: string; from: string }>;
+  traits?: Array<{ trait: string; from: string; event?: string }>;
   /**
    * The dispatching traits' current `@entity` frames (declared defaults <
    * fetched row < `[shared]` frame), keyed by trait name. The server layers

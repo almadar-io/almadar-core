@@ -25,6 +25,7 @@ export {
   getPages,
   getEntity,
   getTrait,
+  pageModifiers,
 } from './src/resolver';
 
 // Embedded-trait `@config.X` forward resolution — shared by the JS
@@ -38,6 +39,7 @@ export {
   traitReferencesCallsitePayload,
   collectCallsiteCaptureChildren,
   collectForwardedConfigKeys,
+  collectOrbitalForwardedConfigKeys,
   traitsEmbeddedByEvent,
   configReferencesCallsitePayload,
   traitsEmbeddedByEffects,
@@ -119,6 +121,9 @@ export {
   type ComposeBehaviorsInput,
   type ComposeBehaviorsResult,
   composeBehaviors,
+  ORBITAL_VALUE_IMPORT_ALIAS,
+  orbitalImportFromValue,
+  parseProgram,
 } from './src/builders/index';
 
 // Export state machine graph algorithms (BFS, guard payloads, replay paths)
@@ -155,7 +160,7 @@ export {
 } from './src/access/entityAccess';
 
 // Declared external inputs: what an outside client may send a trait.
-export { type EventAddress, type ExternalInput, externalInputsOf, findExternalInput, findInputByAddress, payloadSchemaToJsonSchema, readableEntitiesOf } from './src/access/externalInputs';
+export { type EventAddress, type ExternalInput, externalInputsOf, findExternalInput, findInputByAddress, payloadIssues, payloadSchemaToJsonSchema, readableEntitiesOf, type PayloadIssue } from './src/access/externalInputs';
 
 // `expects` derivation — compute an orbital's consumer-side requirement
 // declarations from the organism's golden schema (proposal §7; the ONE owner —
@@ -194,3 +199,4 @@ export * from './src/i18n/index';
 // migrated from packages/almadar-ui/themes/*.css. almadar-pattern-sync's
 // `themes` step regenerates that CSS from these presets.
 export * from './src/themes/index';
+export { orbitalTouchesOwnRecord } from './src/data-bearing';

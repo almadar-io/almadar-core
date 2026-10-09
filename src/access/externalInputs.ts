@@ -12,6 +12,7 @@
 import type { OrbitalSchema } from '../types/schema.js';
 import type { PayloadField } from '../types/state-machine.js';
 import type { JsonSchema } from '../factory/types.js';
+import type { EventPayload, EventPayloadValue } from '../types/expression.js';
 import { mapEntityFieldType } from '../factory/params-schema.js';
 import { isInlineTrait, splitEventAddress } from '../types/trait.js';
 import { orbitalInlineEntities } from './entityAccess.js';
@@ -107,18 +108,103 @@ export function payloadSchemaToJsonSchema(fields: readonly PayloadField[]): Json
     properties[field.name] = payloadFieldToJsonSchema(field);
     if (field.required === true) required.push(field.name);
   }
-  return { type: 'object', properties, ...(required.length > 0 ? { required } : {}) };
+  return {
+    type: 'object',
+    ...(fields.length > 0 ? { additionalProperties: false } : {}),
+    properties,
+    ...(required.length > 0 ? { required } : {}),
+  };
+}
+
+function elementOf(type: string): { isArray: boolean; element: string } {
+  const isArray = type.startsWith('[') && type.endsWith(']');
+  return { isArray, element: isArray ? type.slice(1, -1) : type };
 }
 
 function payloadFieldToJsonSchema(field: PayloadField): JsonSchema {
-  const isArray = field.type.startsWith('[') && field.type.endsWith(']');
-  const element = isArray ? field.type.slice(1, -1) : field.type;
-  const shape: JsonSchema =
+  const { isArray, element } = elementOf(field.type);
+  const base: JsonSchema =
     field.properties !== undefined
       ? payloadSchemaToJsonSchema(field.properties)
       : (() => {
           const t = mapEntityFieldType(element);
           return t === null ? {} : { type: t };
         })();
+  const shape: JsonSchema = field.values !== undefined ? { ...base, enum: [...field.values] } : base;
   return isArray ? { type: 'array', items: shape } : shape;
+}
+
+function isPayloadObject(value: EventPayloadValue): value is EventPayload {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) && !(value instanceof Date);
+}
+
+/** One way a value misses its declared payload. */
+export interface PayloadIssue {
+  readonly path: string;
+  readonly reason: 'missing' | 'unknown' | 'wrong-type' | 'not-one-of';
+  readonly expected?: string;
+}
+
+/**
+ * Check a value against a declared payload: required fields, primitive and container types,
+ * closed value sets, declared object shapes (closed) at any depth. An object field without
+ * declared properties stays open; a type with no JSON shape (`node`, an entity name) is not
+ * checked beyond its container.
+ */
+export function payloadIssues(fields: readonly PayloadField[], value: EventPayloadValue): PayloadIssue[] {
+  return objectIssues(fields, value, '');
+}
+
+function objectIssues(fields: readonly PayloadField[], value: EventPayloadValue, at: string): PayloadIssue[] {
+  if (!isPayloadObject(value)) {
+    return [{ path: at === '' ? '.' : at, reason: 'wrong-type', expected: 'object' }];
+  }
+  const join = (key: string): string => (at === '' ? key : `${at}.${key}`);
+  const issues: PayloadIssue[] = [];
+  for (const field of fields) {
+    const v = value[field.name];
+    if (v === undefined || v === null) {
+      if (field.required === true) issues.push({ path: join(field.name), reason: 'missing' });
+      continue;
+    }
+    issues.push(...fieldIssues(field, v, join(field.name)));
+  }
+  const declared = new Set(fields.map((f) => f.name));
+  for (const key of Object.keys(value)) {
+    if (!declared.has(key)) issues.push({ path: join(key), reason: 'unknown' });
+  }
+  return issues;
+}
+
+function fieldIssues(field: PayloadField, value: EventPayloadValue, at: string): PayloadIssue[] {
+  const { isArray, element } = elementOf(field.type);
+  if (isArray || field.type === 'array') {
+    if (!Array.isArray(value)) return [{ path: at, reason: 'wrong-type', expected: field.type }];
+    return value.flatMap((item, i) => elementIssues(field, element, item, `${at}[${i}]`));
+  }
+  return elementIssues(field, element, value, at);
+}
+
+function elementIssues(field: PayloadField, element: string, value: EventPayloadValue, at: string): PayloadIssue[] {
+  if (field.properties !== undefined && field.type !== 'union') return objectIssues(field.properties, value, at);
+  if (field.type === 'union' && field.properties !== undefined) {
+    const variants = field.properties;
+    return variants.some((v) => elementIssues(v, elementOf(v.type).element, value, at).length === 0)
+      ? []
+      : [{ path: at, reason: 'wrong-type', expected: variants.map((v) => v.type).join(' | ') }];
+  }
+  const json = element === 'object' ? 'object' : mapEntityFieldType(element);
+  const matches =
+    json === null ||
+    (json === 'object' && isPayloadObject(value)) ||
+    (json === 'array' && Array.isArray(value)) ||
+    (json === 'string' && (typeof value === 'string' || value instanceof Date)) ||
+    (json === 'number' && typeof value === 'number') ||
+    (json === 'integer' && typeof value === 'number' && Number.isInteger(value)) ||
+    (json === 'boolean' && typeof value === 'boolean');
+  if (!matches) return [{ path: at, reason: 'wrong-type', expected: element }];
+  if (field.values !== undefined && (typeof value !== 'string' || !field.values.includes(value))) {
+    return [{ path: at, reason: 'not-one-of', expected: field.values.join(' | ') }];
+  }
+  return [];
 }

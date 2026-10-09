@@ -436,6 +436,8 @@ export type FetchOptions = {
     limit?: number | RenderBinding | SExpr[];
     /** Number of entities to skip — same template-layer forms as `limit`. */
     offset?: number | RenderBinding | SExpr[];
+    /** `"field"` or `"field:asc|desc"`, applied after the filter and before offset/limit; missing values sort last. */
+    orderBy?: string | RenderBinding | SExpr[];
     /** Relations to populate (entity field names). The template layer may
      *  carry a binding (`'@config.include'`) — same as `limit`/`offset`, the
      *  compiler's inline phase resolves it to the concrete list. */
@@ -706,27 +708,28 @@ export type BrowserEffect = [`browser/${string}`, ...SExpr[]];
 export type LlmEffect = [`llm/${string}`, ...SExpr[]];
 
 /**
- * Behavior effect - invokes a behavior/* operator (agent path).
- * @example ['behavior/instantiate', '@entity.plan', { emit: { failure: 'BUILD_FAILED' } }]
+ * Behavior reflection effects: list installed behaviors by registry folder,
+ * describe a trait value, read a behavior's source. They read the host's
+ * installed packages through `orb`, so they run on the server.
+ * @example ['behavior/catalog', { paths: ['std/ui/core/molecules'] }, { emit: { success: 'LISTED', failure: 'LIST_FAILED' } }]
  */
-export type BehaviorEffect = [`behavior/${string}`, ...SExpr[]];
+export type BehaviorReflectionEffect = ['behavior/catalog' | 'behavior/describe' | 'behavior/source', ...SExpr[]];
 
 /**
- * Validate effect - invokes a validate/* operator (agent path).
- * @example ['validate/validate', '@entity.schema', { emit: { failure: 'INVALID' } }]
+ * Program effects: read `.lolo` text into a quoted program, print one back,
+ * evaluate one (validate, then instantiate). Run `orb` on the server.
+ * @example ['program/eval', '@entity.program', { emit: { success: 'BUILT', failure: 'BUILD_FAILED' } }]
  */
-export type ValidateEffect = [`validate/${string}`, ...SExpr[]];
+export type ProgramEffect = ['program/read' | 'program/print' | 'program/eval' | 'program/compose', ...SExpr[]];
 
 /**
  * Remaining agent-path operator effects: session/* (workspace session ops),
- * compose/* (schema composition), trace/* (trace emission), memory/*
- * (agent memory), application/* (app lifecycle). Expression-only namespaces
- * (array/, math/, object/, str/, …) are deliberately NOT effect heads.
+ * trace/* (trace emission), memory/* (agent memory), application/* (app
+ * lifecycle). Expression-only namespaces (array/, math/, object/, str/, …)
+ * are deliberately NOT effect heads.
  * @example ['session/write-spec', '@entity.spec']
- * @example ['compose/compose-all', { emit: { failure: 'COMPOSE_FAILED' } }]
  */
 export type SessionEffect = [`session/${string}`, ...SExpr[]];
-export type ComposeEffect = [`compose/${string}`, ...SExpr[]];
 export type TraceEffect = [`trace/${string}`, ...SExpr[]];
 export type MemoryEffect = [`memory/${string}`, ...SExpr[]];
 export type ApplicationEffect = [`application/${string}`, ...SExpr[]];
@@ -799,7 +802,6 @@ export type WorkspaceWriteFileEffect = ['workspace/write-file', SExpr, SExpr];
 export type WorkspaceWriteSchemaEffect = ['workspace/write-schema', SExpr];
 export type WorkspaceWritePlanEffect = ['workspace/write-plan', SExpr];
 export type WorkspaceArchiveOrbitalEffect = ['workspace/archive-orbital', SExpr];
-export type LoloEmitBodyEffect = ['lolo/emit-body', SExpr, SExpr, SExpr];
 export type IntegrationHttpEffect = ['integration/http', SExpr, SExpr, SExpr] | ['integration/http', SExpr, SExpr, SExpr, SExpr];
 export type IntegrationGithubGetRepoEffect = ['integration/github-get-repo', SExpr, SExpr];
 export type IntegrationGithubCreateIssueEffect = ['integration/github-create-issue', SExpr, SExpr, SExpr];
@@ -848,10 +850,9 @@ export type TypedEffect =
     | OsEffect
     | BrowserEffect
     | LlmEffect
-    | BehaviorEffect
-    | ValidateEffect
+    | BehaviorReflectionEffect
+    | ProgramEffect
     | SessionEffect
-    | ComposeEffect
     | TraceEffect
     | MemoryEffect
     | ApplicationEffect
@@ -873,7 +874,6 @@ export type TypedEffect =
     | WorkspaceWriteSchemaEffect
     | WorkspaceWritePlanEffect
     | WorkspaceArchiveOrbitalEffect
-    | LoloEmitBodyEffect
     | IntegrationHttpEffect
     | IntegrationGithubGetRepoEffect
     | IntegrationGithubCreateIssueEffect;
@@ -918,13 +918,14 @@ export const EFFECT_OPERATORS = [
   'checkpoint/load', 'notify', 'send-server', 'async/timeout', 'async/retry', 'nn/setWeights',
   'train/loop', 'train/step', 'train/clipGradients', 'train/clipWeights', 'train/sgd',
   'train/adam', 'prob/seed', 'prob/condition', 'workspace/write-orbital', 'workspace/write-file',
-  'workspace/write-schema', 'workspace/write-plan', 'workspace/archive-orbital', 'lolo/emit-body',
+  'workspace/write-schema', 'workspace/write-plan', 'workspace/archive-orbital', 'behavior/catalog',
+  'behavior/describe', 'behavior/source', 'program/read', 'program/print', 'program/eval', 'program/compose',
   'integration/http', 'integration/github-get-repo', 'integration/github-create-issue',
 ] as const;
 
 /** Namespaced effect families (`<family>/<name>`, e.g. `llm/generate`) the {@link Effect} union declares. */
 export const EFFECT_OPERATOR_FAMILIES = [
-  'agent', 'os', 'browser', 'llm', 'behavior', 'validate', 'session', 'compose', 'trace', 'memory',
+  'agent', 'os', 'browser', 'llm', 'session', 'trace', 'memory',
   'application',
 ] as const;
 

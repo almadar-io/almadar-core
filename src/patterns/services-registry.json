@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-06T17:27:52.588Z",
+  "exportedAt": "2026-10-08T17:09:02.896Z",
   "services": {
     "llm": {
       "name": "llm",
@@ -298,6 +298,46 @@
                   "event": {
                     "type": "EventAddress",
                     "required": false
+                  },
+                  "payload": {
+                    "type": "AgentToolField[]",
+                    "required": false,
+                    "items": {
+                      "type": "AgentToolField",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "required": true
+                        },
+                        "type": {
+                          "type": "string",
+                          "required": true
+                        },
+                        "required": {
+                          "type": "boolean",
+                          "required": false
+                        },
+                        "values": {
+                          "type": "string[]",
+                          "required": false,
+                          "description": "Closed value set — element-wise for an array type."
+                        },
+                        "properties": {
+                          "type": "AgentToolField[]",
+                          "required": false,
+                          "description": "Fields of an object (or `[object]`) type.",
+                          "items": {
+                            "type": "AgentToolField",
+                            "cyclic": true,
+                            "cyclicTypeName": "AgentToolField"
+                          }
+                        },
+                        "description": {
+                          "type": "string",
+                          "required": false
+                        }
+                      }
+                    }
                   },
                   "read": {
                     "type": "string",
@@ -1818,6 +1858,46 @@
                   "event": {
                     "type": "EventAddress",
                     "required": false
+                  },
+                  "payload": {
+                    "type": "AgentToolField[]",
+                    "required": false,
+                    "items": {
+                      "type": "AgentToolField",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "required": true
+                        },
+                        "type": {
+                          "type": "string",
+                          "required": true
+                        },
+                        "required": {
+                          "type": "boolean",
+                          "required": false
+                        },
+                        "values": {
+                          "type": "string[]",
+                          "required": false,
+                          "description": "Closed value set — element-wise for an array type."
+                        },
+                        "properties": {
+                          "type": "AgentToolField[]",
+                          "required": false,
+                          "description": "Fields of an object (or `[object]`) type.",
+                          "items": {
+                            "type": "AgentToolField",
+                            "cyclic": true,
+                            "cyclicTypeName": "AgentToolField"
+                          }
+                        },
+                        "description": {
+                          "type": "string",
+                          "required": false
+                        }
+                      }
+                    }
                   },
                   "read": {
                     "type": "string",
@@ -6508,6 +6588,10 @@
                   "shared": {
                     "type": "string[]",
                     "required": true
+                  },
+                  "linked": {
+                    "type": "boolean",
+                    "required": true
                   }
                 }
               }
@@ -6616,6 +6700,11 @@
                           "type": "string[]",
                           "required": true
                         },
+                        "parents": {
+                          "type": "string[]",
+                          "required": true,
+                          "description": "Names of the concepts this one builds on (the parents a level expansion links it to)."
+                        },
                         "masteryLevel": {
                           "type": "number",
                           "required": true,
@@ -6701,6 +6790,11 @@
                   "prerequisites": {
                     "type": "string[]",
                     "required": true
+                  },
+                  "parents": {
+                    "type": "string[]",
+                    "required": true,
+                    "description": "Names of the concepts this one builds on (the parents a level expansion links it to)."
                   },
                   "masteryLevel": {
                     "type": "number",
@@ -6797,6 +6891,11 @@
                   "type": "string[]",
                   "required": true
                 },
+                "parents": {
+                  "type": "string[]",
+                  "required": true,
+                  "description": "Names of the concepts this one builds on (the parents a level expansion links it to)."
+                },
                 "masteryLevel": {
                   "type": "number",
                   "required": true,
@@ -6823,6 +6922,27 @@
             "lessonId": "string",
             "lesson": "string",
             "prerequisites": {
+              "type": "KnowledgeConceptRef[]",
+              "items": {
+                "type": "KnowledgeConceptRef",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "routeKey": {
+                    "type": "string",
+                    "required": true,
+                    "description": "URL-safe key for the concept's page; `conceptDetail` takes it."
+                  }
+                }
+              }
+            },
+            "parents": {
               "type": "KnowledgeConceptRef[]",
               "items": {
                 "type": "KnowledgeConceptRef",

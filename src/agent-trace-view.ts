@@ -247,3 +247,10 @@ export interface TraceChatMessage {
   reasoningContent?: string;
 }
 
+
+export interface AgentTraceState {
+  activities: TraceActivity[];
+  subagents: TraceSubagent[];
+  coordinatorMessages: TraceChatMessage[];
+  status: 'idle' | 'running' | 'paused' | 'complete' | 'error';
+}

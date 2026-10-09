@@ -106,6 +106,23 @@ export function isCallSiteConfigDeclaration(
     );
 }
 
+/**
+ * Whether a call-site config entry RE-DECLARES its knob (legal for a knob the trait does not
+ * declare) rather than setting a value. Twin of orbital-core `ConfigField::is_declaration_form`:
+ * a value wrapped as `{ type: 'unknown', default }` (what `mergeCallSiteConfigOverrides` builds)
+ * is a value; a typed declaration, or one carrying `label`/`description`/`synonyms`/`tier`, is not.
+ */
+export function isConfigRedeclaration(entry: CallSiteConfigEntry): boolean {
+    if (!isCallSiteConfigDeclaration(entry)) return false;
+    return (
+        entry.type !== 'unknown' ||
+        entry.label !== undefined ||
+        entry.description !== undefined ||
+        entry.synonyms !== undefined ||
+        entry.tier !== undefined
+    );
+}
+
 /** Metadata keys that only ever appear on a declared config-field SCHEMA
  *  (never on a render-value object that merely carries a UI `type` key). */
 const CONFIG_DECLARATION_META_KEYS = ['label', 'description', 'tier', 'synonyms', 'values'] as const;
@@ -163,6 +180,36 @@ export function normalizeCallSiteConfigToValues(
     }
 
     return hasAny ? out : undefined;
+}
+
+/**
+ * Merge call-site config overrides onto a base `CallSiteConfig`. Every entry
+ * in the result is a `ConfigField` (Rust's `HashMap<String, ConfigField>`):
+ * bare values — base AND override — are wrapped as `{ type: 'unknown', default }`
+ * when not already a declaration. Override folds into an existing declaration's
+ * `default` field.
+ */
+export function mergeCallSiteConfigOverrides(
+  base: CallSiteConfig,
+  overrides: CallSiteConfig,
+): Record<string, ConfigFieldDeclaration> {
+  const next: Record<string, ConfigFieldDeclaration> = {};
+  for (const [k, entry] of Object.entries(base)) {
+    next[k] = isConfigFieldSchema(entry)
+      ? entry
+      : { type: 'unknown', default: entry };
+  }
+  for (const [k, v] of Object.entries(overrides)) {
+    if (isCallSiteConfigDeclaration(v)) {
+      next[k] = v;
+      continue;
+    }
+    const existing = base[k];
+    next[k] = existing !== undefined && isConfigFieldSchema(existing)
+      ? { ...existing, default: v }
+      : { type: 'unknown', default: v };
+  }
+  return next;
 }
 
 /**
@@ -647,6 +694,8 @@ export type EventPayloadField = {
     type: string;
     /** Whether field is required in payload */
     required?: boolean;
+    /** Closed value set (`"a" | "b"`) — element-wise for an array type. */
+    values?: ReadonlyArray<string>;
     /** Human-readable description */
     description?: string;
     /** For 'entity' type: the entity type name */
@@ -678,6 +727,7 @@ export const EventPayloadFieldSchema: z.ZodType<EventPayloadField> = z.object({
      */
     type: z.string().min(1),
     required: z.boolean().optional(),
+    values: z.array(z.string()).optional(),
     description: z.string().optional(),
     entity: z.string().optional(),
     properties: z.lazy(() => z.array(EventPayloadFieldSchema)).optional(),
@@ -1091,7 +1141,8 @@ export type TraitReference = {
     effects?: Record<string, SExpr[]>;
 };
 
-export const TraitReferenceSchema = z
+/** The reference object's fields, before the `events` refinement (so other shapes can `.pick` from it). */
+export const TraitReferenceObjectSchema = z
     .object({
         ref: z.string().min(1),
         refId: TraitIdSchema.optional(),
@@ -1143,7 +1194,9 @@ export const TraitReferenceSchema = z
                 z.array(SExprSchema),
             )
             .optional(),
-    })
+    });
+
+export const TraitReferenceSchema = TraitReferenceObjectSchema
     .refine(
         (ref) => {
             if (!ref.events) return true;

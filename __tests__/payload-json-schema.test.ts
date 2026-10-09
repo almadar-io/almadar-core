@@ -12,10 +12,11 @@ describe('payloadSchemaToJsonSchema', () => {
       ]),
     ).toEqual({
       type: 'object',
+      additionalProperties: false,
       properties: {
         title: { type: 'string' },
         points: { type: 'number' },
-        data: { type: 'object', properties: { done: { type: 'boolean' } }, required: ['done'] },
+        data: { type: 'object', additionalProperties: false, properties: { done: { type: 'boolean' } }, required: ['done'] },
       },
       required: ['title', 'data'],
     });
@@ -26,7 +27,8 @@ describe('payloadSchemaToJsonSchema', () => {
       payloadSchemaToJsonSchema([{ name: 'rows', type: '[object]', properties: [{ name: 'id', type: 'string', required: true }] }]),
     ).toEqual({
       type: 'object',
-      properties: { rows: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] } } },
+      additionalProperties: false,
+      properties: { rows: { type: 'array', items: { type: 'object', additionalProperties: false, properties: { id: { type: 'string' } }, required: ['id'] } } },
     });
   });
 

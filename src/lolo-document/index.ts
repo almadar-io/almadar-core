@@ -396,6 +396,13 @@ function parseEntity(text: string, s: number): EntityDecl | null {
   return { name: m[1], tags: m[2] ?? '', fields, span: { start: s, end: block.span.end }, bodySpan: block.bodySpan };
 }
 
+/** End of a declaration whose `[` modifier bracket may span lines: the line end after its `]`. */
+function bracketEnd(text: string, bracketAt: number, firstLineEnd: number): number {
+  if (text[bracketAt] !== '[') return firstLineEnd;
+  const close = matchDelimiter(text, bracketAt);
+  return close === -1 ? firstLineEnd : lineEnd(text, close);
+}
+
 function parsePage(text: string, s: number): PageDecl | null {
   const le = lineEnd(text, s);
   const head = text.slice(s, le);
@@ -426,7 +433,7 @@ function parsePage(text: string, s: number): PageDecl | null {
           .split(',')
           .map((t) => t.trim())
           .filter((t) => t.length > 0);
-  const page: PageDecl = { path: m[1], name: m[2], traits, traitsSpan: { start: traitsStart, end: traitsEnd }, span: { start: s, end: le } };
+  const page: PageDecl = { path: m[1], name: m[2], traits, traitsSpan: { start: traitsStart, end: traitsEnd }, span: { start: s, end: bracketEnd(text, tail, le) } };
   if (arrowAt !== -1) {
     let arrowStart = arrowAt;
     while (arrowStart > s && /\s/.test(text[arrowStart - 1])) arrowStart--;
@@ -452,9 +459,19 @@ export function parseLoloDocument(text: string): LoloDocument {
     pages: [],
     indent: '  ',
   };
-  const appMatch = /^app\s+([\w.-]+)\s+(?:"([^"]+)"|(v[\w.]+))/m.exec(text);
+  // `app NAME [version: "1.0.0", …]`, or the pre-bracket `app NAME "1.0.0"` / `vN`.
+  const appMatch = /^app\s+([\w.-]+)(?:\s+(?:"([^"]+)"|(v[\w.]+)))?/m.exec(text);
   if (appMatch && appMatch.index !== undefined) {
-    doc.app = { name: appMatch[1], version: appMatch[2] ?? appMatch[3] ?? '', span: { start: appMatch.index, end: lineEnd(text, appMatch.index) } };
+    const appLineEnd = lineEnd(text, appMatch.index);
+    const appBracket = text.slice(appMatch.index, appLineEnd).indexOf('[', appMatch[0].length);
+    const bracketClose = appBracket === -1 ? -1 : matchDelimiter(text, appMatch.index + appBracket);
+    const bracketVersion =
+      bracketClose === -1 ? undefined : /\bversion:\s*"([^"]+)"/.exec(text.slice(appMatch.index + appBracket, bracketClose))?.[1];
+    doc.app = {
+      name: appMatch[1],
+      version: bracketVersion ?? appMatch[2] ?? appMatch[3] ?? '',
+      span: { start: appMatch.index, end: bracketEnd(text, appBracket === -1 ? appLineEnd : appMatch.index + appBracket, appLineEnd) },
+    };
   }
   let indentSeen = false;
   for (const s of statementStarts(text, block.bodySpan)) {

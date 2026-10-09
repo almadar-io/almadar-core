@@ -53,6 +53,7 @@ export type FieldType =
     | 'enum'
     | 'relation'
     | 'trait'
+    | 'orbital'
     | 'slot'
     | 'pattern'
     // Renderable UI content — a pattern node (or array of them), the same
@@ -99,6 +100,7 @@ export const FIELD_TYPES = [
     'enum',
     'relation',
     'trait',
+    'orbital',
     'slot',
     'pattern',
     'node',
@@ -326,6 +328,7 @@ type ScalarFieldType =
     | 'money'
     | 'file'
     | 'trait'
+    | 'orbital'
     | 'slot'
     | 'pattern'
     | 'node'
@@ -566,6 +569,7 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
             scalarVariant('uuid'),
             scalarVariant('image'),
             scalarVariant('trait'),
+            scalarVariant('orbital'),
             scalarVariant('slot'),
             scalarVariant('pattern'),
             scalarVariant('node'),

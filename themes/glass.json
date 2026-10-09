@@ -261,7 +261,12 @@
       "backdrop": "blur(20px) saturate(1.6)",
       "cardImage": "linear-gradient(135deg, rgba(255,255,255,0.45), rgba(255,255,255,0.05))",
       "pageImage": "radial-gradient(60% 50% at 15% 10%, rgba(64,88,214,0.22), transparent 70%), radial-gradient(50% 45% at 85% 20%, rgba(194,65,122,0.14), transparent 70%), radial-gradient(55% 50% at 70% 90%, rgba(56,160,190,0.16), transparent 70%), radial-gradient(45% 40% at 10% 85%, rgba(64,88,214,0.12), transparent 70%)",
-      "pageImageSize": "100% 100%"
+      "pageImageSize": "100% 100%",
+      "edgeMask": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100' preserveAspectRatio='none'><path d='M0 60 C240 100 480 100 720 60 C960 20 1200 20 1440 60 V100 H0 Z'/></svg>\")",
+      "edgeHeight": "clamp(24px, 6vw, 96px)",
+      "textureMask": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><circle cx='3' cy='3' r='1.5'/></svg>\")",
+      "textureSize": "24px 24px",
+      "accentImage": "radial-gradient(60% 80% at 15% 20%, color-mix(in oklab, var(--color-primary) 22%, transparent), transparent 70%), radial-gradient(50% 70% at 85% 30%, color-mix(in oklab, var(--color-accent) 20%, transparent), transparent 70%)"
     },
     "diagram": {
       "strokeThin": "1",
@@ -377,7 +382,12 @@
         "backdrop": "blur(20px) saturate(1.6)",
         "cardImage": "linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.01))",
         "pageImage": "radial-gradient(60% 50% at 15% 10%, rgba(138,160,255,0.28), transparent 70%), radial-gradient(50% 45% at 85% 20%, rgba(240,140,176,0.16), transparent 70%), radial-gradient(55% 50% at 70% 90%, rgba(56,160,190,0.16), transparent 70%), radial-gradient(45% 40% at 10% 85%, rgba(138,160,255,0.14), transparent 70%)",
-        "pageImageSize": "100% 100%"
+        "pageImageSize": "100% 100%",
+        "edgeMask": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100' preserveAspectRatio='none'><path d='M0 60 C240 100 480 100 720 60 C960 20 1200 20 1440 60 V100 H0 Z'/></svg>\")",
+        "edgeHeight": "clamp(24px, 6vw, 96px)",
+        "textureMask": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><circle cx='3' cy='3' r='1.5'/></svg>\")",
+        "textureSize": "24px 24px",
+        "accentImage": "radial-gradient(60% 80% at 15% 20%, color-mix(in oklab, var(--color-primary) 22%, transparent), transparent 70%), radial-gradient(50% 70% at 85% 30%, color-mix(in oklab, var(--color-accent) 20%, transparent), transparent 70%)"
       }
     }
   }

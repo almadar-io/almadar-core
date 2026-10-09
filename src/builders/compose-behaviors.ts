@@ -227,6 +227,10 @@ export function composeBehaviors(
     if (orbital.pages && orbital.pages.length > 0) {
       return orbital;
     }
+    // An orbital import's pages come whole from the imported orbital (LOLO §8b).
+    if (orbital.reference !== undefined) {
+      return orbital;
+    }
 
     // Assign the generated page for this orbital
     const page = strategy === 'dashboard' || strategy === 'single'

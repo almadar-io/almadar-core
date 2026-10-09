@@ -45,10 +45,26 @@
     "roles": "vloge",
     "entities": "entitete",
     "extend": "razsiritev",
+    "retype": "prevrsta",
+    "traits": "znacilnosti",
+    "mock": "lazno",
     "lazy": "odlozeno",
     "locales": "jeziki",
     "public": "javno",
-    "instances": "primerki"
+    "instances": "primerki",
+    "access": "dostop",
+    "indexing": "indeksiranje",
+    "title": "naziv",
+    "description": "opis",
+    "origin": "poreklo",
+    "icon": "ikona",
+    "siteName": "imeStrani",
+    "signIn": "prijava",
+    "authenticated": "prijavljen",
+    "index": "indeksiraj",
+    "noindex": "brezIndeksa",
+    "version": "razlicica",
+    "translationOf": "prevodOd"
   },
   "shapes": {
     "Entity": "Entiteta",
@@ -138,6 +154,8 @@
     "fn": "fn",
     "lambda": "lambda",
     "quote": "citat",
+    "quasiquote": "kvazicitat",
+    "unquote": "odcitat",
     "match": "ujemaj",
     "when": "ko"
   },
@@ -174,6 +192,7 @@
     "null": "nic",
     "any": "karkoli",
     "trait": "znacilnost",
+    "orbital": "orbitala",
     "entity": "entiteta",
     "event": "dogodek",
     "EventAddress": "NaslovDogodka",
@@ -276,6 +295,7 @@
     "expects": "pricakuje",
     "exposes": "izpostavlja",
     "extend": "razsiritev",
+    "retype": "prevrsta",
     "extends": "razsiri",
     "extendsId": "razsiriId",
     "external": "zunanje",
@@ -469,6 +489,13 @@
     "seedMock": "lazniZacetek",
     "localeInstances": "jezikovniPrimerki",
     "diagram": "diagram",
-    "scene": "prizor"
+    "scene": "prizor",
+    "access": "dostop",
+    "indexing": "indeksiranje",
+    "origin": "poreklo",
+    "signIn": "prijava",
+    "sourcePage": "izvornaStran",
+    "translationOf": "prevodOd",
+    "pageModifiers": "modifikatorjiStrani"
   }
 }

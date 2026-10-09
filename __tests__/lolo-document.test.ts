@@ -282,3 +282,50 @@ describe('setEmbedAttribute — an inline embed located by `orb embeds` (line, c
     expect(next.split('\n')[0]).toBe('(render-ui main <Stack.traits.StackRender gap={"lg"}>');
   });
 });
+
+describe('modifier brackets', () => {
+  const BRACKETED = [
+    'app shop [',
+    '  version: "1.0.0",',
+    '  description: "A shop",',
+    '  locales: [en, ar]',
+    ']',
+    '',
+    'orbital Shop {',
+    '  page "/" as Home -> HomeView, CartView [',
+    '    access: public,',
+    '    title: "Home"',
+    '  ]',
+    '  page "/cart" -> CartView',
+    '}',
+    '',
+  ].join('\n');
+
+  it('the app span covers its multi-line bracket', () => {
+    const doc = parseLoloDocument(BRACKETED);
+    expect(doc.app?.name).toBe('shop');
+    expect(doc.app?.version).toBe('1.0.0');
+    expect(BRACKETED.slice(doc.app?.span.start, doc.app?.span.end)).toBe(BRACKETED.split('\n').slice(0, 5).join('\n'));
+  });
+
+  it('a page span covers its multi-line bracket and the bracket lines are not statements', () => {
+    const doc = parseLoloDocument(BRACKETED);
+    expect(doc.pages.map((p) => p.path)).toEqual(['/', '/cart']);
+    const home = doc.pages[0];
+    expect(home.traits).toEqual(['HomeView', 'CartView']);
+    expect(BRACKETED.slice(home.span.start, home.span.end).trimEnd().endsWith(']')).toBe(true);
+  });
+
+  it('control: a one-line page and an old-style app line keep line spans', () => {
+    const doc = parseLoloDocument('app shop "1.0.0"\n"A shop"\n\norbital Shop {\n  page "/cart" -> CartView [view: list]\n}\n');
+    expect(doc.app?.span.end).toBe('app shop "1.0.0"'.length);
+    expect(doc.app?.version).toBe('1.0.0');
+    expect(doc.pages[0].traits).toEqual(['CartView']);
+  });
+
+  it('appending a trait to a bracketed page keeps the bracket intact', () => {
+    const doc = parseLoloDocument(BRACKETED);
+    const out = applyEdits(BRACKETED, appendPageTrait(doc, '/', 'Extra'));
+    expect(out).toContain('page "/" as Home -> HomeView, CartView, Extra [\n    access: public,');
+  });
+});

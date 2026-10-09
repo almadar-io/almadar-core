@@ -23,6 +23,9 @@ export type { JsonValue };
  * but stays in the schema for prompt rendering / studio UIs.
  */
 export interface JsonSchema {
+  $id?: string;
+  minItems?: number;
+  minProperties?: number;
   type?: JsonSchemaType | ReadonlyArray<JsonSchemaType>;
   description?: string;
   properties?: Readonly<{ [key: string]: JsonSchema }>;
@@ -134,6 +137,8 @@ export interface FactoryEntitySignature {
   fields: ReadonlyArray<FactorySignatureEntityField>;
   /** Persistence mode declared on the canonical entity in the `.orb`. */
   persistence: EntityPersistence;
+  /** The orbital's own traits fetch or persist this record, so a runtime one may still be saved. */
+  dataBearing?: boolean;
 }
 
 /**

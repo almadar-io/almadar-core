@@ -45,10 +45,26 @@
     "roles": "أدوار",
     "entities": "كيانات",
     "extend": "امتداد",
+    "retype": "إعادة_النوع",
+    "traits": "سمات",
+    "mock": "وهمي",
     "lazy": "مؤجل",
     "locales": "لغات",
     "public": "عام",
-    "instances": "نسخ"
+    "instances": "نسخ",
+    "access": "وصول",
+    "indexing": "فهرسة",
+    "title": "عنوان",
+    "description": "وصف",
+    "origin": "أصل",
+    "icon": "أيقونة",
+    "siteName": "اسم_الموقع",
+    "signIn": "تسجيل_الدخول",
+    "authenticated": "موثق",
+    "index": "فهرس",
+    "noindex": "بلا_فهرسة",
+    "version": "إصدار",
+    "translationOf": "ترجمة_من"
   },
   "shapes": {
     "Entity": "كيان",
@@ -138,6 +154,8 @@
     "fn": "دالة",
     "lambda": "لامدا",
     "quote": "اقتباس",
+    "quasiquote": "شبه_اقتباس",
+    "unquote": "إلغاء_اقتباس",
     "match": "مطابقة",
     "when": "عندما"
   },
@@ -174,6 +192,7 @@
     "null": "عدم",
     "any": "أي",
     "trait": "سمة",
+    "orbital": "مدار",
     "entity": "كيان",
     "event": "حدث",
     "EventAddress": "عنوان_حدث",
@@ -276,6 +295,7 @@
     "expects": "يتوقع",
     "exposes": "يعرض",
     "extend": "امتداد",
+    "retype": "إعادة_النوع",
     "extends": "يمتد",
     "extendsId": "معرف_الامتداد",
     "external": "خارجي",
@@ -469,6 +489,13 @@
     "seedMock": "بذر_وهمي",
     "localeInstances": "نسخ_اللغة",
     "diagram": "مخطط",
-    "scene": "مشهد"
+    "scene": "مشهد",
+    "access": "وصول",
+    "indexing": "فهرسة",
+    "origin": "أصل",
+    "signIn": "تسجيل_الدخول",
+    "sourcePage": "الصفحة_الأصلية",
+    "translationOf": "ترجمة_من",
+    "pageModifiers": "معدلات_الصفحات"
   }
 }

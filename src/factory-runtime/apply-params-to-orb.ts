@@ -36,6 +36,7 @@ import type {
 import {
   isCallSiteConfigDeclaration,
   isConfigFieldSchema,
+  mergeCallSiteConfigOverrides,
   overrideDeclaredKnobs,
   persistenceModeAllowsOverrides,
   ledgerRename,
@@ -55,6 +56,7 @@ import type {
   OrbitalTraitOverride,
   ParamValidationResult,
 } from './types.js';
+import { orbitalTouchesOwnRecord } from '../data-bearing.js';
 
 /**
  * Structural validation of caller-supplied params against the manifest.
@@ -128,6 +130,7 @@ export function validateOrbitalFactoryParams(
 interface OverlayContext {
   readonly canonicalEntityName: string;
   readonly canonicalEntity: OrbitalEntity;
+  readonly dataBearing: boolean;
 }
 
 function assertResolvedEntity(
@@ -214,6 +217,7 @@ function buildEntity(
 
   const allowPersistenceOverride = persistenceModeAllowsOverrides(
     ctx.canonicalEntity.persistence,
+    ctx.dataBearing,
   );
 
   const entity: Entity = {
@@ -225,6 +229,9 @@ function buildEntity(
   };
   if (allowPersistenceOverride && effectiveCollection !== undefined) {
     entity.collection = effectiveCollection;
+  } else if (allowPersistenceOverride && entity.persistence === 'persistent' && ctx.canonicalEntity.persistence === 'runtime') {
+    // A runtime record made persistent has no canonical collection to inherit.
+    entity.collection = `${(params.entityName ?? effectiveName).toLowerCase()}s`;
   }
   return entity;
 }
@@ -449,40 +456,7 @@ function rebuildPages(
   });
 }
 
-/**
- * Merge call-site config overrides onto a base `CallSiteConfig`. Every entry
- * in the result is a `ConfigField` (Rust's `HashMap<String, ConfigField>`):
- * bare values — base AND override — are wrapped as `{ type: 'unknown', default }`
- * when not already a declaration. Override folds into an existing declaration's
- * `default` field.
- *
- * This is the single canonical implementation shared by:
- *   - `applyParamsToOrb` (runtime factory overlay)
- *   - generated factory bodies (via import from `@almadar/core/factory-runtime`)
- *   - generated `mergeExtraTraitWithOverlay` in dispatch.ts
- */
-export function mergeCallSiteConfigOverrides(
-  base: CallSiteConfig,
-  overrides: CallSiteConfig,
-): Record<string, CallSiteConfigEntry> {
-  const next: Record<string, CallSiteConfigEntry> = {};
-  for (const [k, entry] of Object.entries(base)) {
-    next[k] = isConfigFieldSchema(entry)
-      ? entry
-      : { type: 'unknown', default: entry };
-  }
-  for (const [k, v] of Object.entries(overrides)) {
-    if (isCallSiteConfigDeclaration(v)) {
-      next[k] = v;
-      continue;
-    }
-    const existing = base[k];
-    next[k] = existing !== undefined && isConfigFieldSchema(existing)
-      ? { ...existing, default: v }
-      : { type: 'unknown', default: v };
-  }
-  return next;
-}
+export { mergeCallSiteConfigOverrides } from '../types/index.js';
 
 /**
  * Read-only structural view over the JSON lattice the reference-rewrite
@@ -857,7 +831,7 @@ export function applyParamsToOrb(
           : canonicalEntity.collection))
       : params.collection;
 
-  const ctx: OverlayContext = { canonicalEntityName, canonicalEntity };
+  const ctx: OverlayContext = { canonicalEntityName, canonicalEntity, dataBearing: orbitalTouchesOwnRecord(orbital) };
 
   const built = makeOrbitalWithUses({
     name: orbital.name,

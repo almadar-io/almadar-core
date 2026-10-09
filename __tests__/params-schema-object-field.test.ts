@@ -41,23 +41,13 @@ describe('signatureToParamsSchema — object fields (G-CROSS-064)', () => {
     }
   });
 
-  it('a struct branch requires its members in `properties`, each member a typed field', () => {
-    const struct = objectBranches().find((b) => b.required?.includes('properties'));
-    expect(struct).toBeDefined();
-    const members = struct?.properties?.['properties'];
-    expect(members?.type).toBe('object');
-    const member = members?.additionalProperties;
-    expect(typeof member === 'object' && member !== null && !Array.isArray(member)).toBe(true);
-    if (typeof member === 'object' && member !== null && !Array.isArray(member)) {
-      expect(member.required).toContain('type');
-    }
-    expect(struct?.properties?.['items']).toBeUndefined();
-  });
-
-  it('a map branch requires its value type in `items` and declares no members', () => {
-    const map = objectBranches().find((b) => b.required?.includes('items'));
-    expect(map).toBeDefined();
-    expect(map?.properties?.['properties']).toBeUndefined();
+  it('one object branch requires members or a value type and preserves both', () => {
+    expect(objectBranches()).toHaveLength(1);
+    const object = objectBranches()[0];
+    expect(object?.anyOf).toEqual([{ required: ['properties'] }, { required: ['items'] }]);
+    expect(object?.properties?.properties?.type).toBe('object');
+    expect(object?.properties?.items).toBeDefined();
+    expect(object?.additionalProperties).toBe(false);
   });
 
   it('control: scalar types are unchanged', () => {

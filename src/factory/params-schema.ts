@@ -69,6 +69,7 @@ export function signatureToParamsSchema(
 
   const allowPersistenceOverride = persistenceModeAllowsOverrides(
     signature.entities[0]?.persistence,
+    signature.entities[0]?.dataBearing ?? false,
   );
 
   const properties: { [key: string]: JsonSchema } = {
@@ -514,6 +515,8 @@ function mapKnobType(knobType: string): JsonSchemaType | null {
     case 'bool':
       return 'boolean';
     case 'object':
+    // An orbital value is `{ behavior, orbital, …import body }` on the wire.
+    case 'orbital':
       return 'object';
     case 'array':
       return 'array';
@@ -582,6 +585,7 @@ export function mapEntityFieldType(fieldType: string): JsonSchemaType | null {
       return 'array';
     case 'object':
     case 'relation':
+    case 'orbital':
       return 'object';
     case 'enum':
       return 'string';
@@ -658,15 +662,32 @@ function toJsonValue(value: FactoryParamValue | JsonValue): JsonValue {
 const ENTITY_FIELD_BASE_PROPS = {
   name: { type: 'string' as JsonSchemaType, description: 'Field name (camelCase).' },
   required: { type: 'boolean' as JsonSchemaType },
+  primaryKey: { type: 'boolean' as JsonSchemaType },
+  intrinsic: { type: 'boolean' as JsonSchemaType },
+  min: { type: 'number' as JsonSchemaType },
+  max: { type: 'number' as JsonSchemaType },
+  description: { type: 'string' as JsonSchemaType },
+  synonyms: { type: 'string' as JsonSchemaType },
+  mock: { type: 'string' as JsonSchemaType },
+  mergedFrom: { type: 'string' as JsonSchemaType },
+  projectedFrom: {
+    type: 'object' as JsonSchemaType,
+    additionalProperties: false,
+    required: ['type', 'field'],
+    properties: { type: { type: 'string' as JsonSchemaType }, field: { type: 'string' as JsonSchemaType } },
+  },
+  properties: { type: 'object' as JsonSchemaType, additionalProperties: { $ref: 'urn:almadar:entity-field#/$defs/field' } },
+  values: { type: 'array' as JsonSchemaType, items: { type: 'string' as JsonSchemaType } },
   default: {
-    type: ['string', 'number', 'boolean', 'null'] as ReadonlyArray<JsonSchemaType>,
+    type: ['string', 'number', 'boolean', 'null', 'array', 'object'] as ReadonlyArray<JsonSchemaType>,
   } as JsonSchema,
 };
 // Includes the semantic domains: without them an L1 factory HIT cannot express
 // an email field at all, so `fill_params` could never produce one.
 const SCALAR_FIELD_TYPES: ReadonlyArray<string> = [
   'string', 'number', 'boolean', 'date', 'timestamp', 'datetime',
-  'email', 'url', 'phone', 'uuid', 'image',
+  'email', 'url', 'phone', 'uuid', 'image', 'money',
+  'file', 'trait', 'slot', 'pattern', 'node', 'event', 'EventAddress', 'scalar', 'SExpr',
 ];
 const SCALAR_FIELD_BRANCH: JsonSchema = {
   type: 'object',
@@ -687,6 +708,7 @@ const ENUM_FIELD_BRANCH: JsonSchema = {
     values: {
       type: 'array',
       description: 'Closed string vocabulary. e.g. ["active","inactive","pending"].',
+      minItems: 1,
       items: { type: 'string' },
     },
   },
@@ -701,10 +723,13 @@ const RELATION_FIELD_BRANCH: JsonSchema = {
     relation: {
       type: 'object',
       additionalProperties: false,
-      required: ['entity', 'cardinality'],
+      required: ['entity'],
       properties: {
         entity: { type: 'string', description: 'Sibling entity name (PascalCase singular).' },
+        entityId: { type: 'string' },
         cardinality: { type: 'string', enum: ['one', 'many'] },
+        field: { type: 'string' },
+        onDelete: { type: 'string', enum: ['cascade', 'nullify', 'restrict'] },
       },
       description: 'Relation target. `cardinality: "one"` for FK (customerId → one Customer); "many" for collection (tags → many Tag).',
     },
@@ -717,58 +742,60 @@ const ARRAY_FIELD_BRANCH: JsonSchema = {
   properties: {
     ...ENTITY_FIELD_BASE_PROPS,
     type: { type: 'string', enum: ['array'], description: 'Array field.' },
-    items: {
-      type: 'object',
-      description:
-        'Element shape (optional for primitive arrays). A list of nested records within the entity is an array of a struct: `items: { "type": "object", "properties": { … } }`.',
-    },
+    items: { $ref: 'urn:almadar:entity-field#/$defs/field' },
   },
 };
 // A nested structure within the entity: an `object` declares its members
 // (struct) or its value type (map). A shapeless `object` is not offered —
 // `orb validate` rejects it (ORB_T_GENERIC_TYPE_DEPRECATED).
-const STRUCT_FIELD_BRANCH: JsonSchema = {
+const OBJECT_FIELD_BRANCH: JsonSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['name', 'type'],
+  anyOf: [{ required: ['properties'] }, { required: ['items'] }],
+  properties: {
+    ...ENTITY_FIELD_BASE_PROPS,
+    type: { type: 'string', enum: ['object'], description: 'Struct members or map value shape.' },
+    items: { $ref: 'urn:almadar:entity-field#/$defs/field' },
+  },
+};
+const UNION_FIELD_BRANCH: JsonSchema = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['name', 'type', 'values'],
+  properties: {
+    ...ENTITY_FIELD_BASE_PROPS,
+    type: { type: 'string', enum: ['union'] },
+    values: { ...ENTITY_FIELD_BASE_PROPS.values, minItems: 1 },
+  },
+};
+const TUPLE_FIELD_BRANCH: JsonSchema = {
   type: 'object',
   additionalProperties: false,
   required: ['name', 'type', 'properties'],
   properties: {
     ...ENTITY_FIELD_BASE_PROPS,
-    type: { type: 'string', enum: ['object'], description: 'Struct field — fixed members.' },
-    properties: {
-      type: 'object',
-      description:
-        'The struct\'s members keyed by name, each a field shape (e.g. { "name": { "type": "string" }, "sets": { "type": "number" } }).',
-      additionalProperties: {
-        type: 'object',
-        required: ['type'],
-        description: 'Member field shape (same form as an entity field, without `name`).',
-      },
-    },
+    type: { type: 'string', enum: ['tuple'] },
+    properties: { ...ENTITY_FIELD_BASE_PROPS.properties, minProperties: 1 },
   },
 };
-const MAP_FIELD_BRANCH: JsonSchema = {
-  type: 'object',
-  additionalProperties: false,
-  required: ['name', 'type', 'items'],
-  properties: {
-    ...ENTITY_FIELD_BASE_PROPS,
-    type: { type: 'string', enum: ['object'], description: 'Map field — dynamic keys.' },
-    items: {
-      type: 'object',
-      required: ['type'],
-      description: 'The value shape every key maps to (e.g. { "type": "number" }).',
+const ENTITY_FIELD_BRANCHES: ReadonlyArray<JsonSchema> = [
+  SCALAR_FIELD_BRANCH,
+  ENUM_FIELD_BRANCH,
+  RELATION_FIELD_BRANCH,
+  ARRAY_FIELD_BRANCH,
+  OBJECT_FIELD_BRANCH,
+  UNION_FIELD_BRANCH,
+  TUPLE_FIELD_BRANCH,
+];
+export const ENTITY_FIELD_SCHEMA: JsonSchema = {
+  $id: 'urn:almadar:entity-field',
+  oneOf: ENTITY_FIELD_BRANCHES,
+  $defs: {
+    field: {
+      oneOf: ENTITY_FIELD_BRANCHES.map(branch => ({ ...branch, required: branch.required?.filter(key => key !== 'name') })),
     },
   },
-};
-const ENTITY_FIELD_SCHEMA: JsonSchema = {
-  oneOf: [
-    SCALAR_FIELD_BRANCH,
-    ENUM_FIELD_BRANCH,
-    RELATION_FIELD_BRANCH,
-    ARRAY_FIELD_BRANCH,
-    STRUCT_FIELD_BRANCH,
-    MAP_FIELD_BRANCH,
-  ],
 };
 
 const EXTRA_TRAIT_SCHEMA: JsonSchema = {

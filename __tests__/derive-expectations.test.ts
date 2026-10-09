@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { deriveExpectations } from '../src/derive-expectations.js';
+import { deriveExpectations, mergeExpectationShape } from '../src/derive-expectations.js';
 import type { OrbitalSchema } from '../src/types/schema.js';
 import type { EntityField } from '../src/types/field.js';
+import { EntityIdSchema } from '../src/types/identity.js';
 import type { Trait } from '../src/types/trait.js';
 
 /**
@@ -617,5 +618,103 @@ describe('deriveExpectations — an [identity] roster an orbital import supplies
     it('control: without a loader the import cannot be seen, so the expectation stays bare', () => {
         const app1 = app('Identity.orbitals.IdentityOrbital', 'almadar-behaviors/std-identity', 'Customer');
         expect(deriveExpectations(app1, 'NotesPage').expectations.filter((e) => e.kind === 'identity')).toEqual([{ kind: 'identity' }]);
+    });
+});
+
+describe('authored expectations survive derivation', () => {
+    it('retains std-member’s authored identity contract without inventing a roster', () => {
+        const schema: OrbitalSchema = {
+            name: 'std-member',
+            orbitals: [{
+                name: 'MemberOrbital',
+                entity: {
+                    name: 'Member',
+                    fields: [{ name: 'studioAccount', type: 'relation', relation: { entity: 'StudioUser', cardinality: 'one' } }],
+                    read_policy: ['or', ['=', '@user.role', 'admin'], ['=', ['object/get', '@entity', 'studioAccount'], '@user.id']],
+                },
+                expects: [{ kind: 'identity', name: 'StudioUser', shape: [
+                    { name: 'id', type: 'string', required: true },
+                    { name: 'role', type: 'string', values: ['member', 'admin'] },
+                ] }],
+                traits: [], pages: [],
+            }],
+        };
+        const authored = schema.orbitals[0].expects;
+        expect(authored?.find((e) => e.kind === 'identity')).toMatchObject({ name: 'StudioUser' });
+        const result = deriveExpectations(schema, 'MemberOrbital');
+        expect(result.expectations).toEqual(authored);
+        expect(result.diagnostics).toEqual([]);
+    });
+
+    it('merges derived fields while keeping authored contracts and unrelated dependencies', () => {
+        const schema = buildSchema();
+        const orbital = schema.orbitals.find((o) => o.name === 'CheckoutOrbital');
+        expect(orbital).toBeDefined();
+        if (!orbital) return;
+        orbital.expects = [
+            { kind: 'identity', name: 'Customer', shape: [{ name: 'id', type: 'string', required: true }, { name: 'role', type: 'enum', values: ['customer'] }] },
+            { kind: 'entity', name: 'OrderRecord', shape: [{ name: 'memo', type: 'string' }] },
+            { kind: 'page', path: '/external' },
+            { kind: 'event', traitName: 'Inventory', event: 'READY' },
+            { kind: 'event', traitName: 'Inventory', event: 'UPDATED' },
+        ];
+        const before = JSON.stringify(schema);
+        const result = deriveExpectations(schema, orbital.name);
+        expect(result.expectations.filter((e) => e.kind === 'identity')).toEqual([orbital.expects[0]]);
+        const order = result.expectations.find((e) => e.kind === 'entity' && e.name === 'OrderRecord');
+        expect(order?.kind === 'entity' ? order.shape : []).toEqual(expect.arrayContaining([{ name: 'memo', type: 'string' }, { name: 'totalAmount', type: 'number' }]));
+        for (const authored of orbital.expects.filter((e) => e.kind === 'page' || e.kind === 'event')) expect(result.expectations).toContainEqual(authored);
+        expect(result.expectations.filter((e) => e.kind === 'entity' && e.name === 'OrderRecord')).toHaveLength(1);
+        expect(JSON.stringify(schema)).toBe(before);
+    });
+
+    it('preserves authored entity and identity contracts for the same provider when deriving viewer reads', () => {
+        const schema = buildSchema();
+        const orbital = schema.orbitals.find(o => o.name === 'CheckoutOrbital')!;
+        orbital.expects = [{ kind: 'entity', name: 'Customer', shape: [{ name: 'email', type: 'email' }] }, { kind: 'identity', name: 'Customer', shape: [{ name: 'role', type: 'string', values: ['customer'] }] }];
+        const result = deriveExpectations(schema, orbital.name);
+        expect(result.expectations.filter(e => e.kind === 'identity')).toHaveLength(1);
+        expect(result.expectations).toContainEqual(orbital.expects[0]);
+        expect(result.expectations.find(e => e.kind === 'identity')).toMatchObject({ name: 'Customer', shape: expect.arrayContaining([{ name: 'role', type: 'string', values: ['customer'] }, { name: 'id', type: 'string', required: true }]) });
+    });
+
+    it('preserves a bare identity requirement with no inferred fields', () => {
+        const schema: OrbitalSchema = { name: 'bare', orbitals: [{ name: 'Bare', entity: { name: 'Item', fields: [] }, traits: [], pages: [], expects: [{ kind: 'identity' }] }] };
+        expect(deriveExpectations(schema, 'Bare')).toEqual({ expectations: [{ kind: 'identity' }], diagnostics: [] });
+    });
+});
+
+
+describe('canonical expectation shape union', () => {
+    it('retains an explicit relation target identity', () => {
+        const prior: EntityField = { name: 'owner', type: 'relation', relation: { entity: 'Member', cardinality: 'one' } };
+        const incoming: EntityField = { ...prior, relation: { ...prior.relation, entityId: EntityIdSchema.parse('ent_01M4CP7RDD5PE3TMDYAGDG28BD') } };
+        expect(mergeExpectationShape([prior], [incoming])).toEqual([incoming]);
+    });
+    it('rejects conflicting relation target identities despite equal displayed names', () => {
+        const prior: EntityField = { name: 'owner', type: 'relation', relation: { entity: 'Member', cardinality: 'one', entityId: EntityIdSchema.parse('ent_01M4CP7RDD5PE3TMDYAGDG28BD') } };
+        const incoming: EntityField = { ...prior, relation: { ...prior.relation, entityId: EntityIdSchema.parse('ent_01M4CPARK4JPKGG21HZN7ZQDHH') } };
+        expect(() => mergeExpectationShape([prior], [incoming])).toThrow('expectation shape mismatch');
+    });
+    it('merges recursive properties, array items, requiredness, vocabulary and bounded ranges immutably', () => {
+        const prior: EntityField[] = [{ name: 'profile', type: 'object', properties: { role: { type: 'string', values: ['member'], description: 'keep' }, count: { type: 'number', min: 1, max: 10 } } }, { name: 'rows', type: 'array', items: { type: 'object', properties: { label: { type: 'string' } } } }];
+        const incoming: EntityField[] = [{ name: 'profile', type: 'object', properties: { count: { type: 'number', min: 3, max: 8 }, role: { type: 'enum', values: ['admin'], required: true, description: 'other' }, email: { type: 'email' } } }, { name: 'rows', type: 'array', items: { type: 'object', properties: { count: { type: 'number' } } } }];
+        const before = structuredClone([prior, incoming]);
+        expect(mergeExpectationShape(prior, incoming)).toEqual([{ name: 'profile', type: 'object', properties: { role: { type: 'string', values: ['member', 'admin'], required: true, description: 'keep' }, count: { type: 'number', min: 3, max: 8 }, email: { type: 'email' } } }, { name: 'rows', type: 'array', items: { type: 'object', properties: { label: { type: 'string' }, count: { type: 'number' } } } }]);
+        expect([prior, incoming]).toEqual(before);
+    });
+    it('accepts reordered structured keys and same-arity tuple constraints', () => {
+        const prior: EntityField = { name: 'pair', type: 'tuple', properties: { '0': { type: 'string', default: 'first' }, '1': { type: 'object', properties: { a: { type: 'boolean' }, b: { type: 'number' } } } } };
+        const incoming: EntityField = { name: 'pair', type: 'tuple', properties: { '1': { type: 'object', properties: { b: { type: 'number' }, a: { type: 'boolean' } } }, '0': { type: 'string', default: 'other', required: true } } };
+        expect(mergeExpectationShape([prior], [incoming])?.[0]).toMatchObject({ properties: { '0': { default: 'first', required: true } } });
+    });
+    it.each<[EntityField, EntityField]>([
+        [{ name: 'field', type: 'string' }, { name: 'field', type: 'number' }],
+        [{ name: 'field', type: 'relation', relation: { entity: 'A', cardinality: 'one' } }, { name: 'field', type: 'relation', relation: { entity: 'B', cardinality: 'one' } }],
+        [{ name: 'field', type: 'array', items: { type: 'string' } }, { name: 'field', type: 'array', items: { type: 'number' } }],
+        [{ name: 'field', type: 'tuple', properties: { '0': { type: 'string' } } }, { name: 'field', type: 'tuple', properties: { '0': { type: 'string' }, '1': { type: 'string' } } }],
+        [{ name: 'field', type: 'number', min: 5 }, { name: 'field', type: 'number', max: 3 }],
+    ])('refuses incompatible constraints instead of dropping them', (prior, incoming) => {
+        expect(() => mergeExpectationShape([prior], [incoming])).toThrow('expectation shape mismatch');
     });
 });
