@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-09T19:11:33.426Z",
+  "exportedAt": "2026-10-10T08:14:26.986Z",
   "services": {
     "llm": {
       "name": "llm",
@@ -8753,34 +8753,6 @@
           }
         },
         {
-          "name": "visualization",
-          "description": "Choose a std learning instrument for a concept and generate its roster. Streams progress: `start`, then one `step` naming the chosen instrument.\nNo result is cached: every call generates afresh.",
-          "params": [
-            {
-              "name": "graphId",
-              "type": "string",
-              "required": true,
-              "description": ""
-            },
-            {
-              "name": "conceptId",
-              "type": "string",
-              "required": true,
-              "description": ""
-            },
-            {
-              "name": "markerDescription",
-              "type": "string",
-              "required": false,
-              "description": "What the lesson asks to visualise."
-            }
-          ],
-          "responseShape": {
-            "mode": "string",
-            "rosterJson": "string"
-          }
-        },
-        {
           "name": "createGoalWithGraph",
           "description": "Create a learning goal and its path from what the learner wants to learn. Streams progress: `delta`s, and `step`s as the goal is read: its `title` and `description` as they grow, then each `milestone` once.",
           "params": [
@@ -9290,6 +9262,715 @@
           ],
           "responseShape": {
             "saved": "boolean"
+          }
+        },
+        {
+          "name": "feed",
+          "description": "One page of the Rawi feed, ranked over every path the learner owns (or `graphIds`): review cards when a concept is due\nby its mastery and when it was last studied, frontier cards for unlearned concepts whose prerequisites are known, and\nexplore cards for concepts next to a path that are not in it yet; interleaved by `mix`. Deterministic for a cursor.",
+          "params": [
+            {
+              "name": "cursor",
+              "type": "string",
+              "required": false,
+              "description": "The previous page's `nextCursor`; omitted for the first page."
+            },
+            {
+              "name": "limit",
+              "type": "number",
+              "required": false,
+              "description": "Cards per page (1–20, default 8)."
+            },
+            {
+              "name": "graphIds",
+              "type": "string[]",
+              "required": false,
+              "description": "Only these paths; omitted: every path."
+            },
+            {
+              "name": "mix",
+              "type": "KnowledgeFeedMix",
+              "required": false,
+              "description": "Bucket weights; omitted: review 3, frontier 4, explore 1.",
+              "properties": {
+                "review": {
+                  "type": "number",
+                  "required": true
+                },
+                "frontier": {
+                  "type": "number",
+                  "required": true
+                },
+                "explore": {
+                  "type": "number",
+                  "required": true
+                }
+              }
+            }
+          ],
+          "responseShape": {
+            "cards": {
+              "type": "KnowledgeFeedCard[]",
+              "items": {
+                "type": "KnowledgeFeedCard",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true,
+                    "description": "`<graphId>:<conceptId>`, or `explore:<graphId>:<name>`."
+                  },
+                  "source": {
+                    "type": "'review' | 'frontier' | 'explore'",
+                    "required": true
+                  },
+                  "graphId": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "pathTitle": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "conceptId": {
+                    "type": "string",
+                    "required": true,
+                    "description": "Empty for an explore card."
+                  },
+                  "routeKey": {
+                    "type": "string",
+                    "required": true,
+                    "description": "Empty for an explore card."
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "masteryLevel": {
+                    "type": "number",
+                    "required": true,
+                    "description": "0–3; 0 for an explore card."
+                  },
+                  "liked": {
+                    "type": "boolean",
+                    "required": true
+                  },
+                  "content": {
+                    "type": "KnowledgeCardContent | null",
+                    "required": true,
+                    "description": "The kept content, or null until `cardContent` (or `exploreContent`) fills it."
+                  }
+                }
+              }
+            },
+            "nextCursor": "string | null"
+          }
+        },
+        {
+          "name": "cardContent",
+          "description": "A concept's card content, generated once and kept on the concept; later calls return the kept copy.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "conceptId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "content": "KnowledgeCardContent"
+          }
+        },
+        {
+          "name": "exploreContent",
+          "description": "Card content for an explore card, from its name and path; nothing is kept until the learner adds it.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "content": "KnowledgeCardContent"
+          }
+        },
+        {
+          "name": "feedSignal",
+          "description": "What the learner did with a card, kept on the concept: `like`/`unlike` tune the feed, `notInterested` hides it, `seen` starts its cool-down.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "conceptId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "signal",
+              "type": "'like' | 'unlike' | 'notInterested' | 'seen'",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "saved": "boolean"
+          }
+        },
+        {
+          "name": "addExplore",
+          "description": "Add an explore card's concept to its path.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "conceptId": "string",
+            "routeKey": "string"
+          }
+        },
+        {
+          "name": "listCourses",
+          "description": "The learner's courses: pointer records over their paths.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "courses": {
+              "type": "KnowledgeCourse[]",
+              "items": {
+                "type": "KnowledgeCourse",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "graphId": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "title": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "description": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "modules": {
+                    "type": "object[]",
+                    "required": true,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "required": true
+                        },
+                        "conceptRefs": {
+                          "type": "object[]",
+                          "required": true,
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "nodeId": {
+                                "type": "string",
+                                "required": true
+                              },
+                              "sourceGraphId": {
+                                "type": "string",
+                                "required": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "publishStatus": {
+                    "type": "'draft' | 'published'",
+                    "required": true
+                  },
+                  "updatedAt": {
+                    "type": "number",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "courseDetail",
+          "description": "",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "courseId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "course": {
+              "type": "KnowledgeCourse",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "required": true
+                },
+                "graphId": {
+                  "type": "string",
+                  "required": true
+                },
+                "title": {
+                  "type": "string",
+                  "required": true
+                },
+                "description": {
+                  "type": "string",
+                  "required": true
+                },
+                "modules": {
+                  "type": "object[]",
+                  "required": true,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "required": true
+                      },
+                      "conceptRefs": {
+                        "type": "object[]",
+                        "required": true,
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "nodeId": {
+                              "type": "string",
+                              "required": true
+                            },
+                            "sourceGraphId": {
+                              "type": "string",
+                              "required": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "publishStatus": {
+                  "type": "'draft' | 'published'",
+                  "required": true
+                },
+                "updatedAt": {
+                  "type": "number",
+                  "required": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "createCourse",
+          "description": "A new course over a path; its modules start as the path's levels.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "title",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "course": {
+              "type": "KnowledgeCourse",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "required": true
+                },
+                "graphId": {
+                  "type": "string",
+                  "required": true
+                },
+                "title": {
+                  "type": "string",
+                  "required": true
+                },
+                "description": {
+                  "type": "string",
+                  "required": true
+                },
+                "modules": {
+                  "type": "object[]",
+                  "required": true,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "required": true
+                      },
+                      "conceptRefs": {
+                        "type": "object[]",
+                        "required": true,
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "nodeId": {
+                              "type": "string",
+                              "required": true
+                            },
+                            "sourceGraphId": {
+                              "type": "string",
+                              "required": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "publishStatus": {
+                  "type": "'draft' | 'published'",
+                  "required": true
+                },
+                "updatedAt": {
+                  "type": "number",
+                  "required": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "updateCourse",
+          "description": "Rename, describe, reorder or re-point a course's modules, or change whether it is published.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "courseId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "title",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "modules",
+              "type": "object[]",
+              "required": false,
+              "description": "",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "conceptIds": {
+                    "type": "string[]",
+                    "required": true
+                  }
+                }
+              }
+            },
+            {
+              "name": "publishStatus",
+              "type": "'draft' | 'published'",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "course": {
+              "type": "KnowledgeCourse",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "required": true
+                },
+                "graphId": {
+                  "type": "string",
+                  "required": true
+                },
+                "title": {
+                  "type": "string",
+                  "required": true
+                },
+                "description": {
+                  "type": "string",
+                  "required": true
+                },
+                "modules": {
+                  "type": "object[]",
+                  "required": true,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "required": true
+                      },
+                      "conceptRefs": {
+                        "type": "object[]",
+                        "required": true,
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "nodeId": {
+                              "type": "string",
+                              "required": true
+                            },
+                            "sourceGraphId": {
+                              "type": "string",
+                              "required": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "publishStatus": {
+                  "type": "'draft' | 'published'",
+                  "required": true
+                },
+                "updatedAt": {
+                  "type": "number",
+                  "required": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "deleteCourse",
+          "description": "Remove a course; its concepts stay.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "courseId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "deleted": "boolean"
+          }
+        },
+        {
+          "name": "coursePackage",
+          "description": "Everything a course needs to be read elsewhere: its modules, each concept and its lesson.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "courseId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "package": {
+              "type": "KnowledgeCoursePackage",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "required": true
+                },
+                "description": {
+                  "type": "string",
+                  "required": true
+                },
+                "modules": {
+                  "type": "object[]",
+                  "required": true,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "required": true
+                      },
+                      "concepts": {
+                        "type": "object[]",
+                        "required": true,
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "required": true
+                            },
+                            "description": {
+                              "type": "string",
+                              "required": true
+                            },
+                            "lesson": {
+                              "type": "string",
+                              "required": true
+                            },
+                            "layer": {
+                              "type": "number",
+                              "required": true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "enrichPreview",
+          "description": "Proposals for a path (or one of its levels), each with a reason. Streams progress per strategy. Writes nothing.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "layerNumber",
+              "type": "number",
+              "required": false,
+              "description": ""
+            },
+            {
+              "name": "strategies",
+              "type": "KnowledgeEnrichStrategy[]",
+              "required": false,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "items": "KnowledgeEnrichItem[]"
+          }
+        },
+        {
+          "name": "enrichApply",
+          "description": "Write the approved proposals into the path.",
+          "params": [
+            {
+              "name": "graphId",
+              "type": "string",
+              "required": true,
+              "description": ""
+            },
+            {
+              "name": "items",
+              "type": "KnowledgeEnrichItem[]",
+              "required": true,
+              "description": ""
+            }
+          ],
+          "responseShape": {
+            "applied": "number",
+            "failed": {
+              "type": "object[]",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "ref": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "reason": {
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
           }
         }
       ],

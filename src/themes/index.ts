@@ -47,6 +47,7 @@ import memphisTheme from '../../themes/memphis.json' with { type: 'json' };
 import midCenturyTheme from '../../themes/mid-century.json' with { type: 'json' };
 import minimalistTheme from '../../themes/minimalist.json' with { type: 'json' };
 import mudclothTheme from '../../themes/mudcloth.json' with { type: 'json' };
+import nataTheme from '../../themes/nata.json' with { type: 'json' };
 import neonTheme from '../../themes/neon.json' with { type: 'json' };
 import neumorphicTheme from '../../themes/neumorphic.json' with { type: 'json' };
 import newsprintTheme from '../../themes/newsprint.json' with { type: 'json' };
@@ -54,6 +55,7 @@ import notionEditorialTheme from '../../themes/notion-editorial.json' with { typ
 import orbTheme from '../../themes/orb.json' with { type: 'json' };
 import pixelTheme from '../../themes/pixel.json' with { type: 'json' };
 import prismTheme from '../../themes/prism.json' with { type: 'json' };
+import rawiTheme from '../../themes/rawi.json' with { type: 'json' };
 import retroTheme from '../../themes/retro.json' with { type: 'json' };
 import risographTheme from '../../themes/risograph.json' with { type: 'json' };
 import scandiTheme from '../../themes/scandi.json' with { type: 'json' };
@@ -111,6 +113,7 @@ export const THEME_PRESETS: Record<string, ThemeDefinition> = {
   'mid-century': ThemeDefinitionSchema.parse(midCenturyTheme),
   minimalist: ThemeDefinitionSchema.parse(minimalistTheme),
   mudcloth: ThemeDefinitionSchema.parse(mudclothTheme),
+  nata: ThemeDefinitionSchema.parse(nataTheme),
   neon: ThemeDefinitionSchema.parse(neonTheme),
   neumorphic: ThemeDefinitionSchema.parse(neumorphicTheme),
   newsprint: ThemeDefinitionSchema.parse(newsprintTheme),
@@ -118,6 +121,7 @@ export const THEME_PRESETS: Record<string, ThemeDefinition> = {
   orb: ThemeDefinitionSchema.parse(orbTheme),
   pixel: ThemeDefinitionSchema.parse(pixelTheme),
   prism: ThemeDefinitionSchema.parse(prismTheme),
+  rawi: ThemeDefinitionSchema.parse(rawiTheme),
   retro: ThemeDefinitionSchema.parse(retroTheme),
   risograph: ThemeDefinitionSchema.parse(risographTheme),
   scandi: ThemeDefinitionSchema.parse(scandiTheme),
