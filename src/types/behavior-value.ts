@@ -13,8 +13,9 @@
 
 import { z } from 'zod';
 import { DeclaredTraitConfigSchema, TraitConfigValueSchema, TraitReferenceObjectSchema, type TraitConfigValue, type TraitReference } from './trait.js';
-import { OrbitalRefObjectSchema, type OrbitalRefObject } from './orbital.js';
+import { ExpectDeclarationSchema, OrbitalRefObjectSchema, type OrbitalRefObject } from './orbital.js';
 import { EntityFieldSchema, type EntityField } from './field.js';
+import { EntityPersistenceSchema } from './entity.js';
 import type { JsonValue, RuntimeValue } from './json.js';
 import type { OrbitalSchema } from './schema.js';
 import type { FactoryExposure } from '../factory/types.js';
@@ -105,6 +106,10 @@ export type OrbitalOverrides = Omit<OrbitalRefObject, 'ref' | 'refId' | 'config'
   readonly app?: Readonly<Record<string, TraitConfigValue>>;
   readonly config?: Readonly<Record<string, TraitConfigValue>>;
   readonly traits?: Readonly<Record<string, TraitOverrides>>;
+  /** Imports the value's sibling traits compose from, beside its own source. */
+  readonly uses?: readonly OrbitalValueUse[];
+  /** Traits the import orbital declares beside the imported ones, mountable through `mounts`. */
+  readonly siblings?: readonly OrbitalValueSibling[];
 };
 
 /** An orbital of an installed behavior, plus the import body applied to it. */
@@ -117,6 +122,21 @@ export type OrbitalValue = OrbitalOverrides & {
 /** A trait value or an orbital value. */
 export type BehaviorValue = TraitValue | OrbitalValue;
 
+/** One import the value's own sibling traits compose from (`uses <as> from <from>` on the import orbital). */
+export const OrbitalValueUseSchema = z.object({ from: z.string(), as: z.string().regex(PASCAL) }).strict();
+export type OrbitalValueUse = z.infer<typeof OrbitalValueUseSchema>;
+
+/** A trait the import orbital declares beside the imported ones (`trait <name> = <ref> { config }`), mountable through `mounts`. */
+export const OrbitalValueSiblingSchema = z
+  .object({
+    name: z.string().regex(PASCAL),
+    ref: z.string(),
+    linkedEntity: z.string().optional(),
+    config: z.record(TraitConfigValueSchema).optional(),
+  })
+  .strict();
+export type OrbitalValueSibling = z.infer<typeof OrbitalValueSiblingSchema>;
+
 /** Validates the §8b body `behavior/apply` takes for an orbital value; unknown keys are rejected. */
 export const OrbitalOverridesSchema = OrbitalRefObjectSchema.omit({ ref: true, refId: true, config: true, traits: true })
   .extend({
@@ -124,6 +144,8 @@ export const OrbitalOverridesSchema = OrbitalRefObjectSchema.omit({ ref: true, r
     app: z.record(TraitConfigValueSchema).optional(),
     config: z.record(TraitConfigValueSchema).optional(),
     traits: z.record(TraitOverridesSchema).optional(),
+    uses: z.array(OrbitalValueUseSchema).optional(),
+    siblings: z.array(OrbitalValueSiblingSchema).optional(),
   })
   .strict();
 
@@ -190,6 +212,19 @@ export function applyOrbitalOverrides(value: OrbitalValue, overrides: OrbitalOve
   if (overrides.mock !== undefined) merged.mock = { ...value.mock, ...overrides.mock };
   if (overrides.extend !== undefined) merged.extend = mergeFieldsByName(value.extend, overrides.extend);
   if (overrides.retype !== undefined) merged.retype = mergeFieldsByName(value.retype, overrides.retype);
+  if (overrides.uses !== undefined) {
+    const byAlias = new Map((value.uses ?? []).map((u) => [u.as, u]));
+    for (const use of overrides.uses) byAlias.set(use.as, use);
+    merged.uses = [...byAlias.values()];
+  }
+  if (overrides.siblings !== undefined) {
+    const byName = new Map((value.siblings ?? []).map((t) => [t.name, t]));
+    for (const sibling of overrides.siblings) {
+      const prior = byName.get(sibling.name);
+      byName.set(sibling.name, { ...prior, ...sibling, ...(prior?.config !== undefined || sibling.config !== undefined ? { config: { ...prior?.config, ...sibling.config } } : {}) });
+    }
+    merged.siblings = [...byName.values()];
+  }
   if (overrides.traits !== undefined) {
     const traits: Record<string, TraitOverrides> = { ...value.traits };
     for (const [name, entry] of Object.entries(overrides.traits)) {
@@ -222,6 +257,22 @@ export function isOrbitalValue(value: RuntimeValue): value is OrbitalValue {
   return typeof behavior === 'string' && SPECIFIER.test(behavior) && typeof orbital === 'string' && PASCAL.test(orbital);
 }
 
+/** A whole behavior as a value (`.lolo` type `behavior`): what `behavior/ref` builds and a render embed runs. */
+export function behaviorRef(specifier: string): BehaviorRef {
+  if (!SPECIFIER.test(specifier)) {
+    throw new Error(`behavior/ref: "${specifier}" is not a behavior specifier (<prefix>/<name>, std/behaviors/<name> or ./<dir>/<name>)`);
+  }
+  return { behavior: specifier };
+}
+
+/** Structural guard for a behavior value: a specifier and nothing else (a trait or orbital value names a member too). */
+export function isBehaviorRefValue(value: RuntimeValue): value is BehaviorRef {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
+  const keys = Object.keys(value);
+  if (keys.length !== 1 || keys[0] !== 'behavior' || !('behavior' in value)) return false;
+  return typeof value.behavior === 'string' && SPECIFIER.test(value.behavior);
+}
+
 function isOrbitalValueShape(value: BehaviorValue): value is OrbitalValue {
   return 'orbital' in value;
 }
@@ -240,6 +291,10 @@ export const CatalogScopeSchema = z.object({
 }).strict();
 export type CatalogScope = z.infer<typeof CatalogScopeSchema>;
 
+/** A behavior named by itself, with no trait or orbital picked (what `behavior/describe` takes for a whole behavior). */
+export const BehaviorRefSchema = z.object({ behavior: z.string().regex(SPECIFIER) }).strict();
+export type BehaviorRef = z.infer<typeof BehaviorRefSchema>;
+
 /** One behavior `behavior/catalog` returns (`orb behaviors catalog --json`). */
 export const CatalogEntrySchema = z.object({
   /** `<prefix>/<name>`. */
@@ -252,6 +307,8 @@ export const CatalogEntrySchema = z.object({
   capabilities: z.array(z.string()),
   /** The behavior's traits as ready-to-bind values. */
   traits: z.array(TraitValueSchema),
+  /** The behavior as a value (`.lolo` type `behavior`), ready to embed or store. */
+  value: BehaviorRefSchema,
   /** Shipped embedding vectors, keyed by facet (`description`, `capabilities`). */
   vectors: z.record(VectorSchema),
   /** The embedding model the vectors were stamped with. */
@@ -285,9 +342,6 @@ export const TraitDescriptionSchema = z.object({
 }).strict();
 export type TraitDescription = z.infer<typeof TraitDescriptionSchema>;
 
-/** A behavior named by itself, with no trait or orbital picked (what `behavior/describe` takes for a whole behavior). */
-export const BehaviorRefSchema = z.object({ behavior: z.string().regex(SPECIFIER) }).strict();
-export type BehaviorRef = z.infer<typeof BehaviorRefSchema>;
 
 /** What `behavior/describe` accepts: a trait value, an orbital value, or a whole behavior. */
 export const DescribeTargetSchema = z.union([TraitValueSchema, OrbitalValueSchema, BehaviorRefSchema]);
@@ -300,6 +354,8 @@ export interface KnobField {
   readonly required?: boolean;
   readonly values?: readonly string[];
   readonly properties?: readonly KnobField[];
+  /** The knob's current value: what a caller keeps when it does not change it. */
+  readonly default?: TraitConfigValue;
   readonly label?: string;
   readonly description?: string;
   readonly synonyms?: string;
@@ -312,6 +368,7 @@ export const KnobFieldSchema: z.ZodType<KnobField> = z.lazy(() =>
     required: z.boolean().optional(),
     values: z.array(z.string()).optional(),
     properties: z.array(KnobFieldSchema).optional(),
+    default: TraitConfigValueSchema.optional(),
     label: z.string().optional(),
     description: z.string().optional(),
     synonyms: z.string().optional(),
@@ -324,16 +381,21 @@ export const OrbitalDescriptionSchema = z.object({
   value: OrbitalValueSchema,
   config: DeclaredTraitConfigSchema,
   knobs: z.array(KnobFieldSchema),
-  entity: z.object({ name: z.string(), fields: z.array(EntityFieldSchema) }).strict().optional(),
+  entity: z.object({ name: z.string(), fields: z.array(EntityFieldSchema), identity: z.boolean().optional(), persistence: EntityPersistenceSchema.optional() }).strict().optional(),
   /** Entities a sibling orbital owns that this one references: what an import of it maps through `entities {}`. */
   borrows: z.array(z.string()),
+  /** What the orbital needs from its siblings at runtime, derived by `orb` (identity, entities, pages, events). */
+  expects: z.array(ExpectDeclarationSchema),
   traits: z.array(z.object({
     trait: z.string(),
     config: DeclaredTraitConfigSchema,
     knobs: z.array(KnobFieldSchema),
     events: z.object({ emits: z.array(z.string()), listens: z.array(z.string()), transitions: z.array(z.string()) }).strict(),
+    /** Declared `-> @rebindable`: the trait may be bound to another record. */
+    rebindable: z.boolean().optional(),
   }).strict()),
-  pages: z.array(z.object({ name: z.string(), path: z.string() }).strict()),
+  /** Each page with the traits it mounts: what the behavior declares as standing on its own. */
+  pages: z.array(z.object({ name: z.string(), path: z.string(), traits: z.array(z.string()).optional() }).strict()),
 }).strict();
 export type OrbitalDescription = z.infer<typeof OrbitalDescriptionSchema>;
 
@@ -343,6 +405,8 @@ export const BehaviorDescriptionSchema = z.object({
   config: DeclaredTraitConfigSchema,
   knobs: z.array(KnobFieldSchema),
   orbitals: z.array(OrbitalDescriptionSchema),
+  /** The behaviors this one imports (`uses … from`): what it already contains. */
+  uses: z.array(z.string()).optional(),
 }).strict();
 export type BehaviorDescription = z.infer<typeof BehaviorDescriptionSchema>;
 
@@ -351,6 +415,8 @@ export interface EvaluatedProgram {
   /** Workspace-relative specifier of the written program (`./orbitals/<name>` by default). */
   readonly behavior: string;
   readonly traits: readonly TraitValue[];
+  /** The written program as a behavior value, ready to embed. */
+  readonly value: BehaviorRef;
 }
 
 /** A validator finding `program/eval` returns as data (the shape `orb validate --json` reports). A type alias, not an interface, so it is an `EventPayload` member. */
@@ -375,6 +441,18 @@ export interface MountedTraitValue {
   readonly trait: string;
   readonly pagePath?: string;
 }
+
+/** A behavior value made runnable by its host: the resolved program as written and the page it opens on. */
+export interface MountedBehaviorValue {
+  readonly schema: OrbitalSchema;
+  /** The program's first page path (where the frame's scoped router starts). */
+  readonly firstPage: string;
+}
+
+/** Mounting outcome for a behavior value; validator issues come back as data. */
+export type BehaviorValueMountResult =
+  | { readonly ok: true; readonly mounted: MountedBehaviorValue }
+  | { readonly ok: false; readonly error: string; readonly errors?: readonly ProgramValidationIssue[] };
 
 /** Mounting outcome — the validator's issues come back as data when the value does not validate where it is bound. */
 export type TraitValueMountResult =

@@ -503,6 +503,7 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
     // A trait or orbital value held as data seeds unbound — `none` (seed.rs twin).
     case 'trait':
     case 'orbital':
+    case 'behavior':
       return null;
     case 'slot':
     case 'pattern':

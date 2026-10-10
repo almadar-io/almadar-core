@@ -14,7 +14,7 @@ import { TraitIdSchema, EntityIdSchema, EventIdSchema, PageIdSchema, OrbitalIdSc
 import type { StateMachine, PayloadTypeWhen } from './state-machine.js';
 import { StateMachineSchema, PayloadTypeWhenSchema } from './state-machine.js';
 import type { Effect } from './effect.js';
-import { EffectSchema } from './effect.js';
+import { EffectSchema, PatternObjectSchema } from './effect.js';
 import type { Entity } from './entity.js';
 import { EntitySchema, isClientResident } from './entity.js';
 import type { AnyPatternConfig } from '../patterns/index.js';
@@ -1257,14 +1257,13 @@ export type TraitUIBinding = {
 
 /**
  * Zod schema for {@link TraitUIBinding}. `content` is a pattern config (or
- * list of them); pattern configs have no dedicated zod schema in core, so
- * they are validated as JSON objects here and narrowed by downstream
- * pattern-aware consumers.
+ * list of them), validated as pattern objects by {@link PatternObjectSchema}
+ * (the registry checks props at validate time).
  */
 export const TraitUIBindingSchema = z.record(
     z.object({
         presentation: z.enum(['modal', 'drawer', 'popover', 'inline', 'confirm-dialog']),
-        content: z.union([z.record(JsonValueSchema), z.array(z.record(JsonValueSchema))]),
+        content: z.union([PatternObjectSchema, z.array(PatternObjectSchema)]),
         props: z
             .object({
                 size: z.enum(['sm', 'md', 'lg', 'xl', 'full']).optional(),

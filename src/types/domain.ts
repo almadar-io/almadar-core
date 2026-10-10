@@ -1417,10 +1417,11 @@ export type ThemeRef = ThemeDefinition | string;
 /**
  * NavItem - a single navigation entry rendered by a layout trait (e.g.
  * `AppShell.traits.AppLayout`'s `navItems`). `label` + `href` are required;
- * `icon`/`badge`/`children` are optional shaping knobs an author may set on a
- * call-site override. The `@pages` render sigil yields the minimal
- * `{ href, label }` form (one per inline page: `href = page.path`,
- * `label = page.name`), which is assignable to this type. `children` nests
+ * `icon`/`badge`/`children`/`roles` are optional shaping knobs an author may set on a
+ * call-site override. The `@pages` render sigil yields one entry per root page
+ * that declares `@label` (`href = page.path`, `label`, plus its `@icon` and
+ * `@roles`), which is assignable to this type. `roles` lists the viewer roles
+ * the entry shows for (absent = everyone). `children` nests
  * one level deep — a NavItem with children renders as a group header that
  * expands its children on click rather than navigating directly; a further
  * nested `children` on those entries is not rendered (depth 2 only).
@@ -1431,6 +1432,7 @@ export interface NavItem {
   icon?: string;
   badge?: string;
   children?: NavItem[];
+  roles?: string[];
 }
 
 /**

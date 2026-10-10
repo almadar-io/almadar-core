@@ -64,7 +64,8 @@
     "index": "index",
     "noindex": "noindex",
     "version": "version",
-    "translationOf": "translationOf"
+    "translationOf": "translationOf",
+    "label": "label"
   },
   "shapes": {
     "Entity": "Entity",
@@ -118,7 +119,8 @@
     "create": "create",
     "update": "update",
     "delete": "delete",
-    "icon": "icon"
+    "icon": "icon",
+    "roles": "roles"
   },
   "sigils": {
     "entity": "entity",
@@ -193,6 +195,7 @@
     "any": "any",
     "trait": "trait",
     "orbital": "orbital",
+    "behavior": "behavior",
     "entity": "entity",
     "event": "event",
     "EventAddress": "EventAddress",

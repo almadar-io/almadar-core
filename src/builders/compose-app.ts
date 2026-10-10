@@ -8,7 +8,7 @@
  *
  * App assembly, not the `behavior/compose` operator: `composeBehaviors` itself is unchanged.
  */
-import { mergeExpectationShape } from '../derive-expectations.js';
+import { mergeExpectationShape } from '../expectation-shape.js';
 import type { DeclaredTraitConfig, Entity, EntityField, ExpectDeclaration, IdentityLedger, JsonObject, JsonValue, OrbitalDefinition, OrbitalSchema, Trait, TraitConfigValue } from '../types/index.js';
 import { entityRenameBlockers, renameEntity, renameEntityInSchema, type EntityRenameBlocker } from './rename-entity.js';
 import { isEntityReferenceAny, isJsonObject, isPageReference, ledgerRename } from '../types/index.js';

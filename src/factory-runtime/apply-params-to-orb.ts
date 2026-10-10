@@ -460,7 +460,7 @@ export { mergeCallSiteConfigOverrides } from '../types/index.js';
 
 /**
  * Read-only structural view over the JSON lattice the reference-rewrite
- * walker traverses — same trick as `derive-expectations.ts` (`SExpr` and
+ * walker traverses — same trick as the expectation shape union (`SExpr` and
  * `TraitConfigValue` both assign to it). Exported alongside
  * `rewriteTraitRefsInTree` for the rabit composer's dedupe backstop.
  */

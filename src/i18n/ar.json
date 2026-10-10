@@ -64,7 +64,8 @@
     "index": "فهرس",
     "noindex": "بلا_فهرسة",
     "version": "إصدار",
-    "translationOf": "ترجمة_من"
+    "translationOf": "ترجمة_من",
+    "label": "تسمية"
   },
   "shapes": {
     "Entity": "كيان",
@@ -118,7 +119,8 @@
     "create": "إنشاء",
     "update": "تحديث",
     "delete": "حذف",
-    "icon": "أيقونة"
+    "icon": "أيقونة",
+    "roles": "أدوار"
   },
   "sigils": {
     "entity": "كيان",
@@ -193,6 +195,7 @@
     "any": "أي",
     "trait": "سمة",
     "orbital": "مدار",
+    "behavior": "سلوك",
     "entity": "كيان",
     "event": "حدث",
     "EventAddress": "عنوان_حدث",

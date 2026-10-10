@@ -105,6 +105,8 @@ export function payloadSchemaToJsonSchema(fields: readonly PayloadField[]): Json
   const properties: { [key: string]: JsonSchema } = {};
   const required: string[] = [];
   for (const field of fields) {
+    // An object that declares no keys can take no argument, so it is not offered.
+    if (field.properties !== undefined && field.properties.length === 0 && field.type !== 'union') continue;
     properties[field.name] = payloadFieldToJsonSchema(field);
     if (field.required === true) required.push(field.name);
   }
@@ -170,8 +172,9 @@ function objectIssues(fields: readonly PayloadField[], value: EventPayloadValue,
     issues.push(...fieldIssues(field, v, join(field.name)));
   }
   const declared = new Set(fields.map((f) => f.name));
+  const allowed = fields.length > 0 ? fields.map((f) => f.name).join(' | ') : '(no keys)';
   for (const key of Object.keys(value)) {
-    if (!declared.has(key)) issues.push({ path: join(key), reason: 'unknown' });
+    if (!declared.has(key)) issues.push({ path: join(key), reason: 'unknown', expected: allowed });
   }
   return issues;
 }

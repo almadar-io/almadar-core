@@ -26,6 +26,10 @@ export {
   // Expect Declaration (Consumer-Side Requirements)
   type ExpectDeclaration,
   ExpectDeclarationSchema,
+  type ExpectationDiagnostic,
+  ExpectationDiagnosticSchema,
+  type OrganismExpectations,
+  OrganismExpectationsSchema,
   // Entity/Page reference types
   type EntityRef,
   type EntityCall,
@@ -514,6 +518,7 @@ export {
   type ResolvedPatternProps,
   ResolvedPatternPropsSchema,
   PatternConfigSchema,
+  PatternObjectSchema,
   type RenderUINode,
 } from "./effect.js";
 
@@ -1200,6 +1205,17 @@ export {
   TRAIT_MOUNT_ERROR_TESTID,
   EMPTY_STATE_MARKER,
   LOADING_STATE_MARKER,
+  VERIFICATION_DOM_ATTRS,
+  ACTION_TESTID_PREFIX,
+  ACTION_OVERFLOW_TESTID,
+  FORM_PATTERN,
+  actionTestId,
+  actionTestIdMatches,
+  NATIVE_ID_PREFIX,
+  nativePatternId,
+  nativeRowId,
+  nativeFieldId,
+  nativeSlotId,
 } from "./verification.js";
 
 // ============================================================================
@@ -1212,6 +1228,7 @@ export {
   type ToolArgs,
   type RuntimeValue,
   JsonValueSchema,
+  toPayloadValue,
   isJsonPrimitive,
   isJsonObject,
   isJsonArray,

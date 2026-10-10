@@ -466,7 +466,9 @@ export type TransitionRejectionCode =
   | 'no-matching-transition'
   | 'guard-rejected'
   | 'no-dispatchable-traits'
-  | 'not-an-external-input';
+  | 'not-an-external-input'
+  /** An effect of the trait's transition threw; its later effects did not run. */
+  | 'effect-failed';
 
 /**
  * A request on the outside-client input channel (`POST /:orbital/inputs`): an
@@ -520,6 +522,8 @@ export interface TransitionRejection {
   statesDeclaringEvent?: string[];
   transition?: string;
   guard?: unknown;
+  /** `effect-failed`: the thrown error's message. */
+  error?: string;
 }
 
 /**
@@ -646,13 +650,14 @@ export const OrbitalEventResponseSchema: z.ZodType<OrbitalEventResponse, z.ZodTy
   rejections: z
     .array(
       z.object({
-        code: z.enum(['no-matching-transition', 'guard-rejected', 'no-dispatchable-traits', 'not-an-external-input']),
+        code: z.enum(['no-matching-transition', 'guard-rejected', 'no-dispatchable-traits', 'not-an-external-input', 'effect-failed']),
         trait: z.string().optional(),
         from: z.string().optional(),
         event: z.string().optional(),
         statesDeclaringEvent: z.array(z.string()).optional(),
         transition: z.string().optional(),
         guard: z.unknown().optional(),
+        error: z.string().optional(),
       }),
     )
     .optional(),

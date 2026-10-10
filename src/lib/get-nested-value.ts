@@ -27,8 +27,8 @@ type NestedValueInput =
  *
  * Widened over the UI original to admit every shape a payload/field value
  * can hold (`EventPayload`, `EventPayloadValue`, `FieldValue`) — a `string`,
- * `number`, `Date`, or array at any level bails to `undefined` rather than
- * traversing, since none of those are keyed objects.
+ * `number` or `Date` at any level bails to `undefined`; an array is indexed by a
+ * numeric segment (`"rows.0.name"`), matching `object/get` in both evaluators.
  *
  * @example
  * const data = { company: { name: "Acme Corp", address: { city: "NYC" } } };
@@ -38,22 +38,22 @@ type NestedValueInput =
  */
 export function getNestedValue(obj: NestedValueInput, path: string): FieldValue | undefined {
   if (obj === null || obj === undefined || !path) return undefined;
-  if (typeof obj !== 'object' || Array.isArray(obj)) return undefined;
+  if (typeof obj !== 'object') return undefined;
 
   // Fast path: no dots means simple property access.
-  if (!path.includes('.')) {
+  if (!path.includes('.') && !Array.isArray(obj)) {
     return (obj as Record<string, FieldValue | undefined>)[path];
   }
 
-  const parts = path.split('.');
-  let value: Record<string, FieldValue | undefined> | FieldValue | undefined = obj as Record<
-    string,
-    FieldValue | undefined
-  >;
-
-  for (const part of parts) {
-    if (value === null || value === undefined) return undefined;
-    if (typeof value !== 'object' || Array.isArray(value)) return undefined;
+  let value: NestedValueInput = obj;
+  for (const part of path.split('.')) {
+    if (value === null || value === undefined || typeof value !== 'object') return undefined;
+    // An array is indexed by a numeric segment, as `object/get` does in both evaluators.
+    if (Array.isArray(value)) {
+      if (!/^\d+$/.test(part)) return undefined;
+      value = (value as readonly NestedValueInput[])[Number(part)];
+      continue;
+    }
     value = (value as Record<string, FieldValue | undefined>)[part];
   }
 

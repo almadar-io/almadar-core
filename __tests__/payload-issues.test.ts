@@ -36,8 +36,14 @@ describe('payloadIssues', () => {
 
   it('control: a key the declaration does not name, at any depth', () => {
     expect(payloadIssues(FILL, { layout: 'grid', colour: 'red', config: { dense: true, wide: true } })).toEqual([
-      { path: 'config.wide', reason: 'unknown' },
-      { path: 'colour', reason: 'unknown' },
+      { path: 'config.wide', reason: 'unknown', expected: 'dense' },
+      { path: 'colour', reason: 'unknown', expected: 'layout | count | tags | config | rows' },
+    ]);
+  });
+
+  it('edge: a key on an object that declares none names no alternatives', () => {
+    expect(payloadIssues([{ name: 'roles', type: 'object', properties: [] }], { roles: { Member: 'StudioUser' } })).toEqual([
+      { path: 'roles.Member', reason: 'unknown', expected: '(no keys)' },
     ]);
   });
 
@@ -58,5 +64,19 @@ describe('payloadSchemaToJsonSchema with closed values', () => {
       },
       required: ['layout'],
     });
+  });
+});
+
+describe('payloadSchemaToJsonSchema leaves out what cannot be filled', () => {
+  it('an object field that declares no keys is not offered', () => {
+    expect(payloadSchemaToJsonSchema([{ name: 'roles', type: 'object', properties: [] }, FILL[1]!])).toEqual({
+      type: 'object',
+      additionalProperties: false,
+      properties: { count: { type: 'number' } },
+    });
+  });
+
+  it('control: an open object (no declared properties) is still offered', () => {
+    expect(payloadSchemaToJsonSchema([{ name: 'data', type: 'object' }]).properties).toHaveProperty('data');
   });
 });

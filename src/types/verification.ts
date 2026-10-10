@@ -338,3 +338,56 @@ export const EMPTY_STATE_MARKER = "data-empty-state";
 
 /** DOM attribute on a loading view's root (spinner, loading state). */
 export const LOADING_STATE_MARKER = "data-loading-state";
+
+/** Web DOM attributes the verifier selects on; one owner for @almadar/ui (producer) and @almadar-io/verify (consumer). */
+export const VERIFICATION_DOM_ATTRS = {
+  pattern: "data-pattern",
+  rowId: "data-row-id",
+  entityRow: "data-entity-row",
+  entityId: "data-entity-id",
+  fieldName: "data-field-name",
+  event: "data-event",
+} as const;
+
+export const ACTION_TESTID_PREFIX = "action-";
+
+export const ACTION_OVERFLOW_TESTID = `${ACTION_TESTID_PREFIX}overflow`;
+
+/** Pattern name of the form container a verifier fills. */
+export const FORM_PATTERN = "form-section";
+
+/** `data-testid` (web) / native identifier of an element that dispatches `eventKey`. */
+export function actionTestId(eventKey: string): string {
+  return `${ACTION_TESTID_PREFIX}${eventKey}`;
+}
+
+/** True when `testId` dispatches `event`: the exact form, or a qualified `Orbital.Trait.EVENT` form. */
+export function actionTestIdMatches(testId: string, event: string): boolean {
+  if (!testId.startsWith(ACTION_TESTID_PREFIX)) return false;
+  const key = testId.slice(ACTION_TESTID_PREFIX.length);
+  return key === event || key.endsWith(`.${event}`);
+}
+
+/** Single-identifier prefixes for native shells (accessibilityIdentifier / testTag); row scope is hierarchical. */
+export const NATIVE_ID_PREFIX = {
+  pattern: "pattern-",
+  row: "row-",
+  field: "field-",
+  slot: "slot-",
+} as const;
+
+export function nativePatternId(name: string): string {
+  return `${NATIVE_ID_PREFIX.pattern}${name}`;
+}
+
+export function nativeRowId(id: string): string {
+  return `${NATIVE_ID_PREFIX.row}${id}`;
+}
+
+export function nativeFieldId(name: string): string {
+  return `${NATIVE_ID_PREFIX.field}${name}`;
+}
+
+export function nativeSlotId(name: string): string {
+  return `${NATIVE_ID_PREFIX.slot}${name}`;
+}

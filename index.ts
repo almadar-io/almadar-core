@@ -162,19 +162,12 @@ export {
 // Declared external inputs: what an outside client may send a trait.
 export { type EventAddress, type ExternalInput, externalInputsOf, findExternalInput, findInputByAddress, payloadIssues, payloadSchemaToJsonSchema, readableEntitiesOf, type PayloadIssue } from './src/access/externalInputs';
 
-// `expects` derivation — compute an orbital's consumer-side requirement
-// declarations from the organism's golden schema (proposal §7; the ONE owner —
-// rabit's factory generation and edit-demote materializer both derive through
-// this, never their own walks).
-export {
-  deriveExpectations,
-  pathMatchesPattern,
-  type DeriveExpectationsResult,
-  type ExpectationDiagnostic,
-} from './src/derive-expectations';
+// `expects` shape union — the JS composer's merge (derivation itself lives in `orb`:
+// `orb behaviors expects` / `orb behaviors describe`).
+export { mergeExpectationShape } from './src/expectation-shape';
 
 // Route matching — the one path → page-pattern resolver.
-export { matchPath, comparePathSpecificity, matchPathAmong, defaultPage } from './src/route-match';
+export { matchPath, comparePathSpecificity, matchPathAmong, defaultPage, pathMatchesPattern } from './src/route-match';
 
 // Shared-entity frame merge (mechanics-as-traits DRY primitive: the JS
 // interpreter and the generated TypeScript codegen both fold mechanic

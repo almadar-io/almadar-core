@@ -515,8 +515,9 @@ function mapKnobType(knobType: string): JsonSchemaType | null {
     case 'bool':
       return 'boolean';
     case 'object':
-    // An orbital value is `{ behavior, orbital, …import body }` on the wire.
+    // An orbital value is `{ behavior, orbital, …import body }` on the wire; a behavior value is `{ behavior }`.
     case 'orbital':
+    case 'behavior':
       return 'object';
     case 'array':
       return 'array';
@@ -586,6 +587,7 @@ export function mapEntityFieldType(fieldType: string): JsonSchemaType | null {
     case 'object':
     case 'relation':
     case 'orbital':
+    case 'behavior':
       return 'object';
     case 'enum':
       return 'string';

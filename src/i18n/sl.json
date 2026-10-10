@@ -64,7 +64,8 @@
     "index": "indeksiraj",
     "noindex": "brezIndeksa",
     "version": "razlicica",
-    "translationOf": "prevodOd"
+    "translationOf": "prevodOd",
+    "label": "oznaka"
   },
   "shapes": {
     "Entity": "Entiteta",
@@ -118,7 +119,8 @@
     "create": "ustvari",
     "update": "posodobi",
     "delete": "izbrisi",
-    "icon": "ikona"
+    "icon": "ikona",
+    "roles": "vloge"
   },
   "sigils": {
     "entity": "entiteta",
@@ -193,6 +195,7 @@
     "any": "karkoli",
     "trait": "znacilnost",
     "orbital": "orbitala",
+    "behavior": "vedenje",
     "entity": "entiteta",
     "event": "dogodek",
     "EventAddress": "NaslovDogodka",

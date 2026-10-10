@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-08T14:50:23.918Z",
+  "exportedAt": "2026-10-10T01:07:16.949Z",
   "contracts": {
     "form": {
       "emits": [
@@ -911,13 +911,6 @@
           "payload": {
             "type": "object"
           }
-        },
-        {
-          "event": "RUN_CODE",
-          "trigger": "action",
-          "payload": {
-            "type": "object"
-          }
         }
       ],
       "requires": [],
@@ -987,6 +980,95 @@
       ],
       "requires": [],
       "entityAware": true
+    },
+    "flow-canvas": {
+      "emits": [
+        {
+          "event": "WIRE_VALIDATION_WARNING",
+          "trigger": "action",
+          "payload": {
+            "type": "object"
+          }
+        }
+      ],
+      "requires": [],
+      "entityAware": false
+    },
+    "orb-inspector": {
+      "emits": [
+        {
+          "event": "NOTIFY",
+          "trigger": "action",
+          "payload": {
+            "type": "object"
+          }
+        },
+        {
+          "event": "PROP_CHANGE",
+          "trigger": "action",
+          "payload": {
+            "type": "object"
+          }
+        },
+        {
+          "event": "ADD_FIELD",
+          "trigger": "action",
+          "payload": {
+            "type": "object"
+          }
+        },
+        {
+          "event": "UPDATE_FIELD",
+          "trigger": "action",
+          "payload": {
+            "type": "object"
+          }
+        },
+        {
+          "event": "REMOVE_FIELD",
+          "trigger": "action",
+          "payload": {
+            "type": "object"
+          }
+        },
+        {
+          "event": "GUARD_CHANGE",
+          "trigger": "action",
+          "payload": {
+            "type": "object"
+          }
+        },
+        {
+          "event": "ADD_EFFECT",
+          "trigger": "action",
+          "payload": {
+            "type": "object"
+          }
+        },
+        {
+          "event": "REMOVE_EFFECT",
+          "trigger": "action",
+          "payload": {
+            "type": "object"
+          }
+        },
+        {
+          "event": "CODE_CHANGE",
+          "trigger": "action",
+          "payload": {
+            "type": "object"
+          }
+        },
+        {
+          "event": "SERVICE_MODE_TOGGLE",
+          "trigger": "action",
+          "payload": {
+            "type": "object"
+          }
+        }
+      ],
+      "requires": [],
+      "entityAware": false
     }
   }
 }

@@ -122,3 +122,8 @@ export function defaultPage(schema: OrbitalSchema): { page: Page; orbitalName: s
   }
   return null;
 }
+
+/** A concrete path matches a route pattern: same segment count, each pattern segment a `:param` or equal. */
+export function pathMatchesPattern(path: string, pattern: string): boolean {
+  return matchPath(pattern, path) !== null;
+}

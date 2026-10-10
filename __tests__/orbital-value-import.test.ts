@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { orbitalImportFromValue, parseProgram } from '../src/builders';
-import type { OrbitalValue } from '../src/types/behavior-value';
+import { applyOrbitalOverrides, type OrbitalValue } from '../src/types/behavior-value';
 
 const tasks: OrbitalValue = {
   behavior: 'almadar-std/std-kanban',
@@ -45,6 +45,41 @@ describe('orbitalImportFromValue', () => {
       pages: [],
       reference: { ref: 'Source.orbitals.KanbanOrbital' },
     });
+  });
+});
+
+describe('orbitalImportFromValue — sibling traits (the import\'s own uses + traits)', () => {
+  const shelled: OrbitalValue = {
+    behavior: 'almadar-behaviors/std-progress',
+    orbital: 'ProgressOrbital',
+    uses: [{ from: 'std/behaviors/std-app-layout', as: 'Shell' }],
+    siblings: [{ name: 'ProgressShell', ref: 'Shell.traits.AppLayout', config: { navItems: '@pages', contentTrait: '@trait.ProgressList' } }],
+    mounts: { '/progress': ['ProgressShell'] },
+  };
+
+  it('carries the value\'s own imports beside Source and its sibling traits into the import, config wrapped', () => {
+    const imported = orbitalImportFromValue(shelled);
+    expect(imported.uses).toEqual([
+      { from: 'almadar-behaviors/std-progress', as: 'Source' },
+      { from: 'std/behaviors/std-app-layout', as: 'Shell' },
+    ]);
+    expect(imported.traits).toEqual([
+      { name: 'ProgressShell', ref: 'Shell.traits.AppLayout', config: { navItems: { type: 'unknown', default: '@pages' }, contentTrait: { type: 'unknown', default: '@trait.ProgressList' } } },
+    ]);
+    expect(imported.reference).toEqual({ ref: 'Source.orbitals.ProgressOrbital', mounts: { '/progress': ['ProgressShell'] } });
+  });
+
+  it('edge: an import aliased `Source` collides with the value\'s own source and is refused', () => {
+    expect(() => orbitalImportFromValue({ ...shelled, uses: [{ from: 'std/behaviors/std-app-layout', as: 'Source' }] })).toThrow(/Source/);
+  });
+
+  it('control: behavior/apply merges uses by alias and siblings by name (config key-wise)', () => {
+    const next = applyOrbitalOverrides(shelled, {
+      uses: [{ from: 'std/behaviors/std-app-layout', as: 'Shell' }],
+      siblings: [{ name: 'ProgressShell', ref: 'Shell.traits.AppLayout', config: { appName: 'Habits' } }],
+    });
+    expect(next.uses).toEqual([{ from: 'std/behaviors/std-app-layout', as: 'Shell' }]);
+    expect(next.siblings).toEqual([{ name: 'ProgressShell', ref: 'Shell.traits.AppLayout', config: { navItems: '@pages', contentTrait: '@trait.ProgressList', appName: 'Habits' } }]);
   });
 });
 

@@ -173,7 +173,7 @@ export type ExpectDeclaration =
        * effect cannot state for itself: the effect carries a static prefix
        * (`/articles/`), the provider a pattern (`/articles/:slug`), and the
        * parameterisation is information the usage does not hold. Derived, not
-       * hand-authored — see `deriveExpectations`.
+       * hand-authored — `orb behaviors expects` derives them.
        */
       kind: "page";
       path: string;
@@ -222,6 +222,26 @@ export const ExpectDeclarationSchema = z.discriminatedUnion("kind", [
     path: z.string().min(1, "Expected page path is required"),
   }),
 ]);
+
+/** A cross-boundary usage `orb behaviors expects` could not turn into a declaration. */
+export const ExpectationDiagnosticSchema = z
+  .object({
+    kind: z.enum(["unknown-orbital", "identity-field-not-declared", "entity-field-not-declared", "event-source-unknown"]),
+    orbital: z.string(),
+    entity: z.string().optional(),
+    field: z.string().optional(),
+  })
+  .strict();
+export type ExpectationDiagnostic = z.infer<typeof ExpectationDiagnosticSchema>;
+
+/**
+ * What `orb behaviors expects <organism>` prints: every orbital's derived `expects`
+ * (docs/Almadar_LOLO_Expects_Proposal.md §7; the derivation lives in `orbital-core`).
+ */
+export const OrganismExpectationsSchema = z.record(
+  z.object({ expectations: z.array(ExpectDeclarationSchema), diagnostics: z.array(ExpectationDiagnosticSchema) }).strict(),
+);
+export type OrganismExpectations = z.infer<typeof OrganismExpectationsSchema>;
 
 // ============================================================================
 // Entity Reference (Inline OR Reference)
@@ -457,6 +477,10 @@ export type PageRefObject = {
   description?: PageMeta;
   /** `translationOf:` — the translation group this page belongs to. */
   translationOf?: string;
+  /** The page's nav entry (`@label`/`@icon`/`@roles`). */
+  label?: string;
+  icon?: string;
+  roles?: string[];
 };
 
 /**
@@ -567,6 +591,9 @@ export const PageRefObjectSchema = z.object({
   title: PageMetaSchema.optional(),
   description: PageMetaSchema.optional(),
   translationOf: z.string().min(1).optional(),
+  label: z.string().optional(),
+  icon: z.string().optional(),
+  roles: z.array(z.string().min(1)).min(1).optional(),
 });
 
 export const PageRefSchema = z.union([

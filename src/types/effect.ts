@@ -976,8 +976,14 @@ export type NamespacedEffectName = Extract<Effect[0], `${string}/${string}`>;
  * non-operator-headed) are valid argument values; the operator-head refine
  * applies to the effect itself, not to every argument.
  */
-export const EffectSchema = z.array(SExprDataSchema).min(1).refine(
+const EffectShapeSchema = z.array(SExprDataSchema).min(1).refine(
     (arr) => typeof arr[0] === 'string',
+    { message: 'Effect must be an S-expression with a string operator as first element' }
+);
+
+/** Validates the S-expression shape and yields the typed `Effect` (the claim `isEffect` makes). */
+export const EffectSchema: z.ZodType<Effect> = z.custom<Effect>(
+    (value) => EffectShapeSchema.safeParse(value).success,
     { message: 'Effect must be an S-expression with a string operator as first element' }
 );
 
@@ -1293,6 +1299,12 @@ export type ResolvedPatternProps = {
 export const PatternConfigSchema: z.ZodType<AnyPatternConfig | null> = z.custom<AnyPatternConfig | null>(
     (value) => value === null || (typeof value === 'object' && value !== null && !Array.isArray(value)),
     { message: 'Expected a pattern config object or null' },
+);
+
+/** A pattern config that must be present — the non-null twin of {@link PatternConfigSchema}. */
+export const PatternObjectSchema: z.ZodType<AnyPatternConfig> = z.custom<AnyPatternConfig>(
+    (value) => typeof value === 'object' && value !== null && !Array.isArray(value),
+    { message: 'Expected a pattern config object' },
 );
 
 /** Zod twin of `ResolvedPatternProps` — validates the wire shape (a plain object) only, see {@link PatternConfigSchema}. */

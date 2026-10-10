@@ -291,7 +291,7 @@ export interface OrbitalSchemaWithTraits extends OrbitalSchema {
  * @see safeParseOrbitalSchema
  */
 export function parseOrbitalSchema(data: RuntimeValue): OrbitalSchema {
-  return OrbitalSchemaSchema.parse(data) as OrbitalSchema;
+  return OrbitalSchemaSchema.parse(data);
 }
 
 /**

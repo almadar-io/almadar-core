@@ -54,6 +54,7 @@ export type FieldType =
     | 'relation'
     | 'trait'
     | 'orbital'
+    | 'behavior'
     | 'slot'
     | 'pattern'
     // Renderable UI content — a pattern node (or array of them), the same
@@ -101,6 +102,7 @@ export const FIELD_TYPES = [
     'relation',
     'trait',
     'orbital',
+    'behavior',
     'slot',
     'pattern',
     'node',
@@ -215,12 +217,13 @@ export const RelationConfigSchema = z.object({
     type: RelationCardinalitySchema.optional(),
 }).transform((data) => {
     // Normalize legacy format to standard format
+    const cardinality = data.cardinality || data.type;
     const normalized: RelationConfig = {
         entity: data.entity || data.target || '',
-        entityId: data.entityId,
-        cardinality: data.cardinality || data.type,
-        field: data.field,
-        onDelete: data.onDelete,
+        ...(data.entityId !== undefined ? { entityId: data.entityId } : {}),
+        ...(cardinality !== undefined ? { cardinality } : {}),
+        ...(data.field !== undefined ? { field: data.field } : {}),
+        ...(data.onDelete !== undefined ? { onDelete: data.onDelete } : {}),
     };
     return normalized;
 });
@@ -329,6 +332,7 @@ type ScalarFieldType =
     | 'file'
     | 'trait'
     | 'orbital'
+    | 'behavior'
     | 'slot'
     | 'pattern'
     | 'node'
@@ -570,6 +574,7 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
             scalarVariant('image'),
             scalarVariant('trait'),
             scalarVariant('orbital'),
+            scalarVariant('behavior'),
             scalarVariant('slot'),
             scalarVariant('pattern'),
             scalarVariant('node'),

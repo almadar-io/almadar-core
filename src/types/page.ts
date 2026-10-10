@@ -150,9 +150,11 @@ export type OrbitalPage = {
     /** Nav icon name — `@icon "..."` annotation on the page declaration. */
     icon?: string;
 
-    /** Human nav label — `@label "..."` annotation; when absent, nav shows
-     * the page `name` as written (never derived). */
+    /** Nav label — `@label "..."` annotation. Only a page that declares one is a `@pages` nav entry. */
     label?: string;
+
+    /** Roles the nav entry shows for — `@roles "a, b"` annotation. Absent = everyone. */
+    roles?: string[];
 };
 
 /**
@@ -166,6 +168,10 @@ export interface PageModifiers {
     title?: PageMeta;
     description?: PageMeta;
     translationOf?: string;
+    /** The page's nav entry, declared on a `pages {}` remap entry. */
+    label?: string;
+    icon?: string;
+    roles?: string[];
 }
 
 export const PageModifiersSchema = z.object({
@@ -174,6 +180,9 @@ export const PageModifiersSchema = z.object({
     title: PageMetaSchema.optional(),
     description: PageMetaSchema.optional(),
     translationOf: z.string().min(1).optional(),
+    label: z.string().optional(),
+    icon: z.string().optional(),
+    roles: z.array(z.string().min(1)).min(1).optional(),
 }).strict();
 
 export const OrbitalPageStrictSchema = z.object({
@@ -190,6 +199,7 @@ export const OrbitalPageStrictSchema = z.object({
     translationOf: z.string().min(1).optional(),
     icon: z.string().optional(),
     label: z.string().optional(),
+    roles: z.array(z.string().min(1)).min(1).optional(),
 }).strict(); // Reject unknown keys like 'sections'
 
 /**
@@ -213,6 +223,7 @@ export const OrbitalPageSchema = z.object({
     isInitial: z.boolean().optional(),
     icon: z.string().optional(),
     label: z.string().optional(),
+    roles: z.array(z.string().min(1)).min(1).optional(),
 }).strict(); // Reject unknown keys like 'sections' - use traits with render_ui effects
 
 export type OrbitalPageInput = z.input<typeof OrbitalPageSchema>;

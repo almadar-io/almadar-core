@@ -502,6 +502,8 @@ export interface Camera {
     azimuth?: number;
     /** Orbit height angle above the ground plane, in radians (3D hosts only). */
     elevation?: number;
+    /** Whether the viewer may orbit, pan or zoom the camera. `false` holds the authored framing: a decorative backdrop the page scrolls through. Default true. */
+    controls?: boolean;
 }
 
 export const CameraSchema = z.object({
@@ -512,6 +514,7 @@ export const CameraSchema = z.object({
     mode: CameraModeSchema.optional(),
     azimuth: z.number().optional(),
     elevation: z.number().optional(),
+    controls: z.boolean().optional(),
 });
 
 // ============================================================================

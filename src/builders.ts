@@ -387,7 +387,7 @@ export interface MakeOrbitalWithUsesOpts {
   entity: EntityRef;
   /**
    * Derived `expects` declarations (consumer-side requirements). Threaded
-   * verbatim — derivation lives in `deriveExpectations`; builders never
+   * verbatim — derivation lives in `orb` (`orb behaviors expects`); builders never
    * compute it. Omitted from the result when not provided.
    */
   expects?: ExpectDeclaration[];
@@ -437,8 +437,12 @@ export const ORBITAL_VALUE_IMPORT_ALIAS = 'Source';
  * are wrapped into the IR's declaration form here.
  */
 export function orbitalImportFromValue(value: OrbitalValue): OrbitalDefinition {
-  const { behavior, orbital, name, app, config, traits, ...body } = value;
+  const { behavior, orbital, name, app, config, traits, uses, siblings, ...body } = value;
   const ref = `${ORBITAL_VALUE_IMPORT_ALIAS}.orbitals.${orbital}`;
+  const clash = (uses ?? []).find((u) => u.as === ORBITAL_VALUE_IMPORT_ALIAS);
+  if (clash !== undefined) {
+    throw new Error(`orbital value ${orbital}: an import aliased '${ORBITAL_VALUE_IMPORT_ALIAS}' (from ${clash.from}) collides with the value's own source alias`);
+  }
   const traitOverrides =
     traits === undefined
       ? undefined
@@ -450,9 +454,14 @@ export function orbitalImportFromValue(value: OrbitalValue): OrbitalDefinition {
         );
   return {
     name: name ?? orbital,
-    uses: [{ from: behavior, as: ORBITAL_VALUE_IMPORT_ALIAS, ...(app !== undefined ? { config: mergeCallSiteConfigOverrides({}, app) } : {}) }],
+    uses: [{ from: behavior, as: ORBITAL_VALUE_IMPORT_ALIAS, ...(app !== undefined ? { config: mergeCallSiteConfigOverrides({}, app) } : {}) }, ...(uses ?? [])],
     entity: `${ref}.entity`,
-    traits: [],
+    traits: (siblings ?? []).map((sibling) => ({
+      name: sibling.name,
+      ref: sibling.ref,
+      ...(sibling.linkedEntity !== undefined ? { linkedEntity: sibling.linkedEntity } : {}),
+      ...(sibling.config !== undefined ? { config: mergeCallSiteConfigOverrides({}, sibling.config) } : {}),
+    })),
     pages: [],
     reference: {
       ref,

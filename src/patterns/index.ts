@@ -33,6 +33,19 @@ export const registry: PatternsRegistry = patternsRegistry as PatternsRegistry;
 
 export const PATTERN_REGISTRY: PatternsRegistry = patternsRegistry as PatternsRegistry;
 export const INTEGRATORS_REGISTRY = integratorsRegistry;
+
+const RUNTIMES_BY_SERVICE: ReadonlyMap<string, readonly string[]> = new Map(
+  Object.entries(integratorsRegistry.integrators).map(([name, entry]) => [name, entry.runtimes]),
+);
+
+/**
+ * Whether a call to `service` runs in the browser: it declares the browser
+ * runtime and no server one. Twin of orbital-core `effects::is_browser_only`.
+ */
+export function isBrowserOnlyService(service: string): boolean {
+  const runtimes = RUNTIMES_BY_SERVICE.get(service) ?? [];
+  return runtimes.includes('browser') && !runtimes.includes('node');
+}
 export const COMPONENT_MAPPING = componentMapping;
 export const EVENT_CONTRACTS = eventContracts;
 

@@ -110,9 +110,9 @@ describe('TraitOverridesSchema / TraitValueSchema', () => {
 describe('program results are event payload data', () => {
   it('validator issues and an evaluated program travel on the bus as-is', () => {
     const errors: readonly ProgramValidationIssue[] = [{ code: 'ORB_X', message: 'broken', line: 3 }];
-    const result: EvaluatedProgram = { behavior: './orbitals/X', traits: [] };
+    const result: EvaluatedProgram = { behavior: './orbitals/X', traits: [], value: { behavior: './orbitals/X' } };
     const failure: EventPayload = { error: 'does not validate', errors };
-    const success: EventPayload = { behavior: result.behavior };
+    const success: EventPayload = { behavior: result.behavior, value: result.value };
     expect(failure.errors).toBe(errors);
     expect(success.behavior).toBe('./orbitals/X');
   });
@@ -207,10 +207,11 @@ describe('behavior description (orb behaviors describe on a behavior or orbital)
         knobs: [],
         entity: { name: 'Item', fields: [{ name: 'id', type: 'string', required: true }, { name: 'tone', type: 'enum', values: ['warm', 'cool'] }] },
         borrows: ['Note'],
+        expects: [{ kind: 'entity', name: 'Note' }],
         traits: [{ trait: 'ItemList', config: { layout: { type: 'string', values: ['grid', 'rows'], default: 'grid' } }, knobs: [{ name: 'layout', type: 'string', values: ['grid', 'rows'] }, { name: 'columns', type: '[object]', properties: [{ name: 'key', type: 'string', required: true }] }], events: { emits: [], listens: [], transitions: ['OPEN'] } }],
         pages: [{ name: 'ItemsPage', path: '/items' }],
       },
-      { value: { behavior: './orbitals/shop', orbital: 'NoteOrbital' }, config: {}, knobs: [], borrows: [], traits: [], pages: [] },
+      { value: { behavior: './orbitals/shop', orbital: 'NoteOrbital' }, config: {}, knobs: [], borrows: [], expects: [], traits: [], pages: [] },
     ],
   };
 
@@ -218,6 +219,49 @@ describe('behavior description (orb behaviors describe on a behavior or orbital)
     const parsed = BehaviorDescriptionSchema.parse(described);
     expect(parsed.orbitals[0]?.borrows).toEqual(['Note']);
     expect(parsed.orbitals[1]?.entity).toBeUndefined();
+  });
+
+  it('a description names the behaviors it imports; control: one without imports omits them', () => {
+    expect(BehaviorDescriptionSchema.parse({ ...described, uses: ['almadar-behaviors/std-snake-loop'] }).uses).toEqual(['almadar-behaviors/std-snake-loop']);
+    expect(BehaviorDescriptionSchema.parse(described).uses).toBeUndefined();
+  });
+
+  it('a trait says whether another record may rebind it, a page which traits it mounts; control: an older orb omits both', () => {
+    const [item, note] = described.orbitals;
+    const withFlags = { ...described, orbitals: [{ ...item!, traits: item!.traits.map((t) => ({ ...t, rebindable: true })), pages: [{ name: 'ItemsPage', path: '/items', traits: ['ItemList'] }] }, note!] };
+    const parsed = BehaviorDescriptionSchema.parse(withFlags);
+    expect(parsed.orbitals[0]?.traits[0]?.rebindable).toBe(true);
+    expect(parsed.orbitals[0]?.pages[0]?.traits).toEqual(['ItemList']);
+    const older = BehaviorDescriptionSchema.parse(described);
+    expect(older.orbitals[0]?.traits[0]?.rebindable).toBeUndefined();
+    expect(older.orbitals[0]?.pages[0]?.traits).toBeUndefined();
+  });
+
+  it('an entity says whether it is stored or page-only; an unknown kind is refused; control: an older orb omits it', () => {
+    const [item, note] = described.orbitals;
+    const withKind = (persistence: string) => ({ ...described, orbitals: [{ ...item!, entity: { ...item!.entity!, persistence } }, note!] });
+    expect(BehaviorDescriptionSchema.parse(withKind('persistent')).orbitals[0]?.entity?.persistence).toBe('persistent');
+    expect(BehaviorDescriptionSchema.parse(withKind('runtime')).orbitals[0]?.entity?.persistence).toBe('runtime');
+    expect(BehaviorDescriptionSchema.safeParse(withKind('cached')).success).toBe(false);
+    expect(BehaviorDescriptionSchema.parse(described).orbitals[0]?.entity?.persistence).toBeUndefined();
+  });
+
+  it('an entity says whether it is the identity record; control: an older orb omits it', () => {
+    const [item, note] = described.orbitals;
+    const parsed = BehaviorDescriptionSchema.parse({ ...described, orbitals: [{ ...item!, entity: { ...item!.entity!, identity: true } }, note!] });
+    expect(parsed.orbitals[0]?.entity?.identity).toBe(true);
+    expect(BehaviorDescriptionSchema.parse(described).orbitals[0]?.entity?.identity).toBeUndefined();
+  });
+
+  it('a knob carries its current default, a list of structs included', () => {
+    const navItems = [{ label: 'Home', href: '/' }, { label: 'Admin', href: '/admin', roles: ['owner'] }];
+    const knobs = [{ name: 'appName', type: 'string', default: 'Shop' }, { name: 'navItems', type: '[object]', default: navItems, properties: [{ name: 'label', type: 'string', required: true }] }];
+    const parsed = BehaviorDescriptionSchema.parse({ ...described, knobs });
+    expect(parsed.knobs.map((k) => k.default)).toEqual(['Shop', navItems]);
+  });
+
+  it('control: a knob with an unknown key is still refused', () => {
+    expect(BehaviorDescriptionSchema.safeParse({ ...described, knobs: [{ name: 'appName', type: 'string', initial: 'Shop' }] }).success).toBe(false);
   });
 
   it('control: an orbital without its borrows is refused', () => {

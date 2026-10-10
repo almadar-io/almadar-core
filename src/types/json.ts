@@ -21,6 +21,7 @@
  */
 
 import { z } from 'zod';
+import type { EventPayloadValue } from './expression.js';
 
 /**
  * Recursive JSON value union — every shape JSON can carry.
@@ -101,4 +102,13 @@ export function isJsonObject(value: JsonValue): value is JsonObject {
  */
 export function isJsonArray(value: JsonValue): value is JsonValue[] {
   return Array.isArray(value);
+}
+
+/**
+ * A rich value the UI hands back (a program schema, a selected node) as an event payload value:
+ * its JSON form, which is what the event wire carries. `JsonValue` is a payload value.
+ */
+export function toPayloadValue(value: object | null | undefined): EventPayloadValue {
+  if (value === null || value === undefined) return value;
+  return JsonValueSchema.parse(JSON.parse(JSON.stringify(value)));
 }

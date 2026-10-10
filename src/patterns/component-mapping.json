@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-08T14:50:23.918Z",
+  "exportedAt": "2026-10-10T01:07:16.949Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -1303,6 +1303,21 @@
       "component": "AvlTransitionExplainer",
       "importPath": "@/components/avl/molecules/AvlTransitionExplainer",
       "category": "component"
+    },
+    "flow-canvas": {
+      "component": "FlowCanvas",
+      "importPath": "@/components/avl/organisms/FlowCanvas",
+      "category": "display"
+    },
+    "layers-panel": {
+      "component": "LayersPanel",
+      "importPath": "@/components/avl/organisms/LayersPanel",
+      "category": "display"
+    },
+    "orb-inspector": {
+      "component": "OrbInspector",
+      "importPath": "@/components/avl/organisms/OrbInspector",
+      "category": "debug"
     }
   }
 }

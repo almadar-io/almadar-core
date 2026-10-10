@@ -123,7 +123,7 @@ const SYNTHESIZED_GUARD_OPERATORS = new Set([
   'eq', '==', '=', 'not-eq', '!=', 'neq',
   'gt', '>', 'gte', '>=', 'lt', '<', 'lte', '<=',
   'and', 'or', 'not',
-  'object/has', 'object/get', 'array/includes', 'str/startsWith',
+  'object/has', 'object/get', 'array/includes', 'str/startsWith', 'validate/url',
   'agent/is-pinned', 'agent/memory-strength',
 ]);
 
@@ -660,6 +660,14 @@ export function buildGuardPayloads(guard: unknown): GuardPayload {
         pass: nestedPayload(path, `${prefix}mock-suffix`),
         fail: nestedPayload(path, prefix.length > 0 ? `not-${prefix}` : 'mock-test-value'),
       };
+    }
+  }
+
+  // `(validate/url @payload.x)`: pass with a parseable URL, fail with a non-URL string.
+  if (op === 'validate/url') {
+    const path = extractPayloadFieldPath(guard[1]);
+    if (path) {
+      return { pass: nestedPayload(path, 'https://example.test/mock'), fail: nestedPayload(path, 'not-a-url') };
     }
   }
 
