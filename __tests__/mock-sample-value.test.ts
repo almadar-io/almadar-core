@@ -176,6 +176,31 @@ describe.each(STRATEGIES)('mock-seed policy [%s]', (strategy) => {
       expect([1, 2].map((i) => sampleFieldValue(field, ctx(strategy, i)))).toEqual([true, false]);
     });
 
+    it('seeds a behavior @mock as a behavior value per row, the specifier verbatim (never index-suffixed)', () => {
+      const field: EntityField = {
+        name: 'behavior',
+        type: 'behavior',
+        required: true,
+        mock: 'almadar-behaviors/std-booking-solution, almadar-behaviors/std-accounting-solution',
+      };
+      const got = [1, 2, 3].map((i) => sampleFieldValue(field, ctx(strategy, i)));
+      expect(got).toEqual([
+        { behavior: 'almadar-behaviors/std-booking-solution' },
+        { behavior: 'almadar-behaviors/std-accounting-solution' },
+        { behavior: 'almadar-behaviors/std-booking-solution' },
+      ]);
+    });
+
+    it('a single behavior @mock is that behavior on every row', () => {
+      const field: EntityField = { name: 'behavior', type: 'behavior', required: true, mock: 'almadar-behaviors/std-booking-solution' };
+      expect(sampleFieldValue(field, ctx(strategy, 2))).toEqual({ behavior: 'almadar-behaviors/std-booking-solution' });
+    });
+
+    it('control: a behavior field with no @mock still seeds none', () => {
+      const field: EntityField = { name: 'behavior', type: 'behavior', required: true };
+      expect(sampleFieldValue(field, ctx(strategy, 1))).toBeNull();
+    });
+
     it('keeps a numeric-looking @mock on a string field as text', () => {
       const field: EntityField = { name: 'matterNumber', type: 'string', required: true, mock: '2026, 2027' };
       expect(sampleFieldValue(field, ctx(strategy, 1))).toBe('2026');

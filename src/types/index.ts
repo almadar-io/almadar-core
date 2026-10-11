@@ -1171,7 +1171,7 @@ export {
   EventDispatchResponseSchema,
 } from "./bus.js";
 
-export { dispatchVisitKey } from "./visit-key.js";
+export { dispatchVisitKey, DispatchVisits } from "./visit-key.js";
 export { type DeliveryRecord, type DispatchLog, DeliveryRecordSchema, DispatchLogSchema, deliveryRecordValue } from "./bus.js";
 export { DispatchMemory, dispatchScopeOf, type DispatchScope } from "./dispatch-memory.js";
 

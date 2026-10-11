@@ -411,6 +411,12 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
     // An enum's candidates are its members, used as is: an index suffix would seed a non-member.
     const members = declaredValues(field) ? mockCandidates(field.mock) : [];
     if (members.length > 0) return members[(ordinal - 1) % members.length]!;
+    // A behavior field's candidates are behavior specifiers, used verbatim as behavior values.
+    if (field.type === 'behavior') {
+      const candidates = mockCandidates(field.mock);
+      const behavior = candidates[(ordinal - 1) % candidates.length];
+      return behavior === undefined ? null : { behavior };
+    }
     if (field.type === 'date' || field.type === 'datetime' || field.type === 'timestamp') {
       const candidates = mockCandidates(field.mock);
       return mockDateValue(field.type === 'date', candidates[(ordinal - 1) % candidates.length] ?? field.mock, ctx.strategy);
@@ -500,7 +506,7 @@ export function sampleFieldValue(field: EntityField, ctx: SampleContext): FieldV
       return sampleObject(field, ctx);
     case 'union':
       return sampleUnion(field, ctx);
-    // A trait or orbital value held as data seeds unbound — `none` (seed.rs twin).
+    // A trait or orbital value held as data seeds unbound — `none` (seed.rs twin); a behavior with `@mock` seeds above.
     case 'trait':
     case 'orbital':
     case 'behavior':

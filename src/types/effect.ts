@@ -713,7 +713,7 @@ export type LlmEffect = [`llm/${string}`, ...SExpr[]];
  * installed packages through `orb`, so they run on the server.
  * @example ['behavior/catalog', { paths: ['std/ui/core/molecules'] }, { emit: { success: 'LISTED', failure: 'LIST_FAILED' } }]
  */
-export type BehaviorReflectionEffect = ['behavior/catalog' | 'behavior/describe' | 'behavior/source', ...SExpr[]];
+export type BehaviorReflectionEffect = ['behavior/catalog' | 'behavior/describe' | 'behavior/source' | 'behavior/resolve', ...SExpr[]];
 
 /**
  * Program effects: read `.lolo` text into a quoted program, print one back,
@@ -919,7 +919,7 @@ export const EFFECT_OPERATORS = [
   'train/loop', 'train/step', 'train/clipGradients', 'train/clipWeights', 'train/sgd',
   'train/adam', 'prob/seed', 'prob/condition', 'workspace/write-orbital', 'workspace/write-file',
   'workspace/write-schema', 'workspace/write-plan', 'workspace/archive-orbital', 'behavior/catalog',
-  'behavior/describe', 'behavior/source', 'program/read', 'program/print', 'program/eval', 'program/compose',
+  'behavior/describe', 'behavior/source', 'behavior/resolve', 'program/read', 'program/print', 'program/eval', 'program/compose',
   'integration/http', 'integration/github-get-repo', 'integration/github-create-issue',
 ] as const;
 
