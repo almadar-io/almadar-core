@@ -328,16 +328,20 @@ export const TraitKnobSchema = z.object({
 }).strict();
 export type TraitKnob = z.infer<typeof TraitKnobSchema>;
 
+/** A described trait's events: what it emits, listens to and transitions on, and which of those its source declares `@tier "domain"`. */
+export const TraitEventsSchema = z.object({
+  emits: z.array(z.string()),
+  listens: z.array(z.string()),
+  /** Events the trait's own transitions fire on — the only valid `listens` triggers. */
+  transitions: z.array(z.string()),
+  domain: z.array(z.string()).optional(),
+}).strict();
+
 /** What `behavior/describe` returns for a trait value (`orb behaviors describe --json`). */
 export const TraitDescriptionSchema = z.object({
   value: TraitValueSchema,
   knobs: z.array(TraitKnobSchema),
-  events: z.object({
-    emits: z.array(z.string()),
-    listens: z.array(z.string()),
-    /** Events the trait's own transitions fire on — the only valid `listens` triggers. */
-    transitions: z.array(z.string()),
-  }).strict(),
+  events: TraitEventsSchema,
   model: z.string(),
 }).strict();
 export type TraitDescription = z.infer<typeof TraitDescriptionSchema>;
@@ -360,6 +364,8 @@ export interface KnobField {
   readonly description?: string;
   readonly synonyms?: string;
   readonly tier?: string;
+  /** The `@config.<knob>` this knob's value forwards: its text is owned (and set) there. */
+  readonly forwardedFrom?: string;
 }
 export const KnobFieldSchema: z.ZodType<KnobField> = z.lazy(() =>
   z.object({
@@ -373,6 +379,7 @@ export const KnobFieldSchema: z.ZodType<KnobField> = z.lazy(() =>
     description: z.string().optional(),
     synonyms: z.string().optional(),
     tier: z.string().optional(),
+    forwardedFrom: z.string().optional(),
   }).strict(),
 );
 
@@ -390,12 +397,14 @@ export const OrbitalDescriptionSchema = z.object({
     trait: z.string(),
     config: DeclaredTraitConfigSchema,
     knobs: z.array(KnobFieldSchema),
-    events: z.object({ emits: z.array(z.string()), listens: z.array(z.string()), transitions: z.array(z.string()) }).strict(),
+    events: TraitEventsSchema,
     /** Declared `-> @rebindable`: the trait may be bound to another record. */
     rebindable: z.boolean().optional(),
   }).strict()),
   /** Each page with the traits it mounts: what the behavior declares as standing on its own. */
-  pages: z.array(z.object({ name: z.string(), path: z.string(), traits: z.array(z.string()).optional() }).strict()),
+  pages: z.array(z.object({ name: z.string(), path: z.string(), traits: z.array(z.string()).optional(), label: z.string().optional(), icon: z.string().optional() }).strict()),
+  /** Controls the orbital leaves for an embedding organism (`emitsScope external`) that nothing in it handles: an importer must route each. */
+  forwards: z.array(z.object({ trait: z.string(), event: z.string(), via: z.array(z.string()) }).strict()).optional(),
 }).strict();
 export type OrbitalDescription = z.infer<typeof OrbitalDescriptionSchema>;
 

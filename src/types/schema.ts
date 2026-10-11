@@ -28,8 +28,8 @@ import type { Trait, DeclaredTraitConfig } from "./trait.js";
 import { DeclaredTraitConfigSchema } from "./trait.js";
 import type { IdentityLedger } from "./identity.js";
 import { IdentityLedgerSchema } from "./identity.js";
-import type { ThemeRef } from "./domain.js";
-import { ThemeRefSchema } from "./domain.js";
+import type { ThemeDefinition, ThemeRef } from "./domain.js";
+import { ThemeDefinitionSchema, ThemeRefSchema } from "./domain.js";
 import type { RuntimeValue } from "./json.js";
 
 // ============================================================================
@@ -127,6 +127,15 @@ export interface OrbitalSchema {
   theme?: ThemeRef;
 
   /**
+   * The theme presets this program references (app and orbital `theme`
+   * keys) plus the runtime default, written by `orb` when it compiles the
+   * program for a runtime, so a kernel with no installed `@almadar/core`
+   * (wasm, mobile) resolves `@currentTheme` from the program alone. Never
+   * authored; absent on a source `.orb`.
+   */
+  themeDefinitions?: ThemeDefinition[];
+
+  /**
    * Short human-readable summary distinct from `description`. Typically an
    * AI-generated one-liner used by app list views, breadcrumbs, and the
    * `GET /graphs/:appId/domain-text` projection. Kept separate from
@@ -217,6 +226,7 @@ export const OrbitalSchemaSchema = z.object({
   name: z.string().min(1, "Schema name is required"),
   description: z.string().optional(),
   theme: ThemeRefSchema.optional(),
+  themeDefinitions: z.array(ThemeDefinitionSchema).optional(),
   summary: z.string().optional(),
   version: z.string().optional(),
   domainContext: DomainContextSchema.optional(),

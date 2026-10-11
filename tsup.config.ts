@@ -1,6 +1,7 @@
 import { defineConfig } from 'tsup';
 import fs from 'node:fs';
 import path from 'node:path';
+import { BINDING_CONTEXT_RULES } from './src/types/bindings';
 
 export default defineConfig({
   entry: {
@@ -16,6 +17,8 @@ export default defineConfig({
     'i18n/index': 'src/i18n/index.ts',
     'themes/index': 'src/themes/index.ts',
     'fixtures': 'src/fixtures.ts',
+    'behavior-package': 'src/behavior-package.ts',
+    'language-data': 'src/language-data.ts',
   },
   format: ['esm'],
   dts: true,
@@ -52,5 +55,7 @@ export default defineConfig({
       path.join(patternsDist, 'registry.json'),
     );
     console.log('✓ Copied pattern JSON files to dist/patterns');
+    fs.mkdirSync('dist/language', { recursive: true });
+    fs.writeFileSync('dist/language/binding-rules.json', `${JSON.stringify(BINDING_CONTEXT_RULES, null, 2)}\n`);
   },
 });

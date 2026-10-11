@@ -36,7 +36,7 @@
  */
 
 import {
-  coreTables,
+  getVocabulary,
   type I18nSection,
   type LanguageCode,
   type OperatorTables,
@@ -115,7 +115,7 @@ function forward(
   // every section in `resolutionOrder`.
   const canon = (native: string): string | undefined => {
     for (const section of resolutionOrder) {
-      for (const [english, value] of Object.entries(coreTables[lang][section])) {
+      for (const [english, value] of Object.entries(getVocabulary(lang)[section])) {
         if (value === native) return english;
       }
     }
@@ -133,7 +133,7 @@ function forward(
     map.set(english, native);
   };
   for (const section of sections) {
-    for (const [english, native] of Object.entries(coreTables[lang][section])) {
+    for (const [english, native] of Object.entries(getVocabulary(lang)[section])) {
       add(english, native);
     }
   }

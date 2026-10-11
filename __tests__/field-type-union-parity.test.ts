@@ -23,7 +23,7 @@
  * class, not just this one instance of it.
  */
 
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { describe, it, expect } from 'vitest';
@@ -32,6 +32,7 @@ import {
   TRAIT_FIELD_TYPES,
   TraitEntityFieldSchema,
 } from '../src/types/trait.js';
+import { installedRegistries } from './installed-registries.js';
 import { parseOrbitalSchema, safeParseOrbitalSchema } from '../src/types/schema.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -83,9 +84,10 @@ describe('TraitEntityFieldSchema / RequiredFieldSchema admit the full TraitField
 });
 
 describe('registry integration — the real ui-form-section.orb / std-lms.orb files load', () => {
-  const stdRegistry = path.join(here, '../../almadar-std/behaviors/registry');
-  const ioRegistry = path.join(here, '../../almadar-behaviors/behaviors/registry');
-  const haveRegistries = existsSync(stdRegistry) && existsSync(ioRegistry);
+  const registries = installedRegistries(['@almadar/std', '@almadar-io/behaviors']);
+  const stdRegistry = registries.get('@almadar/std') ?? '';
+  const ioRegistry = registries.get('@almadar-io/behaviors') ?? '';
+  const haveRegistries = registries.size === 2;
 
   it('ui-form-section.orb parses through parseOrbitalSchema (0 errors)', () => {
     if (!haveRegistries) return; // standalone (extracted) clone — no sibling registries

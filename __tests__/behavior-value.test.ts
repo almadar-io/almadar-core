@@ -15,7 +15,9 @@ import {
   OrbitalValueSchema,
   BehaviorValueSchema,
   BehaviorDescriptionSchema,
+  TraitDescriptionSchema,
   DescribeTargetSchema,
+  KnobFieldSchema,
   type OrbitalValue,
 } from '../src/types/behavior-value';
 import { JsonValueSchema } from '../src/types/json';
@@ -237,6 +239,31 @@ describe('behavior description (orb behaviors describe on a behavior or orbital)
     expect(older.orbitals[0]?.pages[0]?.traits).toBeUndefined();
   });
 
+  it('a page carries its menu label and icon; control: a page without them omits both', () => {
+    const [item, note] = described.orbitals;
+    const withMenu = { ...described, orbitals: [{ ...item!, pages: [{ name: 'ItemsPage', path: '/items', label: 'Items', icon: 'list' }] }, note!] };
+    expect(BehaviorDescriptionSchema.parse(withMenu).orbitals[0]?.pages[0]).toMatchObject({ label: 'Items', icon: 'list' });
+    expect(BehaviorDescriptionSchema.parse(described).orbitals[0]?.pages[0]?.label).toBeUndefined();
+  });
+
+  it('an orbital lists the controls it forwards to its embedder; a malformed entry is refused; control: an older orb omits them', () => {
+    const [item, note] = described.orbitals;
+    const withForwards = (forwards: unknown) => ({ ...described, orbitals: [{ ...item!, forwards }, note!] });
+    expect(BehaviorDescriptionSchema.parse(withForwards([{ trait: 'ItemList', event: 'EDIT', via: ['detail-panel.actions'] }])).orbitals[0]?.forwards).toEqual([{ trait: 'ItemList', event: 'EDIT', via: ['detail-panel.actions'] }]);
+    expect(BehaviorDescriptionSchema.safeParse(withForwards([{ trait: 'ItemList' }])).success).toBe(false);
+    expect(BehaviorDescriptionSchema.parse(described).orbitals[0]?.forwards).toBeUndefined();
+  });
+
+  it('a trait lists its domain events (orbital and trait descriptions); control: an older orb omits them', () => {
+    const [item, note] = described.orbitals;
+    const withDomain = { ...described, orbitals: [{ ...item!, traits: item!.traits.map((t) => ({ ...t, events: { ...t.events, domain: ['OPEN'] } })) }, note!] };
+    expect(BehaviorDescriptionSchema.parse(withDomain).orbitals[0]?.traits[0]?.events.domain).toEqual(['OPEN']);
+    expect(BehaviorDescriptionSchema.parse(described).orbitals[0]?.traits[0]?.events.domain).toBeUndefined();
+    const trait = { value: { behavior: './orbitals/shop', trait: 'ItemList' }, knobs: [], events: { emits: [], listens: ['OPEN'], transitions: ['OPEN'], domain: ['OPEN'] }, model: '' };
+    expect(TraitDescriptionSchema.parse(trait).events.domain).toEqual(['OPEN']);
+    expect(TraitDescriptionSchema.safeParse({ ...trait, events: { ...trait.events, domain: 'OPEN' } }).success).toBe(false);
+  });
+
   it('an entity says whether it is stored or page-only; an unknown kind is refused; control: an older orb omits it', () => {
     const [item, note] = described.orbitals;
     const withKind = (persistence: string) => ({ ...described, orbitals: [{ ...item!, entity: { ...item!.entity!, persistence } }, note!] });
@@ -278,5 +305,12 @@ describe('behavior description (orb behaviors describe on a behavior or orbital)
   it('control: an unknown key or a missing behavior is refused', () => {
     expect(DescribeTargetSchema.safeParse({ behavior: 'std/std-kanban', bogus: 1 }).success).toBe(false);
     expect(DescribeTargetSchema.safeParse({ orbital: 'KanbanOrbital' }).success).toBe(false);
+  });
+});
+
+describe('KnobFieldSchema forwardedFrom', () => {
+  it('accepts the knob a value forwards; control: an unknown key is still refused', () => {
+    expect(KnobFieldSchema.safeParse({ name: 'navItems', type: '[object]', default: [], forwardedFrom: '@config.navItems' }).success).toBe(true);
+    expect(KnobFieldSchema.safeParse({ name: 'navItems', type: '[object]', forwardedBy: '@config.navItems' }).success).toBe(false);
   });
 });

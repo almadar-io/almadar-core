@@ -319,7 +319,7 @@ export type EvalTrace = EvalStep[];
 
 /**
  * Print an S-expression in `.lolo` surface form: calls as `(op args…)`,
- * bindings bare, strings quoted, objects `{ k: v }`, literal arrays `[a b]`.
+ * bindings bare, strings quoted, objects `{ k: v }` (keys sorted), literal arrays `[a b]`.
  * Structural only — a string-headed array is a call, as in {@link isSExpr}.
  */
 export function formatSExpr(expr: SExpr): string {
@@ -335,7 +335,7 @@ export function formatSExpr(expr: SExpr): string {
     if (op !== null) return `(${[op, ...expr.slice(1).map(formatSExpr)].join(' ')})`;
     return `[${expr.map(formatSExpr).join(' ')}]`;
   }
-  const entries = Object.entries(expr).map(([k, v]) => `${k}: ${formatSExpr(v)}`);
+  const entries = Object.keys(expr).sort().map((k) => `${k}: ${formatSExpr(expr[k])}`);
   return entries.length === 0 ? '{}' : `{ ${entries.join(', ')} }`;
 }
 
@@ -583,8 +583,21 @@ export function quoteExpr(expr: SExpr): [typeof QUOTE_HEAD, string] {
   return [QUOTE_HEAD, encodeQuoteBody(expr)];
 }
 
+/**
+ * The data a quoted value stands for: `decodeQuoteBody` of the body when
+ * `expr` is a `(quote x)` call, else `expr` unchanged. One level per call —
+ * binding path resolution applies it per step, so `(quote …)` nested inside
+ * the decoded data decodes there when the path reaches it.
+ */
+export function decodeQuotedValue(expr: SExpr): SExpr;
+export function decodeQuotedValue(expr: RuntimeValue): RuntimeValue;
+export function decodeQuotedValue(expr: RuntimeValue): RuntimeValue {
+  const body = quoteBodyOf(expr);
+  return body === undefined ? expr : decodeQuoteBody(body);
+}
+
 /** The encoded body when `expr` is a `(quote x)` call, else undefined. */
-export function quoteBodyOf(expr: SExpr): string | undefined {
+export function quoteBodyOf(expr: RuntimeValue): string | undefined {
   return Array.isArray(expr) && expr.length === 2 && expr[0] === QUOTE_HEAD && typeof expr[1] === 'string'
     ? expr[1]
     : undefined;
@@ -705,7 +718,7 @@ function formatTemplate(expr: SExpr, holes: readonly SExpr[]): string {
     return `[${expr.map((e) => formatTemplate(e, holes)).join(' ')}]`;
   }
   if (expr !== null && typeof expr === 'object') {
-    const entries = Object.entries(expr).map(([k, v]) => `${k}: ${formatTemplate(v, holes)}`);
+    const entries = Object.keys(expr).sort().map((k) => `${k}: ${formatTemplate(expr[k], holes)}`);
     return entries.length === 0 ? '{}' : `{ ${entries.join(', ')} }`;
   }
   return formatSExpr(expr);

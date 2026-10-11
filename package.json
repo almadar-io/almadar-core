@@ -1,6 +1,6 @@
 {
   "name": "@almadar/core",
-  "version": "10.123.0",
+  "version": "10.124.0",
   "description": "Core schema types and definitions for Almadar",
   "type": "module",
   "main": "./dist/index.js",
@@ -71,14 +71,33 @@
       "types": "./dist/fixtures.d.ts",
       "import": "./dist/fixtures.js",
       "require": "./dist/fixtures.js"
+    },
+    "./behavior-package": {
+      "types": "./dist/behavior-package.d.ts",
+      "import": "./dist/behavior-package.js",
+      "require": "./dist/behavior-package.js"
+    },
+    "./language-data": {
+      "types": "./dist/language-data.d.ts",
+      "import": "./dist/language-data.js",
+      "require": "./dist/language-data.js"
     }
   },
   "files": [
     "dist",
-    "src/types/bindings.ts",
     "themes",
     "fixtures"
   ],
+  "orbLanguage": {
+    "compiler": ">=17.11.2",
+    "patterns": "dist/patterns/patterns-registry.json",
+    "componentMapping": "dist/patterns/component-mapping.json",
+    "eventContracts": "dist/patterns/event-contracts.json",
+    "services": "dist/patterns/services-registry.json",
+    "bindingRules": "dist/language/binding-rules.json",
+    "themes": "themes",
+    "fixtures": "fixtures"
+  },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public"
@@ -99,6 +118,8 @@
   },
   "devDependencies": {
     "@almadar/eslint-plugin": "^2.21.0",
+    "@almadar/lolo-ar": "^1.0.0",
+    "@almadar/lolo-sl": "^1.0.0",
     "@types/node": "^22.0.0",
     "@typescript-eslint/parser": "8.65.0",
     "@typescript/native": "npm:typescript@^7.0.2",

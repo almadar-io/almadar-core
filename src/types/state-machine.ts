@@ -188,6 +188,12 @@ export type Event = {
    * the trait. Absent = not an input. Mirrors Rust `EventDefinition.external`.
    */
   external?: boolean;
+  /**
+   * Declared in the trait's own `listens { EVENT … }` block (the local form, external or
+   * not): an input the author offers to the program. Absent = not declared there.
+   * Mirrors Rust `EventDefinition.listened`.
+   */
+  listened?: boolean;
   /** Domain vs System classification (optional, for analysis) */
   classification?: "domain" | "system";
   /** Semantic role of this event (optional, for analysis) */
@@ -204,6 +210,7 @@ export const EventSchema = z.object({
   payloadSchema: z.array(PayloadFieldSchema).optional(),
   payloadEntity: z.string().optional(),
   external: z.boolean().optional(),
+  listened: z.boolean().optional(),
   classification: z.enum(["domain", "system"]).optional(),
   semanticRole: z.string().optional(),
 });

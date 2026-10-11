@@ -92,7 +92,7 @@
       "diagram-guide": "#94a0bd",
       "diagram-axis": "#3b2e1c",
       "diagram-grid": "#ece2d3",
-      "diagram-highlight": "#b45309",
+      "diagram-highlight": "#6d28d9",
       "diagram-fill": "#fde8c8"
     },
     "radii": {
@@ -226,7 +226,7 @@
         "diagram-guide": "#5d6890",
         "diagram-axis": "#e6d9c4",
         "diagram-grid": "#3a2e1c",
-        "diagram-highlight": "#fbbf24",
+        "diagram-highlight": "#c4b5fd",
         "diagram-fill": "#4a3714"
       },
       "typography": {

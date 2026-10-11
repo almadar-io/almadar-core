@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-10T01:07:16.949Z",
+  "exportedAt": "2026-10-11T01:15:36.754Z",
   "patterns": {
     "detail-panel": {
       "type": "detail-panel",
@@ -33662,7 +33662,7 @@
           "types": [
             "function"
           ],
-          "description": "Callback when user clicks sign out (optional - uses auth context signOut if not provided)",
+          "description": "The trait's reaction to Sign out; the host ends the session through `UI:SIGN_OUT` either way.",
           "kind": "callback",
           "callbackArgs": []
         },
@@ -54182,6 +54182,60 @@
             ],
             "jsonValueBrand": true
           }
+        },
+        "orientation": {
+          "types": [
+            "string"
+          ],
+          "description": "Scroll direction: a row of slides, or a column (a vertical feed).",
+          "enumValues": [
+            "horizontal",
+            "vertical"
+          ],
+          "default": "horizontal"
+        },
+        "fullHeight": {
+          "types": [
+            "boolean"
+          ],
+          "description": "Each slide fills the carousel's height (pair with `orientation: vertical` for one card per screen).",
+          "default": false
+        },
+        "loadMoreEvent": {
+          "types": [
+            "string"
+          ],
+          "description": "Emitted when the viewer is `loadMoreAhead` slides from the end and `hasMore` is set.",
+          "kind": "event-ref",
+          "notification": true,
+          "emitPayloadSchema": [
+            {
+              "name": "index",
+              "type": "number",
+              "required": true
+            }
+          ]
+        },
+        "loadMoreAhead": {
+          "types": [
+            "number"
+          ],
+          "description": "How many slides before the end to ask for more (default 2).",
+          "default": 2
+        },
+        "hasMore": {
+          "types": [
+            "boolean"
+          ],
+          "description": "More slides can be loaded.",
+          "default": false
+        },
+        "isLoadingMore": {
+          "types": [
+            "boolean"
+          ],
+          "description": "A load is in flight; no further request until it lands.",
+          "default": false
         },
         "className": {
           "types": [
@@ -89381,6 +89435,105 @@
           "description": "The event a message is sent as — `UI:{sendEvent}` with `{ message }`, from Enter or the send button. @default \"CHAT_SEND\"",
           "kind": "event",
           "default": "CHAT_SEND"
+        },
+        "focusRequest": {
+          "types": [
+            "object"
+          ],
+          "description": "Focus the input (with an optional prompt); a new `id` focuses again.",
+          "properties": {
+            "id": {
+              "types": [
+                "string",
+                "number"
+              ]
+            },
+            "placeholder": {
+              "types": [
+                "string"
+              ]
+            }
+          },
+          "propertyRequired": [
+            "id"
+          ]
+        },
+        "editFocus": {
+          "types": [
+            "object"
+          ],
+          "description": "The picked canvas element a sent message edits; its ✕ emits `UI:ELEMENT_SELECTED` with `{ focus: null }`.",
+          "properties": {
+            "level": {
+              "types": [
+                "string"
+              ],
+              "enumValues": [
+                "node",
+                "slot",
+                "field",
+                "effect",
+                "trait",
+                "page",
+                "orbital"
+              ]
+            },
+            "orbital": {
+              "types": [
+                "string"
+              ]
+            },
+            "trait": {
+              "types": [
+                "string"
+              ]
+            },
+            "transition": {
+              "types": [
+                "string"
+              ]
+            },
+            "state": {
+              "types": [
+                "string"
+              ]
+            },
+            "slot": {
+              "types": [
+                "string"
+              ]
+            },
+            "path": {
+              "types": [
+                "string"
+              ]
+            },
+            "patternType": {
+              "types": [
+                "string"
+              ]
+            },
+            "entity": {
+              "types": [
+                "string"
+              ]
+            },
+            "source": {
+              "types": [
+                "string"
+              ]
+            },
+            "label": {
+              "types": [
+                "string"
+              ]
+            }
+          },
+          "propertyRequired": [
+            "level",
+            "orbital",
+            "label"
+          ]
         },
         "enter": {
           "types": [

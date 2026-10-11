@@ -10,7 +10,7 @@ import ts from 'typescript';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { coreTables, ORB_NOTATION_KEYS } from '../src/i18n/index.js';
+import { englishTables, ORB_NOTATION_KEYS } from '../src/i18n/index.js';
 import { collectPaths, notationKeys } from '../scripts/gen-orb-notation.mjs';
 
 const OPAQUE_TYPES = /PatternConfig|PatternProps|^Date$|^Promise$|^Function$|^Effect$|^TypedEffect$|^SExpression$|^SExpr$|^Expression$|^Guard$|^JsonValue$|^Json$/;
@@ -93,7 +93,7 @@ describe('.orb structural vocabulary vs the TS type universe', () => {
       readFileSync(join(import.meta.dirname, '..', 'src', 'i18n', 'orb-rust-only.json'), 'utf8'),
     ) as { keys: string[] };
 
-    const enOrbKeys = new Set(Object.keys(coreTables.en.orb));
+    const enOrbKeys = new Set(Object.keys(englishTables.orb));
     const rustOnlySet = new Set(orbRustOnly.keys);
 
     // TS-universe − notation ⊆ en.orb. A key reachable ONLY under a theme

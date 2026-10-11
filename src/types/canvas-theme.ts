@@ -122,6 +122,11 @@ export interface CanvasShadow {
 /** The theme's drawing axes resolved for one scope. Colors are canvas-ready CSS strings. */
 export interface CanvasTheme {
   ground: string;
+  /**
+   * Diagram chrome surfaces: the neutral wash (`--color-muted`), cards (`--color-card`) and text
+   * drawn on a primary fill (`--color-primary-foreground`).
+   */
+  surfaces: Readonly<Record<'muted' | 'card' | 'onPrimary', string>>;
   tones: Readonly<Record<DiagramTone, string>>;
   series: readonly string[];
   strokes: Readonly<Record<DiagramStrokeWeight, number>>;

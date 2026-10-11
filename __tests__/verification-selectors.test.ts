@@ -7,6 +7,11 @@ import {
   VERIFICATION_DOM_ATTRS,
   actionTestId,
   actionTestIdMatches,
+  gestureActionTestId,
+  gestureOfActionTestId,
+  GESTURE_EVENT_PROPS,
+  nativeIds,
+  splitNativeIds,
   nativeFieldId,
   nativePatternId,
   nativeRowId,
@@ -83,5 +88,46 @@ describe("web DOM attributes", () => {
 
   it("name the form container by its pattern", () => {
     expect(FORM_PATTERN).toBe("form-section");
+  });
+});
+
+describe("gesture actions", () => {
+  it("a gesture-only affordance has its own id; a tap keeps the plain action id", () => {
+    expect(gestureActionTestId("NEXT_WEEK", "swipe-left")).toBe("action-swipe-left:NEXT_WEEK");
+    expect(gestureActionTestId("OPEN", "long-press")).toBe("action-long-press:OPEN");
+    expect(gestureActionTestId("OPEN", "tap")).toBe(actionTestId("OPEN"));
+  });
+
+  it("reads the gesture back from an id, for the exact and the qualified event", () => {
+    expect(gestureOfActionTestId("action-long-press:OPEN", "OPEN")).toBe("long-press");
+    expect(gestureOfActionTestId("action-swipe-right:App.Cal.PREV", "PREV")).toBe("swipe-right");
+    expect(gestureOfActionTestId("action-OPEN", "OPEN")).toBe("tap");
+  });
+
+  it("control: another event, or a non-action id, has no gesture", () => {
+    expect(gestureOfActionTestId("action-long-press:OPEN", "CLOSE")).toBeNull();
+    expect(gestureOfActionTestId("row-1", "OPEN")).toBeNull();
+    expect(gestureOfActionTestId("action-wiggle:OPEN", "OPEN")).toBeNull();
+  });
+
+  it("names the gesture each gesture prop declares", () => {
+    expect(GESTURE_EVENT_PROPS).toEqual({
+      longPressEvent: "long-press",
+      swipeLeftEvent: "swipe-left",
+      swipeRightEvent: "swipe-right",
+    });
+  });
+});
+
+describe("native multi-action identifiers", () => {
+  it("joins the ids an element carries, skipping empty ones", () => {
+    expect(nativeIds("action-OPEN", "", "action-long-press:HOLD")).toBe("action-OPEN action-long-press:HOLD");
+    expect(splitNativeIds("action-OPEN action-long-press:HOLD")).toEqual(["action-OPEN", "action-long-press:HOLD"]);
+  });
+
+  it("control: one id round-trips unchanged and an empty identifier has none", () => {
+    expect(nativeIds("row-1")).toBe("row-1");
+    expect(splitNativeIds("row-1")).toEqual(["row-1"]);
+    expect(splitNativeIds("")).toEqual([]);
   });
 });

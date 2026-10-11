@@ -1,33 +1,23 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { FIELD_TYPES, TYPE_POSITION_ONLY } from '../src/types/field.js';
 import {
   aliasMap,
-  coreTables,
-  LANGUAGE_CODES,
+  getVocabulary,
+  installedLanguages,
   lexLolo,
   localizeLoloSource,
   localizeMap,
   localizeOrbValue,
-  parseOperatorTables,
+  vocabularyOperators,
   type LanguageCode,
   type OperatorTables,
 } from '../src/i18n/index.js';
+import { installFirstPartyPacks } from './language-packs.js';
 
-/**
- * Core must not import `@almadar/std`, so the operator table is read off disk
- * the way every caller supplies it. These tests run from the repo, not from a
- * standalone package checkout, so the path is guarded: without operators the
- * renderer still works, it just leaves operator heads in English.
- */
+installFirstPartyPacks();
+
 function operatorsFor(lang: LanguageCode): OperatorTables | undefined {
-  try {
-    const file = join(__dirname, '../../almadar-std/i18n', `${lang}.json`);
-    return parseOperatorTables(JSON.parse(readFileSync(file, 'utf8')), `std/${lang}.json`);
-  } catch {
-    return undefined;
-  }
+  return vocabularyOperators(lang);
 }
 
 const SAMPLE = `app TaskApp "1.0.0"
@@ -83,10 +73,10 @@ describe('localizeMap', () => {
     // Arabic has no letter case: `event` and `Event` are both `حدث`, and
     // `canon_any` resolves that to the keyword. See G-i18n-1.
     const ar = localizeMap('ar');
-    expect(ar.get('event')).toBe(coreTables.ar.keywords.event);
+    expect(ar.get('event')).toBe(getVocabulary('ar').keywords.event);
     expect(ar.get('Event')).toBeUndefined();
     // Slovenian keeps the case distinction, so the shape survives.
-    expect(localizeMap('sl').get('Event')).toBe(coreTables.sl.shapes.Event);
+    expect(localizeMap('sl').get('Event')).toBe(getVocabulary('sl').shapes.Event);
   });
 });
 
@@ -97,7 +87,7 @@ describe('localizeLoloSource', () => {
 
   it.each(['ar', 'sl'] as const)('translates the vocabulary of %s', (lang) => {
     const out = localizeLoloSource(SAMPLE, lang, { operators: operatorsFor(lang) });
-    const t = coreTables[lang];
+    const t = getVocabulary(lang);
     expect(out).toContain(t.keywords.app);
     expect(out).toContain(t.keywords.orbital);
     expect(out).toContain(t.keywords.entity);
@@ -164,7 +154,7 @@ describe('localizeLoloSource', () => {
 
 describe('localizeOrbValue', () => {
   it.each(['ar', 'sl'] as const)('rewrites keys, type values, heads and sigil roots for %s', (lang) => {
-    const t = coreTables[lang];
+    const t = getVocabulary(lang);
     const out = localizeOrbValue(
       { orbitals: [{ name: 'Demo', entity: { name: 'Task', fields: [{ name: 'title', type: 'string' }] } }] },
       lang,
@@ -179,7 +169,7 @@ describe('localizeOrbValue', () => {
 
   it('translates an s-expression head but not its arguments', () => {
     const out = localizeOrbValue({ effects: [['set', '@entity.title', 'set']] }, 'sl');
-    expect(JSON.stringify(out)).toContain(coreTables.sl.effects.set);
+    expect(JSON.stringify(out)).toContain(getVocabulary('sl').effects.set);
     // The trailing "set" is a string VALUE and must survive.
     expect(JSON.stringify(out)).toContain('"set"');
   });
@@ -208,8 +198,8 @@ describe('types vocabulary vs the field-type universe', () => {
   it('every FIELD_TYPES member is translatable in every language', () => {
     const missing: string[] = [];
     for (const fieldType of FIELD_TYPES) {
-      for (const lang of LANGUAGE_CODES) {
-        if (coreTables[lang].types[fieldType] === undefined) {
+      for (const lang of installedLanguages()) {
+        if (getVocabulary(lang).types[fieldType] === undefined) {
           missing.push(`${lang}.types.${fieldType}`);
         }
       }
@@ -224,14 +214,14 @@ describe('types vocabulary vs the field-type universe', () => {
   // one-directional check above cannot.
   it('en.json "types" section is exactly FIELD_TYPES ∪ TYPE_POSITION_ONLY, for every language', () => {
     const expected = [...FIELD_TYPES, ...TYPE_POSITION_ONLY].slice().sort();
-    for (const lang of LANGUAGE_CODES) {
-      const actual = Object.keys(coreTables[lang].types).sort();
+    for (const lang of installedLanguages()) {
+      const actual = Object.keys(getVocabulary(lang).types).sort();
       expect(actual, `${lang}.json "types" section`).toEqual(expected);
     }
   });
 
   it('each one round-trips — the emitted spelling reads back as the same type', () => {
-    for (const lang of LANGUAGE_CODES) {
+    for (const lang of installedLanguages()) {
       const forward = localizeMap(lang);
       for (const fieldType of FIELD_TYPES) {
         const native = forward.get(fieldType);
@@ -262,7 +252,7 @@ describe('the `type` overload, resolved by position', () => {
     // word, and it appears 483 times in the docs corpus.
     const json = JSON.stringify(localizeOrbValue(RENDER_UI, lang));
     expect(json).toContain('"icon"');
-    expect(json).not.toContain(coreTables[lang].types.icon);
+    expect(json).not.toContain(getVocabulary(lang).types.icon);
   });
 
   it.each(['ar', 'sl'] as const)('still translates a field type outside one (%s)', (lang) => {
@@ -270,7 +260,7 @@ describe('the `type` overload, resolved by position', () => {
       { orbitals: [{ entity: { fields: [{ name: 'avatar', type: 'icon' }] } }] },
       lang,
     );
-    expect(JSON.stringify(out)).toContain(coreTables[lang].types.icon);
+    expect(JSON.stringify(out)).toContain(getVocabulary(lang).types.icon);
   });
 
   it.each(['ar', 'sl'] as const)('does not mistake a plain string list for an expression (%s)', (lang) => {
@@ -281,18 +271,18 @@ describe('the `type` overload, resolved by position', () => {
     );
     const json = JSON.stringify(out);
     expect(json).toContain('"title"');
-    expect(json).toContain(coreTables[lang].types.date);
+    expect(json).toContain(getVocabulary(lang).types.date);
   });
 });
 
 describe('persistence values', () => {
   it.each(['ar', 'sl'] as const)('translates the persistence tag in %s', (lang) => {
     const out = localizeOrbValue({ orbitals: [{ entity: { persistence: 'persistent' } }] }, lang);
-    expect(JSON.stringify(out)).toContain(coreTables[lang].tags.persistent);
+    expect(JSON.stringify(out)).toContain(getVocabulary(lang).tags.persistent);
   });
 
   it.each(['ar', 'sl'] as const)('round-trips through the inbound alias map (%s)', (lang) => {
-    const native = coreTables[lang].tags.persistent;
+    const native = getVocabulary(lang).tags.persistent;
     expect(aliasMap(lang, 'tags').get(native)).toBe('persistent');
   });
 });

@@ -439,11 +439,12 @@ export interface OrbitalEventRequest {
 
 /** The lifecycle events a trait runs when it enters a page (the first it handles). */
 /**
- * Host-level UI events: handled by the app host (router), never by a trait,
- * so a component inside a trait scope emits them bare (`UI:NAVIGATE`), not
- * qualified to its trait.
+ * Host-level UI events: handled by the app host, never by a trait, so a
+ * component inside a trait scope emits them bare (`UI:NAVIGATE`), not
+ * qualified to its trait. `NAVIGATE` moves the router; `SIGN_OUT` ends the
+ * viewer's session.
  */
-export const SYSTEM_UI_EVENTS = ["NAVIGATE"] as const;
+export const SYSTEM_UI_EVENTS = ["NAVIGATE", "SIGN_OUT"] as const;
 export type SystemUiEvent = (typeof SYSTEM_UI_EVENTS)[number];
 
 export function isSystemUiEvent(event: string): event is SystemUiEvent {

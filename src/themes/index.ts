@@ -5,8 +5,8 @@
  *
  * These JSON files are the SOURCE: `almadar-pattern-sync`'s `themes` step
  * regenerates `@almadar/ui`'s CSS presets from them through
- * `themeTokensToCssVars`, and `orbital-core`'s `build.rs` bakes the same
- * directory into the kernel. Each import is validated + typed by
+ * `themeTokensToCssVars`, and `orb` reads the same directory from the
+ * installed package (`orbLanguage.themes`). Each import is validated + typed by
  * `ThemeDefinitionSchema` at load time — a malformed preset fails the moment
  * this module is imported, not silently.
  */
@@ -75,6 +75,7 @@ import zineTheme from '../../themes/zine.json' with { type: 'json' };
 
 import { ThemeDefinitionSchema } from '../types/domain.js';
 import type { ThemeDefinition } from '../types/domain.js';
+import { themeKeys } from './keys.js';
 
 export const THEME_PRESETS: Record<string, ThemeDefinition> = {
   almadar: ThemeDefinitionSchema.parse(almadarTheme),
@@ -141,3 +142,9 @@ export const THEME_PRESETS: Record<string, ThemeDefinition> = {
 };
 
 export { MIN_TEXT_CONTRAST, contrastRatio, themeOverrideIssues, type ThemeOverrideIssue } from './contrast.js';
+export { themeKeys } from './keys.js';
+
+/** Every preset's `[data-theme]` keys (`themeKeys`), sorted — the built-in theme set `orb` validates `theme` against. */
+export function builtInThemeKeys(): string[] {
+  return Object.values(THEME_PRESETS).flatMap(themeKeys).sort();
+}

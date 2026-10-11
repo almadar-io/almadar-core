@@ -368,6 +368,34 @@ export function actionTestIdMatches(testId: string, event: string): boolean {
   return key === event || key.endsWith(`.${event}`);
 }
 
+/** How an affordance dispatches its event: a tap, or a gesture its pattern declares. */
+export type ActionGesture = "tap" | "long-press" | "swipe-left" | "swipe-right";
+
+const GESTURES: readonly ActionGesture[] = ["tap", "long-press", "swipe-left", "swipe-right"];
+
+/** Pattern props whose event fires on a gesture, not a tap (`calendar-grid`, `data-list`). */
+export const GESTURE_EVENT_PROPS: Readonly<Record<string, Exclude<ActionGesture, "tap">>> = {
+  longPressEvent: "long-press",
+  swipeLeftEvent: "swipe-left",
+  swipeRightEvent: "swipe-right",
+};
+
+/** The identifier of an element whose `gesture` dispatches `eventKey`; a tap is the plain {@link actionTestId}. */
+export function gestureActionTestId(eventKey: string, gesture: ActionGesture): string {
+  return gesture === "tap" ? actionTestId(eventKey) : `${ACTION_TESTID_PREFIX}${gesture}:${eventKey}`;
+}
+
+/** The gesture `testId` dispatches `event` with, or null when it does not dispatch `event`. */
+export function gestureOfActionTestId(testId: string, event: string): ActionGesture | null {
+  if (!testId.startsWith(ACTION_TESTID_PREFIX)) return null;
+  const rest = testId.slice(ACTION_TESTID_PREFIX.length);
+  const colon = rest.indexOf(":");
+  const gesture = colon < 0 ? "tap" : GESTURES.find((g) => g !== "tap" && g === rest.slice(0, colon));
+  if (gesture === undefined) return null;
+  const key = colon < 0 ? rest : rest.slice(colon + 1);
+  return key === event || key.endsWith(`.${event}`) ? gesture : null;
+}
+
 /** Single-identifier prefixes for native shells (accessibilityIdentifier / testTag); row scope is hierarchical. */
 export const NATIVE_ID_PREFIX = {
   pattern: "pattern-",
@@ -375,6 +403,19 @@ export const NATIVE_ID_PREFIX = {
   field: "field-",
   slot: "slot-",
 } as const;
+
+/** Separates the ids of one native element that dispatches several actions (a tap and a gesture). */
+export const NATIVE_ID_SEPARATOR = " ";
+
+/** The identifier of a native element carrying every non-empty id in `ids`. */
+export function nativeIds(...ids: readonly string[]): string {
+  return ids.filter((id) => id !== "").join(NATIVE_ID_SEPARATOR);
+}
+
+/** The ids a native identifier carries. */
+export function splitNativeIds(identifier: string): string[] {
+  return identifier.split(NATIVE_ID_SEPARATOR).filter((id) => id !== "");
+}
 
 export function nativePatternId(name: string): string {
   return `${NATIVE_ID_PREFIX.pattern}${name}`;

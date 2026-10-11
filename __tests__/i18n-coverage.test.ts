@@ -2,16 +2,16 @@ import { describe, expect, it } from 'vitest';
 import {
   checkI18nCoverage,
   reportIdenticalToEnglish,
-  coreTables,
   type I18nTables,
   type LanguageCode,
   type OperatorTables,
 } from '../src/i18n/index.js';
+import { installFirstPartyPacks } from './language-packs.js';
 
 // ---------------------------------------------------------------------------
 // Minimal fixtures — a small, self-consistent vocabulary that exercises every
 // checkI18nCoverage rule without carrying the full B1 section vocabulary
-// (that's covered separately against the real coreTables below).
+// (that is covered separately against English + the first-party packs below).
 // ---------------------------------------------------------------------------
 
 function freshCore(): Record<LanguageCode, I18nTables> {
@@ -188,15 +188,14 @@ describe('checkI18nCoverage — one failing case per problem kind', () => {
 });
 
 // ---------------------------------------------------------------------------
-// The real checked-in core tables. Operators live in @almadar/std, which
-// depends on this package: std's own i18n-operators test runs the full
-// core+operators gate, and the pattern-sync `i18n` step gates the monorepo.
-// This repo's CI is a standalone checkout, so no sibling package is read here.
+// English plus the first-party language packs (devDependencies). Operator
+// parity against std's canonical set is std's i18n-operators test and the
+// pattern-sync `i18n` gate.
 // ---------------------------------------------------------------------------
 
-describe('checkI18nCoverage — real checked-in tables', () => {
-  it('core tables pass the coverage gate', () => {
-    const result = checkI18nCoverage({ core: coreTables });
+describe('checkI18nCoverage — English and the first-party packs', () => {
+  it('pass the coverage gate', () => {
+    const result = checkI18nCoverage({ core: installFirstPartyPacks() });
 
     if (!result.ok) {
       const byKind = new Map<string, number>();

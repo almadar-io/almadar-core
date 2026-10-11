@@ -30,6 +30,17 @@ describe('formatSExpr — .lolo surface form of an S-expression', () => {
     expect(formatSExpr([])).toBe('[]');
   });
 
+  it('prints object keys sorted, so the Rust twin (unordered map) prints the same text', () => {
+    expect(formatSExpr({ b: 2, a: 1 })).toBe('{ a: 1, b: 2 }');
+    expect(formatSExpr(['quasiquote', JSON.stringify({ z: ['unquote', 0], a: 1 }), '@entity.x'])).toBe(
+      '(quasiquote { a: 1, z: (unquote @entity.x) })',
+    );
+  });
+
+  it('control: already-sorted keys print unchanged', () => {
+    expect(formatSExpr({ a: 1, b: 2 })).toBe('{ a: 1, b: 2 }');
+  });
+
   it('a string-headed array is a call, consistent with isSExpr', () => {
     expect(formatSExpr(['main'])).toBe('(main)');
   });

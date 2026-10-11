@@ -1,19 +1,19 @@
 /**
  * Internationalization (i18n) — vocabulary tables for the `.lolo`/`.orb`
- * language (English, Arabic, Slovenian). See `Almadar_i18n.md` / the i18n
- * program plan for the section contract; this module is the JS-path owner.
+ * language. English is built in and canonical; every other language is a
+ * language pack (an npm package declaring `orbVocabulary`) a host registers
+ * with {@link registerVocabulary} — Node hosts read the installed packs with
+ * `@almadar/core/language-data`'s `readVocabularyPacks`. See
+ * `Almadar_i18n.md` for the section contract; this module is the JS-path owner.
  *
  * @packageDocumentation
  */
 
 import orbNotationRaw from './orb-notation.json';
 import enRaw from './en.json';
-import arRaw from './ar.json';
-import slRaw from './sl.json';
 
-export type LanguageCode = 'en' | 'ar' | 'sl';
-
-export const LANGUAGE_CODES: readonly LanguageCode[] = ['en', 'ar', 'sl'];
+/** A language's code (`en`, `ar`, `pt-BR`, …). `en` is the canonical language. */
+export type LanguageCode = string;
 
 /** Locales written right to left (twin of orbital-core `messages::RTL_LOCALES`). */
 export const RTL_LOCALES: readonly string[] = ['ar', 'he', 'fa', 'ur'];
@@ -110,9 +110,9 @@ export interface OperatorTables {
 // type assertion. Throws on genuine structural corruption (not an object, a
 // malformed `meta`, or a present section that isn't Record<string,string>).
 // A section that is entirely ABSENT is tolerated as empty rather than
-// thrown on — ar.json/sl.json are filled in section-by-section by other
-// agents, and an incomplete table is the coverage gate's job to report
-// (kind: 'missing'), not a load-time crash.
+// thrown on — a language pack may translate only part of the vocabulary
+// (English spellings stay legal), and an incomplete table is the coverage
+// gate's job to report (kind: 'missing'), not a load-time crash.
 // ---------------------------------------------------------------------------
 
 /** Shape of an on-disk i18n table before validation; every field is unvalidated. */
@@ -149,8 +149,10 @@ function isStringRecord(x: unknown): x is Record<string, string> {
   return true;
 }
 
+const LANGUAGE_CODE = /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/;
+
 function isLanguageCode(x: unknown): x is LanguageCode {
-  return x === 'en' || x === 'ar' || x === 'sl';
+  return typeof x === 'string' && LANGUAGE_CODE.test(x);
 }
 
 function isI18nMeta(x: unknown): x is I18nMeta {
@@ -238,14 +240,72 @@ export const ORB_NOTATION_KEYS: ReadonlySet<string> = new Set(
   parseNotationKeys(orbNotationRaw, 'orb-notation.json'),
 );
 
-export const coreTables: Record<LanguageCode, I18nTables> = {
-  en: parseI18nTables(enRaw, 'en.json'),
-  ar: parseI18nTables(arRaw, 'ar.json'),
-  sl: parseI18nTables(slRaw, 'sl.json'),
-};
+/** The canonical English vocabulary — built in, never a pack. */
+export const englishTables: I18nTables = parseI18nTables(enRaw, 'en.json');
+
+/** One language pack's vocabulary: every core section plus its operator spellings. */
+export type VocabularyPack = I18nTables & OperatorTables;
+
+/** Validating loader for a language pack's vocabulary file. */
+export function parseVocabularyPack(raw: unknown, source: string): VocabularyPack {
+  const tables = parseI18nTables(raw, source);
+  const { operators } = parseOperatorTables(raw, source);
+  return { ...tables, operators };
+}
+
+const registeredPacks = new Map<LanguageCode, VocabularyPack>();
+
+/** Problems that make a pack ambiguous to parse — refused at registration. A missing
+ *  word is not one: English spellings stay legal in every language. */
+const FATAL_PACK_PROBLEMS: ReadonlySet<I18nProblemKind> = new Set(['collision', 'selector-not-unique', 'inconsistent', 'empty']);
+
+/**
+ * Install a language pack for this process. English is built in; a code another
+ * pack already holds, or a pack whose words would make a program ambiguous
+ * (two English words on one spelling, a language selector another installed
+ * language uses), is refused with every problem named. Re-registering an
+ * identical pack is a no-op.
+ */
+export function registerVocabulary(pack: VocabularyPack): void {
+  const code = pack.meta.code;
+  if (code === 'en') throw new Error('language pack "en": English is built in and cannot be replaced');
+  const existing = registeredPacks.get(code);
+  if (existing) {
+    if (JSON.stringify(existing) === JSON.stringify(pack)) return;
+    throw new Error(`language pack "${code}": a different "${code}" pack is already installed`);
+  }
+  const core: Record<LanguageCode, I18nTables> = { en: englishTables };
+  for (const [other, table] of registeredPacks) core[other] = table;
+  core[code] = pack;
+  const std: Record<LanguageCode, OperatorTables> = {};
+  for (const [other, table] of registeredPacks) std[other] = { operators: table.operators };
+  std[code] = { operators: pack.operators };
+  const fatal = checkI18nCoverage({ core, std }).problems.filter((p) => p.lang === code && FATAL_PACK_PROBLEMS.has(p.kind));
+  if (fatal.length > 0) {
+    const lines = fatal.map((p) => `${p.kind} ${p.section}.${p.key}${p.detail ? ` — ${p.detail}` : ''}`);
+    throw new Error(`language pack "${code}" is refused:\n  ${lines.join('\n  ')}`);
+  }
+  registeredPacks.set(code, pack);
+}
+
+/** Every language this process can read and render: `en`, then each registered pack by code. */
+export function installedLanguages(): LanguageCode[] {
+  return ['en', ...[...registeredPacks.keys()].sort()];
+}
 
 export function getVocabulary(lang: LanguageCode): I18nTables {
-  return coreTables[lang];
+  if (lang === 'en') return englishTables;
+  const pack = registeredPacks.get(lang);
+  if (!pack) {
+    throw new Error(`language "${lang}" is not installed — install its language pack (\`orb language install <package>\`) and register it`);
+  }
+  return pack;
+}
+
+/** A registered pack's operator spellings; `undefined` for English (operators are their own English names). */
+export function vocabularyOperators(lang: LanguageCode): OperatorTables | undefined {
+  const pack = registeredPacks.get(lang);
+  return pack ? { operators: pack.operators } : undefined;
 }
 
 /** Native → English map for one section family; operators come from the caller (std). */
@@ -261,7 +321,7 @@ export function aliasMap(
     }
     table = operators.operators;
   } else {
-    table = coreTables[lang][section];
+    table = getVocabulary(lang)[section];
   }
   const map = new Map<string, string>();
   for (const [english, native] of Object.entries(table)) {
@@ -276,8 +336,8 @@ export const LOLO_FIRST_TOKEN_KEYWORDS = ['app', 'uses', 'expects', 'type', 'the
 
 /** A `.lolo` program's language: its first token is one language's translation of a first-token keyword. */
 export function languageOfLoloFirstToken(token: string): LanguageCode | undefined {
-  const matches = LANGUAGE_CODES.filter((lang) =>
-    LOLO_FIRST_TOKEN_KEYWORDS.some((kw) => coreTables[lang].keywords[kw] === token),
+  const matches = installedLanguages().filter((lang) =>
+    LOLO_FIRST_TOKEN_KEYWORDS.some((kw) => getVocabulary(lang).keywords[kw] === token),
   );
   return matches.length === 1 ? matches[0] : undefined;
 }
@@ -285,7 +345,7 @@ export function languageOfLoloFirstToken(token: string): LanguageCode | undefine
 /** A top-level `.orb` key equals exactly one language's `orb.orbitals` value. */
 export function languageOfOrbTopLevelKeys(keys: readonly string[]): LanguageCode | undefined {
   const keySet = new Set(keys);
-  const matches = LANGUAGE_CODES.filter((lang) => keySet.has(coreTables[lang].orb.orbitals));
+  const matches = installedLanguages().filter((lang) => keySet.has(getVocabulary(lang).orb.orbitals));
   return matches.length === 1 ? matches[0] : undefined;
 }
 
@@ -337,7 +397,7 @@ export function checkI18nCoverage(input: I18nCoverageInput): { ok: boolean; prob
   // schema change unless something says no. Owner ruling 2026-09-07: the
   // vocabulary is what the LANGUAGE defines; a library's API surface stays
   // English. See ORB_NOTATION_KEYS / scripts/gen-orb-notation.mts.
-  for (const lang of LANGUAGE_CODES) {
+  for (const lang of Object.keys(core)) {
     for (const key of Object.keys(core[lang].orb)) {
       if (ORB_NOTATION_KEYS.has(key)) {
         problems.push({
@@ -352,7 +412,7 @@ export function checkI18nCoverage(input: I18nCoverageInput): { ok: boolean; prob
   }
 
   // (1) missing / orphan / empty
-  for (const lang of LANGUAGE_CODES) {
+  for (const lang of Object.keys(core)) {
     const table = core[lang];
     for (const section of I18N_SECTIONS) {
       const values = table[section];
@@ -380,7 +440,7 @@ export function checkI18nCoverage(input: I18nCoverageInput): { ok: boolean; prob
 
   // (2) inconsistent — the same English word translated differently across sections
   // (including operators) within one language
-  for (const lang of LANGUAGE_CODES) {
+  for (const lang of Object.keys(core)) {
     const table = core[lang];
     const occurrences = new Map<string, Array<{ section: string; value: string }>>();
     for (const section of I18N_SECTIONS) {
@@ -417,7 +477,7 @@ export function checkI18nCoverage(input: I18nCoverageInput): { ok: boolean; prob
   }
 
   // (3) collision — two English keys sharing a native value, per section and across effects∪operators
-  for (const lang of LANGUAGE_CODES) {
+  for (const lang of Object.keys(core)) {
     const table = core[lang];
     for (const section of I18N_SECTIONS) {
       const byValue = new Map<string, string[]>();
@@ -476,7 +536,7 @@ export function checkI18nCoverage(input: I18nCoverageInput): { ok: boolean; prob
   // (5) selector-not-unique — the translations that select a file's language (every first-token
   // keyword for `.lolo`, `orb.orbitals` for `.orb`) must not be shared by two languages.
   const selectorUses = new Map<string, Array<{ lang: LanguageCode; section: string; key: string }>>();
-  for (const lang of LANGUAGE_CODES) {
+  for (const lang of Object.keys(core)) {
     const table = core[lang];
     const selectors: Array<{ section: string; key: string; value: string }> = [
       ...LOLO_FIRST_TOKEN_KEYWORDS.map((key) => ({ section: 'keywords', key, value: table.keywords[key] })),
@@ -507,7 +567,7 @@ export function checkI18nCoverage(input: I18nCoverageInput): { ok: boolean; prob
   // operators-mismatch — every language's operator key set must equal the canonical set exactly
   if (std && canonicalOperators) {
     const canonicalSet = new Set(canonicalOperators);
-    for (const lang of LANGUAGE_CODES) {
+    for (const lang of Object.keys(core)) {
       const opTable = std[lang]?.operators;
       if (!opTable) continue;
       const langKeys = new Set(Object.keys(opTable));
@@ -535,7 +595,7 @@ export function checkI18nCoverage(input: I18nCoverageInput): { ok: boolean; prob
 export function reportIdenticalToEnglish(input: I18nCoverageInput): I18nProblem[] {
   const problems: I18nProblem[] = [];
   const enTable = input.core.en;
-  for (const lang of LANGUAGE_CODES) {
+  for (const lang of Object.keys(input.core)) {
     if (lang === 'en') continue;
     const table = input.core[lang];
     for (const section of I18N_SECTIONS) {

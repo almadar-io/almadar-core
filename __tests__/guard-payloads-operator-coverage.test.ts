@@ -20,13 +20,11 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { isRecognizedGuardOperator } from '../src/state-machine/guard-payloads.js';
+import { installedRegistries } from './installed-registries.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
-const registries = [
-  path.join(here, '../../almadar-std/behaviors/registry'),
-  path.join(here, '../../almadar-behaviors/behaviors/registry'),
-].filter((dir) => existsSync(dir)); // absent in a standalone (extracted) clone
+const registries = [...installedRegistries(['@almadar/std', '@almadar-io/behaviors']).values()];
 
 function collectOrbFiles(dir: string): string[] {
   const out: string[] = [];
