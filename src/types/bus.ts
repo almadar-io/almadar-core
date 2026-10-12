@@ -405,6 +405,13 @@ export interface OrbitalEventRequest {
   /** Emitting trait for a tick-stamped dispatch — builds the relay's BusEventSource (sourceless emits are dropped client-side). */
   sourceTrait?: string;
   /**
+   * Run one firing of a tick at the data authority: the trait's tick named `tick` runs its
+   * effects there, as `event` + `targetTrait` runs a transition. A browser-run tick sends one
+   * for its data effects on browser-stored entities (a tick has no event to replay under);
+   * `event` is the tick's synthetic key `$TICK_<tick>`. Owner ruling 2026-10-12 (drift D-1).
+   */
+  runTick?: { trait: string; tick: string };
+  /**
    * Stateless addressing: the traits this dispatch runs against, each with
    * the scope it dispatches `from` (a single-element array is the common
    * case; a listens fan-out that crosses traits carries more than one). The
@@ -621,6 +628,7 @@ export const OrbitalEventRequestSchema: z.ZodType<OrbitalEventRequest, z.ZodType
   locale: z.string().optional(),
   tick: z.string().optional(),
   sourceTrait: z.string().optional(),
+  runTick: z.object({ trait: z.string(), tick: z.string() }).optional(),
   traits: z.array(z.object({ trait: z.string(), from: z.string() })).optional(),
   entityByTrait: z.record(EntityRowSchema).optional(),
   behavior: z.string().optional(),

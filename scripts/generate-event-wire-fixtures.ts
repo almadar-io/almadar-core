@@ -266,6 +266,22 @@ const CASES: Record<string, EventWireFixture> = {
     },
   },
 
+  'tick-run-leg': {
+    request: {
+      event: '$TICK_autosave',
+      runTick: { trait: 'Editor', tick: 'autosave' },
+      targetTrait: 'Editor',
+      traits: [{ trait: 'Editor', from: 'editing' }],
+      entityByTrait: { Editor: { id: 'draft-1', text: 'unsaved' } },
+    },
+    response: {
+      success: true,
+      transitioned: false,
+      states: { Editor: 'editing' },
+      emittedEvents: [],
+    },
+  },
+
   'client-effects-by-trait': {
     request: { event: 'REFRESH', clientId: 'tab-1' },
     response: {

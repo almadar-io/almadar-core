@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-11T01:15:36.754Z",
+  "exportedAt": "2026-10-12T03:59:30.122Z",
   "patterns": {
     "detail-panel": {
       "type": "detail-panel",
@@ -18858,6 +18858,21 @@
               "type": "boolean"
             }
           ]
+        },
+        "action": {
+          "types": [
+            "string"
+          ],
+          "description": "Declarative event name — emits UI:{action} with `actionPayload` and the new `checked` value on toggle",
+          "kind": "event"
+        },
+        "actionPayload": {
+          "types": [
+            "object"
+          ],
+          "description": "Payload to include with the action event (the new `checked` is added to it)",
+          "payloadFor": "action",
+          "eventPayloadBrand": true
         },
         "disabled": {
           "types": [
@@ -40441,9 +40456,74 @@
                 "block",
                 "underline"
               ]
+            },
+            {
+              "name": "keys",
+              "type": "array",
+              "required": false,
+              "schema": {
+                "types": [
+                  "array"
+                ],
+                "items": {
+                  "types": [
+                    "string"
+                  ]
+                }
+              }
             }
           ],
           "default": "SET_MODE",
+          "tier": "presentation"
+        },
+        "onKey": {
+          "types": [
+            "string"
+          ],
+          "description": "Emits UI:{onKey} with the keystroke for each key the latest SET_MODE for this editor listed, and keeps it out of the text. No capture without it.",
+          "kind": "event-ref",
+          "emitPayloadSchema": [
+            {
+              "name": "editorId",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "key",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "code",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "ctrl",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "alt",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "shift",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "meta",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "repeat",
+              "type": "boolean",
+              "required": true
+            }
+          ],
           "tier": "presentation"
         },
         "motions": {
@@ -125239,106 +125319,27 @@
           "types": [
             "object"
           ],
-          "description": "With `initialLevel=\"system\"`: what an orbital chip does (drill in, hover preview, open code, preview).",
-          "properties": {
-            "openTraits": {
-              "types": [
-                "function"
-              ]
-            },
-            "renderPreview": {
-              "types": [
-                "function"
-              ]
-            },
-            "openCodeEvent": {
-              "types": [
-                "string"
-              ]
-            },
-            "previewEvent": {
-              "types": [
-                "string"
-              ]
-            },
-            "highlighted": {
-              "types": [
-                "string"
-              ]
-            },
-            "selectDependency": {
-              "types": [
-                "function"
-              ]
+          "description": "With `initialLevel=\"system\"`: what an orbital chip does (drill in, hover preview, open code, preview)."
+        },
+        "openTraitsEvent": {
+          "types": [
+            "string"
+          ],
+          "description": "Emits UI:{openTraitsEvent} with { orbital } when an orbital on the system map is opened (drilled into).",
+          "kind": "event-ref",
+          "emitPayloadSchema": [
+            {
+              "name": "orbital",
+              "type": "string",
+              "required": true
             }
-          },
-          "propertyRequired": [
-            "openTraits"
           ]
         },
         "systemDependencies": {
           "types": [
             "object"
           ],
-          "description": "With `initialLevel=\"system\"`: the app's imports, for the Dependencies lens (absent: Events only).",
-          "properties": {
-            "orbitals": {
-              "types": [
-                "object"
-              ],
-              "mapValue": {
-                "types": [
-                  "array"
-                ],
-                "items": {
-                  "types": [
-                    "string"
-                  ]
-                }
-              }
-            },
-            "behaviors": {
-              "types": [
-                "object"
-              ],
-              "mapValue": {
-                "types": [
-                  "object"
-                ],
-                "properties": {
-                  "layer": {
-                    "types": [
-                      "string"
-                    ],
-                    "enumValues": [
-                      "io",
-                      "std",
-                      "primitive",
-                      "unknown"
-                    ]
-                  },
-                  "imports": {
-                    "types": [
-                      "array"
-                    ],
-                    "items": {
-                      "types": [
-                        "string"
-                      ]
-                    }
-                  }
-                },
-                "required": [
-                  "layer",
-                  "imports"
-                ]
-              }
-            }
-          },
-          "propertyRequired": [
-            "orbitals",
-            "behaviors"
-          ]
+          "description": "With `initialLevel=\"system\"`: the app's imports, for the Dependencies lens (absent: Events only)."
         },
         "traitView": {
           "types": [
@@ -125461,6 +125462,19 @@
             }
           ]
         },
+        "keyMap": {
+          "types": [
+            "object"
+          ],
+          "description": "Maps a keydown `e.code` — optionally prefixed `Mod+` (⌘/Ctrl), `Shift+`, `Alt+` in that order — to an event, emitted as `UI:{event}`; keystrokes inside inputs/textareas never route.",
+          "kind": "event-map",
+          "mapValue": {
+            "types": [
+              "string"
+            ],
+            "kind": "event"
+          }
+        },
         "scene": {
           "types": [
             "object"
@@ -125491,15 +125505,336 @@
                       "string"
                     ]
                   },
+                  "event": {
+                    "types": [
+                      "string"
+                    ],
+                    "kind": "event"
+                  },
                   "payload": {
                     "types": [
                       "object"
                     ],
-                    "eventPayloadBrand": true
+                    "eventPayloadBrand": true,
+                    "payloadFor": "event"
                   },
                   "result": {
                     "types": [
                       "object"
+                    ],
+                    "properties": {
+                      "trait": {
+                        "types": [
+                          "string"
+                        ]
+                      },
+                      "event": {
+                        "types": [
+                          "string"
+                        ]
+                      },
+                      "transitionFired": {
+                        "types": [
+                          "boolean"
+                        ]
+                      },
+                      "guard": {
+                        "types": [
+                          "string"
+                        ],
+                        "enumValues": [
+                          "pass",
+                          "fail",
+                          "none"
+                        ]
+                      },
+                      "firedArm": {
+                        "types": [
+                          "number"
+                        ]
+                      },
+                      "state": {
+                        "types": [
+                          "object"
+                        ],
+                        "properties": {
+                          "before": {
+                            "types": [
+                              "string"
+                            ],
+                            "nullable": true
+                          },
+                          "after": {
+                            "types": [
+                              "string"
+                            ],
+                            "nullable": true
+                          }
+                        }
+                      },
+                      "effects": {
+                        "types": [
+                          "array"
+                        ],
+                        "items": {
+                          "types": [
+                            "object"
+                          ],
+                          "properties": {
+                            "type": {
+                              "types": [
+                                "string"
+                              ]
+                            },
+                            "entityName": {
+                              "types": [
+                                "string"
+                              ]
+                            },
+                            "action": {
+                              "types": [
+                                "string"
+                              ],
+                              "enumValues": [
+                                "create",
+                                "update",
+                                "delete",
+                                "batch"
+                              ]
+                            },
+                            "resultId": {
+                              "types": [
+                                "string"
+                              ]
+                            },
+                            "outcome": {
+                              "types": [
+                                "string"
+                              ],
+                              "enumValues": [
+                                "success",
+                                "denied",
+                                "failed"
+                              ]
+                            },
+                            "args": {
+                              "types": [
+                                "array"
+                              ],
+                              "items": {
+                                "types": [
+                                  "sexpr"
+                                ]
+                              }
+                            },
+                            "status": {
+                              "types": [
+                                "string"
+                              ],
+                              "enumValues": [
+                                "executed",
+                                "failed",
+                                "skipped"
+                              ]
+                            },
+                            "error": {
+                              "types": [
+                                "string"
+                              ]
+                            },
+                            "durationMs": {
+                              "types": [
+                                "number"
+                              ]
+                            },
+                            "evalTrace": {
+                              "types": [
+                                "array"
+                              ],
+                              "items": {
+                                "types": [
+                                  "object"
+                                ],
+                                "properties": {
+                                  "kind": {
+                                    "types": [
+                                      "string"
+                                    ],
+                                    "enumValues": [
+                                      "enter",
+                                      "exit",
+                                      "iter",
+                                      "skip"
+                                    ]
+                                  },
+                                  "path": {
+                                    "types": [
+                                      "array"
+                                    ],
+                                    "items": {
+                                      "types": [
+                                        "number",
+                                        "string"
+                                      ]
+                                    }
+                                  },
+                                  "value": {
+                                    "types": [
+                                      "object"
+                                    ]
+                                  },
+                                  "error": {
+                                    "types": [
+                                      "string"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "kind",
+                                  "path"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "args",
+                            "status"
+                          ]
+                        }
+                      },
+                      "emitted": {
+                        "types": [
+                          "array"
+                        ],
+                        "items": {
+                          "types": [
+                            "object"
+                          ],
+                          "properties": {
+                            "type": {
+                              "types": [
+                                "string"
+                              ]
+                            },
+                            "payload": {
+                              "types": [
+                                "object"
+                              ],
+                              "eventPayloadBrand": true
+                            },
+                            "source": {
+                              "types": [
+                                "object"
+                              ]
+                            },
+                            "timestamp": {
+                              "types": [
+                                "number"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "timestamp"
+                          ]
+                        }
+                      },
+                      "guards": {
+                        "types": [
+                          "array"
+                        ],
+                        "items": {
+                          "types": [
+                            "object"
+                          ],
+                          "properties": {
+                            "arm": {
+                              "types": [
+                                "number"
+                              ]
+                            },
+                            "guard": {
+                              "types": [
+                                "sexpr"
+                              ]
+                            },
+                            "passed": {
+                              "types": [
+                                "boolean"
+                              ]
+                            },
+                            "trace": {
+                              "types": [
+                                "array"
+                              ],
+                              "items": {
+                                "types": [
+                                  "object"
+                                ],
+                                "properties": {
+                                  "kind": {
+                                    "types": [
+                                      "string"
+                                    ],
+                                    "enumValues": [
+                                      "enter",
+                                      "exit",
+                                      "iter",
+                                      "skip"
+                                    ]
+                                  },
+                                  "path": {
+                                    "types": [
+                                      "array"
+                                    ],
+                                    "items": {
+                                      "types": [
+                                        "number",
+                                        "string"
+                                      ]
+                                    }
+                                  },
+                                  "value": {
+                                    "types": [
+                                      "object"
+                                    ]
+                                  },
+                                  "error": {
+                                    "types": [
+                                      "string"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "kind",
+                                  "path"
+                                ]
+                              }
+                            },
+                            "error": {
+                              "types": [
+                                "string"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "arm",
+                            "guard",
+                            "passed",
+                            "trace"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "trait",
+                      "event",
+                      "transitionFired",
+                      "guard",
+                      "state",
+                      "effects",
+                      "emitted"
                     ]
                   }
                 },
@@ -125507,6 +125842,7 @@
                   "orbital",
                   "trait",
                   "from",
+                  "event",
                   "payload",
                   "result"
                 ]
@@ -125653,6 +125989,11 @@
                   "string"
                 ]
               }
+            },
+            "opensApp": {
+              "types": [
+                "boolean"
+              ]
             },
             "patterns": {
               "types": [
@@ -126104,6 +126445,11 @@
                             "string"
                           ]
                         }
+                      },
+                      "opensApp": {
+                        "types": [
+                          "boolean"
+                        ]
                       },
                       "patterns": {
                         "types": [
@@ -127022,6 +127368,11 @@
                       ]
                     }
                   },
+                  "opensApp": {
+                    "types": [
+                      "boolean"
+                    ]
+                  },
                   "patterns": {
                     "types": [
                       "array"
@@ -127457,6 +127808,11 @@
                             "string"
                           ]
                         }
+                      },
+                      "opensApp": {
+                        "types": [
+                          "boolean"
+                        ]
                       },
                       "patterns": {
                         "types": [
@@ -128330,6 +128686,11 @@
                 ]
               }
             },
+            "opensApp": {
+              "types": [
+                "boolean"
+              ]
+            },
             "patterns": {
               "types": [
                 "array"
@@ -128839,6 +129200,11 @@
                       "string"
                     ]
                   }
+                },
+                "opensApp": {
+                  "types": [
+                    "boolean"
+                  ]
                 },
                 "patterns": {
                   "types": [
@@ -129533,6 +129899,1566 @@
             }
           ],
           "renderCallback": true
+        }
+      }
+    },
+    "avl-transition-detail": {
+      "type": "avl-transition-detail",
+      "category": "display",
+      "sourceFile": "components/avl/molecules/AvlTransitionDetail.tsx",
+      "tier": "molecules",
+      "family": "avl",
+      "description": "One transition explained: from-state, event and to-state, the guard that must hold, and each effect it runs in order, drawn as circuit boards.",
+      "capabilities": "transition explainer, event guard effects walkthrough, state machine step detail",
+      "suggestedFor": [
+        "avl",
+        "transition",
+        "detail",
+        "avl transition detail"
+      ],
+      "typicalSize": "medium",
+      "propsSchema": {
+        "orbital": {
+          "types": [
+            "string"
+          ],
+          "description": "Orbital the transition belongs to.",
+          "required": true
+        },
+        "trait": {
+          "types": [
+            "string"
+          ],
+          "description": "Trait the transition belongs to.",
+          "required": true
+        },
+        "transition": {
+          "types": [
+            "object"
+          ],
+          "description": "The transition to explain.",
+          "properties": {
+            "from": {
+              "types": [
+                "string"
+              ]
+            },
+            "to": {
+              "types": [
+                "string"
+              ]
+            },
+            "event": {
+              "types": [
+                "string"
+              ]
+            },
+            "guard": {
+              "types": [
+                "sexpr"
+              ],
+              "nullable": true
+            },
+            "effects": {
+              "types": [
+                "array"
+              ],
+              "items": {
+                "types": [
+                  "object"
+                ],
+                "properties": {
+                  "type": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "args": {
+                    "types": [
+                      "array"
+                    ],
+                    "items": {
+                      "types": [
+                        "sexpr"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "type",
+                  "args"
+                ]
+              }
+            },
+            "index": {
+              "types": [
+                "number"
+              ]
+            }
+          },
+          "propertyRequired": [
+            "from",
+            "to",
+            "event",
+            "effects",
+            "index"
+          ],
+          "example": {
+            "from": "pending",
+            "to": "paid",
+            "event": "PAY",
+            "effects": [
+              {
+                "type": "set",
+                "args": []
+              },
+              {
+                "type": "persist",
+                "args": []
+              }
+            ],
+            "index": 0
+          }
+        },
+        "schema": {
+          "types": [
+            "sexpr",
+            "string"
+          ],
+          "description": "The program the transition belongs to (object or JSON text), when it is given by position instead of `transition`.",
+          "decoder": {
+            "name": "parseOrbitalSchema",
+            "from": "@almadar/core",
+            "acceptsString": true
+          }
+        },
+        "transitionIndex": {
+          "types": [
+            "number"
+          ],
+          "description": "The transition's position among the trait's transitions, read from `schema`."
+        },
+        "scene": {
+          "types": [
+            "array"
+          ],
+          "description": "Played steps; the one at `cursor` that ran this transition lights the boards (with `schema`).",
+          "kind": "event-list",
+          "eventField": "event",
+          "items": {
+            "types": [
+              "object"
+            ],
+            "properties": {
+              "orbital": {
+                "types": [
+                  "string"
+                ]
+              },
+              "trait": {
+                "types": [
+                  "string"
+                ]
+              },
+              "from": {
+                "types": [
+                  "string"
+                ]
+              },
+              "event": {
+                "types": [
+                  "string"
+                ],
+                "kind": "event"
+              },
+              "payload": {
+                "types": [
+                  "object"
+                ],
+                "eventPayloadBrand": true,
+                "payloadFor": "event"
+              },
+              "result": {
+                "types": [
+                  "object"
+                ],
+                "properties": {
+                  "trait": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "event": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "transitionFired": {
+                    "types": [
+                      "boolean"
+                    ]
+                  },
+                  "guard": {
+                    "types": [
+                      "string"
+                    ],
+                    "enumValues": [
+                      "pass",
+                      "fail",
+                      "none"
+                    ]
+                  },
+                  "firedArm": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "state": {
+                    "types": [
+                      "object"
+                    ],
+                    "properties": {
+                      "before": {
+                        "types": [
+                          "string"
+                        ],
+                        "nullable": true
+                      },
+                      "after": {
+                        "types": [
+                          "string"
+                        ],
+                        "nullable": true
+                      }
+                    }
+                  },
+                  "effects": {
+                    "types": [
+                      "array"
+                    ],
+                    "items": {
+                      "types": [
+                        "object"
+                      ],
+                      "properties": {
+                        "type": {
+                          "types": [
+                            "string"
+                          ]
+                        },
+                        "entityName": {
+                          "types": [
+                            "string"
+                          ]
+                        },
+                        "action": {
+                          "types": [
+                            "string"
+                          ],
+                          "enumValues": [
+                            "create",
+                            "update",
+                            "delete",
+                            "batch"
+                          ]
+                        },
+                        "resultId": {
+                          "types": [
+                            "string"
+                          ]
+                        },
+                        "outcome": {
+                          "types": [
+                            "string"
+                          ],
+                          "enumValues": [
+                            "success",
+                            "denied",
+                            "failed"
+                          ]
+                        },
+                        "args": {
+                          "types": [
+                            "array"
+                          ],
+                          "items": {
+                            "types": [
+                              "sexpr"
+                            ]
+                          }
+                        },
+                        "status": {
+                          "types": [
+                            "string"
+                          ],
+                          "enumValues": [
+                            "executed",
+                            "failed",
+                            "skipped"
+                          ]
+                        },
+                        "error": {
+                          "types": [
+                            "string"
+                          ]
+                        },
+                        "durationMs": {
+                          "types": [
+                            "number"
+                          ]
+                        },
+                        "evalTrace": {
+                          "types": [
+                            "array"
+                          ],
+                          "items": {
+                            "types": [
+                              "object"
+                            ],
+                            "properties": {
+                              "kind": {
+                                "types": [
+                                  "string"
+                                ],
+                                "enumValues": [
+                                  "enter",
+                                  "exit",
+                                  "iter",
+                                  "skip"
+                                ]
+                              },
+                              "path": {
+                                "types": [
+                                  "array"
+                                ],
+                                "items": {
+                                  "types": [
+                                    "number",
+                                    "string"
+                                  ]
+                                }
+                              },
+                              "value": {
+                                "types": [
+                                  "object"
+                                ]
+                              },
+                              "error": {
+                                "types": [
+                                  "string"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "path"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "args",
+                        "status"
+                      ]
+                    }
+                  },
+                  "emitted": {
+                    "types": [
+                      "array"
+                    ],
+                    "items": {
+                      "types": [
+                        "object"
+                      ],
+                      "properties": {
+                        "type": {
+                          "types": [
+                            "string"
+                          ]
+                        },
+                        "payload": {
+                          "types": [
+                            "object"
+                          ],
+                          "eventPayloadBrand": true
+                        },
+                        "source": {
+                          "types": [
+                            "object"
+                          ]
+                        },
+                        "timestamp": {
+                          "types": [
+                            "number"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "timestamp"
+                      ]
+                    }
+                  },
+                  "guards": {
+                    "types": [
+                      "array"
+                    ],
+                    "items": {
+                      "types": [
+                        "object"
+                      ],
+                      "properties": {
+                        "arm": {
+                          "types": [
+                            "number"
+                          ]
+                        },
+                        "guard": {
+                          "types": [
+                            "sexpr"
+                          ]
+                        },
+                        "passed": {
+                          "types": [
+                            "boolean"
+                          ]
+                        },
+                        "trace": {
+                          "types": [
+                            "array"
+                          ],
+                          "items": {
+                            "types": [
+                              "object"
+                            ],
+                            "properties": {
+                              "kind": {
+                                "types": [
+                                  "string"
+                                ],
+                                "enumValues": [
+                                  "enter",
+                                  "exit",
+                                  "iter",
+                                  "skip"
+                                ]
+                              },
+                              "path": {
+                                "types": [
+                                  "array"
+                                ],
+                                "items": {
+                                  "types": [
+                                    "number",
+                                    "string"
+                                  ]
+                                }
+                              },
+                              "value": {
+                                "types": [
+                                  "object"
+                                ]
+                              },
+                              "error": {
+                                "types": [
+                                  "string"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "path"
+                            ]
+                          }
+                        },
+                        "error": {
+                          "types": [
+                            "string"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "arm",
+                        "guard",
+                        "passed",
+                        "trace"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "trait",
+                  "event",
+                  "transitionFired",
+                  "guard",
+                  "state",
+                  "effects",
+                  "emitted"
+                ]
+              }
+            },
+            "required": [
+              "orbital",
+              "trait",
+              "from",
+              "event",
+              "payload",
+              "result"
+            ]
+          }
+        },
+        "cursor": {
+          "types": [
+            "number"
+          ],
+          "description": "The scene step shown. Default: the last."
+        },
+        "annotations": {
+          "types": [
+            "object"
+          ],
+          "description": "Author explanations shown in a popover on hover: the transition's event note and per-effect-type notes.",
+          "properties": {
+            "states": {
+              "types": [
+                "object"
+              ],
+              "mapValue": {
+                "types": [
+                  "object"
+                ],
+                "properties": {
+                  "title": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "body": {
+                    "types": [
+                      "string"
+                    ]
+                  }
+                },
+                "required": [
+                  "body"
+                ]
+              }
+            },
+            "transitions": {
+              "types": [
+                "object"
+              ],
+              "mapValue": {
+                "types": [
+                  "object"
+                ],
+                "properties": {
+                  "title": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "body": {
+                    "types": [
+                      "string"
+                    ]
+                  }
+                },
+                "required": [
+                  "body"
+                ]
+              }
+            },
+            "effects": {
+              "types": [
+                "object"
+              ],
+              "mapValue": {
+                "types": [
+                  "object"
+                ],
+                "properties": {
+                  "title": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "body": {
+                    "types": [
+                      "string"
+                    ]
+                  }
+                },
+                "required": [
+                  "body"
+                ]
+              }
+            }
+          },
+          "example": {
+            "transitions": {
+              "PAY": {
+                "title": "Paying",
+                "body": "The customer pays the order total."
+              }
+            },
+            "effects": {
+              "persist": {
+                "body": "Saves the order."
+              }
+            }
+          }
+        },
+        "playback": {
+          "types": [
+            "object"
+          ],
+          "description": "The latest played run of this transition (see `transitionPlayback`).",
+          "properties": {
+            "step": {
+              "types": [
+                "object"
+              ],
+              "properties": {
+                "orbital": {
+                  "types": [
+                    "string"
+                  ]
+                },
+                "trait": {
+                  "types": [
+                    "string"
+                  ]
+                },
+                "from": {
+                  "types": [
+                    "string"
+                  ]
+                },
+                "event": {
+                  "types": [
+                    "string"
+                  ],
+                  "kind": "event"
+                },
+                "payload": {
+                  "types": [
+                    "object"
+                  ],
+                  "eventPayloadBrand": true,
+                  "payloadFor": "event"
+                },
+                "result": {
+                  "types": [
+                    "object"
+                  ],
+                  "properties": {
+                    "trait": {
+                      "types": [
+                        "string"
+                      ]
+                    },
+                    "event": {
+                      "types": [
+                        "string"
+                      ]
+                    },
+                    "transitionFired": {
+                      "types": [
+                        "boolean"
+                      ]
+                    },
+                    "guard": {
+                      "types": [
+                        "string"
+                      ],
+                      "enumValues": [
+                        "pass",
+                        "fail",
+                        "none"
+                      ]
+                    },
+                    "firedArm": {
+                      "types": [
+                        "number"
+                      ]
+                    },
+                    "state": {
+                      "types": [
+                        "object"
+                      ],
+                      "properties": {
+                        "before": {
+                          "types": [
+                            "string"
+                          ],
+                          "nullable": true
+                        },
+                        "after": {
+                          "types": [
+                            "string"
+                          ],
+                          "nullable": true
+                        }
+                      }
+                    },
+                    "effects": {
+                      "types": [
+                        "array"
+                      ],
+                      "items": {
+                        "types": [
+                          "object"
+                        ],
+                        "properties": {
+                          "type": {
+                            "types": [
+                              "string"
+                            ]
+                          },
+                          "entityName": {
+                            "types": [
+                              "string"
+                            ]
+                          },
+                          "action": {
+                            "types": [
+                              "string"
+                            ],
+                            "enumValues": [
+                              "create",
+                              "update",
+                              "delete",
+                              "batch"
+                            ]
+                          },
+                          "resultId": {
+                            "types": [
+                              "string"
+                            ]
+                          },
+                          "outcome": {
+                            "types": [
+                              "string"
+                            ],
+                            "enumValues": [
+                              "success",
+                              "denied",
+                              "failed"
+                            ]
+                          },
+                          "args": {
+                            "types": [
+                              "array"
+                            ],
+                            "items": {
+                              "types": [
+                                "sexpr"
+                              ]
+                            }
+                          },
+                          "status": {
+                            "types": [
+                              "string"
+                            ],
+                            "enumValues": [
+                              "executed",
+                              "failed",
+                              "skipped"
+                            ]
+                          },
+                          "error": {
+                            "types": [
+                              "string"
+                            ]
+                          },
+                          "durationMs": {
+                            "types": [
+                              "number"
+                            ]
+                          },
+                          "evalTrace": {
+                            "types": [
+                              "array"
+                            ],
+                            "items": {
+                              "types": [
+                                "object"
+                              ],
+                              "properties": {
+                                "kind": {
+                                  "types": [
+                                    "string"
+                                  ],
+                                  "enumValues": [
+                                    "enter",
+                                    "exit",
+                                    "iter",
+                                    "skip"
+                                  ]
+                                },
+                                "path": {
+                                  "types": [
+                                    "array"
+                                  ],
+                                  "items": {
+                                    "types": [
+                                      "number",
+                                      "string"
+                                    ]
+                                  }
+                                },
+                                "value": {
+                                  "types": [
+                                    "object"
+                                  ]
+                                },
+                                "error": {
+                                  "types": [
+                                    "string"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind",
+                                "path"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "args",
+                          "status"
+                        ]
+                      }
+                    },
+                    "emitted": {
+                      "types": [
+                        "array"
+                      ],
+                      "items": {
+                        "types": [
+                          "object"
+                        ],
+                        "properties": {
+                          "type": {
+                            "types": [
+                              "string"
+                            ]
+                          },
+                          "payload": {
+                            "types": [
+                              "object"
+                            ],
+                            "eventPayloadBrand": true
+                          },
+                          "source": {
+                            "types": [
+                              "object"
+                            ]
+                          },
+                          "timestamp": {
+                            "types": [
+                              "number"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "timestamp"
+                        ]
+                      }
+                    },
+                    "guards": {
+                      "types": [
+                        "array"
+                      ],
+                      "items": {
+                        "types": [
+                          "object"
+                        ],
+                        "properties": {
+                          "arm": {
+                            "types": [
+                              "number"
+                            ]
+                          },
+                          "guard": {
+                            "types": [
+                              "sexpr"
+                            ]
+                          },
+                          "passed": {
+                            "types": [
+                              "boolean"
+                            ]
+                          },
+                          "trace": {
+                            "types": [
+                              "array"
+                            ],
+                            "items": {
+                              "types": [
+                                "object"
+                              ],
+                              "properties": {
+                                "kind": {
+                                  "types": [
+                                    "string"
+                                  ],
+                                  "enumValues": [
+                                    "enter",
+                                    "exit",
+                                    "iter",
+                                    "skip"
+                                  ]
+                                },
+                                "path": {
+                                  "types": [
+                                    "array"
+                                  ],
+                                  "items": {
+                                    "types": [
+                                      "number",
+                                      "string"
+                                    ]
+                                  }
+                                },
+                                "value": {
+                                  "types": [
+                                    "object"
+                                  ]
+                                },
+                                "error": {
+                                  "types": [
+                                    "string"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "kind",
+                                "path"
+                              ]
+                            }
+                          },
+                          "error": {
+                            "types": [
+                              "string"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "arm",
+                          "guard",
+                          "passed",
+                          "trace"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "trait",
+                    "event",
+                    "transitionFired",
+                    "guard",
+                    "state",
+                    "effects",
+                    "emitted"
+                  ]
+                }
+              },
+              "required": [
+                "orbital",
+                "trait",
+                "from",
+                "event",
+                "payload",
+                "result"
+              ]
+            },
+            "fired": {
+              "types": [
+                "boolean"
+              ]
+            },
+            "guard": {
+              "types": [
+                "object"
+              ],
+              "properties": {
+                "arm": {
+                  "types": [
+                    "number"
+                  ]
+                },
+                "guard": {
+                  "types": [
+                    "sexpr"
+                  ]
+                },
+                "passed": {
+                  "types": [
+                    "boolean"
+                  ]
+                },
+                "trace": {
+                  "types": [
+                    "array"
+                  ],
+                  "items": {
+                    "types": [
+                      "object"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "types": [
+                          "string"
+                        ],
+                        "enumValues": [
+                          "enter",
+                          "exit",
+                          "iter",
+                          "skip"
+                        ]
+                      },
+                      "path": {
+                        "types": [
+                          "array"
+                        ],
+                        "items": {
+                          "types": [
+                            "number",
+                            "string"
+                          ]
+                        }
+                      },
+                      "value": {
+                        "types": [
+                          "object"
+                        ]
+                      },
+                      "error": {
+                        "types": [
+                          "string"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "path"
+                    ]
+                  }
+                },
+                "error": {
+                  "types": [
+                    "string"
+                  ]
+                }
+              },
+              "required": [
+                "arm",
+                "guard",
+                "passed",
+                "trace"
+              ]
+            },
+            "effects": {
+              "types": [
+                "array"
+              ],
+              "items": {
+                "types": [
+                  "object"
+                ],
+                "properties": {
+                  "type": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "entityName": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "action": {
+                    "types": [
+                      "string"
+                    ],
+                    "enumValues": [
+                      "create",
+                      "update",
+                      "delete",
+                      "batch"
+                    ]
+                  },
+                  "resultId": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "outcome": {
+                    "types": [
+                      "string"
+                    ],
+                    "enumValues": [
+                      "success",
+                      "denied",
+                      "failed"
+                    ]
+                  },
+                  "args": {
+                    "types": [
+                      "array"
+                    ],
+                    "items": {
+                      "types": [
+                        "sexpr"
+                      ]
+                    }
+                  },
+                  "status": {
+                    "types": [
+                      "string"
+                    ],
+                    "enumValues": [
+                      "executed",
+                      "failed",
+                      "skipped"
+                    ]
+                  },
+                  "error": {
+                    "types": [
+                      "string"
+                    ]
+                  },
+                  "durationMs": {
+                    "types": [
+                      "number"
+                    ]
+                  },
+                  "evalTrace": {
+                    "types": [
+                      "array"
+                    ],
+                    "items": {
+                      "types": [
+                        "object"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "types": [
+                            "string"
+                          ],
+                          "enumValues": [
+                            "enter",
+                            "exit",
+                            "iter",
+                            "skip"
+                          ]
+                        },
+                        "path": {
+                          "types": [
+                            "array"
+                          ],
+                          "items": {
+                            "types": [
+                              "number",
+                              "string"
+                            ]
+                          }
+                        },
+                        "value": {
+                          "types": [
+                            "object"
+                          ]
+                        },
+                        "error": {
+                          "types": [
+                            "string"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "path"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "type",
+                  "args",
+                  "status"
+                ]
+              }
+            }
+          },
+          "propertyRequired": [
+            "step",
+            "fired",
+            "effects"
+          ]
+        },
+        "stepEvent": {
+          "types": [
+            "string"
+          ],
+          "description": "Emits UI:{stepEvent} with an {@link AvlStepRequest} when Step is pressed.",
+          "kind": "event-ref",
+          "emitPayloadSchema": [
+            {
+              "name": "orbital",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "trait",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "from",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "event",
+              "type": "string",
+              "required": true,
+              "kind": "event"
+            },
+            {
+              "name": "payload",
+              "type": "object",
+              "required": true,
+              "payloadFor": "event",
+              "schema": {
+                "types": [
+                  "object"
+                ],
+                "eventPayloadBrand": true
+              }
+            }
+          ]
+        },
+        "className": {
+          "types": [
+            "string"
+          ],
+          "description": "className prop"
+        },
+        "enter": {
+          "types": [
+            "string"
+          ],
+          "description": "How this element animates in when it mounts (theme-styled); overrides the theme's default slot entry. `none` opts out.",
+          "enumValues": [
+            "none",
+            "fade",
+            "rise",
+            "scale",
+            "slide"
+          ],
+          "kind": "entry"
+        },
+        "enterDelay": {
+          "types": [
+            "number"
+          ],
+          "description": "Stagger step for the entry: waits this many `--motion-enter-stagger` steps before animating.",
+          "numericEnumValues": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "kind": "entry"
+        },
+        "skeleton": {
+          "types": [
+            "string",
+            "object"
+          ],
+          "description": "Skeleton shown while this element's server render is in flight: a shape (`table`, `list`, …), `{ variant, rows?, columns?, fields? }`, or `none`.",
+          "enumValues": [
+            "header",
+            "table",
+            "list",
+            "grid",
+            "detail",
+            "stats",
+            "form",
+            "card",
+            "text",
+            "none"
+          ],
+          "properties": {
+            "variant": {
+              "types": [
+                "string"
+              ],
+              "enumValues": [
+                "header",
+                "table",
+                "list",
+                "grid",
+                "detail",
+                "stats",
+                "form",
+                "card",
+                "text"
+              ]
+            },
+            "rows": {
+              "types": [
+                "number"
+              ]
+            },
+            "columns": {
+              "types": [
+                "number"
+              ]
+            },
+            "fields": {
+              "types": [
+                "number"
+              ]
+            }
+          },
+          "propertyRequired": [
+            "variant"
+          ],
+          "kind": "skeleton",
+          "tier": "presentation"
+        }
+      }
+    },
+    "activity-rail": {
+      "type": "activity-rail",
+      "category": "component",
+      "sourceFile": "components/core/molecules/ActivityRail.tsx",
+      "tier": "molecules",
+      "family": "core",
+      "description": "ActivityRail component",
+      "suggestedFor": [
+        "activity",
+        "rail",
+        "activity rail"
+      ],
+      "typicalSize": "medium",
+      "propsSchema": {
+        "items": {
+          "types": [
+            "array"
+          ],
+          "description": "The rail's items, top to bottom.",
+          "required": true,
+          "items": {
+            "types": [
+              "object"
+            ],
+            "properties": {
+              "id": {
+                "types": [
+                  "string"
+                ]
+              },
+              "icon": {
+                "types": [
+                  "icon",
+                  "string"
+                ]
+              },
+              "label": {
+                "types": [
+                  "string"
+                ]
+              },
+              "opensPanel": {
+                "types": [
+                  "boolean"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "icon",
+              "label"
+            ]
+          },
+          "example": [
+            {
+              "id": "explorer",
+              "icon": "folder",
+              "label": "Explorer"
+            },
+            {
+              "id": "cosmic",
+              "icon": "orbit",
+              "label": "Cosmic",
+              "opensPanel": false
+            }
+          ]
+        },
+        "active": {
+          "types": [
+            "string"
+          ],
+          "description": "The id of the item whose panel is showing.",
+          "required": true
+        },
+        "onChange": {
+          "types": [
+            "string"
+          ],
+          "description": "Emits UI:{onChange} with { id } when an item is picked.",
+          "kind": "event-ref",
+          "emitPayloadSchema": [
+            {
+              "name": "id",
+              "type": "string",
+              "required": true
+            }
+          ]
+        },
+        "onSelect": {
+          "types": [
+            "function"
+          ],
+          "description": "React hosts: called with the picked item's id.",
+          "kind": "callback",
+          "callbackArgs": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ]
+        },
+        "footer": {
+          "types": [
+            "node"
+          ],
+          "description": "Pinned to the bottom of the desktop column."
+        },
+        "testId": {
+          "types": [
+            "string"
+          ],
+          "description": "testId prop"
+        },
+        "itemTestId": {
+          "types": [
+            "function"
+          ],
+          "description": "itemTestId prop",
+          "callbackArgs": [
+            {
+              "name": "id",
+              "type": "string"
+            }
+          ],
+          "renderCallback": true
+        },
+        "className": {
+          "types": [
+            "string"
+          ],
+          "description": "className prop"
+        },
+        "enter": {
+          "types": [
+            "string"
+          ],
+          "description": "How this element animates in when it mounts (theme-styled); overrides the theme's default slot entry. `none` opts out.",
+          "enumValues": [
+            "none",
+            "fade",
+            "rise",
+            "scale",
+            "slide"
+          ],
+          "kind": "entry"
+        },
+        "enterDelay": {
+          "types": [
+            "number"
+          ],
+          "description": "Stagger step for the entry: waits this many `--motion-enter-stagger` steps before animating.",
+          "numericEnumValues": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "kind": "entry"
+        },
+        "skeleton": {
+          "types": [
+            "string",
+            "object"
+          ],
+          "description": "Skeleton shown while this element's server render is in flight: a shape (`table`, `list`, …), `{ variant, rows?, columns?, fields? }`, or `none`.",
+          "enumValues": [
+            "header",
+            "table",
+            "list",
+            "grid",
+            "detail",
+            "stats",
+            "form",
+            "card",
+            "text",
+            "none"
+          ],
+          "properties": {
+            "variant": {
+              "types": [
+                "string"
+              ],
+              "enumValues": [
+                "header",
+                "table",
+                "list",
+                "grid",
+                "detail",
+                "stats",
+                "form",
+                "card",
+                "text"
+              ]
+            },
+            "rows": {
+              "types": [
+                "number"
+              ]
+            },
+            "columns": {
+              "types": [
+                "number"
+              ]
+            },
+            "fields": {
+              "types": [
+                "number"
+              ]
+            }
+          },
+          "propertyRequired": [
+            "variant"
+          ],
+          "kind": "skeleton",
+          "tier": "presentation"
         }
       }
     }

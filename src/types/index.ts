@@ -1174,6 +1174,7 @@ export {
 export { dispatchVisitKey, DispatchVisits } from "./visit-key.js";
 export { type DeliveryRecord, type DispatchLog, DeliveryRecordSchema, DispatchLogSchema, deliveryRecordValue } from "./bus.js";
 export { DispatchMemory, dispatchScopeOf, type DispatchScope } from "./dispatch-memory.js";
+export { guardHolds } from "./guard-holds.js";
 
 // Server-side effect result — the wire shape effectResults carries
 export {

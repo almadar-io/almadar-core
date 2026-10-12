@@ -111,16 +111,20 @@ export function matchPathAmong<T>(
 }
 
 /**
- * The page an app shows when no page matches its route: the first inline page of the first orbital
- * that declares one. The runtime's navigation default and runtime-verify's boot probe both read it.
+ * The page an app shows when no page matches its route: the first page the program marks `initial`,
+ * else the first inline page of the first orbital that declares one. The runtime's navigation
+ * default, runtime-verify's boot probe, the catalog and the behavior-value frame all read it.
  */
 export function defaultPage(schema: OrbitalSchema): { page: Page; orbitalName: string } | null {
+  let first: { page: Page; orbitalName: string } | null = null;
   for (const orbital of schema.orbitals) {
     for (const page of orbital.pages ?? []) {
-      if (!isPageReference(page)) return { page, orbitalName: orbital.name };
+      if (isPageReference(page)) continue;
+      if (page.isInitial === true) return { page, orbitalName: orbital.name };
+      first ??= { page, orbitalName: orbital.name };
     }
   }
-  return null;
+  return first;
 }
 
 /** A concrete path matches a route pattern: same segment count, each pattern segment a `:param` or equal. */

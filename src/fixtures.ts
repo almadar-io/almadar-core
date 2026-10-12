@@ -91,6 +91,7 @@ export const EVENT_WIRE_FIXTURE_CASES: readonly string[] = [
   'render-ui-clear',
   'sse-stream',
   'stateless-traits',
+  'tick-run-leg',
 ];
 
 // `src/fixtures.ts` and its built output `dist/fixtures.js` are both exactly

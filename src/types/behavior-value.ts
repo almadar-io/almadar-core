@@ -265,12 +265,9 @@ export function behaviorRef(specifier: string): BehaviorRef {
   return { behavior: specifier };
 }
 
-/** Structural guard for a behavior value: a specifier and nothing else (a trait or orbital value names a member too). */
+/** Structural guard for a behavior value: a specifier and, optionally, its declared bridge (a trait or orbital value names a member too). */
 export function isBehaviorRefValue(value: RuntimeValue): value is BehaviorRef {
-  if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
-  const keys = Object.keys(value);
-  if (keys.length !== 1 || keys[0] !== 'behavior' || !('behavior' in value)) return false;
-  return typeof value.behavior === 'string' && SPECIFIER.test(value.behavior);
+  return BehaviorRefSchema.safeParse(value).success;
 }
 
 function isOrbitalValueShape(value: BehaviorValue): value is OrbitalValue {
@@ -291,9 +288,29 @@ export const CatalogScopeSchema = z.object({
 }).strict();
 export type CatalogScope = z.infer<typeof CatalogScopeSchema>;
 
-/** A behavior named by itself, with no trait or orbital picked (what `behavior/describe` takes for a whole behavior). */
-export const BehaviorRefSchema = z.object({ behavior: z.string().regex(SPECIFIER) }).strict();
+/**
+ * The events an embedded behavior exchanges with the page that embeds it: `listens` are the
+ * host's events delivered into it (to every trait that handles one), `emits` are its own
+ * `external` events re-emitted on the host. Nothing else crosses; without a bridge it runs isolated.
+ */
+export const BehaviorBridgeSchema = z.object({
+  listens: z.array(z.string().min(1)),
+  emits: z.array(z.string().min(1)),
+}).strict();
+export type BehaviorBridge = z.infer<typeof BehaviorBridgeSchema>;
+
+/** A behavior named by itself, with no trait or orbital picked (what `behavior/describe` takes for a whole behavior), and the bridge its embed declares, if any. */
+export const BehaviorRefSchema = z.object({ behavior: z.string().regex(SPECIFIER), bridge: BehaviorBridgeSchema.optional() }).strict();
 export type BehaviorRef = z.infer<typeof BehaviorRefSchema>;
+
+/** The overrides `behavior/apply` takes for a whole behavior value: its bridge. */
+export const BehaviorRefOverridesSchema = z.object({ bridge: BehaviorBridgeSchema }).strict();
+
+/** `behavior/apply` on a behavior value: records (replaces) its bridge. Pure. */
+export function applyBehaviorRefOverrides(value: BehaviorRef, overrides: JsonValue): BehaviorRef {
+  const parsed = BehaviorRefOverridesSchema.parse(overrides);
+  return { behavior: value.behavior, bridge: parsed.bridge };
+}
 
 /** One behavior `behavior/catalog` returns (`orb behaviors catalog --json`). */
 export const CatalogEntrySchema = z.object({

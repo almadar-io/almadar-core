@@ -57,6 +57,24 @@ describe('defaultPage — the page an app shows when no page matches its route',
     expect(defaultPage(schema)?.page.name).toBe('Desk');
   });
 
+  it('is the page the program declares initial, in any orbital', () => {
+    const home = { ...page('Home', '/'), isInitial: true };
+    const schema: OrbitalSchema = { name: 'studio', orbitals: [orbital('Account', [page('Account', '/settings/account')]), orbital('Apps', [home])] };
+    expect(defaultPage(schema)).toEqual({ page: home, orbitalName: 'Apps' });
+  });
+
+  it('edge: several initial pages, the first in declaration order wins', () => {
+    const en = { ...page('HomeEN', '/'), isInitial: true };
+    const ar = { ...page('HomeAR', '/ar'), isInitial: true };
+    const schema: OrbitalSchema = { name: 'studio', orbitals: [orbital('Account', [page('Account', '/settings/account')]), orbital('AppsEN', [en]), orbital('AppsAR', [ar])] };
+    expect(defaultPage(schema)?.page.name).toBe('HomeEN');
+  });
+
+  it('control: isInitial false is not a declaration', () => {
+    const schema: OrbitalSchema = { name: 'app', orbitals: [orbital('A', [page('A', '/a')]), orbital('B', [{ ...page('B', '/b'), isInitial: false }])] };
+    expect(defaultPage(schema)?.page.name).toBe('A');
+  });
+
   it('control: no inline page anywhere, no default', () => {
     expect(defaultPage({ name: 'atom', orbitals: [orbital('Rules', [])] })).toBeNull();
   });

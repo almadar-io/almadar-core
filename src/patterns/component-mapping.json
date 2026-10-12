@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-11T01:15:36.754Z",
+  "exportedAt": "2026-10-12T03:59:30.122Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -1318,6 +1318,16 @@
       "component": "OrbInspector",
       "importPath": "@/components/avl/organisms/OrbInspector",
       "category": "debug"
+    },
+    "avl-transition-detail": {
+      "component": "AvlTransitionDetail",
+      "importPath": "@/components/avl/molecules/AvlTransitionDetail",
+      "category": "display"
+    },
+    "activity-rail": {
+      "component": "ActivityRail",
+      "importPath": "@/components/core/molecules/ActivityRail",
+      "category": "component"
     }
   }
 }

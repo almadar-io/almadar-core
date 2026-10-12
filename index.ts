@@ -58,6 +58,7 @@ export { INDISTINCT_DELTA_E, themeModes, toneColor, hexToLab, ciede2000, colorDi
 // Listen-route `with { ... }` payload mapping — shared by the server runtime
 // (`@almadar/runtime`) and the client cross-trait wiring (`@almadar/ui`).
 export { applyListenPayloadMapping } from './src/listen-payload-mapping';
+export { importsOf, dependencyGraphOf, type BehaviorTier, type DependencyLayer, type BehaviorImport, type DependencyGraph, type DependencyGraphDeps } from './src/dependency-graph';
 export type { ListenPayloadEvaluator } from './src/listen-payload-mapping';
 
 // ML contract validation — one pure implementation for the runtime path

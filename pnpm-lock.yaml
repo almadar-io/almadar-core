@@ -16,11 +16,11 @@ importers:
         specifier: ^2.21.0
         version: 2.21.0(eslint@10.0.0)
       '@almadar/lolo-ar':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       '@almadar/lolo-sl':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: ^1.2.0
+        version: 1.2.0
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.0
@@ -56,11 +56,11 @@ packages:
     peerDependencies:
       eslint: '>=8.0.0'
 
-  '@almadar/lolo-ar@1.1.0':
-    resolution: {integrity: sha512-gNg756pvxnuTBr8zQyMH2UxS7fvKJvpfpKPhivNqc6QeyOOjNAi2RVVPXPV0OtJrnEAtPucwa5azrzFusi2WwA==}
+  '@almadar/lolo-ar@1.2.0':
+    resolution: {integrity: sha512-YHi9Y29zXM3K76hiFGH5VQOfI4Xzj3YBrMQ8Q5QtcaOd1u0+1qri9v0HOly4ZqShCiz5h8BqdM92Dlv42OWHTw==}
 
-  '@almadar/lolo-sl@1.1.0':
-    resolution: {integrity: sha512-IiDue5Ei/UUOYLs3jF2Yz4f0x3n6yF3AYQXGnzVs93DTs87Q6lU1sbYHsXWpMupvJBS+NHuZ0Dc31CvisDiCzw==}
+  '@almadar/lolo-sl@1.2.0':
+    resolution: {integrity: sha512-S/8nzr/y1EXPR2eILHd471ykQsEOJMsjqwx89yffZ6F4m3YW2G4RqPp7A83y5JJxAGlwyq6ieZnmzIiyZW4y4Q==}
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -1601,9 +1601,9 @@ snapshots:
       eslint: 10.0.0
       jsonc-eslint-parser: 3.1.0
 
-  '@almadar/lolo-ar@1.1.0': {}
+  '@almadar/lolo-ar@1.2.0': {}
 
-  '@almadar/lolo-sl@1.1.0': {}
+  '@almadar/lolo-sl@1.2.0': {}
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
