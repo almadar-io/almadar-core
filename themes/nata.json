@@ -52,8 +52,8 @@
       "borderStyleInteractive": "solid"
     },
     "colors": {
-      "primary": "#b45309",
-      "primary-hover": "#92400e",
+      "primary": "#9c6233",
+      "primary-hover": "#85532b",
       "primary-foreground": "#ffffff",
       "secondary": "#fdf3e6",
       "secondary-hover": "#fbe6c8",
@@ -69,7 +69,7 @@
       "surface": "#f8f2ea",
       "border": "#ece2d3",
       "input": "#dccdb6",
-      "ring": "#b45309",
+      "ring": "#9c6233",
       "error": "#dc2626",
       "error-foreground": "#ffffff",
       "success": "#047857",
@@ -181,13 +181,16 @@
       "lightKey": "1.15",
       "lightKeyColor": "#eef2ff",
       "fog": "0.05"
+    },
+    "illustration": {
+      "loadingAsset": "data:image/svg+xml;utf8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22 fill=%22none%22%3E%3Cdefs%3E%3C/defs%3E%3Cstyle%3E.s1%7Banimation:s1 4.8s ease-in-out infinite%7D%40keyframes s1%7B0%25,14%25%7Bopacity:1%7D30%25,76%25%7Bopacity:0%7D92%25,100%25%7Bopacity:1%7D%7D.p2%7Bopacity:0;animation:p2 4.8s ease-in-out infinite%7D%40keyframes p2%7B0%25,14%25%7Bopacity:0%7D30%25,76%25%7Bopacity:1%7D92%25,100%25%7Bopacity:0%7D%7D.sl%7Banimation:sl 4.8s ease-in-out infinite%7D%40keyframes sl%7B0%25,14%25%7Btransform:translateY(0)%7D18%25%7Btransform:translateY(-3px)%7D22%25%7Btransform:translateY(3px)%7D26%25%7Btransform:translateY(-2px)%7D30%25,76%25%7Btransform:translateY(0)%7D80%25%7Btransform:translateY(2px)%7D84%25%7Btransform:translateY(-3px)%7D88%25%7Btransform:translateY(3px)%7D92%25,100%25%7Btransform:translateY(0)%7D%7D.ph%7Bfill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:36 200;opacity:0%7D.in%7Banimation:in 4.8s linear infinite%7D%40keyframes in%7B0%25%7Bstroke-dashoffset:36;opacity:1%7D15%25%7Bstroke-dashoffset:-64;opacity:1%7D16%25,100%25%7Bopacity:0%7D%7D.out%7Banimation:out 4.8s linear infinite%7D%40keyframes out%7B0%25,76%25%7Bopacity:0;stroke-dashoffset:36%7D77%25%7Bopacity:1;stroke-dashoffset:36%7D93%25%7Bstroke-dashoffset:-100;opacity:1%7D94%25,100%25%7Bopacity:0%7D%7D%40media (prefers-reduced-motion:reduce)%7B*%7Banimation:none!important%7D%7D%3C/style%3E%3Cg class=%22sl%22%3E%3Cg class=%22s1%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2217%22 fill=%22%239c6233%22/%3E%3Ccircle cx=%2245%22 cy=%2245%22 r=%226%22 fill=%22%23e6c09a%22/%3E%3C/g%3E%3Cg class=%22p2%22%3E%3Cpath d=%22M50,50 C39,44 33,31 36,20 C39,9 61,9 64,20 C67,31 61,44 50,50 Z%22 fill=%22%239c6233%22/%3E%3Cpath d=%22M50,50 C39,56 33,69 36,80 C39,91 61,91 64,80 C67,69 61,56 50,50 Z%22 fill=%22%23e6c09a%22/%3E%3C/g%3E%3C/g%3E%3Cpath class=%22ph in%22 pathLength=%22100%22 d=%22M-4,50 q3.5,-7 7,0 t7,0 t7,0 t7,0 t7,0 t7,0 t7,0%22 stroke=%22%239c6233%22 transform=%22rotate(-35 50 50)%22/%3E%3Cpath class=%22ph out%22 pathLength=%22100%22 d=%22M54,50 q3.5,-7 7,0 t7,0 t7,0 t7,0 t7,0 t7,0 t7,0%22 stroke=%22%239c6233%22 transform=%22rotate(-35 50 50)%22/%3E%3C/svg%3E"
     }
   },
   "variants": {
     "dark": {
       "colors": {
-        "primary": "#fbbf24",
-        "primary-hover": "#fcd34d",
+        "primary": "#eab88a",
+        "primary-hover": "#f0caa5",
         "primary-foreground": "#1c1408",
         "secondary": "#2a1f0e",
         "secondary-hover": "#3a2b14",
@@ -203,7 +206,7 @@
         "surface": "#201810",
         "border": "#3a2e1c",
         "input": "#4d3d25",
-        "ring": "#fbbf24",
+        "ring": "#eab88a",
         "error": "#f87171",
         "error-foreground": "#000000",
         "success": "#34d399",
@@ -261,6 +264,9 @@
       },
       "surface": {
         "cardImage": "linear-gradient(135deg, rgba(129, 140, 248, 0.10) 0%, rgba(34, 211, 238, 0.06) 55%, rgba(52, 211, 153, 0.07) 100%)"
+      },
+      "illustration": {
+        "loadingAsset": "data:image/svg+xml;utf8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22 fill=%22none%22%3E%3Cdefs%3E%3C/defs%3E%3Cstyle%3E.s1%7Banimation:s1 4.8s ease-in-out infinite%7D%40keyframes s1%7B0%25,14%25%7Bopacity:1%7D30%25,76%25%7Bopacity:0%7D92%25,100%25%7Bopacity:1%7D%7D.p2%7Bopacity:0;animation:p2 4.8s ease-in-out infinite%7D%40keyframes p2%7B0%25,14%25%7Bopacity:0%7D30%25,76%25%7Bopacity:1%7D92%25,100%25%7Bopacity:0%7D%7D.sl%7Banimation:sl 4.8s ease-in-out infinite%7D%40keyframes sl%7B0%25,14%25%7Btransform:translateY(0)%7D18%25%7Btransform:translateY(-3px)%7D22%25%7Btransform:translateY(3px)%7D26%25%7Btransform:translateY(-2px)%7D30%25,76%25%7Btransform:translateY(0)%7D80%25%7Btransform:translateY(2px)%7D84%25%7Btransform:translateY(-3px)%7D88%25%7Btransform:translateY(3px)%7D92%25,100%25%7Btransform:translateY(0)%7D%7D.ph%7Bfill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:36 200;opacity:0%7D.in%7Banimation:in 4.8s linear infinite%7D%40keyframes in%7B0%25%7Bstroke-dashoffset:36;opacity:1%7D15%25%7Bstroke-dashoffset:-64;opacity:1%7D16%25,100%25%7Bopacity:0%7D%7D.out%7Banimation:out 4.8s linear infinite%7D%40keyframes out%7B0%25,76%25%7Bopacity:0;stroke-dashoffset:36%7D77%25%7Bopacity:1;stroke-dashoffset:36%7D93%25%7Bstroke-dashoffset:-100;opacity:1%7D94%25,100%25%7Bopacity:0%7D%7D%40media (prefers-reduced-motion:reduce)%7B*%7Banimation:none!important%7D%7D%3C/style%3E%3Cg class=%22sl%22%3E%3Cg class=%22s1%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2217%22 fill=%22%23eab88a%22/%3E%3Ccircle cx=%2245%22 cy=%2245%22 r=%226%22 fill=%22%238a6040%22/%3E%3C/g%3E%3Cg class=%22p2%22%3E%3Cpath d=%22M50,50 C39,44 33,31 36,20 C39,9 61,9 64,20 C67,31 61,44 50,50 Z%22 fill=%22%23eab88a%22/%3E%3Cpath d=%22M50,50 C39,56 33,69 36,80 C39,91 61,91 64,80 C67,69 61,56 50,50 Z%22 fill=%22%238a6040%22/%3E%3C/g%3E%3C/g%3E%3Cpath class=%22ph in%22 pathLength=%22100%22 d=%22M-4,50 q3.5,-7 7,0 t7,0 t7,0 t7,0 t7,0 t7,0 t7,0%22 stroke=%22%23eab88a%22 transform=%22rotate(-35 50 50)%22/%3E%3Cpath class=%22ph out%22 pathLength=%22100%22 d=%22M54,50 q3.5,-7 7,0 t7,0 t7,0 t7,0 t7,0 t7,0 t7,0%22 stroke=%22%23eab88a%22 transform=%22rotate(-35 50 50)%22/%3E%3C/svg%3E"
       }
     }
   }

@@ -513,6 +513,32 @@ export function behaviorRegistryDir(pkg: BehaviorPackage, options: RegistryDirOp
   return out;
 }
 
+/**
+ * Every behavior program in the package's registry, by behavior name: each `.orb` under the
+ * registry tree, named by its basename (the rule `orb` indexes by). Two programs with one name
+ * are refused.
+ */
+export function behaviorProgramFiles(pkg: BehaviorPackage, options: RegistryDirOptions = {}): Map<string, string> {
+  const root = behaviorRegistryDir(pkg, options);
+  const files = new Map<string, string>();
+  const walk = (dir: string): void => {
+    for (const entry of nodeFs.readdirSync(dir, { withFileTypes: true })) {
+      const full = nodePath.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.isFile() && entry.name.endsWith('.orb')) {
+        const name = entry.name.slice(0, -'.orb'.length);
+        const seen = files.get(name);
+        if (seen !== undefined) {
+          throw new BehaviorPackageError(`${pkg.name}: two programs named "${name}": ${nodePath.relative(root, seen)} and ${nodePath.relative(root, full)}`);
+        }
+        files.set(name, full);
+      }
+    }
+  };
+  walk(root);
+  return files;
+}
+
 export interface MaterializeOptions extends RegistryDirOptions {
   /** Package-relative directory the programs are written into. Default `behaviors/registry`. */
   target?: string;

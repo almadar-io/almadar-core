@@ -1390,3 +1390,6 @@ export * from "./canvas-theme.js";
 
 // Behaviors as first-class values (language trio)
 export * from "./behavior-value.js";
+
+// Generator evals as data (`orb eval`)
+export * from "./eval-spec.js";

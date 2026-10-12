@@ -41,7 +41,10 @@ export function isContentBodyPatternType(patternType: string): boolean {
 export function isContentBodyPattern(pattern: RenderUiPayload): boolean {
   if (pattern === null) return false;
   if (typeof pattern === 'string') return true;
-  if ('children' in pattern && Array.isArray(pattern.children) && pattern.children.length > 0) return true;
+  if ('children' in pattern) {
+    const children = pattern.children;
+    if (Array.isArray(children) ? children.length > 0 : typeof children === 'object' && children !== null) return true;
+  }
   return isContentBodyPatternType(pattern.type);
 }
 

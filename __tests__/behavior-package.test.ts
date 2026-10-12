@@ -7,6 +7,7 @@ import {
   BehaviorPackageError,
   readBehaviorPackage,
   behaviorRegistryDir,
+  behaviorProgramFiles,
   resolveDeclaredFile,
   type BehaviorPackageOrbBlock,
 } from '../src/behavior-package.js';
@@ -72,5 +73,26 @@ describe('resolveDeclaredFile', () => {
   it('refuses a declared path that escapes the package root', () => {
     const root = fakePackage({ ...ORB, index: '../outside.json' }, []);
     expect(() => resolveDeclaredFile(readBehaviorPackage(root), 'index')).toThrow(/outside the package/);
+  });
+});
+
+describe('behaviorProgramFiles', () => {
+  const declared = ['dist/behaviors-registry.json', 'dist/registry/factory-signatures.json', 'behaviors/lolo-behavior-contracts.json', 'behaviors/signatures.lolo', 'dist/behaviors-embeddings.json'];
+
+  it('maps every program under the registry, nested folders included, to its file by basename', () => {
+    const root = fakePackage(ORB, [...declared, 'behaviors/registry/app/atoms/std-a.orb', 'behaviors/registry/websites/atoms/blog/std-b.orb', 'behaviors/registry/ui/core/templates/ui-c.orb']);
+    const files = behaviorProgramFiles(readBehaviorPackage(root));
+    expect([...files.keys()].sort()).toEqual(['std-a', 'std-b', 'ui-c']);
+    expect(files.get('std-b')).toBe(join(root, 'behaviors/registry/websites/atoms/blog/std-b.orb'));
+  });
+
+  it('control: files that are not programs are not behaviors', () => {
+    const root = fakePackage(ORB, [...declared, 'behaviors/registry/app/atoms/std-a.orb', 'behaviors/registry/factory-signatures.json', 'behaviors/registry/app/atoms/README.md']);
+    expect([...behaviorProgramFiles(readBehaviorPackage(root)).keys()]).toEqual(['std-a']);
+  });
+
+  it('edge: two programs with one name are refused, naming both files', () => {
+    const root = fakePackage(ORB, [...declared, 'behaviors/registry/app/atoms/std-a.orb', 'behaviors/registry/game/atoms/std-a.orb']);
+    expect(() => behaviorProgramFiles(readBehaviorPackage(root))).toThrow(/std-a.*app\/atoms.*game\/atoms|std-a.*game\/atoms.*app\/atoms/);
   });
 });
