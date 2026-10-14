@@ -35,9 +35,7 @@ export const BehaviorPackageOrbBlockSchema = z
   /** The `.lolo` sources, lowered on read when no `registry` is declared (a workspace package). */
   source: z.string().min(1).optional(),
   index: z.string().min(1),
-  factorySignatures: z.string().min(1),
   loloContracts: z.string().min(1),
-  signatures: z.string().min(1),
   embeddings: z.array(z.string().min(1)),
   compiler: z.string().min(1),
   })
@@ -69,7 +67,7 @@ export const SidecarLockSchema = z.object({
 export type SidecarLock = z.infer<typeof SidecarLockSchema>;
 export type SidecarLockEntry = SidecarLock['files'][string];
 
-export type DeclaredFileKey = 'index' | 'factorySignatures' | 'loloContracts' | 'signatures';
+export type DeclaredFileKey = 'index' | 'loloContracts';
 
 export interface BehaviorPackage {
   name: string;
@@ -224,7 +222,7 @@ export function userStoreDir(): string {
 }
 
 /** The `orb` fields only a behavior package declares (`@almadar/core`'s language block is not one). */
-const BEHAVIOR_BLOCK_FIELDS = ['prefix', 'registry', 'source', 'index', 'factorySignatures', 'loloContracts', 'signatures'];
+const BEHAVIOR_BLOCK_FIELDS = ['prefix', 'registry', 'source', 'index', 'loloContracts'];
 
 function packageDirs(nodeModules: string): string[] {
   if (!existsSync(nodeModules)) return [];
@@ -563,7 +561,7 @@ function treeFiles(dir: string): string[] {
  * program that declares `locales` through `orb emit orb --output` so its merged
  * `<stem>.<locale>.json` catalogs ship beside it, and returns the `orb` block the
  * published manifest declares (`registry` set, `source` kept). Files already in
- * `target` that are not programs (the generated `factory-signatures.json`) are
+ * `target` that are not programs are
  * left alone.
  */
 export function materializeRegistry(pkg: BehaviorPackage, options: MaterializeOptions = {}): BehaviorPackageOrbBlock {

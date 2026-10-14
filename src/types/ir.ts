@@ -141,6 +141,8 @@ export interface ResolvedTraitTick {
   effects: SExpr[];
   priority: number;
   appliesTo: string[];
+  /** `[visible]`: pauses while the trait's rendered output is off screen. */
+  whileVisible: boolean;
 }
 
 export interface ResolvedTraitListener {

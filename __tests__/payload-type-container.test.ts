@@ -18,7 +18,7 @@ describe('payloadTypeContainer', () => {
 
   it('keeps nested and generic element spellings whole', () => {
     expect(payloadTypeContainer('[[float]]')).toEqual({ kind: 'array', element: '[float]' });
-    expect(payloadTypeContainer('[Map<string,scalar>]')).toEqual({ kind: 'array', element: 'Map<string,scalar>' });
+    expect(payloadTypeContainer('[Map<string,number>]')).toEqual({ kind: 'array', element: 'Map<string,number>' });
     expect(payloadTypeContainer('[$trows]')).toEqual({ kind: 'array', element: '$trows' });
   });
 

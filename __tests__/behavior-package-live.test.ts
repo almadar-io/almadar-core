@@ -38,7 +38,7 @@ function livePackage(files: Record<string, string>): { root: string; work: strin
     JSON.stringify({
       name: '@test/live',
       version: '1.0.0',
-      orb: { prefix: 'test', source: 'behaviors/lolo', index: 'i.json', factorySignatures: 'f.json', loloContracts: 'c.json', signatures: 's.lolo', embeddings: [], compiler: '>=1.0.0' },
+      orb: { prefix: 'test', source: 'behaviors/lolo', index: 'i.json', loloContracts: 'c.json', embeddings: [], compiler: '>=1.0.0' },
     }),
   );
   for (const [rel, body] of Object.entries(files)) {
@@ -190,14 +190,14 @@ process.exit(2);
   it('writes every lowered program into behaviors/registry and returns the block declaring it', () => {
     const { root, work } = livePackage({ 'app/atoms/a.lolo': 'A', 'kflow/atoms/site.lolo': '{"name":"site","locales":["en"]}', 'kflow/atoms/locales/en/site.json': '{"title":"Hi"}' });
     mkdirSync(join(root, 'behaviors/registry'), { recursive: true });
-    writeFileSync(join(root, 'behaviors/registry/factory-signatures.json'), '{"keep":true}');
+    writeFileSync(join(root, 'behaviors/registry/notes.json'), '{"keep":true}');
     const orb = materializeRegistry(readBehaviorPackage(root), { orbBin: publishOrb(work), cacheDir: join(work, 'cache') });
     expect(orb.registry).toBe('behaviors/registry');
     expect(orb.source).toBe('behaviors/lolo');
     expect(JSON.parse(readFileSync(join(root, 'behaviors/registry/app/atoms/a.orb'), 'utf8'))).toEqual({ name: 'A' });
     expect(readFileSync(join(root, 'behaviors/registry/kflow/atoms/locales/en/site.json'), 'utf8')).toBe('{"title":"Hi"}');
     expect(readFileSync(join(root, 'behaviors/registry/kflow/atoms/site.en.json'), 'utf8')).toBe('{"site:title":"Hi"}');
-    expect(readFileSync(join(root, 'behaviors/registry/factory-signatures.json'), 'utf8')).toBe('{"keep":true}');
+    expect(readFileSync(join(root, 'behaviors/registry/notes.json'), 'utf8')).toBe('{"keep":true}');
     expect(readFileSync(join(work, 'emits.log'), 'utf8').trim().split('\n')).toEqual(['site.lolo']);
   });
 

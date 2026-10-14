@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-12T03:59:30.122Z",
+  "exportedAt": "2026-10-13T17:39:34.142Z",
   "mappings": {
     "page-header": {
       "component": "PageHeader",
@@ -1327,6 +1327,11 @@
     "activity-rail": {
       "component": "ActivityRail",
       "importPath": "@/components/core/molecules/ActivityRail",
+      "category": "component"
+    },
+    "video-embed": {
+      "component": "VideoEmbed",
+      "importPath": "@/components/core/atoms/VideoEmbed",
       "category": "component"
     }
   }

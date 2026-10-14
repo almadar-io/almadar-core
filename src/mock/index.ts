@@ -42,3 +42,14 @@ export {
   linkSelfRelationField,
   selfRelationForest,
 } from './relationForest.js';
+export {
+  type ResponseShapeField,
+  type ServiceMockAnswer,
+  type ServiceMockValue,
+  mockFromJsonSchema,
+  mockFromResponseShape,
+  mockServiceAnswer,
+  mockValueForDescriptor,
+  registryActionNames,
+  registryServiceNames,
+} from './serviceAnswer.js';

@@ -16,9 +16,7 @@ const ORB: BehaviorPackageOrbBlock = {
   prefix: 'almadar-test',
   registry: 'behaviors/registry',
   index: 'dist/behaviors-registry.json',
-  factorySignatures: 'dist/registry/factory-signatures.json',
   loloContracts: 'behaviors/lolo-behavior-contracts.json',
-  signatures: 'behaviors/signatures.lolo',
   embeddings: ['dist/behaviors-embeddings.json'],
   compiler: '>=4.10.0',
 };
@@ -32,6 +30,19 @@ function fakePackage(orb: BehaviorPackageOrbBlock | undefined, files: string[]):
   }
   return root;
 }
+
+describe('orb block without signatures', () => {
+  it('reads a package that declares no signatures file', () => {
+    const pkg = readBehaviorPackage(fakePackage(ORB, []));
+    expect(pkg.orb.prefix).toBe('almadar-test');
+  });
+
+  it('control: a package published with the retired factorySignatures key still reads, the key ignored', () => {
+    const pkg = readBehaviorPackage(fakePackage({ ...ORB, factorySignatures: 'dist/registry/factory-signatures.json' } as BehaviorPackageOrbBlock, []));
+    expect(pkg.orb.prefix).toBe('almadar-test');
+    expect('factorySignatures' in pkg.orb).toBe(false);
+  });
+});
 
 describe('readBehaviorPackage', () => {
   it('reads the declared orb block of a package root', () => {
@@ -55,9 +66,9 @@ describe('readBehaviorPackage', () => {
 
 describe('resolveDeclaredFile', () => {
   it('resolves a declared single-file key to an absolute path that exists', () => {
-    const root = fakePackage(ORB, ['dist/registry/factory-signatures.json']);
-    const file = resolveDeclaredFile(readBehaviorPackage(root), 'factorySignatures');
-    expect(file).toBe(join(root, 'dist/registry/factory-signatures.json'));
+    const root = fakePackage(ORB, ['behaviors/lolo-behavior-contracts.json']);
+    const file = resolveDeclaredFile(readBehaviorPackage(root), 'loloContracts');
+    expect(file).toBe(join(root, 'behaviors/lolo-behavior-contracts.json'));
   });
 
   it('resolves the registry directory key', () => {
@@ -66,8 +77,8 @@ describe('resolveDeclaredFile', () => {
   });
 
   it('fails when the declared file is missing — no layout guess, no fallback copy', () => {
-    const root = fakePackage(ORB, ['behaviors/registry/factory-signatures.json']);
-    expect(() => resolveDeclaredFile(readBehaviorPackage(root), 'factorySignatures')).toThrow(/factorySignatures/);
+    const root = fakePackage(ORB, ['behaviors/registry/lolo-behavior-contracts.json']);
+    expect(() => resolveDeclaredFile(readBehaviorPackage(root), 'loloContracts')).toThrow(/loloContracts/);
   });
 
   it('refuses a declared path that escapes the package root', () => {
@@ -77,7 +88,7 @@ describe('resolveDeclaredFile', () => {
 });
 
 describe('behaviorProgramFiles', () => {
-  const declared = ['dist/behaviors-registry.json', 'dist/registry/factory-signatures.json', 'behaviors/lolo-behavior-contracts.json', 'behaviors/signatures.lolo', 'dist/behaviors-embeddings.json'];
+  const declared = ['dist/behaviors-registry.json', 'behaviors/lolo-behavior-contracts.json', 'behaviors/signatures.lolo', 'dist/behaviors-embeddings.json'];
 
   it('maps every program under the registry, nested folders included, to its file by basename', () => {
     const root = fakePackage(ORB, [...declared, 'behaviors/registry/app/atoms/std-a.orb', 'behaviors/registry/websites/atoms/blog/std-b.orb', 'behaviors/registry/ui/core/templates/ui-c.orb']);
@@ -87,7 +98,7 @@ describe('behaviorProgramFiles', () => {
   });
 
   it('control: files that are not programs are not behaviors', () => {
-    const root = fakePackage(ORB, [...declared, 'behaviors/registry/app/atoms/std-a.orb', 'behaviors/registry/factory-signatures.json', 'behaviors/registry/app/atoms/README.md']);
+    const root = fakePackage(ORB, [...declared, 'behaviors/registry/app/atoms/std-a.orb', 'behaviors/registry/notes.json', 'behaviors/registry/app/atoms/README.md']);
     expect([...behaviorProgramFiles(readBehaviorPackage(root)).keys()]).toEqual(['std-a']);
   });
 

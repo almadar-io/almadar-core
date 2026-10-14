@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 interface CoreManifest {
   orb?: object;
-  orbLanguage?: { compiler?: string; patterns?: string; componentMapping?: string; eventContracts?: string; services?: string; bindingRules?: string; themes?: string; fixtures?: string };
+  orbLanguage?: { compiler?: string; patterns?: string; componentMapping?: string; eventContracts?: string; services?: string; bindingRules?: string; programTypes?: string; themes?: string; fixtures?: string };
 }
 
 const manifest: CoreManifest = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf8'));
@@ -21,6 +21,7 @@ describe('@almadar/core package.json language-data declaration', () => {
     expect(manifest.orbLanguage?.eventContracts).toBe('dist/patterns/event-contracts.json');
     expect(manifest.orbLanguage?.services).toBe('dist/patterns/services-registry.json');
     expect(manifest.orbLanguage?.bindingRules).toBe('dist/language/binding-rules.json');
+    expect(manifest.orbLanguage?.programTypes).toBe('dist/language/program-types.json');
   });
 
   it('declares the theme preset directory orb loads (one ThemeDefinition per file, shipped)', () => {

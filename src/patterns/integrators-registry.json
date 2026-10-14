@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-12T11:05:39.287Z",
+  "exportedAt": "2026-10-13T15:18:05.894Z",
   "integrators": {
     "github": {
       "name": "github",
@@ -403,7 +403,7 @@
             },
             {
               "name": "metadata",
-              "type": "object",
+              "type": "map",
               "required": false,
               "description": "Arbitrary key-value tags attached to the PaymentIntent (string values only).",
               "mapValue": {
@@ -524,7 +524,7 @@
             },
             {
               "name": "metadata",
-              "type": "object",
+              "type": "map",
               "required": false,
               "description": "Tags written onto the created subscription (string values only).",
               "mapValue": {
@@ -597,7 +597,7 @@
             },
             {
               "name": "metadata",
-              "type": "object",
+              "type": "map",
               "required": false,
               "description": "Tags written onto the subscription (string values only).",
               "mapValue": {
@@ -826,7 +826,7 @@
                   "required": false
                 },
                 "properties": {
-                  "type": "object",
+                  "type": "map",
                   "required": false,
                   "description": "Keyed by field name — each named field carries its OWN nested schema\n(real JSON-Schema semantics; a single un-keyed nested schema here would\nsay every field of an object shares one shape).",
                   "mapValue": {
@@ -1090,13 +1090,20 @@
               "name": "input",
               "type": "ServiceParamsValue",
               "required": true,
-              "description": "JSON-safe model input (tensor-shaped payload from `contract/entity-to-tensor`)."
+              "description": "Model input — the caller declares its own shape (tensor-shaped payload from `contract/entity-to-tensor`).",
+              "shapedBy": "input"
             }
           ],
           "responseShape": {
-            "output": "ServiceParamsValue",
+            "output": {
+              "type": "ServiceParamsValue",
+              "shapedBy": "output"
+            },
             "confidence": "number",
-            "violations": "ServiceParamsValue[]"
+            "violations": {
+              "type": "ServiceParamsValue[]",
+              "shapedBy": "violations"
+            }
           }
         }
       ],
@@ -1320,7 +1327,7 @@
             },
             {
               "name": "payload",
-              "type": "object",
+              "type": "map",
               "required": false,
               "description": "Event payload; defaults to an empty object.",
               "mapValue": {
@@ -2339,7 +2346,7 @@
             },
             {
               "name": "buildArgs",
-              "type": "object",
+              "type": "map",
               "required": false,
               "description": "Build-time --build-arg values.",
               "mapValue": {
@@ -2395,7 +2402,7 @@
             },
             {
               "name": "env",
-              "type": "object",
+              "type": "map",
               "required": false,
               "description": "Environment variables set inside the container.",
               "mapValue": {
@@ -2709,7 +2716,7 @@
             },
             {
               "name": "metadata",
-              "type": "object",
+              "type": "map",
               "required": false,
               "description": "Object metadata stored alongside the content (S3-compatible object stores carry metadata as string headers — never structured values).",
               "mapValue": {
@@ -2835,7 +2842,7 @@
             "contentType": "string",
             "size": "number",
             "metadata": {
-              "type": "object",
+              "type": "map",
               "mapValue": {
                 "type": "string"
               }
@@ -3741,7 +3748,7 @@
             },
             {
               "name": "attributes",
-              "type": "object",
+              "type": "map",
               "required": false,
               "description": "Key-value attributes attached to the span (OTel attribute values are scalar).",
               "mapValue": {
@@ -3799,7 +3806,7 @@
             },
             {
               "name": "attributes",
-              "type": "object",
+              "type": "map",
               "required": false,
               "description": "Key-value attributes attached to the event (OTel attribute values are scalar).",
               "mapValue": {
@@ -3835,7 +3842,7 @@
             },
             {
               "name": "labels",
-              "type": "object",
+              "type": "map",
               "required": false,
               "description": "Key-value labels attached to the metric (replaces prior labels on the same name; OTel label values are scalar).",
               "mapValue": {
@@ -4940,138 +4947,6 @@
         "node"
       ]
     },
-    "deepagent": {
-      "name": "deepagent",
-      "description": "AI code generation agent with tool use - generates schemas, code, and manages projects",
-      "category": "ai",
-      "actions": [
-        {
-          "name": "sendMessage",
-          "description": "Send a chat message to the DeepAgent server (POST /api/agent/message), continuing an existing thread or starting one.",
-          "params": [
-            {
-              "name": "message",
-              "type": "string",
-              "required": true,
-              "description": "Message text."
-            },
-            {
-              "name": "threadId",
-              "type": "string",
-              "required": false,
-              "description": "Existing thread id to continue; a new thread starts when omitted."
-            },
-            {
-              "name": "skill",
-              "type": "string",
-              "required": false,
-              "description": "Named skill to invoke for this message."
-            },
-            {
-              "name": "context",
-              "type": "IntegrationParams",
-              "required": false,
-              "description": "Extra context passed through to the agent — the caller declares its own shape.",
-              "shapedBy": "context"
-            }
-          ],
-          "responseShape": {
-            "response": "string",
-            "threadId": "string"
-          }
-        },
-        {
-          "name": "cancelGeneration",
-          "description": "Cancel an in-flight generation on a DeepAgent thread (POST /api/agent/cancel).",
-          "params": [
-            {
-              "name": "threadId",
-              "type": "string",
-              "required": true,
-              "description": "Thread whose generation to cancel."
-            }
-          ],
-          "responseShape": {
-            "cancelled": "boolean"
-          }
-        },
-        {
-          "name": "validateSchema",
-          "description": "Validate a schema via the DeepAgent server (POST /api/schema/validate).",
-          "params": [
-            {
-              "name": "schema",
-              "type": "string",
-              "required": true,
-              "description": "Schema content to validate."
-            }
-          ],
-          "responseShape": {
-            "valid": "boolean",
-            "errors": "string[]"
-          }
-        },
-        {
-          "name": "compileSchema",
-          "description": "Compile a schema to a target shell via the DeepAgent server (POST /api/schema/compile).",
-          "params": [
-            {
-              "name": "schema",
-              "type": "string",
-              "required": true,
-              "description": "Schema content to compile."
-            },
-            {
-              "name": "shell",
-              "type": "string",
-              "required": false,
-              "description": "Target codegen shell (e.g. 'typescript')."
-            }
-          ],
-          "responseShape": {
-            "output": "string",
-            "files": "string[]"
-          }
-        },
-        {
-          "name": "getThreadHistory",
-          "description": "Fetch a thread's message history via the DeepAgent server (POST /api/agent/history).",
-          "params": [
-            {
-              "name": "threadId",
-              "type": "string",
-              "required": true,
-              "description": "Thread id."
-            }
-          ],
-          "responseShape": {
-            "messages": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "role": {
-                    "type": "string",
-                    "required": true
-                  },
-                  "content": {
-                    "type": "string",
-                    "required": true
-                  },
-                  "timestamp": {
-                    "type": "number",
-                    "required": true
-                  }
-                }
-              }
-            }
-          }
-        }
-      ],
-      "runtimes": [
-        "node"
-      ]
-    },
     "database": {
       "name": "database",
       "description": "Generic SQL database integration - read-only queries over external connections",
@@ -5289,9 +5164,82 @@
             },
             {
               "name": "rig",
-              "type": "object",
+              "type": "Rig",
               "required": true,
-              "description": "The rig definition (parts, boxes, pivots, …) as JSON."
+              "description": "The rig definition (parts, boxes, pivots, …).",
+              "properties": {
+                "parts": {
+                  "type": "RigPart[]",
+                  "required": true,
+                  "items": {
+                    "type": "RigPart",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "required": true
+                      },
+                      "box": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pixel box [x0, y0, x1, y1]; derived from the source part for a clone."
+                      },
+                      "pivot": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pivot [x, y] in image pixels; derived from the source part for a clone."
+                      },
+                      "z": {
+                        "type": "number",
+                        "required": false,
+                        "description": "Draw order, back to front."
+                      },
+                      "parent": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Name of the part this one is attached to."
+                      },
+                      "role": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Preset bone role that drives this part; defaults to the part name."
+                      },
+                      "cloneOf": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Name of the part whose geometry this one copies."
+                      },
+                      "offset": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pixel offset [dx, dy] applied to a clone's geometry."
+                      },
+                      "shade": {
+                        "type": "number",
+                        "required": false,
+                        "description": "Shading multiplier."
+                      },
+                      "render": {
+                        "type": "boolean",
+                        "required": false,
+                        "description": "False keeps the part out of the render while it still takes part in pixel ownership."
+                      },
+                      "poly": {
+                        "type": "number[][]",
+                        "required": false,
+                        "description": "Polygon outline [[x, y], …] narrowing the box."
+                      }
+                    }
+                  }
+                },
+                "skinFalloffPx": {
+                  "type": "number",
+                  "required": false
+                },
+                "meshGridStepPx": {
+                  "type": "number",
+                  "required": false
+                }
+              }
             }
           ],
           "responseShape": {
@@ -5314,9 +5262,82 @@
             },
             {
               "name": "rig",
-              "type": "object",
+              "type": "Rig",
               "required": true,
-              "description": "The rig definition (parts, boxes, pivots, …) as JSON."
+              "description": "The rig definition (parts, boxes, pivots, …).",
+              "properties": {
+                "parts": {
+                  "type": "RigPart[]",
+                  "required": true,
+                  "items": {
+                    "type": "RigPart",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "required": true
+                      },
+                      "box": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pixel box [x0, y0, x1, y1]; derived from the source part for a clone."
+                      },
+                      "pivot": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pivot [x, y] in image pixels; derived from the source part for a clone."
+                      },
+                      "z": {
+                        "type": "number",
+                        "required": false,
+                        "description": "Draw order, back to front."
+                      },
+                      "parent": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Name of the part this one is attached to."
+                      },
+                      "role": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Preset bone role that drives this part; defaults to the part name."
+                      },
+                      "cloneOf": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Name of the part whose geometry this one copies."
+                      },
+                      "offset": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pixel offset [dx, dy] applied to a clone's geometry."
+                      },
+                      "shade": {
+                        "type": "number",
+                        "required": false,
+                        "description": "Shading multiplier."
+                      },
+                      "render": {
+                        "type": "boolean",
+                        "required": false,
+                        "description": "False keeps the part out of the render while it still takes part in pixel ownership."
+                      },
+                      "poly": {
+                        "type": "number[][]",
+                        "required": false,
+                        "description": "Polygon outline [[x, y], …] narrowing the box."
+                      }
+                    }
+                  }
+                },
+                "skinFalloffPx": {
+                  "type": "number",
+                  "required": false
+                },
+                "meshGridStepPx": {
+                  "type": "number",
+                  "required": false
+                }
+              }
             },
             {
               "name": "preset",
@@ -5379,8 +5400,55 @@
                     "required": true
                   },
                   "bones": {
-                    "type": "object[]",
-                    "required": true
+                    "type": "PresetBone[]",
+                    "required": true,
+                    "items": {
+                      "type": "PresetBone",
+                      "properties": {
+                        "role": {
+                          "type": "string",
+                          "required": true
+                        },
+                        "rotate_deg": {
+                          "type": "number[]",
+                          "required": false,
+                          "description": "Rotation range [from, to] in degrees."
+                        },
+                        "rotate_deg_curve": {
+                          "type": "number[]",
+                          "required": false,
+                          "description": "Rotation sampled per frame, in degrees."
+                        },
+                        "translate_y": {
+                          "type": "number[]",
+                          "required": false,
+                          "description": "Vertical translation range [from, to] in pixels."
+                        },
+                        "phase": {
+                          "type": "number",
+                          "required": false
+                        },
+                        "freq": {
+                          "type": "number",
+                          "required": false
+                        },
+                        "ik": {
+                          "type": "object",
+                          "required": false,
+                          "description": "Inverse-kinematics stepping for a leg.",
+                          "properties": {
+                            "stride": {
+                              "type": "number",
+                              "required": true
+                            },
+                            "step_height": {
+                              "type": "number",
+                              "required": true
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -5399,8 +5467,150 @@
             }
           ],
           "responseShape": {
-            "rig": "object",
-            "resolved": "object"
+            "rig": {
+              "type": "Rig",
+              "properties": {
+                "parts": {
+                  "type": "RigPart[]",
+                  "required": true,
+                  "items": {
+                    "type": "RigPart",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "required": true
+                      },
+                      "box": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pixel box [x0, y0, x1, y1]; derived from the source part for a clone."
+                      },
+                      "pivot": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pivot [x, y] in image pixels; derived from the source part for a clone."
+                      },
+                      "z": {
+                        "type": "number",
+                        "required": false,
+                        "description": "Draw order, back to front."
+                      },
+                      "parent": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Name of the part this one is attached to."
+                      },
+                      "role": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Preset bone role that drives this part; defaults to the part name."
+                      },
+                      "cloneOf": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Name of the part whose geometry this one copies."
+                      },
+                      "offset": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pixel offset [dx, dy] applied to a clone's geometry."
+                      },
+                      "shade": {
+                        "type": "number",
+                        "required": false,
+                        "description": "Shading multiplier."
+                      },
+                      "render": {
+                        "type": "boolean",
+                        "required": false,
+                        "description": "False keeps the part out of the render while it still takes part in pixel ownership."
+                      },
+                      "poly": {
+                        "type": "number[][]",
+                        "required": false,
+                        "description": "Polygon outline [[x, y], …] narrowing the box."
+                      }
+                    }
+                  }
+                },
+                "skinFalloffPx": {
+                  "type": "number",
+                  "required": false
+                },
+                "meshGridStepPx": {
+                  "type": "number",
+                  "required": false
+                }
+              }
+            },
+            "resolved": {
+              "type": "object",
+              "properties": {
+                "parts": {
+                  "type": "RigPart[]",
+                  "required": true,
+                  "items": {
+                    "type": "RigPart",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "required": true
+                      },
+                      "box": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pixel box [x0, y0, x1, y1]; derived from the source part for a clone."
+                      },
+                      "pivot": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pivot [x, y] in image pixels; derived from the source part for a clone."
+                      },
+                      "z": {
+                        "type": "number",
+                        "required": false,
+                        "description": "Draw order, back to front."
+                      },
+                      "parent": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Name of the part this one is attached to."
+                      },
+                      "role": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Preset bone role that drives this part; defaults to the part name."
+                      },
+                      "cloneOf": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Name of the part whose geometry this one copies."
+                      },
+                      "offset": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pixel offset [dx, dy] applied to a clone's geometry."
+                      },
+                      "shade": {
+                        "type": "number",
+                        "required": false,
+                        "description": "Shading multiplier."
+                      },
+                      "render": {
+                        "type": "boolean",
+                        "required": false,
+                        "description": "False keeps the part out of the render while it still takes part in pixel ownership."
+                      },
+                      "poly": {
+                        "type": "number[][]",
+                        "required": false,
+                        "description": "Polygon outline [[x, y], …] narrowing the box."
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         {
@@ -5415,9 +5625,82 @@
             },
             {
               "name": "rig",
-              "type": "object",
+              "type": "Rig",
               "required": true,
-              "description": "The rig definition (parts, boxes, pivots, …) as JSON."
+              "description": "The rig definition (parts, boxes, pivots, …).",
+              "properties": {
+                "parts": {
+                  "type": "RigPart[]",
+                  "required": true,
+                  "items": {
+                    "type": "RigPart",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "required": true
+                      },
+                      "box": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pixel box [x0, y0, x1, y1]; derived from the source part for a clone."
+                      },
+                      "pivot": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pivot [x, y] in image pixels; derived from the source part for a clone."
+                      },
+                      "z": {
+                        "type": "number",
+                        "required": false,
+                        "description": "Draw order, back to front."
+                      },
+                      "parent": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Name of the part this one is attached to."
+                      },
+                      "role": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Preset bone role that drives this part; defaults to the part name."
+                      },
+                      "cloneOf": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Name of the part whose geometry this one copies."
+                      },
+                      "offset": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pixel offset [dx, dy] applied to a clone's geometry."
+                      },
+                      "shade": {
+                        "type": "number",
+                        "required": false,
+                        "description": "Shading multiplier."
+                      },
+                      "render": {
+                        "type": "boolean",
+                        "required": false,
+                        "description": "False keeps the part out of the render while it still takes part in pixel ownership."
+                      },
+                      "poly": {
+                        "type": "number[][]",
+                        "required": false,
+                        "description": "Polygon outline [[x, y], …] narrowing the box."
+                      }
+                    }
+                  }
+                },
+                "skinFalloffPx": {
+                  "type": "number",
+                  "required": false
+                },
+                "meshGridStepPx": {
+                  "type": "number",
+                  "required": false
+                }
+              }
             }
           ],
           "responseShape": {
@@ -5437,9 +5720,82 @@
             },
             {
               "name": "rig",
-              "type": "object",
+              "type": "Rig",
               "required": true,
-              "description": "The rig definition (parts, boxes, pivots, …) as JSON."
+              "description": "The rig definition (parts, boxes, pivots, …).",
+              "properties": {
+                "parts": {
+                  "type": "RigPart[]",
+                  "required": true,
+                  "items": {
+                    "type": "RigPart",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "required": true
+                      },
+                      "box": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pixel box [x0, y0, x1, y1]; derived from the source part for a clone."
+                      },
+                      "pivot": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pivot [x, y] in image pixels; derived from the source part for a clone."
+                      },
+                      "z": {
+                        "type": "number",
+                        "required": false,
+                        "description": "Draw order, back to front."
+                      },
+                      "parent": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Name of the part this one is attached to."
+                      },
+                      "role": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Preset bone role that drives this part; defaults to the part name."
+                      },
+                      "cloneOf": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Name of the part whose geometry this one copies."
+                      },
+                      "offset": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pixel offset [dx, dy] applied to a clone's geometry."
+                      },
+                      "shade": {
+                        "type": "number",
+                        "required": false,
+                        "description": "Shading multiplier."
+                      },
+                      "render": {
+                        "type": "boolean",
+                        "required": false,
+                        "description": "False keeps the part out of the render while it still takes part in pixel ownership."
+                      },
+                      "poly": {
+                        "type": "number[][]",
+                        "required": false,
+                        "description": "Polygon outline [[x, y], …] narrowing the box."
+                      }
+                    }
+                  }
+                },
+                "skinFalloffPx": {
+                  "type": "number",
+                  "required": false
+                },
+                "meshGridStepPx": {
+                  "type": "number",
+                  "required": false
+                }
+              }
             },
             {
               "name": "outPath",
@@ -5480,9 +5836,82 @@
             },
             {
               "name": "rig",
-              "type": "object",
+              "type": "Rig",
               "required": true,
-              "description": "The rig definition (parts, boxes, pivots, …) as JSON."
+              "description": "The rig definition (parts, boxes, pivots, …).",
+              "properties": {
+                "parts": {
+                  "type": "RigPart[]",
+                  "required": true,
+                  "items": {
+                    "type": "RigPart",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "required": true
+                      },
+                      "box": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pixel box [x0, y0, x1, y1]; derived from the source part for a clone."
+                      },
+                      "pivot": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pivot [x, y] in image pixels; derived from the source part for a clone."
+                      },
+                      "z": {
+                        "type": "number",
+                        "required": false,
+                        "description": "Draw order, back to front."
+                      },
+                      "parent": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Name of the part this one is attached to."
+                      },
+                      "role": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Preset bone role that drives this part; defaults to the part name."
+                      },
+                      "cloneOf": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Name of the part whose geometry this one copies."
+                      },
+                      "offset": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pixel offset [dx, dy] applied to a clone's geometry."
+                      },
+                      "shade": {
+                        "type": "number",
+                        "required": false,
+                        "description": "Shading multiplier."
+                      },
+                      "render": {
+                        "type": "boolean",
+                        "required": false,
+                        "description": "False keeps the part out of the render while it still takes part in pixel ownership."
+                      },
+                      "poly": {
+                        "type": "number[][]",
+                        "required": false,
+                        "description": "Polygon outline [[x, y], …] narrowing the box."
+                      }
+                    }
+                  }
+                },
+                "skinFalloffPx": {
+                  "type": "number",
+                  "required": false
+                },
+                "meshGridStepPx": {
+                  "type": "number",
+                  "required": false
+                }
+              }
             },
             {
               "name": "outDir",
@@ -5550,13 +5979,86 @@
             },
             {
               "name": "rig",
-              "type": "object",
+              "type": "Rig",
               "required": true,
-              "description": "The rig definition (parts, boxes, pivots, …) as JSON."
+              "description": "The rig definition (parts, boxes, pivots, …).",
+              "properties": {
+                "parts": {
+                  "type": "RigPart[]",
+                  "required": true,
+                  "items": {
+                    "type": "RigPart",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "required": true
+                      },
+                      "box": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pixel box [x0, y0, x1, y1]; derived from the source part for a clone."
+                      },
+                      "pivot": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pivot [x, y] in image pixels; derived from the source part for a clone."
+                      },
+                      "z": {
+                        "type": "number",
+                        "required": false,
+                        "description": "Draw order, back to front."
+                      },
+                      "parent": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Name of the part this one is attached to."
+                      },
+                      "role": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Preset bone role that drives this part; defaults to the part name."
+                      },
+                      "cloneOf": {
+                        "type": "string",
+                        "required": false,
+                        "description": "Name of the part whose geometry this one copies."
+                      },
+                      "offset": {
+                        "type": "number[]",
+                        "required": false,
+                        "description": "Pixel offset [dx, dy] applied to a clone's geometry."
+                      },
+                      "shade": {
+                        "type": "number",
+                        "required": false,
+                        "description": "Shading multiplier."
+                      },
+                      "render": {
+                        "type": "boolean",
+                        "required": false,
+                        "description": "False keeps the part out of the render while it still takes part in pixel ownership."
+                      },
+                      "poly": {
+                        "type": "number[][]",
+                        "required": false,
+                        "description": "Polygon outline [[x, y], …] narrowing the box."
+                      }
+                    }
+                  }
+                },
+                "skinFalloffPx": {
+                  "type": "number",
+                  "required": false
+                },
+                "meshGridStepPx": {
+                  "type": "number",
+                  "required": false
+                }
+              }
             },
             {
               "name": "roles",
-              "type": "object",
+              "type": "map",
               "required": true,
               "description": "Map of part name to preset bone role.",
               "mapValue": {
@@ -5571,9 +6073,12 @@
             },
             {
               "name": "overrides",
-              "type": "object",
+              "type": "map",
               "required": false,
-              "description": "Per-part motion overrides applied over the preset."
+              "description": "Per-part motion overrides applied over the preset (part name to value).",
+              "mapValue": {
+                "type": "number"
+              }
             }
           ],
           "responseShape": {
@@ -5581,7 +6086,7 @@
             "frames": {
               "type": "array",
               "items": {
-                "type": "object",
+                "type": "map",
                 "mapValue": {
                   "type": "object",
                   "properties": {
@@ -5720,7 +6225,7 @@
             },
             {
               "name": "params",
-              "type": "object",
+              "type": "map",
               "required": false,
               "description": "Query parameters added to the URL, encoded (e.g. a search term).",
               "mapValue": {
@@ -5798,7 +6303,7 @@
             },
             {
               "name": "fields",
-              "type": "object",
+              "type": "map",
               "required": true,
               "description": "Field name to how to read it from each element.",
               "mapValue": {
@@ -5857,7 +6362,7 @@
                     "required": true
                   },
                   "fields": {
-                    "type": "object",
+                    "type": "map",
                     "required": true,
                     "mapValue": {
                       "type": "string"
@@ -5886,7 +6391,7 @@
             },
             {
               "name": "fields",
-              "type": "object",
+              "type": "map",
               "required": true,
               "description": "Field name to how to read it from each element.",
               "mapValue": {
@@ -8437,7 +8942,7 @@
             },
             {
               "name": "props",
-              "type": "object",
+              "type": "map",
               "required": false,
               "description": "Event properties.",
               "mapValue": {

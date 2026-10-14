@@ -39,7 +39,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 
 describe('TraitEntityFieldSchema / RequiredFieldSchema admit the full TraitFieldType vocabulary', () => {
   it('TRAIT_FIELD_TYPES carries every newly-closed spelling', () => {
-    expect(TRAIT_FIELD_TYPES).toContain('scalar');
+    expect(TRAIT_FIELD_TYPES).not.toContain('scalar');
     expect(TRAIT_FIELD_TYPES).toContain('union');
   });
 

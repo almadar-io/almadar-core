@@ -490,14 +490,13 @@ export const TraitCategorySchema = z.enum([
 // `trait` / `slot` / `pattern` mirror Rust's `FieldType::{Trait, Slot, Pattern}`
 // (orbital-core schema/types.rs) — config-field-only types: a `@trait.X`
 // embed slot, a UI slot name, a pattern type name.
-// `scalar` and `union` are the closed transport/variant types — real
-// .lolo/.orb types, so the trait-side mirror must carry them or generated
-// factories fail DTS.
-export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum' | 'email' | 'url' | 'phone' | 'uuid' | 'image' | 'trait' | 'slot' | 'pattern' | 'node' | 'event' | 'EventAddress' | 'scalar' | 'SExpr' | 'union' | 'tuple';
+// `union` is the closed variant type — a real .lolo/.orb type, so the
+// trait-side mirror must carry it or generated factories fail DTS.
+export type TraitFieldType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object' | 'timestamp' | 'datetime' | 'enum' | 'email' | 'url' | 'phone' | 'uuid' | 'image' | 'trait' | 'slot' | 'pattern' | 'node' | 'event' | 'EventAddress' | 'SExpr' | 'union' | 'tuple';
 
 /** Every `TraitFieldType`, as a runtime array — the ONE list `TraitEntityFieldSchema`
  *  and `RequiredFieldSchema` both read. Two separate inline copies of this enum had
- *  already fallen behind the TS type twice (`node` missing, then `scalar`/`union`
+ *  already fallen behind the TS type twice (`node` missing, then `union`
  *  missing) — mirrors the `FIELD_TYPES` fix for `FieldType` in `field.ts`. */
 export const TRAIT_FIELD_TYPES = [
     'string',
@@ -520,7 +519,6 @@ export const TRAIT_FIELD_TYPES = [
     'node',
     'event',
     'EventAddress',
-    'scalar',
     'SExpr',
     'union',
     'tuple',
@@ -598,6 +596,8 @@ export type TraitTick = {
     appliesTo?: string[];
     /** `[background]`: runs with no client mounted; otherwise paused while no client has the trait mounted. */
     runsInBackground?: boolean;
+    /** `[visible]`: a browser tick that pauses while its trait's rendered output is off screen. */
+    whileVisible?: boolean;
     pages?: string[];
     /** V4 dual-carry id sibling of `pages` — optional until the Phase-7 flip. */
     pageIds?: PageId[];
@@ -648,6 +648,7 @@ export const TraitTickSchema = z.object({
     interval: TickIntervalSchema,
     appliesTo: z.array(z.string()).optional(),
     runsInBackground: z.boolean().optional(),
+    whileVisible: z.boolean().optional(),
     pages: z.array(z.string()).optional(),
     pageIds: z.array(PageIdSchema).optional(),
     guard: ExpressionSchema.optional(),

@@ -507,9 +507,8 @@ export interface FactorySignature {
 }
 
 /**
- * Aggregate catalog written to
- * `packages/almadar-std/behaviors/registry/factory-signatures.json`.
- * Sorted by organism then orbital.
+ * A package's extracted signatures, the input of the contract slice (`buildLoloBehaviorContracts`).
+ * No file carries it since 2026-10-14. Sorted by organism then orbital.
  */
 export interface FactorySignatureCatalog {
   /** Generated-by version stamp (the `@almadar/std` minor it shipped in). */

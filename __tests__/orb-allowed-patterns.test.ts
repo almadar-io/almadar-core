@@ -89,14 +89,14 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
       Object.entries(grouped).map(([cat, items]) => [cat, items.length]),
     );
     expect(counts).toMatchObject({
-      component: 109,
+      component: 110,
       display: 34,
       filter: 4,
       form: 10,
       game: 36,
       media: 1,
     });
-    expect(names.length).toBe(241);
+    expect(names.length).toBe(242);
   });
 
   it('admits the drifted patterns by name, not just by count', () => {
@@ -111,6 +111,7 @@ describe('getOrbAllowedPatterns — free-mode vocabulary', () => {
       'icon-button',
       'commit-row',
       'activity-rail',
+      'video-embed',
     ]) {
       expect(grouped.component.map((p) => p.name)).toContain(name);
     }

@@ -239,6 +239,18 @@ describe('behavior description (orb behaviors describe on a behavior or orbital)
     expect(older.orbitals[0]?.pages[0]?.traits).toBeUndefined();
   });
 
+  it('a trait names the trait it composes and its capability tags; control: an older orb omits both', () => {
+    const [item, note] = described.orbitals;
+    const tagged = { ...described, orbitals: [{ ...item!, traits: item!.traits.map((t) => ({ ...t, ref: 'Door.traits.DoorLife', capabilities: ['hinged'] })) }, note!] };
+    const parsed = BehaviorDescriptionSchema.parse(tagged);
+    expect(parsed.orbitals[0]?.traits[0]?.ref).toBe('Door.traits.DoorLife');
+    expect(parsed.orbitals[0]?.traits[0]?.capabilities).toEqual(['hinged']);
+    const older = BehaviorDescriptionSchema.parse(described);
+    expect(older.orbitals[0]?.traits[0]?.ref).toBeUndefined();
+    expect(older.orbitals[0]?.traits[0]?.capabilities).toBeUndefined();
+    expect(() => BehaviorDescriptionSchema.parse({ ...tagged, orbitals: [{ ...item!, traits: item!.traits.map((t) => ({ ...t, capabilities: 'hinged' })) }, note!] })).toThrow();
+  });
+
   it('a page carries its menu label and icon; control: a page without them omits both', () => {
     const [item, note] = described.orbitals;
     const withMenu = { ...described, orbitals: [{ ...item!, pages: [{ name: 'ItemsPage', path: '/items', label: 'Items', icon: 'list' }] }, note!] };
@@ -262,6 +274,36 @@ describe('behavior description (orb behaviors describe on a behavior or orbital)
     const trait = { value: { behavior: './orbitals/shop', trait: 'ItemList' }, knobs: [], events: { emits: [], listens: ['OPEN'], transitions: ['OPEN'], domain: ['OPEN'] }, model: '' };
     expect(TraitDescriptionSchema.parse(trait).events.domain).toEqual(['OPEN']);
     expect(TraitDescriptionSchema.safeParse({ ...trait, events: { ...trait.events, domain: 'OPEN' } }).success).toBe(false);
+  });
+
+  it('a trait description carries its printed source with each transition\'s lines; a malformed one is refused; control: an older orb omits it', () => {
+    const trait = { value: { behavior: 'std/std-door', trait: 'DoorLife' }, knobs: [], events: { emits: [], listens: [], transitions: ['OPEN'] }, model: '' };
+    const source = { text: 'trait DoorLife -> Door {\n  initial: closed\n  state closed {\n    OPEN -> opened\n  }\n}', transitions: [{ index: 0, start: 4, end: 4 }] };
+    expect(TraitDescriptionSchema.parse({ ...trait, source }).source?.transitions[0]).toEqual({ index: 0, start: 4, end: 4 });
+    expect(TraitDescriptionSchema.safeParse({ ...trait, source: { text: 'x', transitions: [{ index: 0, start: 4 }] } }).success).toBe(false);
+    expect(TraitDescriptionSchema.parse(trait).source).toBeUndefined();
+  });
+
+  it('a trait description carries its state machine as the program runs it; a malformed one is refused; control: an older orb omits it', () => {
+    const trait = { value: { behavior: 'std/std-door', trait: 'DoorLife' }, knobs: [], events: { emits: [], listens: [], transitions: ['OPEN', 'CLOSE'] }, model: '' };
+    const machine = {
+      linkedEntity: 'Door',
+      stateMachine: {
+        states: [{ name: 'closed', isInitial: true }, { name: 'opened' }],
+        events: [{ key: 'OPEN', name: 'OPEN' }, { key: 'CLOSE', name: 'CLOSE' }],
+        transitions: [
+          { from: 'closed', to: 'opened', event: 'OPEN', guard: ['not', '@entity.open'], effects: [['set', '@entity.open', true]] },
+          { from: 'opened', to: 'closed', event: 'CLOSE', effects: [['set', '@entity.open', false]] },
+        ],
+      },
+    };
+    const parsed = TraitDescriptionSchema.parse({ ...trait, machine });
+    expect(parsed.machine?.linkedEntity).toBe('Door');
+    expect(parsed.machine?.stateMachine.transitions[0]?.guard).toEqual(['not', '@entity.open']);
+    expect(parsed.machine?.stateMachine.transitions[1]?.effects).toEqual([['set', '@entity.open', false]]);
+    expect(TraitDescriptionSchema.safeParse({ ...trait, machine: { linkedEntity: 'Door' } }).success).toBe(false);
+    expect(TraitDescriptionSchema.safeParse({ ...trait, machine: { ...machine, stateMachine: { ...machine.stateMachine, states: [] } } }).success).toBe(false);
+    expect(TraitDescriptionSchema.parse(trait).machine).toBeUndefined();
   });
 
   it('an entity says whether it is stored or page-only; an unknown kind is refused; control: an older orb omits it', () => {

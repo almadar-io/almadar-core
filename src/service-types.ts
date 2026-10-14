@@ -320,6 +320,60 @@ export interface RowPage<T> {
   total: number;
 }
 
+/** The comparison members of `StoreFilterOp`. */
+export type RowCompareOp = Extract<StoreFilterOp, "==" | "!=" | "<" | "<=" | ">" | ">=">;
+
+/**
+ * A row predicate with two-valued logic: a missing or null field satisfies only `!=` against a
+ * non-null value and `isNull: true`, and fails every other leaf, so `not` of a failing leaf holds.
+ * Leaves reuse the `StoreFilterOp` meanings: `member` is `in`, `hasElement` is `array-contains`,
+ * `contains` is a substring test.
+ */
+export type RowPredicate =
+  | { kind: "compare"; field: string; op: RowCompareOp; value: FieldValue }
+  | { kind: "member"; field: string; values: FieldValue[] }
+  | { kind: "hasElement"; field: string; value: FieldValue }
+  | { kind: "contains"; field: string; text: string; caseSensitive: boolean }
+  | { kind: "isNull"; field: string; isNull: boolean }
+  | { kind: "all"; of: RowPredicate[] }
+  | { kind: "any"; of: RowPredicate[] }
+  | { kind: "not"; of: RowPredicate }
+  | { kind: "const"; value: boolean };
+
+/** One sort key. Missing and null values sort last in both directions; ties break by `id` ascending. */
+export interface RowOrder {
+  field: string;
+  direction: "asc" | "desc";
+}
+
+/**
+ * A pushed-down query: rows matching `policy` AND `filter`, ordered, then windowed. `policy` is the
+ * entity's `@read` predicate already specialised to the viewer; `filter` is the call-site filter.
+ */
+export interface RowQuery {
+  policy?: RowPredicate;
+  filter?: RowPredicate;
+  order?: RowOrder;
+  offset?: number;
+  /** Absent = no limit. */
+  limit?: number;
+}
+
+/** The answer to a `RowQuery`: the window, and `total` = every match before the window. */
+export type RowQueryPage = RowPage<EntityRow>;
+
+/** What an adapter's `queryPage` honours for one entity type. */
+export interface QueryCapabilities {
+  leaves: ("compare" | "member" | "hasElement" | "contains" | "isNull")[];
+  combinators: ("all" | "any" | "not")[];
+  compareOps: RowCompareOp[];
+  orderableFields: { kind: "every-field" } | { kind: "listed"; fields: string[] };
+  /** offset and limit. */
+  window: boolean;
+  /** `total` counts every match, not the window. */
+  exactTotal: boolean;
+}
+
 /**
  * Storage contract for CRUD operations on entity rows. The runtime's effect
  * handlers and every database backend (`@almadar/db`) speak this interface.
@@ -336,6 +390,10 @@ export interface PersistenceAdapter {
   query?(entityType: string, filters: readonly StoreFilter<EntityRow>[]): Promise<EntityRow[]>;
   /** One page, pushed down to the store where it can; absent = page over `list`. */
   listPage?(entityType: string, request: RowPageRequest<EntityRow>): Promise<RowPage<EntityRow>>;
+  /** The page of rows matching `query.policy AND query.filter`, ordered and windowed; only queries within `queryCapabilities`. */
+  queryPage?(entityType: string, query: RowQuery): Promise<RowQueryPage>;
+  /** What `queryPage` honours; absent = the host cannot push a query down. */
+  queryCapabilities?(entityType: string): QueryCapabilities;
 }
 
 /**

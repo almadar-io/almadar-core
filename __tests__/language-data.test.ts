@@ -28,7 +28,7 @@ function project(opts: { std?: boolean; coreBlock?: Record<string, string> | nul
   const root = mkdtempSync(join(tmpdir(), 'lang-bundle-'));
   const core = join(root, 'node_modules/@almadar/core');
   const block = opts.coreBlock === undefined
-    ? { compiler: '>=17.0.0', patterns: 'p/patterns.json', componentMapping: 'p/cm.json', eventContracts: 'p/ec.json', services: 'p/s.json', bindingRules: 'p/br.json', themes: 'themes' }
+    ? { compiler: '>=17.0.0', patterns: 'p/patterns.json', componentMapping: 'p/cm.json', eventContracts: 'p/ec.json', services: 'p/s.json', bindingRules: 'p/br.json', programTypes: 'p/pt.json', themes: 'themes' }
     : opts.coreBlock;
   write(join(core, 'package.json'), JSON.stringify({ name: '@almadar/core', version: '10.1.0', ...(block ? { orbLanguage: block } : {}) }));
   write(join(core, 'p/patterns.json'), '{"patterns":{"button":{}}}');
@@ -36,6 +36,7 @@ function project(opts: { std?: boolean; coreBlock?: Record<string, string> | nul
   write(join(core, 'p/ec.json'), '{"contracts":{}}');
   write(join(core, 'p/s.json'), '{"services":{}}');
   write(join(core, 'p/br.json'), '{"guard":{"allowed":["entity"]}}');
+  write(join(core, 'p/pt.json'), '{"OrbitalValue":{"type":"object","properties":{"behavior":{"type":"string","required":true}}}}');
   for (const name of opts.themes ?? ['zeta', 'alpha']) write(join(core, `themes/${name}.json`), JSON.stringify({ name, tokens: {} }));
   if (opts.std !== false) {
     const std = join(root, 'node_modules/@almadar/std');
@@ -52,6 +53,7 @@ describe('readLanguageBundle', () => {
     expect(bundle.core.compiler).toBe('>=17.0.0');
     expect(bundle.core.patterns).toEqual({ patterns: { button: {} } });
     expect(bundle.core.bindingRules).toEqual({ guard: { allowed: ['entity'] } });
+    expect(bundle.core.programTypes).toEqual({ OrbitalValue: { type: 'object', properties: { behavior: { type: 'string', required: true } } } });
     expect(bundle.core.themes.map((t) => t.name)).toEqual(['alpha', 'zeta']);
     expect(bundle.std).toEqual({ version: '8.2.0', compiler: '>=17.0.0', operators: { categories: {}, operators: {} } });
   });
@@ -67,6 +69,11 @@ describe('readLanguageBundle', () => {
   it('a core that declares no binding rules fails naming the key', () => {
     const block = { compiler: '>=17.0.0', patterns: 'p/patterns.json', componentMapping: 'p/cm.json', eventContracts: 'p/ec.json', services: 'p/s.json', themes: 'themes' };
     expect(() => readLanguageBundle(project({ coreBlock: block }))).toThrow(/orbLanguage\.bindingRules/);
+  });
+
+  it('a core that declares no program types fails naming the key', () => {
+    const block = { compiler: '>=17.0.0', patterns: 'p/patterns.json', componentMapping: 'p/cm.json', eventContracts: 'p/ec.json', services: 'p/s.json', bindingRules: 'p/br.json', themes: 'themes' };
+    expect(() => readLanguageBundle(project({ coreBlock: block }))).toThrow(/orbLanguage\.programTypes/);
   });
 
   it('edge: an empty theme directory is refused, not an empty bundle', () => {

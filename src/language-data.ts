@@ -37,6 +37,7 @@ export interface LanguageBundle {
     eventContracts: JsonValue;
     services: JsonValue;
     bindingRules: JsonValue;
+    programTypes: JsonValue;
     themes: ThemeDefinition[];
   };
   std: {
@@ -163,6 +164,7 @@ export function readLanguageBundle(fromDir: string, userStore: string = userStor
       eventContracts: readJson(declared(core, 'eventContracts')),
       services: readJson(declared(core, 'services')),
       bindingRules: readJson(declared(core, 'bindingRules')),
+      programTypes: readJson(declared(core, 'programTypes')),
       themes,
     },
     std: {

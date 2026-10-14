@@ -114,8 +114,15 @@ describe('ClientEffectTupleSchema — exact tuple arities', () => {
     expect(ClientEffectTupleSchema.parse(['render-ui', 'main', null])).toBeTruthy();
     expect(ClientEffectTupleSchema.parse(['render-ui', 'main', { patternType: 'box' }, { className: 'x' }])).toBeTruthy();
     expect(
-      ClientEffectTupleSchema.parse(['render-ui', 'main', { patternType: 'box' }, undefined, 2]),
+      ClientEffectTupleSchema.parse(['render-ui', 'main', { patternType: 'box' }, null, 2]),
     ).toBeTruthy();
+  });
+
+  it('empty slots are null on the wire (JSON.stringify writes null for undefined)', () => {
+    const wire = JSON.parse(JSON.stringify(['render-ui', 'main', null, undefined, undefined]));
+    expect(ClientEffectTupleSchema.parse(wire)).toEqual(['render-ui', 'main', null, null, null]);
+    expect(ClientEffectTupleSchema.parse(['navigate', '/tasks', null])).toBeTruthy();
+    expect(() => ClientEffectTupleSchema.parse(['navigate', '/tasks', undefined])).toThrow();
   });
 
   it('rejects a render-ui tuple with a wrong arity', () => {

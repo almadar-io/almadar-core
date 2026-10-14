@@ -103,7 +103,11 @@ describe('shared entity field tool contract', () => {
     for (const key of ['field', 'onDelete']) expect(relation?.properties?.relation?.properties, key).toHaveProperty(key);
   });
 
-  it.each(['file', 'trait', 'slot', 'pattern', 'node', 'event', 'EventAddress', 'scalar', 'SExpr'])('carries an existing scalar tag: %s', type => {
+  it('rejects the removed catch-all type scalar', () => {
+    expect(() => EntityFieldSchema.parse({ name: 'value', type: 'scalar' })).toThrow();
+  });
+
+  it.each(['file', 'trait', 'slot', 'pattern', 'node', 'event', 'EventAddress', 'SExpr'])('carries an existing scalar tag: %s', type => {
     const field = EntityFieldSchema.parse({ name: 'value', type });
     expect(ENTITY_FIELD_SCHEMA.oneOf?.some(branch => branch.properties?.type?.enum?.includes(field.type))).toBe(true);
   });

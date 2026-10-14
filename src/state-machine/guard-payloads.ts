@@ -123,7 +123,7 @@ const SYNTHESIZED_GUARD_OPERATORS = new Set([
   'eq', '==', '=', 'not-eq', '!=', 'neq',
   'gt', '>', 'gte', '>=', 'lt', '<', 'lte', '<=',
   'and', 'or', 'not',
-  'object/has', 'object/get', 'array/includes', 'str/startsWith', 'validate/url',
+  'object/has', 'object/get', 'array/includes', 'str/startsWith', 'validate/url', 'validate/required',
   'agent/is-pinned', 'agent/memory-strength',
 ]);
 
@@ -668,6 +668,14 @@ export function buildGuardPayloads(guard: unknown): GuardPayload {
     const path = extractPayloadFieldPath(guard[1]);
     if (path) {
       return { pass: nestedPayload(path, 'https://example.test/mock'), fail: nestedPayload(path, 'not-a-url') };
+    }
+  }
+
+  // `(validate/required @payload.x)`: pass with a non-empty value, fail with an empty string.
+  if (op === 'validate/required') {
+    const path = extractPayloadFieldPath(guard[1]);
+    if (path) {
+      return { pass: nestedPayload(path, 'mock-required-value'), fail: nestedPayload(path, '') };
     }
   }
 

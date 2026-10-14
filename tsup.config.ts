@@ -2,6 +2,7 @@ import { defineConfig } from 'tsup';
 import fs from 'node:fs';
 import path from 'node:path';
 import { BINDING_CONTEXT_RULES } from './src/types/bindings';
+import { buildProgramTypes } from './src/program-types';
 
 export default defineConfig({
   entry: {
@@ -14,6 +15,7 @@ export default defineConfig({
     'builders': 'src/builders.ts',
     'patterns/index': 'src/patterns/index.ts',
     'mock/index': 'src/mock/index.ts',
+    'kernel-wire': 'src/generated/kernel-wire.ts',
     'i18n/index': 'src/i18n/index.ts',
     'themes/index': 'src/themes/index.ts',
     'fixtures': 'src/fixtures.ts',
@@ -57,5 +59,6 @@ export default defineConfig({
     console.log('✓ Copied pattern JSON files to dist/patterns');
     fs.mkdirSync('dist/language', { recursive: true });
     fs.writeFileSync('dist/language/binding-rules.json', `${JSON.stringify(BINDING_CONTEXT_RULES, null, 2)}\n`);
+    fs.writeFileSync('dist/language/program-types.json', `${JSON.stringify(buildProgramTypes(), null, 2)}\n`);
   },
 });

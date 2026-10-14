@@ -689,7 +689,7 @@ const ENTITY_FIELD_BASE_PROPS = {
 const SCALAR_FIELD_TYPES: ReadonlyArray<string> = [
   'string', 'number', 'boolean', 'date', 'timestamp', 'datetime',
   'email', 'url', 'phone', 'uuid', 'image', 'money',
-  'file', 'trait', 'slot', 'pattern', 'node', 'event', 'EventAddress', 'scalar', 'SExpr',
+  'file', 'trait', 'slot', 'pattern', 'node', 'event', 'EventAddress', 'SExpr',
 ];
 const SCALAR_FIELD_BRANCH: JsonSchema = {
   type: 'object',

@@ -72,6 +72,8 @@ export {
   parseImportedTraitRef,
   parseOrbitalRef,
   isImportedTraitRef,
+  unwrapTraitRef,
+  inlineTraitRefs,
   // Expectation accessors
   expectedEntityName,
 } from "./orbital.js";
@@ -1061,6 +1063,12 @@ export {
   type StoreFilter,
   type RowPageRequest,
   type RowPage,
+  type RowCompareOp,
+  type RowPredicate,
+  type RowOrder,
+  type RowQuery,
+  type RowQueryPage,
+  type QueryCapabilities,
   type PersistenceAdapter,
   type StoreContract,
   // Typed EventBus wrapper
@@ -1069,6 +1077,19 @@ export {
   type LazyService,
   createLazyService,
 } from "../service-types.js";
+
+export {
+  RowPredicateSchema,
+  RowQuerySchema,
+  RowQueryPageSchema,
+  rowMatchesPredicate,
+  compareByField,
+  orderRows,
+  runRowQuery,
+  queryUnsupportedReason,
+  FULL_QUERY_CAPABILITIES,
+  type QueryUnsupportedReason,
+} from "../row-query.js";
 
 // ============================================================================
 // IR Types (Intermediate Representation)
@@ -1142,6 +1163,9 @@ export {
   type ClientEffectByTrait,
   type TransitionRejection,
   type TransitionRejectionCode,
+  type TransitionHop,
+  type HopEffect,
+  type HopEffectStatus,
   type ExternalInputRequest,
   type ServiceHostPorts,
   OrbitalEventRequestSchema,

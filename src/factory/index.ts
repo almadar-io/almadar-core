@@ -20,7 +20,6 @@ export type {
 } from './types.js';
 
 export { rehydrateKnobDefs } from './knob-defs.js';
-export { mergeParams, type ParamConflict, type ParamConflictKind, type ParamsMerge } from './merge.js';
 export {
   buildLoloBehaviorContracts,
   serializeLoloBehaviorContracts,
@@ -58,16 +57,6 @@ export type {
   RuleOverlayEntry,
   OwnershipOverlayEntry,
 } from './overlays.js';
-
-export { translateOverlaysToParams } from './translate.js';
-export type {
-  TranslationBinding,
-  TranslationResult,
-  TranslationWarning,
-} from './translate.js';
-
-export { diffFactoryCalls } from './diff.js';
-export type { CallSiteDiff } from './diff.js';
 
 export {
   applyFactoryCallPlanMutation,

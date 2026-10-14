@@ -16,6 +16,7 @@ import { DeclaredTraitConfigSchema, TraitConfigValueSchema, TraitReferenceObject
 import { ExpectDeclarationSchema, OrbitalRefObjectSchema, type OrbitalRefObject } from './orbital.js';
 import { EntityFieldSchema, type EntityField } from './field.js';
 import { EntityPersistenceSchema } from './entity.js';
+import { StateMachineSchema, type StateMachine } from './state-machine.js';
 import type { JsonValue, RuntimeValue } from './json.js';
 import type { OrbitalSchema } from './schema.js';
 import type { FactoryExposure } from '../factory/types.js';
@@ -334,7 +335,16 @@ export const CatalogEntrySchema = z.object({
 export type CatalogEntry = z.infer<typeof CatalogEntrySchema>;
 
 /** One knob of a described trait, with its shipped embedding vector. */
-export const TraitKnobSchema = z.object({
+export type TraitKnob = {
+  key: string;
+  type: string;
+  default?: TraitConfigValue;
+  label?: string;
+  description?: string;
+  tier?: string;
+  vector?: number[];
+};
+export const TraitKnobSchema: z.ZodType<TraitKnob> = z.object({
   key: z.string(),
   type: z.string(),
   default: TraitConfigValueSchema.optional(),
@@ -343,25 +353,63 @@ export const TraitKnobSchema = z.object({
   tier: z.string().optional(),
   vector: VectorSchema.optional(),
 }).strict();
-export type TraitKnob = z.infer<typeof TraitKnobSchema>;
 
 /** A described trait's events: what it emits, listens to and transitions on, and which of those its source declares `@tier "domain"`. */
-export const TraitEventsSchema = z.object({
+export type TraitEvents = {
+  emits: string[];
+  listens: string[];
+  /** Events the trait's own transitions fire on — the only valid `listens` triggers. */
+  transitions: string[];
+  domain?: string[];
+};
+export const TraitEventsSchema: z.ZodType<TraitEvents> = z.object({
   emits: z.array(z.string()),
   listens: z.array(z.string()),
-  /** Events the trait's own transitions fire on — the only valid `listens` triggers. */
   transitions: z.array(z.string()),
   domain: z.array(z.string()).optional(),
 }).strict();
 
+/** A described trait's state machine as the program runs it (resolved: composition and renames applied). */
+export type TraitMachine = {
+  linkedEntity?: string;
+  stateMachine: StateMachine;
+};
+const TraitMachineObject = z.object({
+  linkedEntity: z.string().optional(),
+  stateMachine: StateMachineSchema,
+}).strict();
+export const TraitMachineSchema: z.ZodType<TraitMachine, z.ZodTypeDef, z.input<typeof TraitMachineObject>> = TraitMachineObject;
+
+/** A described trait printed as `.lolo` by orb's formatter, with the 1-based lines each transition (by its index in the machine) spans. */
+export type TraitSource = {
+  text: string;
+  transitions: { index: number; start: number; end: number }[];
+};
+export const TraitSourceSchema: z.ZodType<TraitSource> = z.object({
+  text: z.string(),
+  transitions: z.array(z.object({ index: z.number().int(), start: z.number().int(), end: z.number().int() }).strict()),
+}).strict();
+
 /** What `behavior/describe` returns for a trait value (`orb behaviors describe --json`). */
-export const TraitDescriptionSchema = z.object({
+export type TraitDescription = {
+  value: TraitValue;
+  knobs: TraitKnob[];
+  events: TraitEvents;
+  /** The trait's state machine; absent from an older orb. */
+  machine?: TraitMachine;
+  /** The trait as orb prints it; absent from an older orb. */
+  source?: TraitSource;
+  model: string;
+};
+const TraitDescriptionObject = z.object({
   value: TraitValueSchema,
   knobs: z.array(TraitKnobSchema),
   events: TraitEventsSchema,
+  machine: TraitMachineSchema.optional(),
+  source: TraitSourceSchema.optional(),
   model: z.string(),
 }).strict();
-export type TraitDescription = z.infer<typeof TraitDescriptionSchema>;
+export const TraitDescriptionSchema: z.ZodType<TraitDescription, z.ZodTypeDef, z.input<typeof TraitDescriptionObject>> = TraitDescriptionObject;
 
 
 /** What `behavior/describe` accepts: a trait value, an orbital value, or a whole behavior. */
@@ -417,6 +465,10 @@ export const OrbitalDescriptionSchema = z.object({
     events: TraitEventsSchema,
     /** Declared `-> @rebindable`: the trait may be bound to another record. */
     rebindable: z.boolean().optional(),
+    /** The upstream trait this one composes (`trait X = Alias.traits.Y`), as written; absent for a trait the behavior defines itself. */
+    ref: z.string().optional(),
+    /** The trait's declared `@capabilities` tags. */
+    capabilities: z.array(z.string()).optional(),
   }).strict()),
   /** Each page with the traits it mounts: what the behavior declares as standing on its own. */
   pages: z.array(z.object({ name: z.string(), path: z.string(), traits: z.array(z.string()).optional(), label: z.string().optional(), icon: z.string().optional() }).strict()),

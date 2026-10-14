@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 import { discoverBehaviorPackages } from '../src/behavior-package.js';
 
-const ORB = { index: 'i.json', factorySignatures: 'f.json', loloContracts: 'c.json', signatures: 's.lolo', embeddings: [], compiler: '>=1.0.0', source: 'behaviors/lolo' };
+const ORB = { index: 'i.json', loloContracts: 'c.json', embeddings: [], compiler: '>=1.0.0', source: 'behaviors/lolo' };
 
 function writeManifest(dir: string, manifest: object): void {
   mkdirSync(dir, { recursive: true });

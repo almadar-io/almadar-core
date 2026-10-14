@@ -68,14 +68,12 @@ export type FieldType =
     // A value addressing a declared external input (`Trait.EVENT`,
     // `Orbital.Trait.EVENT`) — never a bare name. See `EventAddress` in access/externalInputs.
     | 'EventAddress'
-    // Closed scalar transport union (`ControlValue`) and tagged struct union
-    // (`type DrawItem = DrawShape | DrawText`) — real .lolo/.orb types the
-    // Rust compiler accepts; the TS mirror must carry them or generated
-    // factories fail DTS (docs/Almadar_LOLO_Gaps.md L-6).
-    | 'scalar'
     // An S-expression as data — atom, list or options object (a transition's
     // guard / effect args); config-only (G-ORB-093).
     | 'SExpr'
+    // Tagged struct union (`type DrawItem = DrawShape | DrawText`) — a real
+    // .lolo/.orb type the Rust compiler accepts; the TS mirror must carry it
+    // or generated factories fail DTS (docs/Almadar_LOLO_Gaps.md L-6).
     | 'union'
     // Fixed-length tuple (`.lolo` `[T1, T2, …]`); slots ride `properties`, keyed by index.
     | 'tuple';
@@ -108,7 +106,6 @@ export const FIELD_TYPES = [
     'node',
     'event',
     'EventAddress',
-    'scalar',
     'SExpr',
     'union',
     'tuple',
@@ -338,10 +335,6 @@ type ScalarFieldType =
     | 'node'
     | 'event'
     | 'EventAddress'
-    // Closed scalar transport union (`ControlValue`) — a real .lolo/.orb type
-    // the compiler accepts in payloads and map values; the TS mirror must carry
-    // it or generated factories fail DTS (docs/Almadar_LOLO_Gaps.md L-6).
-    | 'scalar'
     | 'SExpr';
 
 /** Fields shared across every variant. */
@@ -582,7 +575,6 @@ export const EntityFieldSchema: z.ZodType<EntityField, z.ZodTypeDef, unknown> = 
             scalarVariant('EventAddress'),
             scalarVariant('money'),
             scalarVariant('file'),
-            scalarVariant('scalar'),
             scalarVariant('SExpr'),
             // Enum variant — REQUIRES non-empty values.
             z.object({

@@ -17,9 +17,7 @@ const ORB: BehaviorPackageOrbBlock = {
   prefix: 'almadar-test',
   registry: 'behaviors/registry',
   index: 'dist/behaviors-registry.json',
-  factorySignatures: 'dist/registry/factory-signatures.json',
   loloContracts: 'behaviors/lolo-behavior-contracts.json',
-  signatures: 'behaviors/signatures.lolo',
   embeddings: ['dist/behaviors-embeddings.json', 'dist/knob-embeddings.json'],
   compiler: '>=4.10.0',
 };

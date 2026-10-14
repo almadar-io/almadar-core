@@ -214,6 +214,7 @@ export function schemaToIR(schema: OrbitalSchema, useCache: boolean = true): Res
           effects: tk.effects,
           priority: tk.priority ?? 0,
           appliesTo: tk.appliesTo ?? [],
+          whileVisible: tk.whileVisible === true,
         })) as ResolvedTraitTick[],
         listens: (trait.listens || []).map((l: TraitEventListener) => ({
           event: l.event,

@@ -24,6 +24,7 @@ import type { Page, PageAccess, PageIndexing, PageMeta, PageModifiers } from "./
 import { PageSchema, PageAccessSchema, PageIndexingSchema, PageMetaSchema, PageModifiersSchema } from "./page.js";
 import type {
   TraitRef,
+  CallSiteConfig,
   EventPayloadField,
   EventScope,
   Trait,
@@ -31,6 +32,8 @@ import type {
   TraitEventListener,
 } from "./trait.js";
 import {
+  isInlineTrait,
+  mergeCallSiteConfigOverrides,
   TraitRefSchema,
   EventPayloadFieldSchema,
   EventScopeSchema,
@@ -1238,10 +1241,29 @@ export type OrbitalDefinition = {
    * The `.orb`'s only record of a struct alias post-L1 — a Type-kind trait
    * type-param arg (`:: p SomeStructAlias`) resolves against this map.
    * Enum/primitive/entity aliases are NOT carried here (not legal `::`
-   * args).
+   * args). A dictionary or list alias (`Map string string`, `[string]`) is one
+   * unnamed member (`name: ''`) carrying the type string; a tagged union alias is one
+   * unnamed member typed `union` whose `properties` are its variants.
    */
   types?: Record<string, EventPayloadField[]>;
 };
+
+/**
+ * A named type alias of an orbital: a record alias is its fields; a dictionary or list alias
+ * (`type Cells = Map string string`) is one unnamed member carrying the type string; a tagged union alias
+ * (`type Item = Shape | Text`) is one unnamed member typed `union` whose properties are its variants.
+ */
+const TypeAliasMembersSchema = z.union([
+  z.array(EventPayloadFieldSchema),
+  z.tuple([
+    z.object({
+      name: z.literal(''),
+      type: z.string().min(1),
+      // A tagged union alias is the unnamed member `union`, its variants the properties.
+      properties: z.array(EventPayloadFieldSchema).optional(),
+    }),
+  ]),
+]);
 
 export const OrbitalDefinitionSchema = z.object({
   id: OrbitalIdSchema.optional(),
@@ -1282,10 +1304,39 @@ export const OrbitalDefinitionSchema = z.object({
   domainContext: DomainContextSchema.optional(),
   design: DesignPreferencesSchema.optional(),
   suggestedGuards: z.array(SuggestedGuardSchema).optional(),
-  types: z.record(z.string(), z.array(EventPayloadFieldSchema)).optional(),
+  types: z.record(z.string(), TypeAliasMembersSchema).optional(),
 });
 
 export const OrbitalSchema = OrbitalDefinitionSchema;
+
+/**
+ * Unwrap a composed trait (`X = Atom.traits.T`) carried as a `{ ref, config?, _resolved }` wrapper to
+ * its resolved trait, returning the call-site `config` beside it. A string ref, an inline trait and a
+ * wrapper with no `_resolved` come back as they are, with no config.
+ */
+export function unwrapTraitRef(traitRef: TraitRef): { trait: TraitRef; config?: CallSiteConfig } {
+  if (typeof traitRef === 'string' || isInlineTrait(traitRef) || traitRef._resolved === undefined) {
+    return { trait: traitRef };
+  }
+  return traitRef.config === undefined
+    ? { trait: traitRef._resolved }
+    : { trait: traitRef._resolved, config: traitRef.config };
+}
+
+/**
+ * The orbitals with every composed-trait wrapper replaced by its inline trait, the call-site `config`
+ * folded onto the trait's declared knobs (`mergeCallSiteConfigOverrides`). Pure.
+ */
+export function inlineTraitRefs(orbitals: readonly OrbitalDefinition[]): OrbitalDefinition[] {
+  return orbitals.map((orbital) => ({
+    ...orbital,
+    traits: orbital.traits.map((traitRef) => {
+      const { trait, config } = unwrapTraitRef(traitRef);
+      if (config === undefined || typeof trait === 'string' || !isInlineTrait(trait)) return trait;
+      return { ...trait, config: mergeCallSiteConfigOverrides(trait.config ?? {}, config) };
+    }),
+  }));
+}
 
 // ============================================================================
 // Type Guards

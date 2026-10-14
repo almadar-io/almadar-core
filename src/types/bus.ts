@@ -10,7 +10,7 @@
  */
 
 import { z } from "zod";
-import { EventPayloadSchema, type EventPayload } from "./expression.js";
+import { EventPayloadSchema, SExprDataSchema, type EventPayload, type SExpr } from "./expression.js";
 import { OrbitalIdSchema, TraitIdSchema, EventIdSchema, type OrbitalId, type TraitId, type EventId } from "./identity.js";
 import { EntityRowSchema, type EntityRow } from "./entity.js";
 import { PatternConfigSchema, ResolvedPatternPropsSchema, type PatternConfig, type ResolvedPatternProps } from "./effect.js";
@@ -167,6 +167,11 @@ export interface BusEventSource {
    * the bridge or the server.
    */
   pendingKey?: string;
+  /**
+   * Set by a server-role kernel on a `persist` effect's `emit.success` envelope: the one emit a live-push
+   * host (`setLiveBroadcastSink`) also fans out to every other connected client.
+   */
+  persistSuccess?: boolean;
 }
 
 // The third type param is `object` on schemas nesting a branded-id
@@ -219,6 +224,7 @@ export const BusEventSourceSchema: z.ZodType<BusEventSource, z.ZodTypeDef, objec
   dispatched: z.boolean().optional(),
   originClientId: z.string().optional(),
   pendingKey: z.string().optional(),
+  persistSuccess: z.boolean().optional(),
 });
 
 /** Zod twin of `DeliveryRecord`. */
@@ -294,7 +300,7 @@ export const EmittedEventSchema: z.ZodType<EmittedEvent, z.ZodTypeDef, object> =
  * `NavigateEffect` from `@almadar/core/types/effect.ts` in two places — the
  * runtime appends an interpolated `props` object plus an optional `priority`
  * slot to render-ui (slot 4 + 5), and `navigate`'s optional argument may
- * surface as `undefined` rather than absent. The local union spells those
+ * surface as `null` rather than absent (an empty slot is `null` on the wire: `JSON.stringify` and the Rust serializer both write it). The local union spells those
  * variants out explicitly so consumers (ServerBridge.tsx parser, debugger
  * inspector) get accurate completions instead of `unknown[]`.
  *
@@ -305,13 +311,13 @@ export const EmittedEventSchema: z.ZodType<EmittedEvent, z.ZodTypeDef, object> =
  */
 export type ClientRenderUITuple =
   | ['render-ui', string, PatternConfig | null]
-  | ['render-ui', string, PatternConfig | null, ResolvedPatternProps]
-  | ['render-ui', string, PatternConfig | null, ResolvedPatternProps | undefined, number | undefined];
+  | ['render-ui', string, PatternConfig | null, ResolvedPatternProps | null]
+  | ['render-ui', string, PatternConfig | null, ResolvedPatternProps | null, number | null];
 
 export type ClientNavigateTuple =
   | ['navigate', string]
-  | ['navigate', string, Record<string, string> | undefined]
-  | ['navigate', string, Record<string, string> | undefined, { crumb?: string }];
+  | ['navigate', string, Record<string, string> | null]
+  | ['navigate', string, Record<string, string> | null, { crumb?: string }];
 
 export type ClientNavigateBackTuple = ['navigate-back'];
 
@@ -323,24 +329,24 @@ export type ClientEffectTuple =
 /** Zod twin of `ClientRenderUITuple` — one variant per fixed arity (3/4/5), unioned. */
 export const ClientRenderUITupleSchema = z.union([
   z.tuple([z.literal('render-ui'), z.string(), PatternConfigSchema]),
-  z.tuple([z.literal('render-ui'), z.string(), PatternConfigSchema, ResolvedPatternPropsSchema]),
+  z.tuple([z.literal('render-ui'), z.string(), PatternConfigSchema, ResolvedPatternPropsSchema.nullable()]),
   z.tuple([
     z.literal('render-ui'),
     z.string(),
     PatternConfigSchema,
-    ResolvedPatternPropsSchema.optional(),
-    z.number().optional(),
+    ResolvedPatternPropsSchema.nullable(),
+    z.number().nullable(),
   ]),
 ]);
 
 /** Zod twin of `ClientNavigateTuple` — one variant per fixed arity (2/3/4), unioned. */
 export const ClientNavigateTupleSchema = z.union([
   z.tuple([z.literal('navigate'), z.string()]),
-  z.tuple([z.literal('navigate'), z.string(), z.record(z.string()).optional()]),
+  z.tuple([z.literal('navigate'), z.string(), z.record(z.string()).nullable()]),
   z.tuple([
     z.literal('navigate'),
     z.string(),
-    z.record(z.string()).optional(),
+    z.record(z.string()).nullable(),
     z.object({ crumb: z.string().optional() }),
   ]),
 ]);
@@ -534,6 +540,31 @@ export interface TransitionRejection {
   error?: string;
 }
 
+/** How one authored effect of an executed hop ran. */
+export type HopEffectStatus = 'executed' | 'failed' | 'skipped';
+
+/** One authored effect of a hop: its operator head, its arguments as authored, and how it ran. */
+export interface HopEffect {
+  type: string;
+  args: SExpr[];
+  status: HopEffectStatus;
+  error?: string;
+}
+
+/**
+ * One executed hop of a dispatch (the seed's, a same-trait cascade step's, a listener delivery's), in
+ * dispatch order: what a `TransitionObserver` hears. `guardResult` is `true` when the fired arm's guard
+ * held and absent for an unguarded arm.
+ */
+export interface TransitionHop {
+  trait: string;
+  from: string;
+  to: string;
+  event: string;
+  guardResult?: boolean;
+  effects: HopEffect[];
+}
+
 /**
  * One client effect paired with the trait that produced it and, when the
  * producer knows it, the transition that fired: that transition's own event
@@ -613,6 +644,8 @@ export interface OrbitalEventResponse {
    * executed).
    */
   cascadeTruncated?: string[];
+  /** Every executed hop of the dispatch, in order (the server role's trace); absent when none ran. */
+  transitions?: TransitionHop[];
   error?: string;
 }
 
@@ -652,6 +685,7 @@ export const OrbitalEventResponseSchema: z.ZodType<OrbitalEventResponse, z.ZodTy
       effect: ClientEffectTupleSchema,
       event: z.string().optional(),
       fromState: z.string().optional(),
+      callsitePayload: EventPayloadSchema.optional(),
     }))
     .optional(),
   effectResults: z.array(ServerEffectResultSchema).optional(),
@@ -671,6 +705,25 @@ export const OrbitalEventResponseSchema: z.ZodType<OrbitalEventResponse, z.ZodTy
     )
     .optional(),
   cascadeTruncated: z.array(z.string()).optional(),
+  transitions: z
+    .array(
+      z.object({
+        trait: z.string(),
+        from: z.string(),
+        to: z.string(),
+        event: z.string(),
+        guardResult: z.boolean().optional(),
+        effects: z.array(
+          z.object({
+            type: z.string(),
+            args: z.array(SExprDataSchema),
+            status: z.enum(['executed', 'failed', 'skipped']),
+            error: z.string().optional(),
+          }),
+        ),
+      }),
+    )
+    .optional(),
   error: z.string().optional(),
 });
 

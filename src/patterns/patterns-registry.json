@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "exportedAt": "2026-10-12T03:59:30.122Z",
+  "exportedAt": "2026-10-13T17:39:34.142Z",
   "patterns": {
     "detail-panel": {
       "type": "detail-panel",
@@ -39960,6 +39960,28 @@
           "description": "GAP-80: line-level error/warning highlights. Map of 1-based line number → severity. Paints a colored background on each line: error = red, warning = yellow. Honored by the editable overlay and (GAP-84) by viewer mode's non-diff highlight; pass undefined (default) to disable. The consumer is responsible for computing the path → line map from the schema + validation results.",
           "nonAuthorable": true
         },
+        "highlightLines": {
+          "types": [
+            "object"
+          ],
+          "description": "Lines to mark and keep in view (1-based, inclusive): the code of the step a running program just took.",
+          "properties": {
+            "start": {
+              "types": [
+                "number"
+              ]
+            },
+            "end": {
+              "types": [
+                "number"
+              ]
+            }
+          },
+          "propertyRequired": [
+            "start",
+            "end"
+          ]
+        },
         "title": {
           "types": [
             "string"
@@ -42479,6 +42501,13 @@
             ]
           }
         },
+        "followActive": {
+          "types": [
+            "boolean"
+          ],
+          "description": "Keep the active state in view: when it changes, the diagram scrolls sideways to centre it. @default false",
+          "default": false
+        },
         "stateClickEvent": {
           "types": [
             "string"
@@ -42880,6 +42909,12 @@
             "emittedEvents",
             "listenedEvents"
           ]
+        },
+        "description": {
+          "types": [
+            "sexpr"
+          ],
+          "description": "A described trait (`behavior/describe`), drawn from its machine when no `trait` is given."
         },
         "isLoading": {
           "types": [
@@ -120482,6 +120517,13 @@
             ]
           }
         },
+        "followActive": {
+          "types": [
+            "boolean"
+          ],
+          "description": "Keep the active state in view: when it changes, the diagram scrolls sideways to centre it. @default false",
+          "default": false
+        },
         "stateClickEvent": {
           "types": [
             "string"
@@ -131459,6 +131501,401 @@
           ],
           "kind": "skeleton",
           "tier": "presentation"
+        }
+      }
+    },
+    "video-embed": {
+      "type": "video-embed",
+      "category": "component",
+      "sourceFile": "components/core/atoms/VideoEmbed.tsx",
+      "tier": "atoms",
+      "family": "core",
+      "description": "Embedded video player: a YouTube video by id, or any player page by URL. Fires a ready event once it can play and an error event when it cannot.",
+      "capabilities": "embedded video, YouTube player, lesson video, video embed, play a video by id or URL, player ready and error events",
+      "accessibleName": [
+        "title"
+      ],
+      "suggestedFor": [
+        "video",
+        "embed",
+        "video embed"
+      ],
+      "typicalSize": "small",
+      "propsSchema": {
+        "videoId": {
+          "types": [
+            "string"
+          ],
+          "description": "YouTube video id (the 11 characters of the share URL); played through the YouTube IFrame API"
+        },
+        "src": {
+          "types": [
+            "string"
+          ],
+          "description": "URL of any other embeddable player page; used when no `videoId` is set"
+        },
+        "title": {
+          "types": [
+            "string"
+          ],
+          "description": "Accessible name of the player"
+        },
+        "autoplay": {
+          "types": [
+            "boolean"
+          ],
+          "description": "Start playback as soon as the player is ready (YouTube ids only)",
+          "default": false
+        },
+        "controls": {
+          "types": [
+            "boolean"
+          ],
+          "description": "Show the player's own controls (YouTube ids only)",
+          "default": true
+        },
+        "start": {
+          "types": [
+            "number"
+          ],
+          "description": "Second of the video to start from (YouTube ids only)",
+          "default": 0
+        },
+        "readyEvent": {
+          "types": [
+            "string"
+          ],
+          "description": "Event fired once the player is ready to play; the payload names the video id or URL",
+          "kind": "event-ref",
+          "emitPayloadSchema": [
+            {
+              "name": "source",
+              "type": "string",
+              "required": true
+            }
+          ]
+        },
+        "playEvent": {
+          "types": [
+            "string"
+          ],
+          "description": "Event fired each time the YouTube player begins or resumes playing; the payload names the video id",
+          "kind": "event-ref",
+          "emitPayloadSchema": [
+            {
+              "name": "source",
+              "type": "string",
+              "required": true
+            }
+          ]
+        },
+        "errorEvent": {
+          "types": [
+            "string"
+          ],
+          "description": "Event fired when the YouTube player cannot load or play the video; the payload carries the message and the player's error code. A plain URL never fires it: a browser reports no load failure for a page frame",
+          "kind": "event-ref",
+          "emitPayloadSchema": [
+            {
+              "name": "error",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "code",
+              "type": "string",
+              "required": true
+            }
+          ]
+        },
+        "className": {
+          "types": [
+            "string"
+          ],
+          "description": "Additional class names"
+        },
+        "enter": {
+          "types": [
+            "string"
+          ],
+          "description": "How this element animates in when it mounts (theme-styled); overrides the theme's default slot entry. `none` opts out.",
+          "enumValues": [
+            "none",
+            "fade",
+            "rise",
+            "scale",
+            "slide"
+          ],
+          "kind": "entry"
+        },
+        "enterDelay": {
+          "types": [
+            "number"
+          ],
+          "description": "Stagger step for the entry: waits this many `--motion-enter-stagger` steps before animating.",
+          "numericEnumValues": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "kind": "entry"
+        },
+        "skeleton": {
+          "types": [
+            "string",
+            "object"
+          ],
+          "description": "Skeleton shown while this element's server render is in flight: a shape (`table`, `list`, …), `{ variant, rows?, columns?, fields? }`, or `none`.",
+          "enumValues": [
+            "header",
+            "table",
+            "list",
+            "grid",
+            "detail",
+            "stats",
+            "form",
+            "card",
+            "text",
+            "none"
+          ],
+          "properties": {
+            "variant": {
+              "types": [
+                "string"
+              ],
+              "enumValues": [
+                "header",
+                "table",
+                "list",
+                "grid",
+                "detail",
+                "stats",
+                "form",
+                "card",
+                "text"
+              ]
+            },
+            "rows": {
+              "types": [
+                "number"
+              ]
+            },
+            "columns": {
+              "types": [
+                "number"
+              ]
+            },
+            "fields": {
+              "types": [
+                "number"
+              ]
+            }
+          },
+          "propertyRequired": [
+            "variant"
+          ],
+          "kind": "skeleton",
+          "tier": "presentation"
+        },
+        "aria-label": {
+          "types": [
+            "string"
+          ],
+          "description": "Accessible name read by screen readers when the visible text is missing or not descriptive (e.g. an icon-only control)."
+        },
+        "aria-labelledby": {
+          "types": [
+            "string"
+          ],
+          "description": "Id of the element whose text names this one."
+        },
+        "aria-describedby": {
+          "types": [
+            "string"
+          ],
+          "description": "Id of the element whose text describes this one (help text, error)."
+        },
+        "aria-live": {
+          "types": [
+            "string"
+          ],
+          "description": "Announce changes to this region: polite waits for a pause, assertive interrupts.",
+          "enumValues": [
+            "off",
+            "polite",
+            "assertive"
+          ]
+        },
+        "aria-current": {
+          "types": [
+            "string"
+          ],
+          "description": "Marks the current item in a set: the current page, step, location, date or time.",
+          "enumValues": [
+            "page",
+            "step",
+            "location",
+            "date",
+            "time",
+            "true",
+            "false"
+          ]
+        },
+        "aria-pressed": {
+          "types": [
+            "string"
+          ],
+          "description": "Toggle-button state.",
+          "enumValues": [
+            "true",
+            "false",
+            "mixed"
+          ]
+        },
+        "aria-expanded": {
+          "types": [
+            "boolean"
+          ],
+          "description": "Whether the element it controls is expanded."
+        },
+        "aria-selected": {
+          "types": [
+            "boolean"
+          ],
+          "description": "Whether this item is selected (tabs, options, grid cells)."
+        },
+        "aria-hidden": {
+          "types": [
+            "boolean"
+          ],
+          "description": "Hide from assistive technology (decorative content only)."
+        },
+        "aria-busy": {
+          "types": [
+            "boolean"
+          ],
+          "description": "This region is updating; assistive technology waits before announcing it."
+        },
+        "role": {
+          "types": [
+            "string"
+          ],
+          "description": "WAI-ARIA role when the element's native semantics don't describe it.",
+          "enumValues": [
+            "alert",
+            "alertdialog",
+            "application",
+            "article",
+            "banner",
+            "blockquote",
+            "button",
+            "caption",
+            "cell",
+            "checkbox",
+            "code",
+            "columnheader",
+            "combobox",
+            "complementary",
+            "contentinfo",
+            "definition",
+            "deletion",
+            "dialog",
+            "document",
+            "emphasis",
+            "feed",
+            "figure",
+            "form",
+            "generic",
+            "grid",
+            "gridcell",
+            "group",
+            "heading",
+            "img",
+            "insertion",
+            "link",
+            "list",
+            "listbox",
+            "listitem",
+            "log",
+            "main",
+            "marquee",
+            "math",
+            "menu",
+            "menubar",
+            "menuitem",
+            "menuitemcheckbox",
+            "menuitemradio",
+            "meter",
+            "navigation",
+            "none",
+            "note",
+            "option",
+            "paragraph",
+            "presentation",
+            "progressbar",
+            "radio",
+            "radiogroup",
+            "region",
+            "row",
+            "rowgroup",
+            "rowheader",
+            "scrollbar",
+            "search",
+            "searchbox",
+            "separator",
+            "slider",
+            "spinbutton",
+            "status",
+            "strong",
+            "subscript",
+            "superscript",
+            "switch",
+            "tab",
+            "table",
+            "tablist",
+            "tabpanel",
+            "term",
+            "textbox",
+            "time",
+            "timer",
+            "toolbar",
+            "tooltip",
+            "tree",
+            "treegrid",
+            "treeitem"
+          ]
+        },
+        "lang": {
+          "types": [
+            "string"
+          ],
+          "description": "Language of this element's content (BCP 47, e.g. ar, sl, en)."
+        },
+        "dir": {
+          "types": [
+            "string"
+          ],
+          "description": "Text direction of this element's content.",
+          "enumValues": [
+            "ltr",
+            "rtl",
+            "auto"
+          ]
+        },
+        "tabIndex": {
+          "types": [
+            "number"
+          ],
+          "description": "0 puts the element in the Tab order; -1 makes it focusable only programmatically.",
+          "numericEnumValues": [
+            -1,
+            0
+          ]
         }
       }
     }
